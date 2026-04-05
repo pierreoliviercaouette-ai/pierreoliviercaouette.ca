@@ -1,15 +1,13 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { supabase } from '../lib/supabaseClient';
 import { ArrowLeft, Save, Clock, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
 import { getCalculator } from '../utils/toolCalculators';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Remove inline event handlers from HTML
 const cleanHtml = (html) => {
@@ -97,7 +95,7 @@ const formatPercent = (value) => {
 
 export const ToolDetail = () => {
   const { slug } = useParams();
-  const { user, token, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const contentRef = useRef(null);
   const [tool, setTool] = useState(null);
@@ -118,10 +116,19 @@ export const ToolDetail = () => {
 
     const fetchTool = async () => {
       try {
-        const response = await axios.get(`${API}/tools/${slug}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setTool(response.data);
+        const { data, error } = await supabase
+          .from('tools')
+          .select('*')
+          .eq('slug', slug)
+          .eq('is_active', true)
+          .maybeSingle();
+        if (error) throw error;
+        if (!data) {
+          toast.error('Outil non trouvé');
+          navigate('/outils');
+          return;
+        }
+        setTool(data);
         setCurrentStep(0);
         setFormValues({});
         setCalculatedResults({});
@@ -134,7 +141,7 @@ export const ToolDetail = () => {
       }
     };
     fetchTool();
-  }, [slug, user, token, authLoading, navigate]);
+  }, [slug, user, authLoading, navigate]);
 
   const steps = useMemo(() => {
     if (!tool?.html_content) return [];
@@ -308,13 +315,14 @@ export const ToolDetail = () => {
 
     setSaving(true);
     try {
-      await axios.post(`${API}/tool-results`, {
+      const { error } = await supabase.from('tool_results').insert({
+        user_id: user.id,
         tool_id: tool.id,
+        tool_name: tool.name,
         result_data: { ...formValues, ...calculatedResults },
         summary: resultSummary
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
+      if (error) throw error;
 
       toast.success('Résultat sauvegardé!');
       setShowSaveModal(false);

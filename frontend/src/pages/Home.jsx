@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink } from 'lucide-react';
-import axios from 'axios';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { supabase } from '../lib/supabaseClient';
 
 const Hero = () => (
   <section className="relative min-h-[90vh] overflow-hidden">
@@ -500,8 +498,14 @@ const TestimonialSection = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const res = await axios.get(`${API}/testimonials`);
-        setTestimonials(res.data);
+        const { data, error } = await supabase
+          .from('testimonials')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(20);
+        if (error) throw error;
+        setTestimonials(data || []);
       } catch (error) {
         console.error('Failed to fetch testimonials:', error);
         // Fallback testimonial

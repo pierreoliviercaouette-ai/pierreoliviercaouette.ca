@@ -1,23 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { supabase } from '../lib/supabaseClient';
 import { Wrench, Lock, ArrowRight, Clock, ChevronRight } from 'lucide-react';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-
 export const Tools = () => {
-  const { user, token, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [tools, setTools] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+      setTools([]);
+      setLoading(false);
+      return;
+    }
     const fetchTools = async () => {
       try {
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await axios.get(`${API}/tools`, { headers });
-        setTools(response.data);
+        const { data, error } = await supabase
+          .from('tools')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        setTools(data || []);
       } catch (error) {
         console.error('Failed to fetch tools:', error);
       } finally {
@@ -25,7 +31,7 @@ export const Tools = () => {
       }
     };
     fetchTools();
-  }, [token]);
+  }, [user?.id]);
 
   if (!user) {
     return (

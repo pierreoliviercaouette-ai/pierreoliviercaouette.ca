@@ -3,6 +3,29 @@ import { supabase } from '../lib/supabaseClient';
 
 const SupabaseAuthContext = createContext(null);
 
+/** Profil + session → même forme que l’ancien AuthContext (Mongo / API). */
+function mapSessionToAppUser(sessionUser, profile) {
+  const meta = sessionUser?.user_metadata || {};
+  const firstName = profile?.first_name || meta.first_name || '';
+  const lastName = profile?.last_name || meta.last_name || '';
+  const created =
+    profile?.created_at ||
+    sessionUser?.created_at ||
+    new Date().toISOString();
+  const createdStr = typeof created === 'string' ? created : new Date(created).toISOString();
+
+  return {
+    id: sessionUser.id,
+    email: sessionUser.email || profile?.email || '',
+    first_name: firstName || '—',
+    last_name: lastName || '—',
+    phone: profile?.phone ?? meta.phone ?? null,
+    is_admin: profile?.is_admin ?? false,
+    referral_code: profile?.referral_code ?? '',
+    created_at: createdStr,
+  };
+}
+
 export const SupabaseAuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -27,17 +50,13 @@ export const SupabaseAuthProvider = ({ children }) => {
       setToken(session.access_token);
       
       // Fetch user profile from custom 'users' or 'profiles' table if you have one
-      const { data: profile, error } = await supabase
-        .from('profiles') // Adjust table name to your schema
+      const { data: profile } = await supabase
+        .from('profiles')
         .select('*')
         .eq('id', session.user.id)
-        .single();
-        
-      if (profile) {
-        setUser({ ...session.user, ...profile });
-      } else {
-        setUser(session.user);
-      }
+        .maybeSingle();
+
+      setUser(mapSessionToAppUser(session.user, profile));
     } catch (error) {
       console.error('Failed to fetch user:', error);
       setUser(null);
@@ -212,3 +231,6 @@ export const useSupabaseAuth = () => {
   }
   return context;
 };
+
+/** Alias pour les composants qui importent encore depuis AuthContext. */
+export const useAuth = useSupabaseAuth;

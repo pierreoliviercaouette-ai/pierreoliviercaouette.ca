@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { supabase } from '../lib/supabaseClient';
 import { 
   Settings, Wrench, Users, Mail, Plus, Trash2, 
   ToggleLeft, ToggleRight, CheckCircle2, XCircle, Clock,
@@ -15,10 +15,8 @@ import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-
 export const Admin = () => {
-  const { user, token, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('tools');
   
@@ -60,20 +58,46 @@ export const Admin = () => {
 
   const fetchAllData = async () => {
     try {
-      const headers = { Authorization: `Bearer ${token}` };
       const [toolsRes, referralsRes, contactsRes, usersRes] = await Promise.all([
-        axios.get(`${API}/tools`, { headers }),
-        axios.get(`${API}/admin/referrals`, { headers }),
-        axios.get(`${API}/admin/contacts`, { headers }),
-        axios.get(`${API}/admin/users`, { headers })
+        supabase.from('tools').select('*').order('created_at', { ascending: false }),
+        supabase
+          .from('referrals')
+          .select(
+            `
+            *,
+            referrer:profiles!referrer_id (
+              first_name,
+              last_name,
+              email
+            )
+          `
+          )
+          .order('created_at', { ascending: false }),
+        supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*').order('created_at', { ascending: false })
       ]);
-      setTools(toolsRes.data);
-      setAllReferrals(referralsRes.data);
-      setContacts(contactsRes.data);
-      setUsers(usersRes.data);
+
+      if (toolsRes.error) throw toolsRes.error;
+      if (referralsRes.error) throw referralsRes.error;
+      if (contactsRes.error) throw contactsRes.error;
+      if (usersRes.error) throw usersRes.error;
+
+      const rawRefs = referralsRes.data || [];
+      setTools(toolsRes.data || []);
+      setAllReferrals(
+        rawRefs.map((r) => ({
+          ...r,
+          referrer_name: r.referrer
+            ? `${r.referrer.first_name || ''} ${r.referrer.last_name || ''}`.trim() || 'Inconnu'
+            : 'Inconnu',
+          referrer_email: r.referrer?.email || 'Inconnu'
+        }))
+      );
+      setContacts(contactsRes.data || []);
+      setUsers(usersRes.data || []);
     } catch (error) {
       console.error('Failed to fetch admin data:', error);
-      toast.error('Erreur lors du chargement des données');
+      toast.error(error.message || 'Erreur lors du chargement des données');
     } finally {
       setLoading(false);
     }
@@ -83,17 +107,22 @@ export const Admin = () => {
   const handleToolSubmit = async (e) => {
     e.preventDefault();
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      const data = {
-        ...toolForm,
-        tags: toolForm.tags.split(',').map(t => t.trim()).filter(t => t)
+      const payload = {
+        name: toolForm.name,
+        slug: toolForm.slug,
+        description: toolForm.description,
+        html_content: toolForm.html_content,
+        tags: toolForm.tags.split(',').map((t) => t.trim()).filter(Boolean),
+        is_active: toolForm.is_active
       };
 
       if (editingTool) {
-        await axios.put(`${API}/tools/${editingTool.id}`, data, { headers });
+        const { error } = await supabase.from('tools').update(payload).eq('id', editingTool.id);
+        if (error) throw error;
         toast.success('Outil mis à jour!');
       } else {
-        await axios.post(`${API}/tools`, data, { headers });
+        const { error } = await supabase.from('tools').insert(payload);
+        if (error) throw error;
         toast.success('Outil créé!');
       }
 
@@ -102,31 +131,34 @@ export const Admin = () => {
       setToolForm({ name: '', slug: '', description: '', html_content: '', tags: '', is_active: true });
       fetchAllData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur');
+      toast.error(error.message || 'Erreur');
     }
   };
 
   const toggleToolStatus = async (toolId) => {
     try {
-      await axios.patch(`${API}/tools/${toolId}/toggle`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const tool = tools.find((t) => t.id === toolId);
+      if (!tool) return;
+      const { error } = await supabase
+        .from('tools')
+        .update({ is_active: !tool.is_active })
+        .eq('id', toolId);
+      if (error) throw error;
       fetchAllData();
     } catch (error) {
-      toast.error('Erreur');
+      toast.error(error.message || 'Erreur');
     }
   };
 
   const deleteTool = async (toolId) => {
     if (!confirm('Supprimer cet outil?')) return;
     try {
-      await axios.delete(`${API}/tools/${toolId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { error } = await supabase.from('tools').delete().eq('id', toolId);
+      if (error) throw error;
       toast.success('Outil supprimé');
       fetchAllData();
     } catch (error) {
-      toast.error('Erreur');
+      toast.error(error.message || 'Erreur');
     }
   };
 
@@ -144,28 +176,45 @@ export const Admin = () => {
   };
 
   // Referral handlers
-  const updateReferralStatus = async (referralId, status) => {
+  const updateReferralStatus = async (ref, status) => {
     try {
-      await axios.patch(`${API}/admin/referrals/${referralId}/status?status=${status}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const updates = { status };
+      if (status === 'qualified') {
+        updates.qualified_at = new Date().toISOString();
+      } else {
+        updates.qualified_at = null;
+      }
+      const { error } = await supabase.from('referrals').update(updates).eq('id', ref.id);
+      if (error) throw error;
+
+      if (status === 'qualified' && ref.referrer_id) {
+        await supabase.from('notifications').insert({
+          user_id: ref.referrer_id,
+          title: 'Référence qualifiée!',
+          message: `Votre référence ${ref.referred_name} a été qualifiée. Merci!`,
+          is_read: false
+        });
+      }
+
       toast.success('Statut mis à jour');
       fetchAllData();
     } catch (error) {
-      toast.error('Erreur');
+      toast.error(error.message || 'Erreur');
     }
   };
 
   // User handlers
-  const toggleUserAdmin = async (userId) => {
+  const toggleUserAdmin = async (targetUser) => {
     try {
-      await axios.patch(`${API}/admin/users/${userId}/admin`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_admin: !targetUser.is_admin })
+        .eq('id', targetUser.id);
+      if (error) throw error;
       toast.success('Statut admin mis à jour');
       fetchAllData();
     } catch (error) {
-      toast.error('Erreur');
+      toast.error(error.message || 'Erreur');
     }
   };
 
@@ -449,7 +498,7 @@ export const Admin = () => {
                               <div className="flex gap-2">
                                 <Button
                                   size="sm"
-                                  onClick={() => updateReferralStatus(ref.id, 'qualified')}
+                                  onClick={() => updateReferralStatus(ref, 'qualified')}
                                   className="bg-green-600 hover:bg-green-700 text-white"
                                   data-testid={`qualify-referral-${ref.id}`}
                                 >
@@ -459,7 +508,7 @@ export const Admin = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => updateReferralStatus(ref.id, 'rejected')}
+                                  onClick={() => updateReferralStatus(ref, 'rejected')}
                                   className="text-red-600 border-red-600"
                                 >
                                   <XCircle className="w-4 h-4 mr-1" />
@@ -574,7 +623,7 @@ export const Admin = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => toggleUserAdmin(u.id)}
+                              onClick={() => toggleUserAdmin(u)}
                               data-testid={`toggle-admin-${u.id}`}
                             >
                               {u.is_admin ? 'Retirer admin' : 'Rendre admin'}

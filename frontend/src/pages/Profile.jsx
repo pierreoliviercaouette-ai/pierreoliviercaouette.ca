@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { supabase } from '../lib/supabaseClient';
+import { computeReferralStats } from '../lib/referralStats';
 import { 
   User, Gift, Clock, Bell, Copy, CheckCircle2, Users, 
   ChevronRight, Trophy, Star, ArrowRight, Send, ExternalLink,
@@ -15,7 +16,7 @@ import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const GOOGLE_REVIEW_LINK = 'https://g.page/r/CewlYHqUvuLyEAI/review';
 
 // Tier configuration
 const TIERS = [
@@ -27,7 +28,7 @@ const TIERS = [
 ];
 
 export const Profile = () => {
-  const { user, token, loading: authLoading, notifications, markNotificationRead, markAllNotificationsRead } = useAuth();
+  const { user, loading: authLoading, notifications, markNotificationRead, markAllNotificationsRead } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [toolResults, setToolResults] = useState([]);
@@ -71,21 +72,37 @@ export const Profile = () => {
 
   const fetchData = async () => {
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      const [resultsRes, referralsRes, statsRes, reviewRes, clientRes, linkRes] = await Promise.all([
-        axios.get(`${API}/tool-results`, { headers }),
-        axios.get(`${API}/referrals`, { headers }),
-        axios.get(`${API}/referrals/stats`, { headers }),
-        axios.get(`${API}/google-reviews/me`, { headers }),
-        axios.get(`${API}/existing-clients/me`, { headers }),
-        axios.get(`${API}/google-reviews/link`)
+      const [tr, ref, gRev, exCl] = await Promise.all([
+        supabase
+          .from('tool_results')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(100),
+        supabase
+          .from('referrals')
+          .select('*')
+          .eq('referrer_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(100),
+        supabase.from('google_reviews').select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('existing_clients').select('*').eq('user_id', user.id).maybeSingle()
       ]);
-      setToolResults(resultsRes.data);
-      setReferrals(referralsRes.data);
-      setReferralStats(statsRes.data);
-      setGoogleReview(reviewRes.data);
-      setExistingClient(clientRes.data);
-      setGoogleReviewLink(linkRes.data.link);
+
+      if (tr.error) throw tr.error;
+      if (ref.error) throw ref.error;
+      if (gRev.error) throw gRev.error;
+      if (exCl.error) throw exCl.error;
+
+      const referralsList = ref.data || [];
+      setToolResults(tr.data || []);
+      setReferrals(referralsList);
+      setReferralStats(
+        computeReferralStats(referralsList, gRev.data || null, exCl.data || null)
+      );
+      setGoogleReview(gRev.data);
+      setExistingClient(exCl.data);
+      setGoogleReviewLink(GOOGLE_REVIEW_LINK);
     } catch (error) {
       console.error('Failed to fetch profile data:', error);
     } finally {
@@ -106,14 +123,28 @@ export const Profile = () => {
     setSubmittingReferral(true);
 
     try {
-      await axios.post(`${API}/referrals`, referralForm, {
-        headers: { Authorization: `Bearer ${token}` }
+      const { error } = await supabase.from('referrals').insert({
+        referrer_id: user.id,
+        referrer_code: user.referral_code,
+        referred_email: referralForm.referred_email.trim().toLowerCase(),
+        referred_name: referralForm.referred_name.trim(),
+        referred_phone: referralForm.referred_phone?.trim() || null,
+        notes: referralForm.notes?.trim() || null,
+        status: 'pending'
       });
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Vous avez déjà référé cette personne');
+        } else {
+          throw error;
+        }
+        return;
+      }
       toast.success('Référence envoyée!');
       setReferralForm({ referred_name: '', referred_email: '', referred_phone: '', notes: '' });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur lors de l\'envoi');
+      toast.error(error.message || 'Erreur lors de l\'envoi');
     } finally {
       setSubmittingReferral(false);
     }
@@ -122,13 +153,22 @@ export const Profile = () => {
   const handleGoogleReviewSubmit = async () => {
     setSubmittingReview(true);
     try {
-      await axios.post(`${API}/google-reviews`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
+      const { error } = await supabase.from('google_reviews').insert({
+        user_id: user.id,
+        status: 'pending'
       });
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Vous avez déjà soumis un avis Google');
+        } else {
+          throw error;
+        }
+        return;
+      }
       toast.success('Avis soumis! Il sera vérifié sous peu.');
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur lors de la soumission');
+      toast.error(error.message || 'Erreur lors de la soumission');
     } finally {
       setSubmittingReview(false);
     }
@@ -138,14 +178,26 @@ export const Profile = () => {
     e.preventDefault();
     setSubmittingClient(true);
     try {
-      await axios.post(`${API}/existing-clients`, existingClientForm, {
-        headers: { Authorization: `Bearer ${token}` }
+      const { error } = await supabase.from('existing_clients').insert({
+        user_id: user.id,
+        first_name: existingClientForm.first_name.trim(),
+        last_name: existingClientForm.last_name.trim(),
+        date_of_birth: existingClientForm.date_of_birth,
+        status: 'pending'
       });
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Vous avez déjà soumis une vérification de client existant');
+        } else {
+          throw error;
+        }
+        return;
+      }
       toast.success('Vérification soumise! Elle sera traitée sous peu.');
       setExistingClientForm({ first_name: '', last_name: '', date_of_birth: '' });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur lors de la soumission');
+      toast.error(error.message || 'Erreur lors de la soumission');
     } finally {
       setSubmittingClient(false);
     }

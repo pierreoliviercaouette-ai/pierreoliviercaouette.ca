@@ -6,9 +6,7 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
-import axios from 'axios';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { supabase } from '../lib/supabaseClient';
 
 // Contact info centralisé
 const CONTACT_INFO = {
@@ -45,11 +43,20 @@ export const Contact = () => {
     setLoading(true);
 
     try {
-      await axios.post(`${API}/contact`, formData);
+      const { error } = await supabase.rpc('create_contact_submission', {
+        p_name: formData.name,
+        p_email: formData.email,
+        p_phone: formData.phone || null,
+        p_subject: formData.subject,
+        p_message: formData.message,
+        p_referral_code: formData.referral_code || null
+      });
+      if (error) throw error;
       setSubmitted(true);
       toast.success('Message envoyé avec succès!');
     } catch (error) {
-      toast.error('Erreur lors de l\'envoi. Veuillez réessayer.');
+      console.error(error);
+      toast.error(error.message || 'Erreur lors de l\'envoi. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }

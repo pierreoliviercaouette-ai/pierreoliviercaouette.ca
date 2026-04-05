@@ -28,7 +28,7 @@ export const Login = () => {
       navigate(from, { replace: true });
     } catch (error) {
       console.error('Login failed:', error);
-      toast.error(error.response?.data?.detail || 'Erreur de connexion');
+      toast.error(error.message || 'Erreur de connexion');
     } finally {
       setLoading(false);
     }
@@ -175,7 +175,7 @@ export const Register = () => {
       navigate('/');
     } catch (error) {
       console.error('Registration failed:', error);
-      toast.error(error.response?.data?.detail || 'Erreur lors de l\'inscription');
+      toast.error(error.message || 'Erreur lors de l\'inscription');
     } finally {
       setLoading(false);
     }
