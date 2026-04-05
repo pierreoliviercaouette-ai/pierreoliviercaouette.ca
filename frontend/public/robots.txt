@@ -1,0 +1,11 @@
+# https://pierreoliviercaouette.ca
+User-agent: *
+Allow: /
+
+# Espace connecté — peu utile au référencement organique
+Disallow: /connexion
+Disallow: /inscription
+Disallow: /profil
+Disallow: /admin
+
+Sitemap: https://pierreoliviercaouette.ca/sitemap.xml
