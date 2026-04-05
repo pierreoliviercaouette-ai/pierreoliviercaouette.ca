@@ -1,0 +1,251 @@
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/manrope/400.css';
+@import '@fontsource/manrope/500.css';
+@import '@fontsource/manrope/600.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 210 40% 98%;
+        --foreground: 222 47% 11%;
+        --card: 0 0% 100%;
+        --card-foreground: 215 28% 17%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 215 28% 17%;
+        --primary: 220 96% 44%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 199 80% 71%;
+        --secondary-foreground: 210 100% 13%;
+        --muted: 210 40% 96%;
+        --muted-foreground: 215 16% 47%;
+        --accent: 199 100% 93%;
+        --accent-foreground: 210 100% 13%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 35 20% 87%;
+        --input: 35 20% 87%;
+        --ring: 220 96% 44%;
+        --radius: 0.75rem;
+        --chart-1: 220 96% 44%;
+        --chart-2: 199 80% 71%;
+        --chart-3: 210 100% 13%;
+        --chart-4: 35 20% 87%;
+        --chart-5: 30 14% 47%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    body {
+        @apply bg-background text-foreground font-body antialiased text-[18px] leading-relaxed;
+    }
+    
+    h1, h2, h3, h4 {
+        @apply font-heading;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-primary text-white rounded-full px-8 py-3 font-semibold shadow-lg;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        @apply bg-dark shadow-ia-hover;
+    }
+    
+    .btn-primary:focus {
+        @apply outline-none ring-2 ring-primary ring-offset-2;
+    }
+    
+    .btn-secondary {
+        @apply bg-white text-primary border-2 border-primary rounded-full px-8 py-3 font-semibold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        @apply bg-light;
+    }
+    
+    .btn-secondary:focus {
+        @apply outline-none ring-2 ring-primary ring-offset-2;
+    }
+    
+    .btn-prestige {
+        @apply bg-prestige-taupe text-white rounded-full px-8 py-3 shadow-md;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-prestige:hover {
+        @apply bg-dark;
+    }
+    
+    .card-service {
+        @apply bg-white border border-prestige-beige rounded-2xl p-8 relative overflow-hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .card-service:hover {
+        @apply border-primary shadow-[0_20px_50px_rgba(6,77,217,0.05)];
+    }
+    
+    .card-feature {
+        @apply bg-[#F8FAFC] rounded-2xl p-6;
+        transition: all 0.3s ease;
+    }
+    
+    .card-feature:hover {
+        @apply bg-white shadow-ia-hover;
+    }
+    
+    .section-padding {
+        @apply py-16 px-4;
+    }
+    
+    @media (min-width: 768px) {
+        .section-padding {
+            @apply py-24 px-8;
+        }
+    }
+    
+    .container-max {
+        @apply max-w-7xl mx-auto;
+    }
+    
+    .gradient-hero {
+        background: linear-gradient(135deg, #01233f 0%, #064dd9 100%);
+    }
+    
+    .gradient-prestige {
+        background: linear-gradient(to bottom right, #fdfbf7, #e2dcd0);
+    }
+    
+    .text-gradient {
+        @apply bg-clip-text text-transparent;
+        background-image: linear-gradient(to right, #064dd9, #73c4ef);
+    }
+}
+
+@layer utilities {
+    .animate-delay-100 {
+        animation-delay: 100ms;
+    }
+    .animate-delay-200 {
+        animation-delay: 200ms;
+    }
+    .animate-delay-300 {
+        animation-delay: 300ms;
+    }
+    .animate-delay-400 {
+        animation-delay: 400ms;
+    }
+    
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #064dd9;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #01233f;
+}
+
+/* Focus states for accessibility */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+}
+
+/* Animated gradient text */
+@keyframes gradient {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+}
+
+/* Shimmer effect for progress bars */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}

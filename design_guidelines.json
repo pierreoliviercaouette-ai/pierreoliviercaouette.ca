@@ -1,0 +1,147 @@
+{
+  "identity": {
+    "name": "E1 - The Anti-AI Designer (Prestige Finance Edition)",
+    "mission": "Create a high-trust, premium financial advisory platform that breaks the 'corporate template' mold while strictly adhering to the Industrial Alliance (iA) visual identity.",
+    "tone": {
+      "primary": "Confident & Insightful",
+      "secondary": "Accessible & Engaged",
+      "keywords": ["Legacy", "Security", "Modernity", "Human Connection"]
+    }
+  },
+  "theme": {
+    "mode": "light",
+    "strategy": "Hybrid Prestige",
+    "description": "Primary Light Mode for trust and readability (Services, Tools, Content). Strategic Dark Mode for high-impact sections (Hero, CTA, Footer) to evoke the 'Midnight Blue' premium feel."
+  },
+  "typography": {
+    "headings": {
+      "family": "Playfair Display",
+      "weights": ["400", "600", "700"],
+      "usage": "All H1-H3 headings. Use for high-impact statements and 'Prestige' messaging.",
+      "letterSpacing": "-0.02em",
+      "fallback": "serif"
+    },
+    "body": {
+      "family": "Manrope",
+      "weights": ["400", "500", "600"],
+      "usage": "Paragraphs, UI elements, Tools, Data tables.",
+      "fallback": "sans-serif"
+    },
+    "accent": {
+      "family": "JetBrains Mono",
+      "usage": "Financial figures, data points, tool inputs (adds technical credibility).",
+      "fallback": "monospace"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#064dd9",
+        "name": "iA Legacy Blue",
+        "usage": "Primary Buttons, Active States, Key Highlights"
+      },
+      "secondary": {
+        "DEFAULT": "#73c4ef",
+        "name": "iA Sky Blue",
+        "usage": "Gradients, Accents, Success States, Soft Backgrounds"
+      },
+      "dark": {
+        "DEFAULT": "#01233f",
+        "name": "iA Midnight Blue",
+        "usage": "Headings (Text), Hero Backgrounds, Footers, Strong Contrast"
+      },
+      "light": {
+        "DEFAULT": "#dbf0ff",
+        "name": "iA Mist Blue",
+        "usage": "Subtle Backgrounds, Hover States"
+      },
+      "prestige": {
+        "beige": "#e2dcd0",
+        "taupe": "#756b5f",
+        "usage": "Premium Service Cards, Testimonial Backgrounds, Borders"
+      },
+      "neutral": {
+        "white": "#ffffff",
+        "background": "#F8FAFC",
+        "text": "#0F172A"
+      }
+    },
+    "gradients": {
+      "hero": "linear-gradient(135deg, #01233f 0%, #064dd9 100%)",
+      "accent": "linear-gradient(90deg, #064dd9 0%, #73c4ef 100%)",
+      "prestige": "linear-gradient(to bottom right, #fdfbf7, #e2dcd0)"
+    }
+  },
+  "visual_enhancers": {
+    "radius": {
+      "default": "0.75rem",
+      "button": "9999px"
+    },
+    "shadows": {
+      "card": "0 4px 6px -1px rgba(6, 77, 217, 0.1), 0 2px 4px -1px rgba(6, 77, 217, 0.06)",
+      "hover": "0 20px 25px -5px rgba(6, 77, 217, 0.1), 0 10px 10px -5px rgba(6, 77, 217, 0.04)"
+    },
+    "textures": {
+      "noise": "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E\")"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#064dd9] text-white rounded-full px-8 py-3 font-semibold hover:bg-[#01233f] transition-all shadow-lg hover:shadow-[#064dd9]/20",
+      "secondary": "bg-white text-[#064dd9] border border-[#064dd9] rounded-full px-8 py-3 font-semibold hover:bg-[#dbf0ff] transition-all",
+      "prestige": "bg-[#756b5f] text-white rounded-full px-8 py-3 hover:bg-[#5e554b] shadow-md"
+    },
+    "cards": {
+      "service": "bg-white border border-[#e2dcd0] rounded-xl p-8 hover:border-[#064dd9] transition-colors group relative overflow-hidden",
+      "feature": "bg-[#F8FAFC] rounded-2xl p-6 hover:bg-white hover:shadow-xl transition-all duration-300"
+    },
+    "inputs": {
+      "default": "border-[#e2dcd0] focus:border-[#064dd9] focus:ring-[#064dd9]/20 rounded-lg bg-white"
+    }
+  },
+  "layout_strategies": {
+    "hero": {
+      "type": "Asymmetric Split",
+      "bg": "bg-[#01233f]",
+      "text": "text-white",
+      "structure": "Left: High-impact typography + Call to Action. Right: Dynamic image or 3D abstract element."
+    },
+    "services": {
+      "type": "Bento Grid",
+      "grid": "grid-cols-1 md:grid-cols-3 gap-6",
+      "card_style": "Prestige Beige Backgrounds with dark text for contrast."
+    },
+    "tools": {
+      "type": "Dashboard Dense",
+      "style": "Clean white containers on a subtle grey background (#F8FAFC). Focus on data clarity."
+    }
+  },
+  "images": {
+    "strategy": "Professional, Authentic, Quebec Context. Avoid generic US-style stock photos.",
+    "urls": {
+      "advisor_hero": "https://images.pexels.com/photos/7821671/pexels-photo-7821671.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "handshake_trust": "https://images.pexels.com/photos/7693156/pexels-photo-7693156.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "modern_office": "https://images.unsplash.com/photo-1769109003546-3312d4682a7f?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "family_lifestyle": "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&q=80"
+    }
+  },
+  "accessibility": {
+    "contrast_check": "Ensure #064dd9 is used on white or #dbf0ff backgrounds. On #01233f backgrounds, use White text.",
+    "focus_states": "All interactive elements must have a visible focus ring using #73c4ef."
+  },
+  "instructions_to_main_agent": [
+    "1. INSTALL FONTS: Add '@fontsource/playfair-display' and '@fontsource/manrope' immediately.",
+    "2. SETUP TAILWIND: Configure the 'colors' object in tailwind.config.js exactly as specified in the 'palette' section.",
+    "3. IMPLEMENT HERO: Build the Hero section first using the 'Midnight Blue' theme to establish the premium feel.",
+    "4. USE SHADCN: Use standard Shadcn components but override the 'rounded-md' with 'rounded-xl' or 'rounded-full' to match the softer, friendlier finance aesthetic.",
+    "5. PRESTIGE SECTIONS: For the 'Why Work Together' and 'Testimonials' sections, use the 'Prestige' color palette (Beige/Taupe) to differentiate from the standard blue service sections.",
+    "6. DATA-TESTID: Add data-testid attributes to all buttons, inputs, and links."
+  ],
+  "universal_guidelines": [
+    "Do not use gradients for text.",
+    "Avoid 'Inter' font. Use Manrope for body.",
+    "Use 2x more whitespace than you think is necessary.",
+    "Animations should be 'ease-out' and slow (0.4s+).",
+    "Never use pure black (#000000). Use #01233f or #0F172A."
+  ]
+}

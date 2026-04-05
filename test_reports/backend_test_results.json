@@ -1,0 +1,365 @@
+{
+  "timestamp": "2026-02-26T14:09:30.256886",
+  "summary": {
+    "total_tests": 16,
+    "passed": 16,
+    "failed": 0,
+    "success_rate": 100.0
+  },
+  "detailed_results": [
+    {
+      "name": "Health Check",
+      "method": "GET",
+      "endpoint": "health",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "status": "healthy",
+        "timestamp": "2026-02-26T14:09:27.462577+00:00"
+      },
+      "description": "Verify API is running and accessible"
+    },
+    {
+      "name": "User Registration",
+      "method": "POST",
+      "endpoint": "auth/register",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MzdkNzBmYy1mZjhhLTQ2OWItOWZjMC1mMzVkNjZkNzM2YzkiLCJleHAiOjE3NzIyMDEzNjcsImlhdCI6MTc3MjExNDk2N30.Qu6Lo0ZEjn7DiBsztJ-Yh9Tog2FVCyqSLjh3dBvUkJ8",
+        "token_type": "bearer",
+        "user": {
+          "id": "437d70fc-ff8a-469b-9fc0-f35d66d736c9",
+          "email": "testuser140927@example.com",
+          "first_name": "Test",
+          "last_name": "User140927",
+          "phone": "514-123-4567",
+          "is_admin": false,
+          "referral_code": "8EF8E657",
+          "created_at": "2026-02-26T14:09:27.627254+00:00"
+        }
+      },
+      "description": "Create new user account"
+    },
+    {
+      "name": "User Login",
+      "method": "POST",
+      "endpoint": "auth/login",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MzdkNzBmYy1mZjhhLTQ2OWItOWZjMC1mMzVkNjZkNzM2YzkiLCJleHAiOjE3NzIyMDEzNjgsImlhdCI6MTc3MjExNDk2OH0.8IlgACfZI09bJ1xL4SNHv1fa82DpfIKb7QfWwiPi2mk",
+        "token_type": "bearer",
+        "user": {
+          "id": "437d70fc-ff8a-469b-9fc0-f35d66d736c9",
+          "email": "testuser140927@example.com",
+          "first_name": "Test",
+          "last_name": "User140927",
+          "phone": "514-123-4567",
+          "is_admin": false,
+          "referral_code": "8EF8E657",
+          "created_at": "2026-02-26T14:09:27.627254+00:00"
+        }
+      },
+      "description": "Login with existing user credentials"
+    },
+    {
+      "name": "Invalid Login",
+      "method": "POST",
+      "endpoint": "auth/login",
+      "expected_status": 401,
+      "actual_status": 401,
+      "success": true,
+      "response_data": {
+        "detail": "Email ou mot de passe incorrect"
+      },
+      "description": "Should fail with invalid credentials"
+    },
+    {
+      "name": "Get Current User",
+      "method": "GET",
+      "endpoint": "auth/me",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "id": "437d70fc-ff8a-469b-9fc0-f35d66d736c9",
+        "email": "testuser140927@example.com",
+        "first_name": "Test",
+        "last_name": "User140927",
+        "phone": "514-123-4567",
+        "is_admin": false,
+        "referral_code": "8EF8E657",
+        "created_at": "2026-02-26T14:09:27.627254+00:00"
+      },
+      "description": "Get authenticated user's profile"
+    },
+    {
+      "name": "Update Profile",
+      "method": "PUT",
+      "endpoint": "auth/profile",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "id": "437d70fc-ff8a-469b-9fc0-f35d66d736c9",
+        "email": "testuser140927@example.com",
+        "first_name": "Test",
+        "last_name": "User140927",
+        "phone": "514-123-4567",
+        "is_admin": false,
+        "referral_code": "8EF8E657",
+        "created_at": "2026-02-26T14:09:27.627254+00:00"
+      },
+      "description": "Update user profile information"
+    },
+    {
+      "name": "Get Tools (Auth)",
+      "method": "GET",
+      "endpoint": "tools",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": [
+        {
+          "id": "7e57f84a-6d81-48d4-b4b9-b1c51d7390f0",
+          "name": "Calculateur d'assurance vie",
+          "slug": "calculateur-assurance-vie",
+          "description": "Estimez vos besoins en couverture d'assurance vie en fonction de votre situation familiale",
+          "html_content": "<h2>Calculateur d'assurance vie</h2><form id=\"calc-form\"><div style=\"margin-bottom: 1rem;\"><label>\u00c2ge actuel</label><input type=\"number\" name=\"age\" placeholder=\"35\" min=\"18\" max=\"100\"/></div><div style=\"margin-bottom: 1rem;\"><label>Revenu annuel ($)</label><input type=\"number\" name=\"revenu\" placeholder=\"75000\"/></div><div style=\"margin-bottom: 1rem;\"><label>Nombre de personnes \u00e0 charge</label><input type=\"number\" name=\"dependants\" placeholder=\"2\" min=\"0\"/></div><div style=\"margin-bottom: 1rem;\"><label>Dettes totales ($)</label><input type=\"number\" name=\"dettes\" placeholder=\"350000\"/></div><button type=\"button\" onclick=\"calculer()\">Calculer mes besoins</button><div id=\"result\" class=\"result\" style=\"display:none;\"></div></form><script>function calculer(){var age=parseInt(document.querySelector(\"[name=age]\").value)||35;var revenu=parseInt(document.querySelector(\"[name=revenu]\").value)||75000;var dep=parseInt(document.querySelector(\"[name=dependants]\").value)||0;var dettes=parseInt(document.querySelector(\"[name=dettes]\").value)||0;var annees=(65-age);if(annees<5)annees=5;var besoin=(revenu*annees*0.7)+(dettes)+(dep*50000);document.getElementById(\"result\").innerHTML=\"<h3>R\u00e9sultat estim\u00e9</h3><p>Couverture recommand\u00e9e: <strong>\"+besoin.toLocaleString()+\" $</strong></p><p style=\\\"font-size:0.875rem;color:#756b5f;\\\">Ce montant couvre \"+annees+\" ann\u00e9es de revenus (70%), vos dettes, et \"+dep+\" personne(s) \u00e0 charge.</p>\";document.getElementById(\"result\").style.display=\"block\";}</script>",
+          "tags": [
+            "assurance",
+            "vie",
+            "calculateur"
+          ],
+          "is_active": true,
+          "created_at": "2026-02-26T14:05:48.369523+00:00"
+        },
+        {
+          "id": "872fe505-ae71-4d4b-8490-450f8bbdb7db",
+          "name": "Simulateur REER vs CELI",
+          "slug": "simulateur-reer-celi",
+          "description": "Comparez l'impact fiscal du REER et du CELI selon votre situation",
+          "html_content": "<h2>REER vs CELI</h2><form><div style=\"margin-bottom:1rem;\"><label>Taux marginal d'imposition actuel (%)</label><input type=\"number\" name=\"taux_actuel\" placeholder=\"40\" min=\"0\" max=\"60\"/></div><div style=\"margin-bottom:1rem;\"><label>Taux pr\u00e9vu \u00e0 la retraite (%)</label><input type=\"number\" name=\"taux_retraite\" placeholder=\"30\" min=\"0\" max=\"60\"/></div><div style=\"margin-bottom:1rem;\"><label>Montant \u00e0 investir ($)</label><input type=\"number\" name=\"montant\" placeholder=\"10000\"/></div><button type=\"button\" onclick=\"comparer()\">Comparer</button><div id=\"result\" class=\"result\" style=\"display:none;\"></div></form><script>function comparer(){var ta=parseInt(document.querySelector(\"[name=taux_actuel]\").value)||40;var tr=parseInt(document.querySelector(\"[name=taux_retraite]\").value)||30;var m=parseInt(document.querySelector(\"[name=montant]\").value)||10000;var eco_reer=m*(ta/100);var avantage=ta>tr?\"REER\":\"CELI\";var diff=Math.abs(ta-tr);document.getElementById(\"result\").innerHTML=\"<h3>Analyse</h3><p>\u00c9conomie d'imp\u00f4t REER aujourd'hui: <strong>\"+eco_reer.toLocaleString()+\" $</strong></p><p>Recommandation: <strong>\"+avantage+\"</strong></p><p style=\\\"font-size:0.875rem;color:#756b5f;\\\">Diff\u00e9rence de taux: \"+diff+\"%. \"+(ta>tr?\"Votre taux sera plus bas \u00e0 la retraite, le REER est avantageux.\":\"Le CELI offre plus de flexibilit\u00e9 dans votre situation.\")+\"</p>\";document.getElementById(\"result\").style.display=\"block\";}</script>",
+          "tags": [
+            "\u00e9pargne",
+            "REER",
+            "CELI",
+            "comparateur"
+          ],
+          "is_active": true,
+          "created_at": "2026-02-26T14:06:00.639709+00:00"
+        }
+      ],
+      "description": "Should show tools to authenticated users"
+    },
+    {
+      "name": "Create Referral",
+      "method": "POST",
+      "endpoint": "referrals",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "id": "0410fea3-c07e-47f3-8a60-e677354e9701",
+        "referred_email": "referred140928@example.com",
+        "referred_name": "Referred User 140928",
+        "referred_phone": "514-555-0123",
+        "notes": "Test referral from API testing",
+        "status": "pending",
+        "created_at": "2026-02-26T14:09:28.920559+00:00",
+        "qualified_at": null
+      },
+      "description": "Create new referral"
+    },
+    {
+      "name": "Get User Referrals",
+      "method": "GET",
+      "endpoint": "referrals",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": [
+        {
+          "id": "0410fea3-c07e-47f3-8a60-e677354e9701",
+          "referred_email": "referred140928@example.com",
+          "referred_name": "Referred User 140928",
+          "referred_phone": "514-555-0123",
+          "notes": "Test referral from API testing",
+          "status": "pending",
+          "created_at": "2026-02-26T14:09:28.920559+00:00",
+          "qualified_at": null
+        }
+      ],
+      "description": "Get list of user's referrals"
+    },
+    {
+      "name": "Get Referral Stats",
+      "method": "GET",
+      "endpoint": "referrals/stats",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "total_referrals": 1,
+        "qualified_referrals": 0,
+        "pending_referrals": 1,
+        "current_tier": null,
+        "next_tier": {
+          "threshold": 3,
+          "reward": "Carte-cadeau 25 $",
+          "name": "Bronze"
+        },
+        "referrals_to_next_tier": 3,
+        "total_rewards_earned": "Aucune r\u00e9compense encore"
+      },
+      "description": "Get user's referral statistics and tier info"
+    },
+    {
+      "name": "Get Notifications",
+      "method": "GET",
+      "endpoint": "notifications",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": [],
+      "description": "Get user notifications"
+    },
+    {
+      "name": "Unauthorized Admin Access",
+      "method": "GET",
+      "endpoint": "admin/users",
+      "expected_status": 403,
+      "actual_status": 403,
+      "success": true,
+      "response_data": {
+        "detail": "Acc\u00e8s administrateur requis"
+      },
+      "description": "Regular user should be denied admin access"
+    },
+    {
+      "name": "Get Tools (No Auth)",
+      "method": "GET",
+      "endpoint": "tools",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": [
+        {
+          "id": "7e57f84a-6d81-48d4-b4b9-b1c51d7390f0",
+          "name": "Calculateur d'assurance vie",
+          "slug": "calculateur-assurance-vie",
+          "description": "Estimez vos besoins en couverture d'assurance vie en fonction de votre situation familiale",
+          "html_content": "<h2>Calculateur d'assurance vie</h2><form id=\"calc-form\"><div style=\"margin-bottom: 1rem;\"><label>\u00c2ge actuel</label><input type=\"number\" name=\"age\" placeholder=\"35\" min=\"18\" max=\"100\"/></div><div style=\"margin-bottom: 1rem;\"><label>Revenu annuel ($)</label><input type=\"number\" name=\"revenu\" placeholder=\"75000\"/></div><div style=\"margin-bottom: 1rem;\"><label>Nombre de personnes \u00e0 charge</label><input type=\"number\" name=\"dependants\" placeholder=\"2\" min=\"0\"/></div><div style=\"margin-bottom: 1rem;\"><label>Dettes totales ($)</label><input type=\"number\" name=\"dettes\" placeholder=\"350000\"/></div><button type=\"button\" onclick=\"calculer()\">Calculer mes besoins</button><div id=\"result\" class=\"result\" style=\"display:none;\"></div></form><script>function calculer(){var age=parseInt(document.querySelector(\"[name=age]\").value)||35;var revenu=parseInt(document.querySelector(\"[name=revenu]\").value)||75000;var dep=parseInt(document.querySelector(\"[name=dependants]\").value)||0;var dettes=parseInt(document.querySelector(\"[name=dettes]\").value)||0;var annees=(65-age);if(annees<5)annees=5;var besoin=(revenu*annees*0.7)+(dettes)+(dep*50000);document.getElementById(\"result\").innerHTML=\"<h3>R\u00e9sultat estim\u00e9</h3><p>Couverture recommand\u00e9e: <strong>\"+besoin.toLocaleString()+\" $</strong></p><p style=\\\"font-size:0.875rem;color:#756b5f;\\\">Ce montant couvre \"+annees+\" ann\u00e9es de revenus (70%), vos dettes, et \"+dep+\" personne(s) \u00e0 charge.</p>\";document.getElementById(\"result\").style.display=\"block\";}</script>",
+          "tags": [
+            "assurance",
+            "vie",
+            "calculateur"
+          ],
+          "is_active": true,
+          "created_at": "2026-02-26T14:05:48.369523+00:00"
+        },
+        {
+          "id": "872fe505-ae71-4d4b-8490-450f8bbdb7db",
+          "name": "Simulateur REER vs CELI",
+          "slug": "simulateur-reer-celi",
+          "description": "Comparez l'impact fiscal du REER et du CELI selon votre situation",
+          "html_content": "<h2>REER vs CELI</h2><form><div style=\"margin-bottom:1rem;\"><label>Taux marginal d'imposition actuel (%)</label><input type=\"number\" name=\"taux_actuel\" placeholder=\"40\" min=\"0\" max=\"60\"/></div><div style=\"margin-bottom:1rem;\"><label>Taux pr\u00e9vu \u00e0 la retraite (%)</label><input type=\"number\" name=\"taux_retraite\" placeholder=\"30\" min=\"0\" max=\"60\"/></div><div style=\"margin-bottom:1rem;\"><label>Montant \u00e0 investir ($)</label><input type=\"number\" name=\"montant\" placeholder=\"10000\"/></div><button type=\"button\" onclick=\"comparer()\">Comparer</button><div id=\"result\" class=\"result\" style=\"display:none;\"></div></form><script>function comparer(){var ta=parseInt(document.querySelector(\"[name=taux_actuel]\").value)||40;var tr=parseInt(document.querySelector(\"[name=taux_retraite]\").value)||30;var m=parseInt(document.querySelector(\"[name=montant]\").value)||10000;var eco_reer=m*(ta/100);var avantage=ta>tr?\"REER\":\"CELI\";var diff=Math.abs(ta-tr);document.getElementById(\"result\").innerHTML=\"<h3>Analyse</h3><p>\u00c9conomie d'imp\u00f4t REER aujourd'hui: <strong>\"+eco_reer.toLocaleString()+\" $</strong></p><p>Recommandation: <strong>\"+avantage+\"</strong></p><p style=\\\"font-size:0.875rem;color:#756b5f;\\\">Diff\u00e9rence de taux: \"+diff+\"%. \"+(ta>tr?\"Votre taux sera plus bas \u00e0 la retraite, le REER est avantageux.\":\"Le CELI offre plus de flexibilit\u00e9 dans votre situation.\")+\"</p>\";document.getElementById(\"result\").style.display=\"block\";}</script>",
+          "tags": [
+            "\u00e9pargne",
+            "REER",
+            "CELI",
+            "comparateur"
+          ],
+          "is_active": true,
+          "created_at": "2026-02-26T14:06:00.639709+00:00"
+        }
+      ],
+      "description": "Should show only active tools to unauthenticated users"
+    },
+    {
+      "name": "Contact Form Submission",
+      "method": "POST",
+      "endpoint": "contact",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "message": "Merci! Nous vous contacterons bient\u00f4t.",
+        "id": "bee8fe22-d683-483c-89de-5c9df6a82e71"
+      },
+      "description": "Submit contact form without authentication"
+    },
+    {
+      "name": "Create Admin User",
+      "method": "POST",
+      "endpoint": "auth/register",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "response_data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YzAxYTlkYy1jOTQ5LTQ2NjUtYjIzMC1jM2JmYWQ2YjRkMzAiLCJleHAiOjE3NzIyMDEzNzAsImlhdCI6MTc3MjExNDk3MH0.8dpQTd6XkTQ67H692xXFYhxSfWoF3E8ZbHSiOf3E2yQ",
+        "token_type": "bearer",
+        "user": {
+          "id": "4c01a9dc-c949-4665-b230-c3bfad6b4d30",
+          "email": "admin140929@example.com",
+          "first_name": "Admin",
+          "last_name": "User140929",
+          "phone": null,
+          "is_admin": false,
+          "referral_code": "20C2E017",
+          "created_at": "2026-02-26T14:09:29.904235+00:00"
+        }
+      },
+      "description": "Create user account that will be made admin"
+    },
+    {
+      "name": "Create Tool (Admin Required)",
+      "method": "POST",
+      "endpoint": "tools",
+      "expected_status": 403,
+      "actual_status": 403,
+      "success": true,
+      "response_data": {
+        "detail": "Acc\u00e8s administrateur requis"
+      },
+      "description": "Should fail - user not admin yet"
+    }
+  ],
+  "created_resources": {
+    "tools": [],
+    "referrals": [
+      {
+        "id": "0410fea3-c07e-47f3-8a60-e677354e9701",
+        "referred_email": "referred140928@example.com",
+        "referred_name": "Referred User 140928",
+        "referred_phone": "514-555-0123",
+        "notes": "Test referral from API testing",
+        "status": "pending",
+        "created_at": "2026-02-26T14:09:28.920559+00:00",
+        "qualified_at": null
+      }
+    ],
+    "contacts": [
+      {
+        "message": "Merci! Nous vous contacterons bient\u00f4t.",
+        "id": "bee8fe22-d683-483c-89de-5c9df6a82e71"
+      }
+    ],
+    "users": [
+      {
+        "id": "437d70fc-ff8a-469b-9fc0-f35d66d736c9",
+        "email": "testuser140927@example.com",
+        "first_name": "Test",
+        "last_name": "User140927",
+        "phone": "514-123-4567",
+        "is_admin": false,
+        "referral_code": "8EF8E657",
+        "created_at": "2026-02-26T14:09:27.627254+00:00"
+      }
+    ]
+  }
+}
