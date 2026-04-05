@@ -1,4 +1,4 @@
-# https://pierreoliviercaouette.ca
+# https://www.pierreoliviercaouette.ca
 User-agent: *
 Allow: /
 
@@ -8,4 +8,4 @@ Disallow: /inscription
 Disallow: /profil
 Disallow: /admin
 
-Sitemap: https://pierreoliviercaouette.ca/sitemap.xml
+Sitemap: https://www.pierreoliviercaouette.ca/sitemap.xml
