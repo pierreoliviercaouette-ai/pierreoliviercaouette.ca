@@ -113,11 +113,12 @@ const Hero = () => (
             </div>
             
             {/* Stats badge */}
-            <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4 animate-float" style={{ animationDelay: '0.5s' }}>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">iA</p>
-                <p className="text-xs text-prestige-taupe">Groupe financier</p>
-              </div>
+            <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-3 border border-gray-100 flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
+              <img 
+                src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658b7c46935167e7514507.webp" 
+                alt="iA Groupe financier"
+                className="h-10 w-auto object-contain"
+              />
             </div>
           </div>
         </div>
