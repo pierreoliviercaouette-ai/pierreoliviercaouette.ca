@@ -49,7 +49,7 @@
     }
     
     body {
-        @apply bg-background text-foreground font-body antialiased text-[18px] leading-relaxed;
+        @apply bg-background text-foreground font-body antialiased;
     }
     
     h1, h2, h3, h4 {

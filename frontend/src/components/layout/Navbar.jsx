@@ -31,9 +31,11 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-20 px-4 md:px-8">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3" data-testid="navbar-logo">
-            <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-              <span className="text-white font-heading font-bold text-lg">PO</span>
-            </div>
+            <img 
+              src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658b7c46935167e7514507.webp" 
+              alt="iA Groupe financier"
+              className="h-10 w-auto object-contain bg-white rounded-md"
+            />
             <div className="hidden sm:block">
               <p className="font-heading font-semibold text-dark text-lg leading-tight">Pierre-Olivier</p>
               <p className="text-xs text-prestige-taupe">Conseiller en sécurité financière</p>
