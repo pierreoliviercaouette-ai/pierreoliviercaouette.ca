@@ -28,24 +28,20 @@ export const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-prestige-beige">
       <div className="container-max">
-        <div className="flex items-center w-full h-20 px-4 md:px-8">
+        <div className="flex items-center justify-between h-20 px-4 md:px-8">
           {/* Logo */}
-          <div className="flex-1 flex items-center justify-start min-w-0">
-            <Link to="/" className="flex items-center gap-3 min-w-0" data-testid="navbar-logo">
-              <img 
-                src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658b7c46935167e7514507.webp" 
-                alt="iA Groupe financier"
-                className="h-10 w-auto object-contain bg-white rounded-md shrink-0"
-              />
-              <div className="hidden xl:block overflow-hidden">
-                <p className="font-heading font-semibold text-dark text-lg leading-tight truncate">Pierre-Olivier</p>
-                <p className="text-xs text-prestige-taupe truncate">Conseiller en sécurité financière</p>
-              </div>
-            </Link>
-          </div>
+          <Link to="/" className="flex items-center gap-3" data-testid="navbar-logo">
+            <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
+              <span className="text-white font-heading font-bold text-lg">PO</span>
+            </div>
+            <div className="hidden sm:block">
+              <p className="font-heading font-semibold text-dark text-lg leading-tight">Pierre-Olivier</p>
+              <p className="text-xs text-prestige-taupe">Conseiller en sécurité financière</p>
+            </div>
+          </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex shrink-0 items-center justify-center gap-8 px-4">
+          <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -62,10 +58,8 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* Right section: Desktop Actions & Mobile Menu */}
-          <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
-            {/* Desktop Actions */}
-            <div className="hidden lg:flex items-center gap-3">
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center gap-3">
             {/* Referral CTA - Always visible, special styling */}
             <Link 
               to="/referencement" 
@@ -199,15 +193,14 @@ export const Navbar = () => {
             )}
           </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className="lg:hidden p-2 ml-2"
-              onClick={() => setIsOpen(!isOpen)}
-              data-testid="mobile-menu-button"
-            >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden p-2"
+            onClick={() => setIsOpen(!isOpen)}
+            data-testid="mobile-menu-button"
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
 
         {/* Mobile Menu */}
