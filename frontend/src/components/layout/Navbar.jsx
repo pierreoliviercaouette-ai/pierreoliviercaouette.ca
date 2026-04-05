@@ -28,7 +28,7 @@ export const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-prestige-beige">
       <div className="container-max">
-        <div className="flex items-center justify-between h-20 px-4 md:px-8">
+        <div className="relative flex items-center justify-between h-20 px-4 md:px-8">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3" data-testid="navbar-logo">
             <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
@@ -41,7 +41,7 @@ export const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
