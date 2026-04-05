@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { Wrench, Lock, ArrowRight, Clock, ChevronRight } from 'lucide-react';
 
 export const Tools = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [tools, setTools] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ export const Tools = () => {
       }
     };
     fetchTools();
-  }, [user?.id]);
+  }, [user]);
 
   if (!user) {
     return (
