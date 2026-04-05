@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { getPublicSiteOrigin } from '../lib/referralLink';
 
 const Hero = () => (
   <section className="relative min-h-[90vh] overflow-hidden">
@@ -733,9 +734,15 @@ export const Home = () => {
   const refFromQuery = searchParams.get('ref');
 
   useEffect(() => {
-    if (refFromQuery && refFromQuery.trim()) {
-      navigate(`/referencement/consentement?ref=${encodeURIComponent(refFromQuery.trim())}`, { replace: true });
+    if (!refFromQuery?.trim()) return;
+    const ref = encodeURIComponent(refFromQuery.trim());
+    const path = `/referencement/consentement?ref=${ref}`;
+    const publicOrigin = getPublicSiteOrigin();
+    if (typeof window !== 'undefined' && publicOrigin && publicOrigin !== window.location.origin) {
+      window.location.replace(`${publicOrigin}${path}`);
+      return;
     }
+    navigate(path, { replace: true });
   }, [refFromQuery, navigate]);
 
   return (
