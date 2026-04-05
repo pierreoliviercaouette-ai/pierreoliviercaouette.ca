@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { computeReferralStats } from '../lib/referralStats';
+import { getReferralConsentUrl } from '../lib/referralLink';
 import { 
   User, Gift, Clock, Bell, Copy, CheckCircle2, Users, 
   ChevronRight, Trophy, Star, ArrowRight, Send, ExternalLink,
@@ -111,7 +112,7 @@ export const Profile = () => {
   };
 
   const copyReferralLink = () => {
-    const link = `${window.location.origin}?ref=${user.referral_code}`;
+    const link = getReferralConsentUrl(user.referral_code);
     navigator.clipboard.writeText(link);
     setCopied(true);
     toast.success('Lien copié!');
@@ -793,11 +794,11 @@ export const Profile = () => {
                               <Badge className="bg-blue-500 text-white border-0 text-xs px-2 py-0.5">+1 pt/réf.</Badge>
                             </div>
                             <p className="text-xs md:text-sm text-prestige-taupe mb-2 md:mb-3">
-                              Partagez votre lien unique ou remplissez le formulaire ci-dessous.
+                              Ce lien ouvre une page de consentement pour votre contact (coordonnées et accord écrit). Vous pouvez aussi saisir une référence ci-dessous.
                             </p>
                             <div className="flex items-center gap-2">
                               <div className="flex-1 min-w-0 p-2 md:p-3 bg-white rounded-lg md:rounded-xl font-mono text-[10px] md:text-xs truncate border border-gray-200 overflow-hidden">
-                                {window.location.origin}?ref={user.referral_code}
+                                {getReferralConsentUrl(user.referral_code)}
                               </div>
                               <Button 
                                 onClick={copyReferralLink}

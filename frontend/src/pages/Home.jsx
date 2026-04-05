@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -728,6 +728,16 @@ const CTASection = () => (
 );
 
 export const Home = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refFromQuery = searchParams.get('ref');
+
+  useEffect(() => {
+    if (refFromQuery && refFromQuery.trim()) {
+      navigate(`/referencement/consentement?ref=${encodeURIComponent(refFromQuery.trim())}`, { replace: true });
+    }
+  }, [refFromQuery, navigate]);
+
   return (
     <main data-testid="home-page">
       <Hero />

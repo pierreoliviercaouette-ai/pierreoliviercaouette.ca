@@ -19,6 +19,7 @@ import { Admin } from "./pages/Admin";
 import { Contact, Appointment } from "./pages/Contact";
 import { Privacy, Terms } from "./pages/Legal";
 import { Referral } from "./pages/Referral";
+import { ReferralConsent } from "./pages/ReferralConsent";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
               <Route path="/admin" element={<Admin />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/rendez-vous" element={<Appointment />} />
+              <Route path="/referencement/consentement" element={<ReferralConsent />} />
               <Route path="/referencement" element={<Referral />} />
               <Route path="/confidentialite" element={<Privacy />} />
               <Route path="/conditions" element={<Terms />} />

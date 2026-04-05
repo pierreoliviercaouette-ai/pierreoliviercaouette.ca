@@ -63,7 +63,7 @@ export const Referral = () => {
       icon: Users,
       title: 'Référez quelqu\'un',
       points: 1,
-      description: 'Gagnez 1 point pour chaque référence confirmée. Partagez votre lien unique et recommandez mes services.',
+      description: 'Gagnez 1 point pour chaque référence confirmée. Partagez votre lien : la personne invitée remplit une page de consentement (coordonnées + accord pour être contactée).',
       color: 'bg-blue-500'
     },
     {
