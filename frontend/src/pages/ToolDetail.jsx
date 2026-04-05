@@ -258,9 +258,10 @@ export const ToolDetail = () => {
   // Attach event listeners to inputs after render - simplified
   useEffect(() => {
     // This effect is now handled by the HTML injection effect above
+    const currentRef = contentRef.current;
     return () => {
-      if (contentRef.current) {
-        const inputs = contentRef.current.querySelectorAll('input, select');
+      if (currentRef) {
+        const inputs = currentRef.querySelectorAll('input, select');
         inputs.forEach(input => {
           input.removeEventListener('input', handleInputChange);
           input.removeEventListener('change', handleInputChange);

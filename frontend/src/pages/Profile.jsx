@@ -66,6 +66,7 @@ export const Profile = () => {
       return;
     }
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading, navigate]);
 
   const fetchData = async () => {

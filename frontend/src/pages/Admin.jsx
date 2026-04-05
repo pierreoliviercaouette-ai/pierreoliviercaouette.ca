@@ -55,6 +55,7 @@ export const Admin = () => {
       return;
     }
     fetchAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading, navigate]);
 
   const fetchAllData = async () => {
