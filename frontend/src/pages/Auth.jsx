@@ -232,6 +232,14 @@ export const Register = () => {
               </div>
             </div>
 
+            <div className="rounded-lg bg-light border border-prestige-beige px-3 py-2">
+              <p className="text-xs text-prestige-taupe">
+                Choisissez votre mode d&apos;inscription: <strong>courriel</strong> ou <strong>téléphone</strong>.
+                <br />
+                <strong>Au moins un des deux</strong> est requis.
+              </p>
+            </div>
+
             <div>
               <Label htmlFor="email">Adresse courriel (optionnel)</Label>
               <Input
@@ -246,7 +254,7 @@ export const Register = () => {
             </div>
 
             <div>
-              <Label htmlFor="phone">Numéro de téléphone</Label>
+              <Label htmlFor="phone">Numéro de téléphone (optionnel)</Label>
               <Input
                 id="phone"
                 name="phone"
@@ -256,9 +264,6 @@ export const Register = () => {
                 placeholder="+1 514 123-4567"
                 data-testid="register-phone"
               />
-              <p className="text-xs text-prestige-taupe mt-1">
-                Courriel ou téléphone requis (au moins un des deux).
-              </p>
             </div>
 
             <div>
