@@ -7,6 +7,7 @@ import { Button } from '../components/ui/button';
 import { Checkbox } from '../components/ui/checkbox';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
+import { trackEvent } from '../lib/analytics';
 
 const CONSENT_TEXT =
   "J'accepte que Pierre-Olivier Caouette, conseiller en sécurité financière, communique avec moi par téléphone ou par courriel au sujet de ses services de conseil, en se basant sur les renseignements que je fournis ci-dessous. Je comprends que je peux retirer ce consentement en tout temps en le lui signalant directement.";
@@ -39,10 +40,12 @@ export const ReferralConsent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!refCode) {
+      trackEvent('referral_consent_error', { reason: 'missing_code' });
       toast.error(errorMessages.invalid_code);
       return;
     }
     if (!consent) {
+      trackEvent('referral_consent_error', { reason: 'consent_required' });
       toast.error(errorMessages.consent_required);
       return;
     }
@@ -61,14 +64,21 @@ export const ReferralConsent = () => {
 
       if (!data?.ok) {
         const key = data?.error || 'invalid_code';
+        trackEvent('referral_consent_error', { reason: key });
         toast.error(errorMessages[key] || 'Une erreur est survenue.');
         return;
       }
 
       setDone(true);
+      trackEvent('generate_lead', {
+        method: 'referral_consent',
+        has_phone: Boolean(phone.trim()),
+        has_email: Boolean(email.trim()),
+      });
       toast.success('Merci! Votre demande a été transmise.');
     } catch (err) {
       console.error(err);
+      trackEvent('referral_consent_error', { reason: 'rpc_exception' });
       toast.error(err.message || 'Une erreur est survenue.');
     } finally {
       setLoading(false);

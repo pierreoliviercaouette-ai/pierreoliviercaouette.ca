@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Badge } from '../ui/badge';
+import { trackEvent } from '../../lib/analytics';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,6 +49,7 @@ export const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
+                onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: link.path })}
                 data-testid={`nav-link-${link.path.replace('/', '') || 'home'}`}
                 className={`font-medium transition-colors duration-200 py-2 px-3 rounded-lg hover:bg-light/50 ${
                   isActive(link.path)
@@ -65,6 +67,7 @@ export const Navbar = () => {
             {/* Referral CTA - Always visible, special styling */}
             <Link 
               to="/referencement" 
+              onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/referencement' })}
               className="relative group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-secondary/20 to-primary/20 hover:from-secondary/30 hover:to-primary/30 rounded-full transition-all duration-300"
               data-testid="nav-referral-cta"
             >
@@ -179,6 +182,7 @@ export const Navbar = () => {
               <>
                 <Link 
                   to="/connexion" 
+                  onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/connexion' })}
                   className="font-medium text-dark hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-light/50"
                   data-testid="login-link"
                 >
@@ -186,6 +190,7 @@ export const Navbar = () => {
                 </Link>
                 <Link 
                   to="/rendez-vous" 
+                  onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/rendez-vous' })}
                   className="btn-primary"
                   data-testid="cta-rdv"
                 >
@@ -213,7 +218,10 @@ export const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    trackEvent('navigation_click', { location: 'navbar_mobile', destination: link.path });
+                    setIsOpen(false);
+                  }}
                   className={`block py-2 font-medium ${
                     isActive(link.path) ? 'text-primary' : 'text-dark'
                   }`}
@@ -225,7 +233,10 @@ export const Navbar = () => {
               {/* Mobile Referral CTA */}
               <Link
                 to="/referencement"
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/referencement' });
+                  setIsOpen(false);
+                }}
                 className="flex items-center gap-2 py-2 font-medium text-primary"
               >
                 <Gift className="w-5 h-5" />
@@ -268,14 +279,20 @@ export const Navbar = () => {
                   <>
                     <Link
                       to="/connexion"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/connexion' });
+                        setIsOpen(false);
+                      }}
                       className="block py-2 font-medium text-dark"
                     >
                       Connexion
                     </Link>
                     <Link
                       to="/rendez-vous"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/rendez-vous' });
+                        setIsOpen(false);
+                      }}
                       className="btn-primary block text-center"
                     >
                       Prendre rendez-vous

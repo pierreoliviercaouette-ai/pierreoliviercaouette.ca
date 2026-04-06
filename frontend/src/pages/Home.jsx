@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
+import { trackEvent } from '../lib/analytics';
 
 const Hero = () => (
   <section className="relative min-h-[90vh] overflow-hidden">
@@ -48,6 +49,7 @@ const Hero = () => (
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
               to="/rendez-vous" 
+              onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'home_hero_rendez_vous' })}
               className="group bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-secondary hover:text-white transition-all duration-300 inline-flex items-center justify-center gap-2 shadow-lg shadow-white/20"
               data-testid="hero-cta-rdv"
             >
@@ -56,6 +58,7 @@ const Hero = () => (
             </Link>
             <Link 
               to="/contact" 
+              onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'home_hero_contact' })}
               className="group border-2 border-white/30 text-white rounded-full px-8 py-4 font-semibold hover:bg-white/10 hover:border-white/50 transition-all duration-300 inline-flex items-center justify-center gap-2 backdrop-blur-sm"
               data-testid="hero-cta-contact"
             >
@@ -709,6 +712,7 @@ const CTASection = () => (
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Link 
             to="/rendez-vous" 
+            onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'home_final_rendez_vous' })}
             className="group bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-secondary hover:text-white transition-all duration-300 inline-flex items-center justify-center gap-2 shadow-lg"
             data-testid="cta-final-rdv"
           >
@@ -717,6 +721,7 @@ const CTASection = () => (
           </Link>
           <Link 
             to="/contact" 
+            onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'home_final_contact' })}
             className="border-2 border-white/30 text-white rounded-full px-8 py-4 font-semibold hover:bg-white/10 transition-all inline-flex items-center justify-center backdrop-blur-sm"
             data-testid="cta-final-contact"
           >

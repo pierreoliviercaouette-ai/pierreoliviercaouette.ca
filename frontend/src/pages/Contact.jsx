@@ -7,6 +7,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
+import { trackEvent } from '../lib/analytics';
 
 // Contact info centralisé
 const CONTACT_INFO = {
@@ -53,9 +54,17 @@ export const Contact = () => {
       });
       if (error) throw error;
       setSubmitted(true);
+      trackEvent('generate_lead', {
+        method: 'contact_form',
+        has_phone: Boolean(formData.phone),
+        has_referral_code: Boolean(formData.referral_code),
+      });
       toast.success('Message envoyé avec succès!');
     } catch (error) {
       console.error(error);
+      trackEvent('contact_form_error', {
+        source: 'contact_page',
+      });
       toast.error(error.message || 'Erreur lors de l\'envoi. Veuillez réessayer.');
     } finally {
       setLoading(false);
@@ -208,7 +217,11 @@ export const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-prestige-taupe">Téléphone</p>
-                      <a href={CONTACT_INFO.phoneLink} className="font-medium text-dark hover:text-primary">
+                      <a
+                        href={CONTACT_INFO.phoneLink}
+                        onClick={() => trackEvent('contact_click', { channel: 'phone', source: 'contact_page' })}
+                        className="font-medium text-dark hover:text-primary"
+                      >
                         {CONTACT_INFO.phone}
                       </a>
                     </div>
@@ -219,7 +232,11 @@ export const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-prestige-taupe">Courriel</p>
-                      <a href={`mailto:${CONTACT_INFO.email}`} className="font-medium text-dark hover:text-primary">
+                      <a
+                        href={`mailto:${CONTACT_INFO.email}`}
+                        onClick={() => trackEvent('contact_click', { channel: 'email', source: 'contact_page' })}
+                        className="font-medium text-dark hover:text-primary"
+                      >
                         {CONTACT_INFO.email}
                       </a>
                     </div>
@@ -245,6 +262,7 @@ export const Contact = () => {
                 </p>
                 <Link 
                   to="/rendez-vous"
+                  onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'contact_to_rendez_vous' })}
                   className="inline-flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-full font-medium hover:bg-light transition-colors"
                 >
                   Prendre rendez-vous
@@ -261,6 +279,7 @@ export const Contact = () => {
 
 export const Appointment = () => {
   useEffect(() => {
+    trackEvent('view_item', { item_category: 'appointment', item_id: 'booking_page' });
     // Load GoHighLevel widget script
     const script = document.createElement('script');
     script.src = 'https://link.msgsndr.com/js/form_embed.js';
@@ -354,6 +373,7 @@ export const Appointment = () => {
             <div className="mt-8 grid md:grid-cols-3 gap-4">
               <a 
                 href={CONTACT_INFO.phoneLink}
+                onClick={() => trackEvent('contact_click', { channel: 'phone', source: 'appointment_page' })}
                 className="bg-white rounded-xl p-4 shadow-ia hover:shadow-ia-hover transition-shadow flex items-center gap-4"
               >
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -366,6 +386,7 @@ export const Appointment = () => {
               </a>
               <a 
                 href={`mailto:${CONTACT_INFO.email}`}
+                onClick={() => trackEvent('contact_click', { channel: 'email', source: 'appointment_page' })}
                 className="bg-white rounded-xl p-4 shadow-ia hover:shadow-ia-hover transition-shadow flex items-center gap-4"
               >
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">

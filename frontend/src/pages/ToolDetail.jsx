@@ -8,6 +8,7 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
 import { getCalculator } from '../utils/toolCalculators';
+import { trackEvent } from '../lib/analytics';
 
 // Remove inline event handlers from HTML
 const cleanHtml = (html) => {
@@ -295,6 +296,10 @@ export const ToolDetail = () => {
 
   const handleNext = () => {
     if (!isLastStep) {
+      trackEvent('tool_step_next', {
+        tool_slug: slug,
+        step_index: currentStep + 1,
+      });
       setCurrentStep(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -302,6 +307,10 @@ export const ToolDetail = () => {
 
   const handlePrevious = () => {
     if (!isFirstStep) {
+      trackEvent('tool_step_previous', {
+        tool_slug: slug,
+        step_index: currentStep + 1,
+      });
       setCurrentStep(prev => prev - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -324,11 +333,18 @@ export const ToolDetail = () => {
       });
       if (error) throw error;
 
+      trackEvent('save_tool_result', {
+        tool_slug: slug,
+        tool_name: tool.name,
+      });
       toast.success('Résultat sauvegardé!');
       setShowSaveModal(false);
       setResultSummary('');
     } catch (error) {
       console.error('Failed to save result:', error);
+      trackEvent('save_tool_result_error', {
+        tool_slug: slug,
+      });
       toast.error('Erreur lors de la sauvegarde');
     } finally {
       setSaving(false);

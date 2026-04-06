@@ -6,6 +6,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
+import { trackEvent } from '../lib/analytics';
 
 export const Login = () => {
   const [identifier, setIdentifier] = useState('');
@@ -32,6 +33,7 @@ export const Login = () => {
     try {
       if (isEmailLogin) {
         await login(identifier, password);
+        trackEvent('login', { method: 'email_password' });
         toast.success('Connexion réussie!');
         navigate(from, { replace: true });
         return;
@@ -39,15 +41,22 @@ export const Login = () => {
 
       if (!otpSent) {
         await sendPhoneOtp(identifier);
+        trackEvent('begin_checkout', { // used as "start verification flow"
+          currency: 'CAD',
+          value: 0,
+          method: 'phone_otp_login'
+        });
         setOtpSent(true);
         toast.success('Code OTP envoyé par SMS.');
       } else {
         await verifyPhoneOtp(identifier, otp);
+        trackEvent('login', { method: 'phone_otp' });
         toast.success('Connexion réussie!');
         navigate(from, { replace: true });
       }
     } catch (error) {
       console.error('Login failed:', error);
+      trackEvent('login_error', { method: isEmailLogin ? 'email_password' : 'phone_otp' });
       toast.error(error.message || 'Erreur de connexion');
     } finally {
       setLoading(false);
@@ -221,6 +230,7 @@ export const Register = () => {
         last_name: formData.last_name.trim(),
         phone: formData.phone.trim()
       });
+      trackEvent('sign_up_start', { method: 'phone_otp' });
       setOtpStep(true);
       toast.success('Code OTP envoyé par SMS.');
     } catch (error) {
@@ -240,9 +250,11 @@ export const Register = () => {
     setLoading(true);
     try {
       await verifyPhoneOtp(formData.phone, otp);
+      trackEvent('sign_up', { method: 'phone_otp' });
       toast.success('Compte vérifié et connexion réussie!');
       navigate('/');
     } catch (error) {
+      trackEvent('sign_up_error', { method: 'phone_otp' });
       toast.error(error.message || 'Code OTP invalide');
     } finally {
       setLoading(false);

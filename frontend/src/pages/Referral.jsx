@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Gift, Users, CheckCircle2, ArrowRight, Trophy, Star, Sparkles, Heart, MessageSquare, UserCheck, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { trackEvent } from '../lib/analytics';
 
 export const Referral = () => {
   const { user } = useAuth();
@@ -196,6 +197,7 @@ export const Referral = () => {
               {user ? (
                 <Link 
                   to="/profil" 
+                  onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_hero_profile' })}
                   className="bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-light transition-all inline-flex items-center justify-center gap-2"
                   data-testid="referral-cta-profile"
                 >
@@ -206,6 +208,7 @@ export const Referral = () => {
                 <>
                   <Link 
                     to="/inscription" 
+                    onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_hero_register' })}
                     className="bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-light transition-all inline-flex items-center justify-center gap-2"
                     data-testid="referral-cta-register"
                   >
@@ -214,6 +217,7 @@ export const Referral = () => {
                   </Link>
                   <Link 
                     to="/connexion" 
+                    onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_hero_login' })}
                     className="border-2 border-white text-white rounded-full px-8 py-4 font-semibold hover:bg-white/10 transition-all inline-flex items-center justify-center"
                     data-testid="referral-cta-login"
                   >
@@ -487,6 +491,7 @@ export const Referral = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
                 to={user ? "/profil" : "/inscription"}
+                onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: user ? 'referral_final_profile' : 'referral_final_register' })}
                 className="bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-light transition-all inline-flex items-center justify-center gap-2"
               >
                 {user ? 'Voir mes points' : 'Créer mon compte'}
