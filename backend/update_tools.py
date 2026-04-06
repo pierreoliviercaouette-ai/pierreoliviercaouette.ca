@@ -8,13 +8,13 @@ from motor.motor_asyncio import AsyncIOMotorClient
 TOOLS_DATA = [
     {
         "slug": "simulateur-reer",
-        "name": "Simulateur REER Québec 2024",
+        "name": "Simulateur REER Québec 2026",
         "description": "Calculez votre économie d'impôt avec les taux fédéraux et provinciaux actuels",
         "icon": "📊",
         "tags": ["REER", "Impôt", "Épargne", "Retraite"],
         "html_content": '''
 <div class="intro-box">
-    <h2>Simulateur REER Québec 2024</h2>
+    <h2>Simulateur REER Québec 2026</h2>
     <p>Calculez précisément votre économie d'impôt selon les tables d'imposition fédérale et québécoise en vigueur, incluant l'abattement du Québec de 16.5%.</p>
 </div>
 
@@ -30,7 +30,7 @@ TOOLS_DATA = [
             <div class="form-group">
                 <label for="cotisation">Cotisation REER prévue ($)</label>
                 <input type="number" id="cotisation" placeholder="10000">
-                <small>Max 18% du revenu ou <span id="droits_max">0 $</span> (2024)</small>
+                <small>Max 18% du revenu ou <span id="droits_max">0 $</span> (2026)</small>
             </div>
         </div>
         <div class="form-row">
@@ -213,13 +213,13 @@ TOOLS_DATA = [
     },
     {
         "slug": "simulateur-reee",
-        "name": "Simulateur REEE Québec 2024",
+        "name": "Simulateur REEE Québec 2026",
         "description": "Maximisez les subventions SCEE et IQEE pour l'éducation de vos enfants",
         "icon": "🎓",
         "tags": ["REEE", "Éducation", "Subventions", "SCEE", "IQEE"],
         "html_content": '''
 <div class="intro-box">
-    <h2>Simulateur REEE Québec 2024</h2>
+    <h2>Simulateur REEE Québec 2026</h2>
     <p>Calculez les subventions fédérales (SCEE) et québécoises (IQEE) auxquelles vous avez droit. Les familles à revenu modeste peuvent recevoir jusqu'à 60% de bonification!</p>
 </div>
 

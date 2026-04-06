@@ -1,31 +1,16 @@
 // Comprehensive Financial Tool Calculators for Quebec
-// All tax rates are based on 2024 Quebec and Federal rates
+// Fiscal constants are centralized in fiscalConfig2026.js
+import { INCOME_TAX_2026, REEE_2026, REER_2026 } from './fiscalConfig2026';
 
 // =============================================================================
 // TAX RATE TABLES - QUEBEC 2024
 // =============================================================================
 
-// Federal tax brackets 2024
-const FEDERAL_BRACKETS = [
-  { min: 0, max: 55867, rate: 0.15 },
-  { min: 55867, max: 111733, rate: 0.205 },
-  { min: 111733, max: 173205, rate: 0.26 },
-  { min: 173205, max: 246752, rate: 0.29 },
-  { min: 246752, max: Infinity, rate: 0.33 }
-];
+const FEDERAL_BRACKETS = INCOME_TAX_2026.federalBrackets;
+const QUEBEC_BRACKETS = INCOME_TAX_2026.quebecBrackets;
+const QUEBEC_ABATEMENT = INCOME_TAX_2026.quebecAbatement;
 
-// Quebec tax brackets 2024
-const QUEBEC_BRACKETS = [
-  { min: 0, max: 51780, rate: 0.14 },
-  { min: 51780, max: 103545, rate: 0.19 },
-  { min: 103545, max: 126000, rate: 0.24 },
-  { min: 126000, max: Infinity, rate: 0.2575 }
-];
-
-// Quebec abatement on federal tax
-const QUEBEC_ABATEMENT = 0.165;
-
-// SCHL premium rates based on down payment percentage
+// SCHL premium rates by loan-to-value ratio (insured mortgages).
 const SCHL_RATES = [
   { minLTV: 0.95, maxLTV: 1.00, rate: 0.04 },
   { minLTV: 0.90, maxLTV: 0.95, rate: 0.031 },
@@ -33,6 +18,8 @@ const SCHL_RATES = [
   { minLTV: 0.80, maxLTV: 0.85, rate: 0.024 },
   { minLTV: 0, maxLTV: 0.80, rate: 0 }
 ];
+
+const MAX_INSURABLE_PROPERTY_VALUE = 1500000;
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -96,12 +83,24 @@ const calculateQuebecTax = (income) => {
 // Calculate SCHL premium
 const calculateSCHLPremium = (loanAmount, propertyValue) => {
   const ltv = loanAmount / propertyValue;
-  for (const rate of SCHL_RATES) {
-    if (ltv > rate.minLTV && ltv <= rate.maxLTV) {
-      return loanAmount * rate.rate;
-    }
+  // Boundary-safe mapping so 95% and 90% LTV are handled correctly.
+  if (ltv >= 0.95) return loanAmount * 0.04;
+  if (ltv >= 0.90) return loanAmount * 0.031;
+  if (ltv >= 0.85) return loanAmount * 0.028;
+  if (ltv > 0.80) return loanAmount * 0.024;
+  for (const rate of SCHL_RATES) { // fallback to table for future edits
+    if (ltv >= rate.minLTV && ltv <= rate.maxLTV) return loanAmount * rate.rate;
   }
   return 0;
+};
+
+const calculateMinimumDownPayment = (propertyValue) => {
+  if (propertyValue <= 0) return 0;
+  if (propertyValue <= 500000) return propertyValue * 0.05;
+  if (propertyValue <= MAX_INSURABLE_PROPERTY_VALUE) {
+    return 500000 * 0.05 + (propertyValue - 500000) * 0.10;
+  }
+  return propertyValue * 0.20;
 };
 
 // Future value calculation
@@ -266,8 +265,8 @@ export const calculateREER = (values) => {
   const situation = values['situation'] || 'celibataire';
   const enfants = parseInt(values['enfants']) || 0;
   
-  // Calcul des droits de cotisation max (18% du revenu, max 31 560$ pour 2024)
-  const droitsMax = Math.min(revenuBrut * 0.18, 31560);
+  // Calcul des droits de cotisation max (18% du revenu, plafonné selon année fiscale)
+  const droitsMax = Math.min(revenuBrut * REER_2026.contributionRate, REER_2026.deductionLimitMax);
   
   // Taux marginaux
   const tauxFederal = getFederalMarginalRate(revenuBrut);
@@ -452,7 +451,7 @@ export const calculateREEE = (values) => {
   const cotisation = get('cotisation');
   const nbEnfants = parseInt(values['nb_enfants']) || 1;
   const revenuFamilial = get('revenu');
-  const droitsAccumules = get('droits_inutilises') || 0;
+  const droitsAccumules = Math.max(0, get('droits_inutilises') || 0);
   
   const cotisationParEnfant = cotisation / nbEnfants;
   
@@ -460,16 +459,16 @@ export const calculateREEE = (values) => {
   // SCEE (Subvention canadienne pour l'épargne-études)
   // ===================
   // Base: 20% sur premiers 2 500$ par enfant (max 500$/an/enfant, max vie 7 200$)
-  const sceeBase = Math.min(cotisationParEnfant, 2500) * 0.20 * nbEnfants;
+  const sceeBase = Math.min(cotisationParEnfant, REEE_2026.cesg.annualContributionCapPerChild) * REEE_2026.cesg.baseRate * nbEnfants;
   
   // Supplément SCEE selon revenu familial
   let sceeSupp = 0;
-  if (revenuFamilial > 0 && revenuFamilial <= 55867) {
+  if (revenuFamilial > 0 && revenuFamilial <= REEE_2026.cesg.additionalLowIncomeThreshold) {
     // 20% additionnel sur premiers 500$
-    sceeSupp = Math.min(cotisationParEnfant, 500) * 0.20 * nbEnfants;
-  } else if (revenuFamilial <= 111733) {
+    sceeSupp = Math.min(cotisationParEnfant, REEE_2026.cesg.additionalContributionBasePerChild) * REEE_2026.cesg.additionalLowIncomeRate * nbEnfants;
+  } else if (revenuFamilial <= REEE_2026.cesg.additionalMidIncomeThreshold) {
     // 10% additionnel sur premiers 500$
-    sceeSupp = Math.min(cotisationParEnfant, 500) * 0.10 * nbEnfants;
+    sceeSupp = Math.min(cotisationParEnfant, REEE_2026.cesg.additionalContributionBasePerChild) * REEE_2026.cesg.additionalMidIncomeRate * nbEnfants;
   }
   
   const sceeTotal = sceeBase + sceeSupp;
@@ -478,16 +477,16 @@ export const calculateREEE = (values) => {
   // IQEE (Incitatif québécois à l'épargne-études)
   // ===================
   // Base: 10% sur premiers 2 500$ par enfant (max 250$/an/enfant, max vie 3 600$)
-  const iqeeBase = Math.min(cotisationParEnfant, 2500) * 0.10 * nbEnfants;
+  const iqeeBase = Math.min(cotisationParEnfant, REEE_2026.iqee.annualContributionCapPerChild) * REEE_2026.iqee.baseRate * nbEnfants;
   
   // Supplément IQEE selon revenu familial
   let iqeeSupp = 0;
-  if (revenuFamilial > 0 && revenuFamilial <= 48535) {
+  if (revenuFamilial > 0 && revenuFamilial <= REEE_2026.iqee.additionalLowIncomeThreshold) {
     // 10% additionnel sur premiers 500$
-    iqeeSupp = Math.min(cotisationParEnfant, 500) * 0.10 * nbEnfants;
-  } else if (revenuFamilial <= 97070) {
+    iqeeSupp = Math.min(cotisationParEnfant, REEE_2026.iqee.additionalContributionBasePerChild) * REEE_2026.iqee.additionalLowIncomeRate * nbEnfants;
+  } else if (revenuFamilial <= REEE_2026.iqee.additionalMidIncomeThreshold) {
     // 5% additionnel sur premiers 500$
-    iqeeSupp = Math.min(cotisationParEnfant, 500) * 0.05 * nbEnfants;
+    iqeeSupp = Math.min(cotisationParEnfant, REEE_2026.iqee.additionalContributionBasePerChild) * REEE_2026.iqee.additionalMidIncomeRate * nbEnfants;
   }
   
   const iqeeTotal = iqeeBase + iqeeSupp;
@@ -496,13 +495,21 @@ export const calculateREEE = (values) => {
   // BEC (Bon d'études canadien) - familles à faible revenu seulement
   // ===================
   let bec = 0;
-  if (revenuFamilial > 0 && revenuFamilial <= 55867) {
+  if (revenuFamilial > 0 && revenuFamilial <= REEE_2026.bec.estimatedEligibilityThreshold) {
     // 100$ par enfant admissible par an (max 2 000$ vie)
-    bec = 100 * nbEnfants;
+    bec = REEE_2026.bec.annualAmountPerChild * nbEnfants;
   }
+  // Simplified rattrapage model: only one extra year of grant room can be used annually.
+  const rattrapageEligibleParEnfant = Math.min(
+    droitsAccumules / nbEnfants,
+    REEE_2026.cesg.annualContributionCapPerChild
+  );
+  const cotisationRattrapage = Math.max(0, Math.min(cotisationParEnfant - REEE_2026.cesg.annualContributionCapPerChild, rattrapageEligibleParEnfant));
+  const sceeRattrapage = cotisationRattrapage * REEE_2026.cesg.baseRate * nbEnfants;
+  const iqeeRattrapage = cotisationRattrapage * REEE_2026.iqee.baseRate * nbEnfants;
   
   // Total des subventions
-  const totalSubventions = sceeTotal + iqeeTotal + bec;
+  const totalSubventions = sceeTotal + iqeeTotal + sceeRattrapage + iqeeRattrapage + bec;
   
   // Rendement des subventions
   const rendementSubventions = cotisation > 0 ? (totalSubventions / cotisation * 100) : 0;
@@ -545,13 +552,15 @@ export const calculateREEE = (values) => {
   
   return {
     // Subventions
-    scee: sceeTotal,
+    scee: sceeTotal + sceeRattrapage,
     scee_base: sceeBase,
     scee_bonus: sceeSupp,
-    iqee: iqeeTotal,
+    iqee: iqeeTotal + iqeeRattrapage,
     iqee_base: iqeeBase,
     iqee_bonus: iqeeSupp,
     bec: bec,
+    scee_rattrapage: sceeRattrapage,
+    iqee_rattrapage: iqeeRattrapage,
     total_sub: totalSubventions,
     rendement_sub: rendementSubventions.toFixed(1),
     
@@ -797,12 +806,16 @@ export const calculateHypotheque = (values) => {
   const montantPret = prixPropriete - miseDeFonds;
   const ratioMiseDeFonds = prixPropriete > 0 ? (miseDeFonds / prixPropriete) : 0;
   const ratioLTV = 1 - ratioMiseDeFonds;
+  const miseMinimum = calculateMinimumDownPayment(prixPropriete);
+  const respecteMiseMinimum = miseDeFonds >= miseMinimum;
+  const proprieteAssurable = prixPropriete > 0 && prixPropriete <= MAX_INSURABLE_PROPERTY_VALUE;
+  const estPretAssurable = ratioMiseDeFonds >= 0.05 && ratioMiseDeFonds < 0.20 && proprieteAssurable && respecteMiseMinimum;
   
   // Prime SCHL
   let primeSCHL = 0;
-  const doitPayerSCHL = inclureSCHL === 'oui' || (inclureSCHL === 'auto' && ratioMiseDeFonds < 0.20);
-  
-  if (doitPayerSCHL && ratioMiseDeFonds < 0.20 && montantPret > 0) {
+  const doitPayerSCHL = inclureSCHL === 'oui' || (inclureSCHL === 'auto' && estPretAssurable);
+
+  if (doitPayerSCHL && estPretAssurable && montantPret > 0) {
     primeSCHL = calculateSCHLPremium(montantPret, prixPropriete);
   }
   
@@ -854,10 +867,14 @@ export const calculateHypotheque = (values) => {
   
   // Conseil
   let conseil = '';
-  if (ratioMiseDeFonds < 0.05) {
-    conseil = '⚠️ Une mise de fonds minimale de 5% est requise. Augmentez votre mise de fonds.';
+  if (!respecteMiseMinimum) {
+    conseil = `⚠️ Mise de fonds insuffisante. Minimum estimé: ${Math.round(miseMinimum).toLocaleString()} $.`;
+  } else if (prixPropriete > MAX_INSURABLE_PROPERTY_VALUE && ratioMiseDeFonds < 0.20) {
+    conseil = '⚠️ Pour une propriété au-dessus de 1 500 000 $, une mise de fonds minimale de 20% est requise (non assurable SCHL).';
+  } else if (inclureSCHL === 'non' && ratioMiseDeFonds < 0.20) {
+    conseil = '⚠️ Avec moins de 20% de mise de fonds, l’assurance prêt hypothécaire est normalement requise.';
   } else if (ratioMiseDeFonds < 0.20) {
-    conseil = `💡 Avec ${(ratioMiseDeFonds*100).toFixed(0)}% de mise de fonds, vous payez ${Math.round(primeSCHL).toLocaleString()} $ de prime SCHL. À 20%, vous l'évitez.`;
+    conseil = `💡 Avec ${(ratioMiseDeFonds*100).toFixed(1)}% de mise de fonds, prime estimée: ${Math.round(primeSCHL).toLocaleString()} $. À 20%, vous l'évitez.`;
   } else {
     conseil = `✨ Excellente mise de fonds de ${(ratioMiseDeFonds*100).toFixed(0)}%! Vous évitez la prime SCHL et obtenez un meilleur taux.`;
   }
@@ -871,6 +888,7 @@ export const calculateHypotheque = (values) => {
     montant_pret: montantTotalPret,
     pret_base: montantPret,
     prime_schl: primeSCHL,
+    mise_min: miseMinimum,
     mise_pct: (ratioMiseDeFonds * 100).toFixed(0) + '%',
     
     // Coûts totaux
