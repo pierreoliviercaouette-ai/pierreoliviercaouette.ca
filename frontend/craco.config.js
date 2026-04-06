@@ -47,6 +47,10 @@ const webpackConfig = {
       '@': path.resolve(__dirname, 'src'),
     },
     configure: (webpackConfig) => {
+      // Speed up CI/production builds: skip source map generation.
+      if (process.env.NODE_ENV === "production") {
+        webpackConfig.devtool = false;
+      }
 
       // Add ignored patterns to reduce watched directories
         webpackConfig.watchOptions = {

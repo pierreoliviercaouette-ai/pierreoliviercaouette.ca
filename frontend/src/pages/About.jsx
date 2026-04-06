@@ -179,7 +179,7 @@ export const About = () => {
                 <img
                   src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/677aabaf6e3c7422d41c91c5.png"
                   alt="Pierre-Olivier parcours"
-                  className="w-full h-[500px] object-cover object-center"
+                  className="w-full h-[500px] object-cover object-[50%_18%]"
                 />
                 
                 {/* Overlay text */}
