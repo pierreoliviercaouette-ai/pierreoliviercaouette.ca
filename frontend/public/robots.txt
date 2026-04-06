@@ -7,5 +7,6 @@ Disallow: /connexion
 Disallow: /inscription
 Disallow: /profil
 Disallow: /admin
+Disallow: /outils/
 
 Sitemap: https://www.pierreoliviercaouette.ca/sitemap.xml
