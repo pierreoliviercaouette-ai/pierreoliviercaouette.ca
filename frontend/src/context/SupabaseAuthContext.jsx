@@ -3,6 +3,32 @@ import { supabase } from '../lib/supabaseClient';
 
 const SupabaseAuthContext = createContext(null);
 
+function normalizePhoneForAuth(value) {
+  const raw = (value || '').trim();
+  if (!raw) return '';
+
+  const hasPlus = raw.startsWith('+');
+  const digits = raw.replace(/\D/g, '');
+
+  // If already in international style with "+", preserve and clean digits.
+  if (hasPlus && digits.length >= 10) {
+    return `+${digits}`;
+  }
+
+  // Canada/US local style: 10 digits -> prepend +1
+  if (digits.length === 10) {
+    return `+1${digits}`;
+  }
+
+  // 11 digits starting by 1 -> prepend +
+  if (digits.length === 11 && digits.startsWith('1')) {
+    return `+${digits}`;
+  }
+
+  // Fallback: return as-is (Supabase will validate and return explicit error).
+  return raw;
+}
+
 /** Profil + session → même forme que l’ancien AuthContext (Mongo / API). */
 function mapSessionToAppUser(sessionUser, profile) {
   const meta = sessionUser?.user_metadata || {};
@@ -136,7 +162,9 @@ export const SupabaseAuthProvider = ({ children }) => {
   const login = async (identifier, password) => {
     const value = (identifier || '').trim();
     const isEmail = value.includes('@');
-    const credentials = isEmail ? { email: value, password } : { phone: value, password };
+    const credentials = isEmail
+      ? { email: value, password }
+      : { phone: normalizePhoneForAuth(value), password };
     const { data, error } = await supabase.auth.signInWithPassword(credentials);
     if (error) throw error;
     await fetchUser();
@@ -146,7 +174,7 @@ export const SupabaseAuthProvider = ({ children }) => {
   const register = async (userData) => {
     const { email, phone, password, first_name, last_name } = userData;
     const normalizedEmail = (email || '').trim();
-    const normalizedPhone = (phone || '').trim();
+    const normalizedPhone = normalizePhoneForAuth(phone);
 
     const signUpPayload = normalizedPhone
       ? {

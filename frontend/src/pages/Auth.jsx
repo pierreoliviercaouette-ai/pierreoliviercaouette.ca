@@ -58,7 +58,7 @@ export const Login = () => {
                 type="text"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="vous@exemple.com ou +1 514 123-4567"
+                placeholder="vous@exemple.com ou 8198061164"
                 required
                 data-testid="login-email"
               />
@@ -261,7 +261,7 @@ export const Register = () => {
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="+1 514 123-4567"
+                placeholder="8198061164"
                 data-testid="register-phone"
               />
             </div>
