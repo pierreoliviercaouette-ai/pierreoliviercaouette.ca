@@ -178,8 +178,13 @@ export const Register = () => {
         phone: formData.phone.trim() || null,
         password: formData.password
       });
-      toast.success('Compte créé avec succès!');
-      navigate('/');
+      if (hasPhone) {
+        toast.success('Compte créé. Vérifiez votre SMS pour le code OTP.');
+        navigate('/connexion');
+      } else {
+        toast.success('Compte créé. Vérifiez votre courriel pour confirmer votre compte.');
+        navigate('/connexion');
+      }
     } catch (error) {
       console.error('Registration failed:', error);
       toast.error(error.message || 'Erreur lors de l\'inscription');

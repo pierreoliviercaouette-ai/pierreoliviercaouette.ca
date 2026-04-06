@@ -204,10 +204,20 @@ export const SupabaseAuthProvider = ({ children }) => {
 
     const { data, error } = await supabase.auth.signUp(signUpPayload);
     if (error) throw error;
-    
-    // If not using email confirmations or if user inserts into profiles automatically via trigger:
+
+    // If Supabase auto-creates a session (phone/email confirm disabled),
+    // force sign-out so UX remains "verify first" for registration.
+    if (data?.session) {
+      await supabase.auth.signOut();
+      setUser(null);
+      setToken(null);
+    }
+
     await fetchUser();
-    return data.user;
+    return {
+      user: data?.user || null,
+      session: data?.session || null,
+    };
   };
 
   const logout = async () => {
