@@ -171,6 +171,31 @@ export const SupabaseAuthProvider = ({ children }) => {
     return data.user;
   };
 
+  const sendPhoneOtp = async (phone, metadata = null) => {
+    const normalizedPhone = normalizePhoneForAuth(phone);
+    const payload = {
+      phone: normalizedPhone,
+    };
+    if (metadata) {
+      payload.options = { data: metadata };
+    }
+    const { data, error } = await supabase.auth.signInWithOtp(payload);
+    if (error) throw error;
+    return { data, phone: normalizedPhone };
+  };
+
+  const verifyPhoneOtp = async (phone, token) => {
+    const normalizedPhone = normalizePhoneForAuth(phone);
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone: normalizedPhone,
+      token: (token || '').trim(),
+      type: 'sms',
+    });
+    if (error) throw error;
+    await fetchUser();
+    return data?.session;
+  };
+
   const register = async (userData) => {
     const { email, phone, password, first_name, last_name } = userData;
     const normalizedEmail = (email || '').trim();
@@ -269,6 +294,8 @@ export const SupabaseAuthProvider = ({ children }) => {
     notifications,
     unreadCount,
     login,
+    sendPhoneOtp,
+    verifyPhoneOtp,
     register,
     logout,
     getAuthHeaders, // Kept for legacy compatibility

@@ -10,22 +10,42 @@ import { toast } from 'sonner';
 export const Login = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, sendPhoneOtp, verifyPhoneOtp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/';
+  const isEmailLogin = identifier.includes('@');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!identifier.trim()) {
+      toast.error('Entrez un courriel ou un numéro de téléphone');
+      return;
+    }
     setLoading(true);
 
     try {
-      await login(identifier, password);
-      toast.success('Connexion réussie!');
-      navigate(from, { replace: true });
+      if (isEmailLogin) {
+        await login(identifier, password);
+        toast.success('Connexion réussie!');
+        navigate(from, { replace: true });
+        return;
+      }
+
+      if (!otpSent) {
+        await sendPhoneOtp(identifier);
+        setOtpSent(true);
+        toast.success('Code OTP envoyé par SMS.');
+      } else {
+        await verifyPhoneOtp(identifier, otp);
+        toast.success('Connexion réussie!');
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error('Login failed:', error);
       toast.error(error.message || 'Erreur de connexion');
@@ -64,27 +84,61 @@ export const Login = () => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="password">Mot de passe</Label>
-              <div className="relative">
+            {isEmailLogin ? (
+              <div>
+                <Label htmlFor="password">Mot de passe</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    data-testid="login-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-prestige-taupe hover:text-dark"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+            ) : otpSent ? (
+              <div>
+                <Label htmlFor="otp">Code OTP reçu par SMS</Label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  id="otp"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                  placeholder="123456"
                   required
-                  data-testid="login-password"
+                  data-testid="login-otp"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-prestige-taupe hover:text-dark"
+                  className="mt-2 text-sm text-primary hover:underline"
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      await sendPhoneOtp(identifier);
+                      toast.success('Nouveau code OTP envoyé.');
+                    } catch (error) {
+                      toast.error(error.message || 'Erreur lors du renvoi');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  Renvoyer le code
                 </button>
               </div>
-            </div>
+            ) : null}
 
             <Button 
               type="submit" 
@@ -92,7 +146,13 @@ export const Login = () => {
               className="w-full btn-primary"
               data-testid="login-submit"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading
+                ? 'Chargement...'
+                : isEmailLogin
+                  ? 'Se connecter'
+                  : otpSent
+                    ? 'Vérifier le code'
+                    : 'Recevoir un code OTP'}
             </Button>
           </form>
 
@@ -131,14 +191,12 @@ export const Register = () => {
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
-    email: '',
     phone: '',
-    password: '',
-    confirmPassword: ''
   });
-  const [showPassword, setShowPassword] = useState(false);
+  const [otpStep, setOtpStep] = useState(false);
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { sendPhoneOtp, verifyPhoneOtp } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -150,44 +208,42 @@ export const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast.error('Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
-
-    const hasEmail = !!formData.email.trim();
-    const hasPhone = !!formData.phone.trim();
-    if (!hasEmail && !hasPhone) {
-      toast.error('Entrez au moins un courriel ou un numéro de téléphone');
+    if (!formData.phone.trim()) {
+      toast.error('Entrez un numéro de téléphone');
       return;
     }
 
     setLoading(true);
 
     try {
-      await register({
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email.trim() || null,
-        phone: formData.phone.trim() || null,
-        password: formData.password
+      await sendPhoneOtp(formData.phone, {
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        phone: formData.phone.trim()
       });
-      if (hasPhone) {
-        toast.success('Compte créé. Vérifiez votre SMS pour le code OTP.');
-        navigate('/connexion');
-      } else {
-        toast.success('Compte créé. Vérifiez votre courriel pour confirmer votre compte.');
-        navigate('/connexion');
-      }
+      setOtpStep(true);
+      toast.success('Code OTP envoyé par SMS.');
     } catch (error) {
       console.error('Registration failed:', error);
       toast.error(error.message || 'Erreur lors de l\'inscription');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otp.trim()) {
+      toast.error('Entrez le code OTP');
+      return;
+    }
+    setLoading(true);
+    try {
+      await verifyPhoneOtp(formData.phone, otp);
+      toast.success('Compte vérifié et connexion réussie!');
+      navigate('/');
+    } catch (error) {
+      toast.error(error.message || 'Code OTP invalide');
     } finally {
       setLoading(false);
     }
@@ -209,114 +265,104 @@ export const Register = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          {!otpStep ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="first_name">Prénom</Label>
+                  <Input
+                    id="first_name"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleChange}
+                    placeholder="Jean"
+                    required
+                    data-testid="register-firstname"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="last_name">Nom</Label>
+                  <Input
+                    id="last_name"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleChange}
+                    placeholder="Tremblay"
+                    required
+                    data-testid="register-lastname"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-light border border-prestige-beige px-3 py-2">
+                <p className="text-xs text-prestige-taupe">
+                  Inscription par téléphone avec code OTP SMS (sans mot de passe).
+                </p>
+              </div>
+
               <div>
-                <Label htmlFor="first_name">Prénom</Label>
+                <Label htmlFor="phone">Numéro de téléphone</Label>
                 <Input
-                  id="first_name"
-                  name="first_name"
-                  value={formData.first_name}
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Jean"
+                  placeholder="8198061164"
                   required
-                  data-testid="register-firstname"
+                  data-testid="register-phone"
                 />
               </div>
+
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="w-full btn-primary"
+                data-testid="register-submit"
+              >
+                {loading ? 'Envoi du code...' : 'Recevoir le code OTP'}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div className="rounded-lg bg-light border border-prestige-beige px-3 py-2">
+                <p className="text-xs text-prestige-taupe">
+                  Un code a été envoyé au <strong>{formData.phone}</strong>.
+                </p>
+              </div>
               <div>
-                <Label htmlFor="last_name">Nom</Label>
+                <Label htmlFor="otp">Code OTP (6 chiffres)</Label>
                 <Input
-                  id="last_name"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  placeholder="Tremblay"
+                  id="otp"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                  placeholder="123456"
                   required
-                  data-testid="register-lastname"
+                  data-testid="register-otp"
                 />
               </div>
-            </div>
-
-            <div className="rounded-lg bg-light border border-prestige-beige px-3 py-2">
-              <p className="text-xs text-prestige-taupe">
-                Choisissez votre mode d&apos;inscription: <strong>courriel</strong> ou <strong>téléphone</strong>.
-                <br />
-                <strong>Au moins un des deux</strong> est requis.
-              </p>
-            </div>
-
-            <div>
-              <Label htmlFor="email">Adresse courriel (optionnel)</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="vous@exemple.com"
-                data-testid="register-email"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="phone">Numéro de téléphone (optionnel)</Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="8198061164"
-                data-testid="register-phone"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="password">Mot de passe</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Minimum 6 caractères"
-                  required
-                  data-testid="register-password"
-                />
-                <button
+              <div className="flex gap-3">
+                <Button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-prestige-taupe hover:text-dark"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setOtpStep(false)}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+                  Modifier le numéro
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? 'Vérification...' : 'Vérifier le code'}
+                </Button>
               </div>
-            </div>
-
-            <div>
-              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                data-testid="register-confirm-password"
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="w-full btn-primary"
-              data-testid="register-submit"
-            >
-              {loading ? 'Création...' : 'Créer mon compte'}
-            </Button>
-          </form>
+            </form>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-prestige-taupe">
