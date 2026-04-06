@@ -48,13 +48,13 @@ export const Referral = () => {
     },
     {
       threshold: 100,
-      reward: 'Coffret VIP',
-      name: 'VIP',
+      reward: 'Coffret Privilège',
+      name: 'Privilège',
       icon: Crown,
       color: 'text-purple-600',
       bg: 'bg-purple-100',
       gradient: 'from-purple-600 to-purple-400',
-      description: 'Coffret Cadeau VIP exclusif'
+      description: 'Coffret Privilège exclusif'
     }
   ];
 
@@ -96,7 +96,7 @@ export const Referral = () => {
     {
       icon: Users,
       title: 'Paliers cumulatifs',
-      description: 'Les niveaux s\'additionnent: à 100 points, les avantages cumulés peuvent atteindre 425$ + un coffret VIP.'
+      description: 'Les niveaux s\'additionnent: à 100 points, les avantages cumulés peuvent atteindre 425$ + un coffret Privilège.'
     },
     {
       icon: Sparkles,
@@ -135,7 +135,7 @@ export const Referral = () => {
     },
     {
       question: 'Les paliers sont-ils cumulatifs?',
-      answer: 'Oui. À 100 points, les avantages cumulés incluent 25$ + 50$ + 100$ + 250$ + coffret VIP = 425$ en cartes-cadeaux, plus le coffret.'
+      answer: 'Oui. À 100 points, les avantages cumulés incluent 25$ + 50$ + 100$ + 250$ + coffret Privilège = 425$ en cartes-cadeaux, plus le coffret.'
     },
     {
       question: 'Comment laisser un avis Google?',
@@ -154,15 +154,15 @@ export const Referral = () => {
       answer: 'Non. Votre role est uniquement de mettre en relation. Vous ne devez pas fournir de conseils ni presenter des produits financiers.'
     },
     {
-      question: 'Les récompenses sont-elles liées à une vente?',
-      answer: 'Non. Les points sont attribues pour la mise en relation, independamment des suites donnees ou d’une transaction.'
+      question: 'Les points dépendent-ils d’une vente?',
+      answer: 'Non. Les points sont attribués pour la mise en relation, peu importe qu’une transaction ait lieu ou non.'
     }
   ];
 
   // Calculate cumulative rewards
   const cumulativeReward = tiers.reduce((acc, tier, index) => {
     const previousTotal = index > 0 ? acc[index - 1].total : 0;
-    const currentValue = tier.name === 'VIP' ? 0 : parseInt(tier.reward.replace(' $', '').replace(',', ''));
+    const currentValue = tier.name === 'Privilège' ? 0 : parseInt(tier.reward.replace(' $', '').replace(',', ''));
     return [...acc, { total: previousTotal + currentValue, tier: tier.name }];
   }, []);
 
@@ -189,7 +189,7 @@ export const Referral = () => {
             
             <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-8">
               3 facons de recevoir des points de remerciement. 5 paliers de reconnaissance.
-              Jusqu'a 425$ en cartes-cadeaux + un coffret VIP.
+              Jusqu'a 425$ en cartes-cadeaux + un coffret Privilège.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -268,7 +268,7 @@ export const Referral = () => {
           </div>
           <div className="mt-8 max-w-3xl mx-auto bg-blue-50 border border-blue-200 rounded-xl p-4 md:p-5">
             <p className="text-sm md:text-base text-dark">
-              Les points sont attribues pour une mise en relation valide ou une interaction reconnue (ex. avis). Aucune souscription ou achat de produit financier n’est requis.
+              Les points sont attribués pour une mise en relation valide uniquement, sans obligation de souscription.
             </p>
           </div>
         </div>
@@ -331,7 +331,7 @@ export const Referral = () => {
           </div>
           <div className="mt-4 text-center bg-white/70 border border-prestige-beige rounded-xl p-5 max-w-3xl mx-auto">
             <p className="text-dark text-sm md:text-base">
-              Les recompenses sont offertes independamment de toute decision financiere ou conclusion de contrat.
+              Les récompenses ne sont en aucun cas liées à la conclusion d’un contrat ou à l’achat d’un produit financier.
             </p>
           </div>
         </div>
@@ -461,6 +461,9 @@ export const Referral = () => {
               </p>
               <p>
                 Une compensation peut etre versee pour certaines mises en relation.
+              </p>
+              <p>
+                Les récompenses sont indépendantes de toute décision financière prise par la personne référée.
               </p>
             </div>
           </div>
