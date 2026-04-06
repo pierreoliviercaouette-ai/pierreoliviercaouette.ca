@@ -69,7 +69,7 @@ export const Navbar = () => {
               data-testid="nav-referral-cta"
             >
               <Gift className="w-4 h-4 text-primary" />
-              <span className="font-medium text-primary text-sm">Référez & Gagnez</span>
+              <span className="font-medium text-primary text-sm">Recommandations</span>
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-secondary rounded-full animate-pulse" />
             </Link>
 
@@ -229,7 +229,7 @@ export const Navbar = () => {
                 className="flex items-center gap-2 py-2 font-medium text-primary"
               >
                 <Gift className="w-5 h-5" />
-                Référez & Gagnez
+                Recommandations
               </Link>
               
               <div className="pt-4 border-t border-prestige-beige space-y-3">
