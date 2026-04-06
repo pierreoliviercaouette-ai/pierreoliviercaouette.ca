@@ -16,7 +16,8 @@ function mapSessionToAppUser(sessionUser, profile) {
 
   return {
     id: sessionUser.id,
-    email: sessionUser.email || profile?.email || '',
+    // Keep `email` key for legacy UI; fallback to phone for phone-based auth.
+    email: sessionUser.email || profile?.email || sessionUser.phone || profile?.phone || '',
     first_name: firstName || '—',
     last_name: lastName || '—',
     phone: profile?.phone ?? meta.phone ?? null,
@@ -132,17 +133,20 @@ export const SupabaseAuthProvider = ({ children }) => {
     }
   }, [user, fetchNotifications]);
 
-  const login = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const login = async (identifier, password) => {
+    const value = (identifier || '').trim();
+    const isEmail = value.includes('@');
+    const credentials = isEmail ? { email: value, password } : { phone: value, password };
+    const { data, error } = await supabase.auth.signInWithPassword(credentials);
     if (error) throw error;
     await fetchUser();
     return data.user;
   };
 
   const register = async (userData) => {
-    const { email, password, first_name, last_name, phone } = userData;
+    const { phone, password, first_name, last_name } = userData;
     const { data, error } = await supabase.auth.signUp({
-      email,
+      phone,
       password,
       options: {
         data: {

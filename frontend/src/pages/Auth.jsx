@@ -8,7 +8,7 @@ import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 
 export const Login = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export const Login = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(identifier, password);
       toast.success('Connexion réussie!');
       navigate(from, { replace: true });
     } catch (error) {
@@ -52,13 +52,13 @@ export const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <Label htmlFor="email">Adresse courriel</Label>
+              <Label htmlFor="identifier">Courriel ou numéro de téléphone</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="vous@exemple.com"
+                id="identifier"
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="vous@exemple.com ou +1 514 123-4567"
                 required
                 data-testid="login-email"
               />
@@ -131,7 +131,6 @@ export const Register = () => {
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
-    email: '',
     phone: '',
     password: '',
     confirmPassword: ''
@@ -167,8 +166,7 @@ export const Register = () => {
       await register({
         first_name: formData.first_name,
         last_name: formData.last_name,
-        email: formData.email,
-        phone: formData.phone || null,
+        phone: formData.phone,
         password: formData.password
       });
       toast.success('Compte créé avec succès!');
@@ -226,28 +224,15 @@ export const Register = () => {
             </div>
 
             <div>
-              <Label htmlFor="email">Adresse courriel</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="vous@exemple.com"
-                required
-                data-testid="register-email"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="phone">Téléphone (optionnel)</Label>
+              <Label htmlFor="phone">Numéro de téléphone</Label>
               <Input
                 id="phone"
                 name="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="(514) 123-4567"
+                placeholder="+1 514 123-4567"
+                required
                 data-testid="register-phone"
               />
             </div>
