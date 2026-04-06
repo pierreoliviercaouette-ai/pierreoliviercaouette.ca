@@ -377,7 +377,7 @@ export const Referral = () => {
       </section>
 
       {/* How It Works */}
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-light">
         <div className="container-max">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-4">
@@ -427,7 +427,7 @@ export const Referral = () => {
             {faqs.map((faq, index) => (
               <div 
                 key={index}
-                className="bg-gray-50 rounded-xl p-6"
+                className="bg-light rounded-xl p-6"
                 data-testid={`faq-${index}`}
               >
                 <h3 className="font-heading font-semibold text-dark mb-2">
@@ -443,7 +443,7 @@ export const Referral = () => {
       </section>
 
       {/* Conditions Section */}
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-light">
         <div className="container-max">
           <div className="max-w-4xl mx-auto bg-white border border-prestige-beige rounded-2xl p-6 md:p-8">
             <h2 className="font-heading text-2xl md:text-3xl font-bold text-dark mb-4">

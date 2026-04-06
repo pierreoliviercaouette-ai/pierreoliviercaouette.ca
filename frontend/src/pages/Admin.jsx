@@ -229,7 +229,7 @@ export const Admin = () => {
 
   if (authLoading) {
     return (
-      <main className="pt-20 min-h-screen bg-gray-50 flex items-center justify-center">
+      <main className="pt-20 min-h-screen bg-light flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-prestige-taupe">Chargement...</p>
@@ -241,7 +241,7 @@ export const Admin = () => {
   if (!user || !user.is_admin) return null;
 
   return (
-    <main className="pt-20 min-h-screen bg-gray-50" data-testid="admin-page">
+    <main className="pt-20 min-h-screen bg-light" data-testid="admin-page">
       {/* Header */}
       <section className="bg-white border-b border-prestige-beige py-8">
         <div className="container-max px-4 md:px-8">

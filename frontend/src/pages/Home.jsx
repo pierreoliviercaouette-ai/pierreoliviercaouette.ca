@@ -112,7 +112,7 @@ const Hero = () => (
             </div>
             
             {/* Stats badge */}
-            <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-3 border border-gray-100 flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
+            <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-2xl p-3 border border-prestige-beige flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
               <img 
                 src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658b7c46935167e7514507.webp" 
                 alt="iA Groupe financier"
@@ -183,7 +183,7 @@ const ServicesSection = () => {
           {services.map((service, index) => (
             <div
               key={service.title}
-              className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-primary/20 hover:-translate-y-2"
+              className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-prestige-beige hover:border-primary/20 hover:-translate-y-2"
               data-testid={`service-card-${index}`}
             >
               {/* Gradient bar on top */}
@@ -251,7 +251,7 @@ const AdvantageSection = () => (
           ].map((item, index) => (
             <div 
               key={index} 
-              className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+              className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-prestige-beige"
             >
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
                 <CheckCircle2 className="w-5 h-5 text-white" />
@@ -303,7 +303,7 @@ const AboutPreview = () => (
             
             {/* Floating certification badge */}
             <div className="absolute -bottom-6 -right-6 z-20">
-              <div className="bg-white rounded-2xl shadow-xl p-5 flex items-center gap-4 border border-gray-100">
+              <div className="bg-white rounded-2xl shadow-xl p-5 flex items-center gap-4 border border-prestige-beige">
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-secondary to-secondary/70 flex items-center justify-center">
                   <Shield className="w-7 h-7 text-white" />
                 </div>
@@ -348,7 +348,7 @@ const AboutPreview = () => (
               { icon: '🛡️', label: 'Certifié AMF' },
               { icon: '🤝', label: 'Accompagnement humain' }
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full">
+              <div key={i} className="flex items-center gap-2 px-4 py-2 bg-light rounded-full">
                 <span>{item.icon}</span>
                 <p className="text-sm font-medium text-dark">{item.label}</p>
               </div>
@@ -536,7 +536,7 @@ const TestimonialSection = () => {
   const currentTestimonial = testimonials[currentIndex] || testimonials[0];
 
   return (
-    <section className="section-padding bg-gray-50 relative overflow-hidden" data-testid="testimonial-section">
+    <section className="section-padding bg-light relative overflow-hidden" data-testid="testimonial-section">
       {/* Decorative quotes */}
       <div className="absolute top-10 left-10 text-[200px] font-serif text-primary/5 leading-none">"</div>
       <div className="absolute bottom-10 right-10 text-[200px] font-serif text-primary/5 leading-none rotate-180">"</div>
@@ -561,7 +561,7 @@ const TestimonialSection = () => {
               <div className="h-4 bg-gray-200 rounded w-4/6"></div>
             </div>
           ) : currentTestimonial ? (
-            <div className="bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-gray-100 relative">
+            <div className="bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-prestige-beige relative">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <div className="flex gap-1">
                   {[1,2,3,4,5].map((star) => (
@@ -663,7 +663,7 @@ const PartnersSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-white border-t border-gray-100" data-testid="partners-section">
+    <section className="py-16 bg-white border-t border-prestige-beige" data-testid="partners-section">
       <div className="container-max">
         <p className="text-center text-prestige-taupe mb-8">Partenaires de confiance</p>
         <div className="flex flex-wrap justify-center items-center gap-16">

@@ -194,7 +194,7 @@ export const About = () => {
       </section>
 
       {/* Timeline Section */}
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding bg-light">
         <div className="container-max">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="inline-block px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
@@ -290,7 +290,7 @@ export const About = () => {
           </div>
           
           <div className="max-w-2xl mx-auto">
-            <div className="bg-gray-50 rounded-3xl p-8 md:p-10 relative">
+            <div className="bg-light rounded-3xl p-8 md:p-10 relative">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex gap-1">
                 {[1,2,3,4,5].map((star) => (
                   <Star key={star} className="w-6 h-6 fill-secondary text-secondary" />
@@ -318,7 +318,7 @@ export const About = () => {
       </section>
 
       {/* Partners Section */}
-      <section className="py-12 bg-gray-50 border-t border-gray-100">
+      <section className="py-12 bg-light border-t border-prestige-beige">
         <div className="container-max">
           <p className="text-center text-prestige-taupe mb-8">Partenaires de confiance</p>
           <div className="flex flex-wrap justify-center items-center gap-16">

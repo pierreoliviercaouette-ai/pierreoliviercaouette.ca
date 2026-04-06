@@ -238,7 +238,7 @@ export const Profile = () => {
 
   if (authLoading) {
     return (
-      <main className="pt-20 min-h-screen bg-gray-50 flex items-center justify-center">
+      <main className="pt-20 min-h-screen bg-light flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-prestige-taupe">Chargement de votre profil...</p>
@@ -253,7 +253,7 @@ export const Profile = () => {
   const nextTier = getNextTier();
 
   return (
-    <main className="pt-20 min-h-screen bg-gray-50" data-testid="profile-page">
+    <main className="pt-20 min-h-screen bg-light" data-testid="profile-page">
       {/* Header - Enhanced */}
       <section className="relative overflow-hidden">
         {/* Background gradient */}
@@ -651,21 +651,21 @@ export const Profile = () => {
                       <div className="p-6">
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-4">
-                            <div className="flex justify-between py-3 border-b border-gray-100">
+                            <div className="flex justify-between py-3 border-b border-prestige-beige">
                               <span className="text-prestige-taupe">Nom complet</span>
                               <span className="font-medium text-dark">{user.first_name} {user.last_name}</span>
                             </div>
-                            <div className="flex justify-between py-3 border-b border-gray-100">
+                            <div className="flex justify-between py-3 border-b border-prestige-beige">
                               <span className="text-prestige-taupe">Courriel</span>
                               <span className="font-medium text-dark">{user.email}</span>
                             </div>
                           </div>
                           <div className="space-y-4">
-                            <div className="flex justify-between py-3 border-b border-gray-100">
+                            <div className="flex justify-between py-3 border-b border-prestige-beige">
                               <span className="text-prestige-taupe">Téléphone</span>
                               <span className="font-medium text-dark">{user.phone || 'Non renseigné'}</span>
                             </div>
-                            <div className="flex justify-between py-3 border-b border-gray-100">
+                            <div className="flex justify-between py-3 border-b border-prestige-beige">
                               <span className="text-prestige-taupe">Membre depuis</span>
                               <span className="font-medium text-dark">
                                 {new Date(user.created_at).toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -748,7 +748,7 @@ export const Profile = () => {
                       {toolResults.map((result) => (
                         <div 
                           key={result.id}
-                          className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                          className="p-4 bg-light rounded-xl hover:bg-gray-100 transition-colors"
                           data-testid={`tool-result-${result.id}`}
                         >
                           <div className="flex items-start justify-between">
@@ -1040,7 +1040,7 @@ export const Profile = () => {
                           {referrals.map((ref) => (
                             <div 
                               key={ref.id}
-                              className="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors gap-2"
+                              className="flex items-center justify-between p-3 md:p-4 bg-light rounded-xl hover:bg-gray-100 transition-colors gap-2"
                               data-testid={`referral-item-${ref.id}`}
                             >
                               <div className="flex items-center gap-2 md:gap-3 min-w-0">
@@ -1153,7 +1153,7 @@ export const Profile = () => {
                         <div 
                           key={notif.id}
                           className={`p-4 rounded-xl cursor-pointer transition-all ${
-                            notif.is_read ? 'bg-gray-50 hover:bg-gray-100' : 'bg-blue-50 hover:bg-blue-100 border-l-4 border-primary'
+                            notif.is_read ? 'bg-light hover:bg-gray-100' : 'bg-blue-50 hover:bg-blue-100 border-l-4 border-primary'
                           }`}
                           onClick={() => markNotificationRead(notif.id)}
                           data-testid={`notification-${notif.id}`}

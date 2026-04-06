@@ -95,7 +95,7 @@ export const Tools = () => {
   }
 
   return (
-    <main className="pt-20 min-h-screen bg-gray-50" data-testid="tools-page">
+    <main className="pt-20 min-h-screen bg-light" data-testid="tools-page">
       {/* Header */}
       <section className="bg-white border-b border-prestige-beige py-8">
         <div className="container-max px-4 md:px-8">

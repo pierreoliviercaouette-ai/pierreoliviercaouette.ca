@@ -64,7 +64,7 @@ export const Contact = () => {
 
   if (submitted) {
     return (
-      <main className="pt-20 min-h-screen flex items-center justify-center bg-gray-50" data-testid="contact-success">
+      <main className="pt-20 min-h-screen flex items-center justify-center bg-light" data-testid="contact-success">
         <div className="text-center max-w-md mx-4">
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
             <Send className="w-10 h-10 text-green-600" />
@@ -85,7 +85,7 @@ export const Contact = () => {
   }
 
   return (
-    <main className="pt-20 min-h-screen bg-gray-50" data-testid="contact-page">
+    <main className="pt-20 min-h-screen bg-light" data-testid="contact-page">
       {/* Hero */}
       <section className="section-padding gradient-hero">
         <div className="container-max text-center">
@@ -277,7 +277,7 @@ export const Appointment = () => {
   }, []);
 
   return (
-    <main className="pt-20 min-h-screen bg-gray-50" data-testid="appointment-page">
+    <main className="pt-20 min-h-screen bg-light" data-testid="appointment-page">
       {/* Hero */}
       <section className="section-padding gradient-hero">
         <div className="container-max text-center">

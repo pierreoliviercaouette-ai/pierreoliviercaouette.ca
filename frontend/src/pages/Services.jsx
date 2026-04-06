@@ -281,7 +281,7 @@ const ServiceDetailModal = ({ service, isOpen, onClose }) => {
           </div>
           
           {/* Who is it for */}
-          <div className="bg-gray-50 rounded-2xl p-6">
+          <div className="bg-light rounded-2xl p-6">
             <h4 className="font-heading text-lg font-semibold text-dark mb-4">
               À qui ça s'adresse?
             </h4>
