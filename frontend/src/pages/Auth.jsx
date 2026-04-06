@@ -131,6 +131,7 @@ export const Register = () => {
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
+    email: '',
     phone: '',
     password: '',
     confirmPassword: ''
@@ -160,13 +161,21 @@ export const Register = () => {
       return;
     }
 
+    const hasEmail = !!formData.email.trim();
+    const hasPhone = !!formData.phone.trim();
+    if (!hasEmail && !hasPhone) {
+      toast.error('Entrez au moins un courriel ou un numéro de téléphone');
+      return;
+    }
+
     setLoading(true);
 
     try {
       await register({
         first_name: formData.first_name,
         last_name: formData.last_name,
-        phone: formData.phone,
+        email: formData.email.trim() || null,
+        phone: formData.phone.trim() || null,
         password: formData.password
       });
       toast.success('Compte créé avec succès!');
@@ -224,6 +233,19 @@ export const Register = () => {
             </div>
 
             <div>
+              <Label htmlFor="email">Adresse courriel (optionnel)</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="vous@exemple.com"
+                data-testid="register-email"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="phone">Numéro de téléphone</Label>
               <Input
                 id="phone"
@@ -232,9 +254,11 @@ export const Register = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+1 514 123-4567"
-                required
                 data-testid="register-phone"
               />
+              <p className="text-xs text-prestige-taupe mt-1">
+                Courriel ou téléphone requis (au moins un des deux).
+              </p>
             </div>
 
             <div>

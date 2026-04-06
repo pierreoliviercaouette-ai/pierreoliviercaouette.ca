@@ -144,18 +144,37 @@ export const SupabaseAuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const { phone, password, first_name, last_name } = userData;
-    const { data, error } = await supabase.auth.signUp({
-      phone,
-      password,
-      options: {
-        data: {
-          first_name,
-          last_name,
-          phone
+    const { email, phone, password, first_name, last_name } = userData;
+    const normalizedEmail = (email || '').trim();
+    const normalizedPhone = (phone || '').trim();
+
+    const signUpPayload = normalizedPhone
+      ? {
+          phone: normalizedPhone,
+          password,
+          options: {
+            emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+            data: {
+              first_name,
+              last_name,
+              phone: normalizedPhone
+            }
+          }
         }
-      }
-    });
+      : {
+          email: normalizedEmail,
+          password,
+          options: {
+            emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+            data: {
+              first_name,
+              last_name,
+              phone: null
+            }
+          }
+        };
+
+    const { data, error } = await supabase.auth.signUp(signUpPayload);
     if (error) throw error;
     
     // If not using email confirmations or if user inserts into profiles automatically via trigger:
