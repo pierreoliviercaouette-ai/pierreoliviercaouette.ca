@@ -29,6 +29,15 @@ function normalizePhoneForAuth(value) {
   return raw;
 }
 
+function generateReferralCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i = 0; i < 8; i += 1) {
+    out += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return out;
+}
+
 /** Profil + session → même forme que l’ancien AuthContext (Mongo / API). */
 function mapSessionToAppUser(sessionUser, profile) {
   const meta = sessionUser?.user_metadata || {};
@@ -83,7 +92,31 @@ export const SupabaseAuthProvider = ({ children }) => {
         .eq('id', session.user.id)
         .maybeSingle();
 
-      setUser(mapSessionToAppUser(session.user, profile));
+      let finalProfile = profile;
+
+      // Safety net: if profile row is missing, create it from auth metadata.
+      if (!finalProfile) {
+        const meta = session.user.user_metadata || {};
+        const fallbackProfile = {
+          id: session.user.id,
+          email: session.user.email || null,
+          first_name: (meta.first_name || 'Utilisateur').trim() || 'Utilisateur',
+          last_name: (meta.last_name || 'Nouveau').trim() || 'Nouveau',
+          phone: normalizePhoneForAuth(session.user.phone || meta.phone || '') || null,
+          referral_code: generateReferralCode(),
+          is_admin: false,
+        };
+
+        const { data: created } = await supabase
+          .from('profiles')
+          .insert(fallbackProfile)
+          .select('*')
+          .maybeSingle();
+
+        finalProfile = created || fallbackProfile;
+      }
+
+      setUser(mapSessionToAppUser(session.user, finalProfile));
     } catch (error) {
       console.error('Failed to fetch user:', error);
       setUser(null);
