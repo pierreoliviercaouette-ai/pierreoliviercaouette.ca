@@ -1,0 +1,36 @@
+Courriel automatique — formulaire Contact
+========================================
+
+1) Compte Resend (gratuit) : https://resend.com → API Keys → créer une clé.
+
+2) Utiliser une adresse @ votre domaine (ex. www.pierreoliviercaouette.ca) — simple en pratique :
+   - Dans Resend : Domains → Add domain → entrez pierreoliviercaouette.ca (ou le domaine racine géré par votre DNS).
+   - Resend affiche des enregistrements DNS (souvent SPF/DKIM en TXT ou CNAME). Ajoutez-les chez votre
+     hébergeur DNS (là où pointe le domaine du site : Vercel, Cloudflare, GoDaddy, etc.).
+   - Après vérification (quelques minutes), tout courrier envoyé par l’API peut utiliser :
+       RESEND_FROM = Pierre-Olivier Caouette <contact@pierreoliviercaouette.ca>
+     (ou noreply@…, bonjour@… — tant que le domaine est « Verified » dans Resend).
+   - CONTACT_TO_EMAIL peut rester votre boîte pro actuelle (ex. p-o.caouette@agc.ia.ca) : c’est seulement
+     la destination. L’expéditeur vu par le client peut être @votredomaine ; le Reply-To reste le courriel
+     du visiteur pour répondre directement.
+   Sans domaine vérifié, Resend limite l’usage (souvent envoi de test seulement).
+
+3) Déployer la fonction Edge "send-contact-email" (dossier supabase/functions/send-contact-email).
+
+4) Dans Supabase : Project Settings → Edge Functions → Secrets :
+   RESEND_API_KEY=re_xxxxx
+   CONTACT_TO_EMAIL=p-o.caouette@agc.ia.ca
+   RESEND_FROM=Nom affiché <contact@votredomaine.ca>
+   CONTACT_WEBHOOK_SECRET=une_longue_chaîne_aléatoire_secrète
+
+5) Database → Webhooks → Create a new hook
+   - Table : public.contact_submissions
+   - Events : INSERT
+   - Type : Supabase Edge Functions → choisir send-contact-email
+     OU HTTP Request → URL : https://<PROJECT_REF>.supabase.co/functions/v1/send-contact-email
+   - HTTP Headers : Authorization = Bearer <même valeur que CONTACT_WEBHOOK_SECRET>
+
+Si vous utilisez le type "HTTP Request", méthode POST ; le corps est le JSON du webhook Supabase
+(contient "record" avec les colonnes de la ligne insérée).
+
+6) Tester en envoyant un message depuis /contact sur le site.

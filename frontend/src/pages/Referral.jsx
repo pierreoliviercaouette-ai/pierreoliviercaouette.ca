@@ -63,21 +63,21 @@ export const Referral = () => {
       icon: Users,
       title: 'Référez quelqu\'un',
       points: 1,
-      description: 'Gagnez 1 point pour chaque référence confirmée. Partagez votre lien : la personne invitée remplit une page de consentement (coordonnées + accord pour être contactée).',
+      description: 'Recevez 1 point pour chaque mise en relation valide. La personne invitée remplit une page de consentement (coordonnées + accord pour être contactée).',
       color: 'bg-blue-500'
     },
     {
       icon: MessageSquare,
       title: 'Avis Google',
       points: 2,
-      description: 'Gagnez 2 points en laissant un avis sur Google My Business. Votre témoignage aide d\'autres personnes!',
+      description: 'Recevez 2 points en laissant un avis Google reconnu. Votre témoignage peut aider d\'autres personnes.',
       color: 'bg-green-500'
     },
     {
       icon: UserCheck,
       title: 'Client existant',
       points: 2,
-      description: 'Vous êtes déjà client? Confirmez votre statut et gagnez 2 points instantanément.',
+      description: 'Vous êtes déjà client? Confirmez votre statut et recevez 2 points de remerciement.',
       color: 'bg-purple-500'
     }
   ];
@@ -85,8 +85,8 @@ export const Referral = () => {
   const benefits = [
     {
       icon: Gift,
-      title: 'Récompenses généreuses',
-      description: 'Accumulez des points et débloquez des cartes-cadeaux allant jusqu\'à un coffret VIP exclusif!'
+      title: 'Remerciements appréciés',
+      description: 'Des avantages de remerciement sont offerts pour reconnaître les mises en relation admissibles.'
     },
     {
       icon: Heart,
@@ -96,7 +96,7 @@ export const Referral = () => {
     {
       icon: Users,
       title: 'Paliers cumulatifs',
-      description: 'Les récompenses s\'additionnent! À 100 points, vous aurez cumulé 425$ + coffret VIP!'
+      description: 'Les niveaux s\'additionnent: à 100 points, les avantages cumulés peuvent atteindre 425$ + un coffret VIP.'
     },
     {
       icon: Sparkles,
@@ -113,29 +113,29 @@ export const Referral = () => {
     },
     {
       number: '02',
-      title: 'Accumulez des points',
-      description: 'Référez des proches, laissez un avis Google, ou confirmez votre statut de client.'
+      title: 'Mises en relation et interactions',
+      description: 'Recommandez des proches, laissez un avis Google, ou confirmez votre statut de client existant.'
     },
     {
       number: '03',
       title: 'Validation',
-      description: 'Chaque action est vérifiée par notre équipe pour garantir la qualité.'
+      description: 'Une référence est considérée valide lorsqu’une mise en relation est effectuée avec le consentement de la personne référée.'
     },
     {
       number: '04',
-      title: 'Récompense',
-      description: 'Débloquez vos récompenses automatiquement en atteignant les paliers!'
+      title: 'Remerciement',
+      description: 'Les points de remerciement sont appliqués selon les critères du programme.'
     }
   ];
 
   const faqs = [
     {
       question: 'Comment fonctionne le système de points?',
-      answer: 'Vous gagnez 1 point par référence confirmée, 2 points pour un avis Google, et 2 points en confirmant votre statut de client existant. Les points s\'accumulent pour débloquer des récompenses.'
+      answer: 'Vous recevez 1 point par mise en relation valide, 2 points pour un avis Google reconnu, et 2 points en confirmant votre statut de client existant. Les points s\'accumulent pour les niveaux de reconnaissance du programme.'
     },
     {
       question: 'Les paliers sont-ils cumulatifs?',
-      answer: 'Oui! À 100 points, vous aurez reçu 25$ + 50$ + 100$ + 250$ + Coffret VIP = 425$ total en cartes-cadeaux plus le coffret!'
+      answer: 'Oui. À 100 points, les avantages cumulés incluent 25$ + 50$ + 100$ + 250$ + coffret VIP = 425$ en cartes-cadeaux, plus le coffret.'
     },
     {
       question: 'Comment laisser un avis Google?',
@@ -148,6 +148,14 @@ export const Referral = () => {
     {
       question: 'Combien de temps prend la vérification?',
       answer: 'Les vérifications sont généralement traitées dans les 48 heures ouvrables.'
+    },
+    {
+      question: 'Est-ce que je dois vendre ou expliquer des produits?',
+      answer: 'Non. Votre role est uniquement de mettre en relation. Vous ne devez pas fournir de conseils ni presenter des produits financiers.'
+    },
+    {
+      question: 'Les récompenses sont-elles liées à une vente?',
+      answer: 'Non. Les points sont attribues pour la mise en relation, independamment des suites donnees ou d’une transaction.'
     }
   ];
 
@@ -176,12 +184,12 @@ export const Referral = () => {
             </div>
             
             <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Accumulez des points, <span className="text-secondary">gagnez gros</span>
+              Recommandez des proches. <span className="text-secondary">Recevez des remerciements.</span>
             </h1>
             
             <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-              3 façons de gagner des points. 5 paliers de récompenses. 
-              Jusqu'à 425$ en cartes-cadeaux + un coffret VIP exclusif!
+              3 facons de recevoir des points de remerciement. 5 paliers de reconnaissance.
+              Jusqu'a 425$ en cartes-cadeaux + un coffret VIP.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -223,10 +231,10 @@ export const Referral = () => {
         <div className="container-max">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-4">
-              3 façons de gagner des points
+              3 facons de recevoir des points de remerciement
             </h2>
             <p className="text-prestige-taupe text-lg">
-              Multipliez vos chances d'atteindre les paliers plus rapidement
+              Programme de reconnaissance pour les mises en relation personnelles
             </p>
           </div>
           
@@ -258,6 +266,11 @@ export const Referral = () => {
               </div>
             ))}
           </div>
+          <div className="mt-8 max-w-3xl mx-auto bg-blue-50 border border-blue-200 rounded-xl p-4 md:p-5">
+            <p className="text-sm md:text-base text-dark">
+              Les points sont attribues pour une mise en relation valide ou une interaction reconnue (ex. avis). Aucune souscription ou achat de produit financier n’est requis.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -269,7 +282,7 @@ export const Referral = () => {
               Les paliers de récompenses
             </h2>
             <p className="text-prestige-taupe text-lg">
-              Les paliers sont <strong>cumulatifs</strong>: à 100 points, vous aurez reçu <strong>425$ + Coffret VIP</strong>!
+              Les paliers representent des niveaux de reconnaissance et non une remuneration liee a la vente ou a la performance.
             </p>
           </div>
           
@@ -313,7 +326,12 @@ export const Referral = () => {
           
           <div className="mt-8 text-center bg-white/50 rounded-xl p-6 max-w-2xl mx-auto">
             <p className="text-dark font-medium">
-              <strong>Exemple:</strong> À 40 points, vous recevez 25$ + 50$ + 100$ = <strong className="text-primary">175$ total</strong>
+              <strong>Exemple:</strong> A 40 points, les avantages cumules sont 25$ + 50$ + 100$ = <strong className="text-primary">175$</strong>
+            </p>
+          </div>
+          <div className="mt-4 text-center bg-white/70 border border-prestige-beige rounded-xl p-5 max-w-3xl mx-auto">
+            <p className="text-dark text-sm md:text-base">
+              Les recompenses sont offertes independamment de toute decision financiere ou conclusion de contrat.
             </p>
           </div>
         </div>
@@ -327,7 +345,7 @@ export const Referral = () => {
               Pourquoi participer?
             </h2>
             <p className="text-prestige-taupe text-lg">
-              Un programme simple, transparent et avantageux pour vous et vos proches
+              Un programme simple, transparent et utile pour vos recommandations personnelles
             </p>
           </div>
           
@@ -349,6 +367,11 @@ export const Referral = () => {
                 </p>
               </div>
             ))}
+          </div>
+          <div className="mt-8 max-w-4xl mx-auto bg-amber-50 border border-amber-200 rounded-xl p-4 md:p-5">
+            <p className="text-sm md:text-base text-dark">
+              Ce programme vise uniquement a remercier les recommandations personnelles, sans implication dans la presentation ou le conseil de produits financiers.
+            </p>
           </div>
         </div>
       </section>
@@ -383,6 +406,11 @@ export const Referral = () => {
               </div>
             ))}
           </div>
+          <div className="mt-8 max-w-3xl mx-auto text-center bg-white rounded-xl border border-prestige-beige p-4">
+            <p className="text-sm text-prestige-taupe">
+              Les points sont attribues pour la mise en relation uniquement, independamment des suites donnees.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -410,6 +438,31 @@ export const Referral = () => {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Conditions Section */}
+      <section className="section-padding bg-gray-50">
+        <div className="container-max">
+          <div className="max-w-4xl mx-auto bg-white border border-prestige-beige rounded-2xl p-6 md:p-8">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold text-dark mb-4">
+              Conditions du programme
+            </h2>
+            <div className="space-y-3 text-prestige-taupe">
+              <p>
+                Ce programme est offert a titre de reconnaissance pour des mises en relation.
+              </p>
+              <p>
+                Il ne constitue pas une activite de distribution de produits ou services financiers.
+              </p>
+              <p>
+                Les participants ne sont pas autorises a conseiller, recommander ou presenter des produits financiers.
+              </p>
+              <p>
+                Une compensation peut etre versee pour certaines mises en relation.
+              </p>
+            </div>
           </div>
         </div>
       </section>
