@@ -21,6 +21,17 @@ function formatReturn(value) {
   return `${sign}${abs} %`;
 }
 
+function formatIsoDateLabel(isoDate) {
+  if (!isoDate || typeof isoDate !== 'string') return '';
+  const [year, month, day] = isoDate.split('-').map((value) => Number(value));
+  if (!year || !month || !day) return '';
+  return new Date(year, month - 1, day).toLocaleDateString('fr-CA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
 export const ModelPortfolioDetail = () => {
   const { slug } = useParams();
   const fallbackPortfolio = DEFAULT_MODEL_PORTFOLIOS.find((item) => item.key === slug);
@@ -68,13 +79,7 @@ export const ModelPortfolioDetail = () => {
           href: legacy.href,
         });
         if (legacy.as_of_date) {
-          setAsOfLabel(
-            new Date(legacy.as_of_date).toLocaleDateString('fr-CA', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })
-          );
+          setAsOfLabel(formatIsoDateLabel(legacy.as_of_date));
         }
         setSnapshot(null);
         setHoldings([]);
@@ -175,13 +180,7 @@ export const ModelPortfolioDetail = () => {
       setFundPerfById(perfById);
 
       if (legacyRow?.as_of_date || snap?.as_of_date) {
-        setAsOfLabel(
-          new Date(legacyRow?.as_of_date || snap.as_of_date).toLocaleDateString('fr-CA', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })
-        );
+        setAsOfLabel(formatIsoDateLabel(legacyRow?.as_of_date || snap.as_of_date));
       }
 
       setLoading(false);

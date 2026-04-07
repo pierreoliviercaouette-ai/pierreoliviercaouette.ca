@@ -73,6 +73,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         .eq('id', portfolioId);
       if (error) throw error;
       toast.success('Portefeuille sauvegarde');
+      window.dispatchEvent(new Event('model-portfolios-updated'));
       onRefresh?.();
     } catch (error) {
       toast.error(error.message || 'Erreur mise a jour');
@@ -97,6 +98,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         .in('id', ids);
       if (error) throw error;
       toast.success('Date de mise a jour appliquee a tous les portefeuilles');
+      window.dispatchEvent(new Event('model-portfolios-updated'));
       await load();
       onRefresh?.();
     } catch (error) {

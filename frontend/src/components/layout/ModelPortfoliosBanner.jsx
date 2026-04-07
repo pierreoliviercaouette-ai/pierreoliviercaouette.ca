@@ -17,6 +17,17 @@ function formatReturn(value) {
   return `${sign}${abs} %`;
 }
 
+function formatIsoDateLabel(isoDate) {
+  if (!isoDate || typeof isoDate !== 'string') return '';
+  const [year, month, day] = isoDate.split('-').map((value) => Number(value));
+  if (!year || !month || !day) return '';
+  return new Date(year, month - 1, day).toLocaleDateString('fr-CA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
 export const ModelPortfoliosBanner = () => {
   const [portfolios, setPortfolios] = useState(
     DEFAULT_MODEL_PORTFOLIOS.map((p) => ({
@@ -50,17 +61,18 @@ export const ModelPortfoliosBanner = () => {
       setPrevYearLabel(new Date().getFullYear() - 1);
       const firstDate = rows[0]?.as_of_date;
       if (firstDate) {
-        setAsOfLabel(
-          new Date(firstDate).toLocaleDateString('fr-CA', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })
-        );
+        setAsOfLabel(formatIsoDateLabel(firstDate));
       }
     };
 
     loadPortfolios();
+    const onModelPortfoliosUpdated = () => {
+      loadPortfolios();
+    };
+    window.addEventListener('model-portfolios-updated', onModelPortfoliosUpdated);
+    return () => {
+      window.removeEventListener('model-portfolios-updated', onModelPortfoliosUpdated);
+    };
   }, []);
 
   useEffect(() => {
