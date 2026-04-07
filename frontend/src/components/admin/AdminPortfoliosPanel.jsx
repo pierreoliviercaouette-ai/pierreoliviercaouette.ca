@@ -12,7 +12,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     setLoading(true);
     const { data, error } = await supabase
       .from('model_portfolios')
-      .select('id, key, name, ytd_2026, year_2025, display_order')
+      .select('id, key, name, ytd_2026, year_2025, annualized_3y, annualized_5y, display_order')
       .order('display_order', { ascending: true });
 
     if (error) {
@@ -57,7 +57,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
       </h3>
 
       <p className="text-xs text-prestige-taupe">
-        Entrez manuellement uniquement le rendement AAJ et l annee precedente pour chaque profil.
+        Entrez manuellement les rendements AAJ, annee precedente, 3 ans annualise et 5 ans annualise pour chaque profil.
       </p>
 
       {modelPortfolios.length === 0 ? (
@@ -66,7 +66,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         <div className="space-y-3">
           {modelPortfolios.map((portfolio) => (
             <div key={portfolio.id} className="p-4 bg-light rounded-xl border border-prestige-beige">
-              <div className="grid md:grid-cols-3 gap-3 items-end">
+              <div className="grid md:grid-cols-5 gap-3 items-end">
                 <div>
                   <Label>Profil</Label>
                   <Input value={portfolio.name} disabled />
@@ -89,6 +89,26 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                     step="0.01"
                     defaultValue={portfolio.year_2025}
                     onBlur={(e) => updateModelPortfolio(portfolio.id, 'year_2025', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <Label>Rendement 3 ans annualise (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    defaultValue={portfolio.annualized_3y}
+                    onBlur={(e) => updateModelPortfolio(portfolio.id, 'annualized_3y', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <Label>Rendement 5 ans annualise (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    defaultValue={portfolio.annualized_5y}
+                    onBlur={(e) => updateModelPortfolio(portfolio.id, 'annualized_5y', e.target.value)}
                   />
                 </div>
               </div>
