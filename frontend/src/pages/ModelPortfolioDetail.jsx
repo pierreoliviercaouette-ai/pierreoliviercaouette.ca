@@ -35,6 +35,12 @@ export const ModelPortfolioDetail = () => {
     const loadPortfolio = async () => {
       if (!slug) return;
       setLoading(true);
+      const { data: legacyNameRow } = await supabase
+        .from('model_portfolios')
+        .select('name')
+        .eq('key', slug)
+        .maybeSingle();
+
       const { data: def, error: dErr } = await supabase
         .from('portfolio_definitions')
         .select('id, key, name, href')
@@ -151,7 +157,7 @@ export const ModelPortfolioDetail = () => {
 
       setPortfolio({
         key: def.key,
-        name: def.name,
+        name: legacyNameRow?.name || def.name,
         ytd2026: snap?.ytd_pct != null ? Number(snap.ytd_pct) : null,
         year2025: snap?.prev_civil_year_pct != null ? Number(snap.prev_civil_year_pct) : null,
         href: def.href,

@@ -33,6 +33,12 @@ export const ModelPortfoliosBanner = () => {
 
   useEffect(() => {
     const loadPortfolios = async () => {
+      const { data: nameRows } = await supabase
+        .from('model_portfolios')
+        .select('key,name')
+        .order('display_order', { ascending: true });
+      const namesByKey = new Map((nameRows || []).map((row) => [row.key, row.name]));
+
       const { data, error } = await supabase
         .from('portfolio_snapshots')
         .select(
@@ -92,7 +98,7 @@ export const ModelPortfoliosBanner = () => {
       setPortfolios(
         sorted.map((row) => ({
           key: row.portfolio_definitions.key,
-          name: row.portfolio_definitions.name,
+          name: namesByKey.get(row.portfolio_definitions.key) || row.portfolio_definitions.name,
           ytd2026: row.ytd_pct != null ? Number(row.ytd_pct) : null,
           yearPrev: row.prev_civil_year_pct != null ? Number(row.prev_civil_year_pct) : null,
           href: row.portfolio_definitions.href,
