@@ -1,27 +1,27 @@
 import { Link } from 'react-router-dom';
 import { Gift, Users, ArrowRight, MessageSquare, UserCheck } from 'lucide-react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  LabelList,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { ReferralTiersInfographic } from '../components/referral/ReferralTiersInfographic';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
-/** Valeur en $ pour l’échelle du graphique (palier individuel). Le coffret : hauteur indicative seulement. */
+/**
+ * chartValue : hauteur relative du coffret (dernier palier indicatif, non monétaire).
+ * fill / highlight : dégradés du visuel.
+ */
 const TIERS_FOR_CHART = [
-  { threshold: 10, reward: '25 $', name: 'Bronze', chartValue: 25, fill: '#ea580c' },
-  { threshold: 20, reward: '50 $', name: 'Argent', chartValue: 50, fill: '#64748b' },
-  { threshold: 40, reward: '100 $', name: 'Or', chartValue: 100, fill: '#ca8a04' },
-  { threshold: 75, reward: '250 $', name: 'Platine', chartValue: 250, fill: '#0891b2' },
-  { threshold: 100, reward: 'Coffret Privilège', name: 'Privilège', chartValue: 300, fill: '#7c3aed' },
+  { threshold: 10, reward: '25 $', name: 'Bronze', chartValue: 25, fill: '#ea580c', highlight: '#fb923c' },
+  { threshold: 20, reward: '50 $', name: 'Argent', chartValue: 50, fill: '#64748b', highlight: '#94a3b8' },
+  { threshold: 40, reward: '100 $', name: 'Or', chartValue: 100, fill: '#ca8a04', highlight: '#facc15' },
+  { threshold: 75, reward: '250 $', name: 'Platine', chartValue: 250, fill: '#0891b2', highlight: '#22d3ee' },
+  {
+    threshold: 100,
+    reward: 'Coffret Privilège',
+    name: 'Privilège',
+    chartValue: 300,
+    fill: '#7c3aed',
+    highlight: '#c4b5fd',
+  },
 ];
 
 export const Referral = () => {
@@ -91,7 +91,7 @@ export const Referral = () => {
     },
     {
       question: 'Les paliers sont-ils cumulatifs?',
-      answer: 'Oui. Les récompenses des paliers atteints s’additionnent (voir le graphique ci-dessus).',
+      answer: 'Oui. Les récompenses des paliers atteints s’additionnent (voir l’illustration ci-dessus).',
     },
     {
       question: 'Dois-je parler de produits financiers?',
@@ -217,69 +217,13 @@ export const Referral = () => {
               Faites défiler horizontalement pour voir tous les paliers.
             </p>
             <div className="w-full overflow-x-auto overscroll-x-contain -mx-1 px-1 sm:mx-0 sm:px-0">
-              <div className="h-[min(380px,55vh)] min-h-[260px] min-w-[520px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={TIERS_FOR_CHART}
-                  margin={{ top: 28, right: 8, left: 4, bottom: 8 }}
-                  barCategoryGap="18%"
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2dcd0" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 11, fill: '#64748b' }}
-                    tickLine={false}
-                    axisLine={{ stroke: '#e2dcd0' }}
-                    interval={0}
-                    angle={-18}
-                    textAnchor="end"
-                    height={56}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: '#64748b' }}
-                    tickLine={false}
-                    axisLine={{ stroke: '#e2dcd0' }}
-                    tickFormatter={(v) => `${v} $`}
-                    width={44}
-                    domain={[0, 360]}
-                  />
-                  <Tooltip
-                    cursor={{ fill: 'rgba(6, 77, 217, 0.06)' }}
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null;
-                      const row = payload[0].payload;
-                      return (
-                        <div className="rounded-xl border border-prestige-beige bg-white px-4 py-3 shadow-lg text-left max-w-[240px]">
-                          <p className="font-heading font-bold text-dark">{row.name}</p>
-                          <p className="text-xs text-prestige-taupe mt-0.5">{row.threshold} points cumulés</p>
-                          <p className="text-primary font-heading font-bold text-lg mt-2">{row.reward}</p>
-                          {row.name === 'Privilège' && (
-                            <p className="text-[11px] text-prestige-taupe mt-2 leading-snug">
-                              Récompense non monétaire ; la hauteur de la barre est indicative.
-                            </p>
-                          )}
-                        </div>
-                      );
-                    }}
-                  />
-                  <Bar dataKey="chartValue" radius={[10, 10, 0, 0]} maxBarSize={72}>
-                    {TIERS_FOR_CHART.map((entry) => (
-                      <Cell key={entry.name} fill={entry.fill} />
-                    ))}
-                    <LabelList
-                      dataKey="reward"
-                      position="top"
-                      className="fill-dark"
-                      style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-heading, Georgia, serif)' }}
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="w-full min-w-[520px] max-w-4xl mx-auto">
+                <ReferralTiersInfographic tiers={TIERS_FOR_CHART} className="w-full h-auto block" />
               </div>
             </div>
             <p className="mt-4 text-center text-xs text-prestige-taupe max-w-2xl mx-auto leading-relaxed">
-              Chaque palier correspond à une récompense distincte ; les paliers atteints s’additionnent. La barre « Privilège »
-              représente un coffret (valeur non exprimée ici en dollars sur le graphique).
+              Chaque palier correspond à une récompense distincte ; les paliers atteints s’additionnent. La taille du dernier coffret
+              illustre le palier « Privilège » (récompense non monétaire ; hauteur indicative).
             </p>
           </div>
 
