@@ -16,6 +16,8 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
+import { PageHero } from '../components/layout/PageHero';
+import { useSeoMeta } from '../lib/seo';
 
 const GOOGLE_REVIEW_LINK = 'https://g.page/r/CewlYHqUvuLyEAI/review';
 
@@ -30,6 +32,12 @@ const TIERS = [
 
 export const Profile = () => {
   const { user, loading: authLoading, notifications, markNotificationRead, markAllNotificationsRead } = useAuth();
+  useSeoMeta({
+    title: 'Mon profil | Espace membre',
+    description:
+      'Consultez vos points de recommandation, votre historique d’outils et vos notifications.',
+    canonicalPath: '/profil',
+  });
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [toolResults, setToolResults] = useState([]);
@@ -254,127 +262,121 @@ export const Profile = () => {
 
   return (
     <main className="pt-20 min-h-screen bg-light" data-testid="profile-page">
-      {/* Header - Enhanced */}
-      <section className="relative overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 gradient-hero" />
-        <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-2xl" />
-        </div>
-        
-        {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }} />
-        
-        <div className="relative container-max px-4 md:px-8 py-12">
+      <PageHero
+        badge="Espace membre"
+        title={`Bonjour, ${user.first_name}`}
+        description="Vos points de recommandation, l’historique de vos outils et vos notifications, au même endroit."
+        minHeightClass="min-h-[42vh] md:min-h-[48vh]"
+      />
+
+      <div className="relative z-20 container-max px-4 md:px-8 -mt-14 md:-mt-[4.25rem] pb-2">
+        <div className="rounded-2xl border border-prestige-beige bg-white shadow-ia p-6 md:p-8">
           <div className="flex flex-col lg:flex-row lg:items-center gap-8">
-            {/* Avatar & Info */}
             <div className="flex items-center gap-6">
               <div className="relative">
-                <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 shadow-xl">
-                  <span className="text-white font-heading font-bold text-3xl">
-                    {user.first_name[0]}{user.last_name[0]}
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-light flex items-center justify-center border border-prestige-beige shadow-sm">
+                  <span className="text-primary font-heading font-bold text-2xl md:text-3xl">
+                    {(user.first_name?.[0] || '').toUpperCase()}
+                    {(user.last_name?.[0] || '').toUpperCase()}
                   </span>
                 </div>
                 {currentTier && (
-                  <div className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br ${currentTier.gradient} flex items-center justify-center shadow-lg`}>
-                    <currentTier.icon className="w-5 h-5 text-white" />
+                  <div
+                    className={`absolute -bottom-1 -right-1 w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br ${currentTier.gradient} flex items-center justify-center shadow-md border-2 border-white`}
+                  >
+                    <currentTier.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                 )}
               </div>
               <div>
-                <h1 className="font-heading text-2xl md:text-3xl font-bold text-white mb-1">
+                <p className="font-heading text-xl md:text-2xl font-bold text-dark">
                   {user.first_name} {user.last_name}
-                </h1>
-                <p className="text-white/70">{user.email}</p>
-                <div className="flex items-center gap-2 mt-2">
+                </p>
+                <p className="text-prestige-taupe text-sm mt-1">{user.email}</p>
+                <div className="flex flex-wrap items-center gap-2 mt-3">
                   {user.is_admin && (
-                    <Badge className="bg-white/20 text-white border-white/30">Administrateur</Badge>
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                      Administrateur
+                    </Badge>
                   )}
                   {currentTier && (
-                    <Badge className={`${currentTier.bg} ${currentTier.color} border-0`}>
-                      {currentTier.name}
-                    </Badge>
+                    <Badge className={`${currentTier.bg} ${currentTier.color} border-0`}>{currentTier.name}</Badge>
                   )}
                 </div>
               </div>
             </div>
-            
-            {/* Stats Cards */}
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 lg:ml-auto lg:max-w-2xl">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-center">
-                <div className="w-10 h-10 mx-auto rounded-xl bg-white/20 flex items-center justify-center mb-2">
-                  <Sparkles className="w-5 h-5 text-secondary" />
+
+            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:ml-auto lg:max-w-2xl">
+              <div className="rounded-xl p-4 text-center border border-prestige-beige bg-light/80">
+                <div className="w-9 h-9 mx-auto rounded-lg bg-white flex items-center justify-center mb-2 border border-prestige-beige">
+                  <Sparkles className="w-4 h-4 text-primary" />
                 </div>
-                <p className="text-3xl font-bold text-white">{referralStats?.total_points || 0}</p>
-                <p className="text-xs text-white/70">Points</p>
+                <p className="text-2xl md:text-3xl font-bold text-dark">{referralStats?.total_points || 0}</p>
+                <p className="text-xs text-prestige-taupe">Points</p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-center">
-                <div className="w-10 h-10 mx-auto rounded-xl bg-white/20 flex items-center justify-center mb-2">
-                  <Users className="w-5 h-5 text-blue-300" />
+              <div className="rounded-xl p-4 text-center border border-prestige-beige bg-light/80">
+                <div className="w-9 h-9 mx-auto rounded-lg bg-white flex items-center justify-center mb-2 border border-prestige-beige">
+                  <Users className="w-4 h-4 text-primary" />
                 </div>
-                <p className="text-3xl font-bold text-white">{referralStats?.qualified_referrals || 0}</p>
-                <p className="text-xs text-white/70">Références</p>
+                <p className="text-2xl md:text-3xl font-bold text-dark">{referralStats?.qualified_referrals || 0}</p>
+                <p className="text-xs text-prestige-taupe">Références</p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-center">
-                <div className="w-10 h-10 mx-auto rounded-xl bg-white/20 flex items-center justify-center mb-2">
-                  <Target className="w-5 h-5 text-green-300" />
+              <div className="rounded-xl p-4 text-center border border-prestige-beige bg-light/80">
+                <div className="w-9 h-9 mx-auto rounded-lg bg-white flex items-center justify-center mb-2 border border-prestige-beige">
+                  <Target className="w-4 h-4 text-primary" />
                 </div>
-                <p className="text-3xl font-bold text-white">{nextTier?.points || '∞'}</p>
-                <p className="text-xs text-white/70">Prochain palier</p>
+                <p className="text-2xl md:text-3xl font-bold text-dark">{nextTier?.points ?? '—'}</p>
+                <p className="text-xs text-prestige-taupe">Seuil palier suivant</p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-center">
-                <div className="w-10 h-10 mx-auto rounded-xl bg-white/20 flex items-center justify-center mb-2">
-                  <Award className="w-5 h-5 text-yellow-300" />
+              <div className="rounded-xl p-4 text-center border border-prestige-beige bg-light/80">
+                <div className="w-9 h-9 mx-auto rounded-lg bg-white flex items-center justify-center mb-2 border border-prestige-beige">
+                  <Award className="w-4 h-4 text-primary" />
                 </div>
-                <p className="text-3xl font-bold text-white">{currentTier ? TIERS.indexOf(currentTier) + 1 : 0}</p>
-                <p className="text-xs text-white/70">Paliers atteints</p>
+                <p className="text-2xl md:text-3xl font-bold text-dark">{currentTier ? TIERS.indexOf(currentTier) + 1 : 0}</p>
+                <p className="text-xs text-prestige-taupe">Paliers atteints</p>
               </div>
             </div>
           </div>
-          
-          {/* Progress Bar */}
+
           {nextTier && (
-            <div className="mt-8 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-white/80 text-sm">
-                  {currentTier?.name || 'Départ'} → {nextTier.name}
+            <div className="mt-6 md:mt-8 pt-6 border-t border-prestige-beige">
+              <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
+                <span className="text-prestige-taupe text-sm">
+                  Progression : <span className="text-dark font-medium">{currentTier?.name || 'Départ'}</span> →{' '}
+                  <span className="text-dark font-medium">{nextTier.name}</span>
                 </span>
-                <span className="text-white font-semibold">
+                <span className="text-sm font-semibold text-primary">
                   {referralStats?.points_to_next_tier || 0} points restants
                 </span>
               </div>
-              <div className="h-3 bg-white/20 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-secondary to-yellow-400 rounded-full transition-all duration-500"
+              <div className="h-2.5 bg-prestige-beige/80 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-500"
                   style={{ width: `${getProgressToNextTier()}%` }}
                 />
               </div>
             </div>
           )}
         </div>
-      </section>
+      </div>
 
-      {/* Tabs Content */}
-      <section className="section-padding -mt-4">
+      <section className="section-padding bg-light pt-6 md:pt-8">
         <div className="container-max">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4 bg-white rounded-2xl p-1 shadow-lg mb-8">
-              <TabsTrigger value="overview" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 rounded-2xl border border-prestige-beige bg-white/90 p-1.5 shadow-ia mb-8">
+              <TabsTrigger value="overview" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white text-prestige-taupe">
                 <User className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Aperçu</span>
               </TabsTrigger>
-              <TabsTrigger value="history" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white">
+              <TabsTrigger value="history" className="rounded-xl text-prestige-taupe data-[state=active]:bg-primary data-[state=active]:text-white">
                 <Clock className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Historique</span>
               </TabsTrigger>
-              <TabsTrigger value="referrals" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white">
+              <TabsTrigger value="referrals" className="rounded-xl text-prestige-taupe data-[state=active]:bg-primary data-[state=active]:text-white">
                 <Gift className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Points</span>
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white relative">
+              <TabsTrigger value="notifications" className="rounded-xl text-prestige-taupe data-[state=active]:bg-primary data-[state=active]:text-white relative">
                 <Bell className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Notifications</span>
                 {notifications.filter(n => !n.is_read).length > 0 && (
@@ -388,151 +390,131 @@ export const Profile = () => {
             {/* Overview Tab */}
             <TabsContent value="overview">
               <div className="space-y-6">
-                {/* HERO REWARDS SECTION - PROMINENT */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-secondary via-amber-500 to-orange-500 p-1 shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-transparent to-orange-600/20" />
-                  <div className="relative bg-gradient-to-br from-dark/95 via-primary/95 to-dark/95 rounded-[22px] p-6 md:p-8">
-                    {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/20 rounded-full blur-3xl" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl" />
-                    
-                    <div className="relative grid lg:grid-cols-2 gap-8">
-                      {/* Left: Current Progress */}
-                      <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary to-yellow-400 flex items-center justify-center shadow-lg animate-pulse">
-                            <Trophy className="w-7 h-7 text-white" />
-                          </div>
-                          <div>
-                            <h2 className="font-heading text-2xl md:text-3xl font-bold text-white">
-                              Programme de récompenses
-                            </h2>
-                            <p className="text-white/70">Gagnez des récompenses en référant vos proches!</p>
-                          </div>
+                <div className="rounded-2xl border border-prestige-beige bg-white shadow-ia overflow-hidden">
+                  <div className="grid lg:grid-cols-2 gap-0 lg:divide-x divide-prestige-beige">
+                    <div className="p-6 md:p-8">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-12 h-12 rounded-2xl bg-light border border-prestige-beige flex items-center justify-center">
+                          <Trophy className="w-6 h-6 text-primary" />
                         </div>
-                        
-                        {/* Big Points Display */}
-                        <div className="flex items-end gap-4 mb-6">
-                          <div className="relative">
-                            <span className="text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-secondary via-yellow-400 to-secondary animate-gradient">
-                              {referralStats?.total_points || 0}
-                            </span>
-                            <Sparkles className="absolute -top-2 -right-4 w-6 h-6 text-secondary animate-bounce" />
-                          </div>
-                          <span className="text-2xl text-white/60 mb-2">points</span>
-                        </div>
-                        
-                        {/* Next Tier Progress */}
-                        {nextTier && (
-                          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-2">
-                                <Target className="w-5 h-5 text-secondary" />
-                                <span className="text-white font-medium">Prochain palier: {nextTier.name}</span>
-                              </div>
-                              <Badge className={`${nextTier.bg} ${nextTier.color} border-0 font-bold`}>
-                                {nextTier.reward}
-                              </Badge>
-                            </div>
-                            <div className="h-4 bg-white/20 rounded-full overflow-hidden mb-2">
-                              <div 
-                                className="h-full bg-gradient-to-r from-secondary via-yellow-400 to-secondary rounded-full transition-all duration-1000 relative overflow-hidden"
-                                style={{ width: `${getProgressToNextTier()}%` }}
-                              >
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
-                              </div>
-                            </div>
-                            <p className="text-white/80 text-sm text-center">
-                              Plus que <span className="font-bold text-secondary">{referralStats?.points_to_next_tier || nextTier.points}</span> points pour débloquer!
-                            </p>
-                          </div>
-                        )}
-                        
-                        {/* Quick CTA */}
-                        <div className="flex flex-wrap gap-3 mt-6">
-                          <button 
-                            onClick={copyReferralLink}
-                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-secondary to-yellow-400 rounded-xl text-dark font-bold hover:shadow-lg hover:scale-105 transition-all"
-                            data-testid="hero-copy-link"
-                          >
-                            {copied ? <CheckCircle2 className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                            {copied ? 'Lien copié!' : 'Copier mon lien'}
-                          </button>
-                          <button
-                            onClick={() => setActiveTab('referrals')}
-                            className="flex items-center justify-center gap-2 px-6 py-3 bg-white/10 border-2 border-secondary/50 rounded-xl text-white font-bold hover:bg-white/20 transition-all"
-                          >
-                            <Gift className="w-5 h-5" />
-                            Gagner des points
-                          </button>
+                        <div>
+                          <h2 className="font-heading text-xl md:text-2xl font-bold text-dark">Programme de recommandations</h2>
+                          <p className="text-prestige-taupe text-sm">Remerciements pour les mises en relation admissibles.</p>
                         </div>
                       </div>
-                      
-                      {/* Right: Tier Ladder */}
-                      <div className="relative">
-                        <h3 className="font-heading text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                          <Crown className="w-5 h-5 text-secondary" />
-                          Paliers de récompenses
-                        </h3>
-                        <div className="space-y-2">
-                          {TIERS.map((tier, index) => {
-                            const isReached = referralStats?.total_points >= tier.points;
-                            const isCurrent = currentTier?.name === tier.name;
-                            const TierIcon = tier.icon;
-                            return (
-                              <div 
-                                key={tier.name}
-                                className={`relative flex items-center gap-4 p-3 rounded-xl transition-all ${
-                                  isCurrent 
-                                    ? 'bg-gradient-to-r from-secondary/30 to-yellow-400/20 border-2 border-secondary shadow-lg scale-105' 
-                                    : isReached 
-                                      ? 'bg-white/15 border border-white/30' 
-                                      : 'bg-white/5 border border-white/10'
+
+                      <div className="flex items-end gap-3 mb-6">
+                        <span className="text-5xl md:text-6xl font-bold text-primary font-heading tabular-nums">
+                          {referralStats?.total_points || 0}
+                        </span>
+                        <span className="text-lg text-prestige-taupe pb-1">points</span>
+                      </div>
+
+                      {nextTier && (
+                        <div className="rounded-xl border border-prestige-beige bg-light/60 p-4 mb-6">
+                          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <span className="text-dark font-medium text-sm">Prochain palier : {nextTier.name}</span>
+                            <Badge className={`${nextTier.bg} ${nextTier.color} border-0`}>{nextTier.reward}</Badge>
+                          </div>
+                          <div className="h-2.5 bg-prestige-beige rounded-full overflow-hidden mb-2">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-700"
+                              style={{ width: `${getProgressToNextTier()}%` }}
+                            />
+                          </div>
+                          <p className="text-prestige-taupe text-sm text-center">
+                            Encore{' '}
+                            <span className="font-semibold text-dark">
+                              {referralStats?.points_to_next_tier ?? nextTier.points}
+                            </span>{' '}
+                            point{(referralStats?.points_to_next_tier || 0) > 1 ? 's' : ''} pour le palier suivant.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                          type="button"
+                          onClick={copyReferralLink}
+                          className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-primary text-white px-6 py-3 font-semibold hover:opacity-95 transition-opacity shadow-ia"
+                          data-testid="hero-copy-link"
+                        >
+                          {copied ? <CheckCircle2 className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                          {copied ? 'Lien copié' : 'Copier mon lien de consentement'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('referrals')}
+                          className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary/25 text-primary px-6 py-3 font-semibold hover:bg-primary/5 transition-colors"
+                        >
+                          <Gift className="w-5 h-5" />
+                          Gagner des points
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-6 md:p-8 bg-[#fdfbf7]">
+                      <h3 className="font-heading text-lg font-semibold text-dark mb-4 flex items-center gap-2">
+                        <Crown className="w-5 h-5 text-secondary" />
+                        Paliers de remerciement
+                      </h3>
+                      <div className="space-y-2">
+                        {TIERS.map((tier) => {
+                          const isReached = referralStats?.total_points >= tier.points;
+                          const isCurrent = currentTier?.name === tier.name;
+                          const TierIcon = tier.icon;
+                          return (
+                            <div
+                              key={tier.name}
+                              className={`relative flex items-center gap-3 p-3 rounded-xl border transition-colors ${
+                                isCurrent
+                                  ? 'border-primary bg-white shadow-sm ring-1 ring-primary/15'
+                                  : isReached
+                                    ? 'border-prestige-beige bg-white/80'
+                                    : 'border-prestige-beige/60 bg-white/50'
+                              }`}
+                            >
+                              {isCurrent ? (
+                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-primary rounded-r-full" />
+                              ) : null}
+                              <div
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                                  isReached ? `bg-gradient-to-br ${tier.gradient}` : 'bg-light border border-prestige-beige'
                                 }`}
                               >
-                                {isCurrent && (
-                                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-secondary rounded-r-full" />
+                                {isReached ? (
+                                  <CheckCircle2 className="w-5 h-5 text-white" />
+                                ) : (
+                                  <TierIcon className={`w-5 h-5 ${tier.color} opacity-60`} />
                                 )}
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                                  isReached 
-                                    ? `bg-gradient-to-br ${tier.gradient} shadow-md` 
-                                    : 'bg-white/10'
-                                }`}>
-                                  {isReached ? (
-                                    <CheckCircle2 className="w-5 h-5 text-white" />
-                                  ) : (
-                                    <TierIcon className={`w-5 h-5 ${tier.color} opacity-50`} />
-                                  )}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className={`font-semibold ${isReached ? 'text-white' : 'text-white/50'}`}>
-                                      {tier.name}
-                                    </span>
-                                    {isCurrent && (
-                                      <Badge className="bg-secondary text-dark text-xs px-2 py-0">Actuel</Badge>
-                                    )}
-                                  </div>
-                                  <span className="text-xs text-white/50">{tier.points} points requis</span>
-                                </div>
-                                <span className={`font-bold ${isReached ? 'text-secondary' : 'text-white/40'}`}>
-                                  {tier.reward}
-                                </span>
                               </div>
-                            );
-                          })}
-                        </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className={`font-semibold text-sm ${isReached ? 'text-dark' : 'text-prestige-taupe'}`}>
+                                    {tier.name}
+                                  </span>
+                                  {isCurrent ? (
+                                    <Badge className="bg-primary/10 text-primary border-0 text-[10px]">Actuel</Badge>
+                                  ) : null}
+                                </div>
+                                <p className="text-xs text-prestige-taupe">{tier.points} pts requis</p>
+                              </div>
+                              <span className={`font-heading font-bold text-sm shrink-0 ${isReached ? 'text-primary' : 'text-prestige-taupe'}`}>
+                                {tier.reward}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                {/* 3 Ways to Earn - Mobile Optimized */}
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-secondary to-yellow-500 p-3 md:p-4">
-                    <h3 className="font-heading text-lg md:text-xl font-semibold text-white flex items-center gap-2">
-                      <Sparkles className="w-5 h-5" />
-                      3 façons de gagner des points
+                <div className="bg-white rounded-2xl border border-prestige-beige shadow-ia overflow-hidden">
+                  <div className="px-4 md:px-6 py-4 border-b border-prestige-beige bg-light/50">
+                    <h3 className="font-heading text-lg md:text-xl font-semibold text-dark flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      Trois façons de gagner des points
                     </h3>
                   </div>
                   
@@ -641,10 +623,10 @@ export const Profile = () => {
                 <div className="grid lg:grid-cols-3 gap-6">
                   {/* User Info Card */}
                   <div className="lg:col-span-2">
-                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                      <div className="bg-gradient-to-r from-primary to-primary/80 p-4">
-                        <h3 className="font-heading text-xl font-semibold text-white flex items-center gap-2">
-                          <User className="w-5 h-5" />
+                    <div className="bg-white rounded-2xl border border-prestige-beige shadow-ia overflow-hidden">
+                      <div className="px-6 py-4 border-b border-prestige-beige bg-light/50">
+                        <h3 className="font-heading text-xl font-semibold text-dark flex items-center gap-2">
+                          <User className="w-5 h-5 text-primary" />
                           Mes informations
                         </h3>
                       </div>
@@ -679,32 +661,32 @@ export const Profile = () => {
 
                   {/* Quick Actions */}
                   <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-primary to-dark rounded-2xl p-6 text-white shadow-lg">
-                      <h3 className="font-heading text-lg font-semibold mb-4 flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5 text-secondary" />
+                    <div className="rounded-2xl border border-prestige-beige bg-white shadow-ia p-6">
+                      <h3 className="font-heading text-lg font-semibold text-dark mb-4 flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-primary" />
                         Accès rapide
                       </h3>
-                      <div className="space-y-3">
-                        <Link 
+                      <div className="space-y-2">
+                        <Link
                           to="/outils"
-                          className="w-full flex items-center gap-3 p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
+                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-prestige-beige bg-light/50 hover:border-primary/30 hover:bg-white transition-colors text-dark text-sm"
                         >
-                          <TrendingUp className="w-5 h-5" />
-                          <span className="text-sm">Outils financiers</span>
+                          <TrendingUp className="w-5 h-5 text-primary shrink-0" />
+                          Outils financiers
                         </Link>
-                        <Link 
+                        <Link
                           to="/rendez-vous"
-                          className="w-full flex items-center gap-3 p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
+                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-prestige-beige bg-light/50 hover:border-primary/30 hover:bg-white transition-colors text-dark text-sm"
                         >
-                          <Calendar className="w-5 h-5" />
-                          <span className="text-sm">Prendre rendez-vous</span>
+                          <Calendar className="w-5 h-5 text-primary shrink-0" />
+                          Prendre rendez-vous
                         </Link>
-                        <Link 
+                        <Link
                           to="/recommandations"
-                          className="w-full flex items-center gap-3 p-3 bg-secondary/20 rounded-xl hover:bg-secondary/30 transition-colors border border-secondary/30"
+                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors text-dark text-sm"
                         >
-                          <Gift className="w-5 h-5 text-secondary" />
-                          <span className="text-sm">Détails du programme</span>
+                          <Gift className="w-5 h-5 text-primary shrink-0" />
+                          Détails du programme
                         </Link>
                       </div>
                     </div>
@@ -715,13 +697,13 @@ export const Profile = () => {
 
             {/* History Tab */}
             <TabsContent value="history">
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                <div className="bg-gradient-to-r from-primary to-primary/80 p-4 flex items-center justify-between">
-                  <h3 className="font-heading text-xl font-semibold text-white flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
+              <div className="bg-white rounded-2xl border border-prestige-beige shadow-ia overflow-hidden">
+                <div className="px-6 py-4 border-b border-prestige-beige bg-light/50 flex items-center justify-between gap-4">
+                  <h3 className="font-heading text-xl font-semibold text-dark flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-primary" />
                     Historique des outils
                   </h3>
-                  <Link to="/outils" className="text-white/80 hover:text-white text-sm flex items-center gap-1">
+                  <Link to="/outils" className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
                     Voir les outils <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -774,11 +756,11 @@ export const Profile = () => {
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-4 md:space-y-6 min-w-0 overflow-hidden">
                   {/* Ways to Earn Points */}
-                  <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                    <div className="bg-gradient-to-r from-secondary/90 to-secondary p-3 md:p-4">
-                      <h3 className="font-heading text-lg md:text-xl font-semibold text-white flex items-center gap-2">
-                        <Sparkles className="w-5 h-5" />
-                        Gagnez des points
+                  <div className="bg-white rounded-2xl border border-prestige-beige shadow-ia overflow-hidden">
+                    <div className="px-4 md:px-6 py-4 border-b border-prestige-beige bg-light/50">
+                      <h3 className="font-heading text-lg md:text-xl font-semibold text-dark flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-primary" />
+                        Gagner des points
                       </h3>
                     </div>
                     <div className="p-3 md:p-6 space-y-3 md:space-y-4 overflow-hidden">
@@ -948,11 +930,11 @@ export const Profile = () => {
                   </div>
 
                   {/* Referral Form */}
-                  <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                    <div className="bg-gradient-to-r from-primary to-primary/80 p-3 md:p-4">
-                      <h3 className="font-heading text-lg md:text-xl font-semibold text-white flex items-center gap-2">
-                        <Send className="w-5 h-5" />
-                        Référer quelqu'un
+                  <div className="bg-white rounded-2xl border border-prestige-beige shadow-ia overflow-hidden">
+                    <div className="px-4 md:px-6 py-4 border-b border-prestige-beige bg-light/50">
+                      <h3 className="font-heading text-lg md:text-xl font-semibold text-dark flex items-center gap-2">
+                        <Send className="w-5 h-5 text-primary" />
+                        Référer quelqu’un
                       </h3>
                     </div>
                     <div className="p-3 md:p-6">
@@ -1023,10 +1005,10 @@ export const Profile = () => {
                   </div>
 
                   {/* Referrals List */}
-                  <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                    <div className="bg-gradient-to-r from-gray-700 to-gray-800 p-3 md:p-4">
-                      <h3 className="font-heading text-lg md:text-xl font-semibold text-white flex items-center gap-2">
-                        <Users className="w-5 h-5" />
+                  <div className="bg-white rounded-2xl border border-prestige-beige shadow-ia overflow-hidden">
+                    <div className="px-4 md:px-6 py-4 border-b border-prestige-beige bg-light/50">
+                      <h3 className="font-heading text-lg md:text-xl font-semibold text-dark flex items-center gap-2">
+                        <Users className="w-5 h-5 text-primary" />
                         Mes références ({referrals.length})
                       </h3>
                     </div>
@@ -1071,47 +1053,47 @@ export const Profile = () => {
                 {/* Sidebar - Hidden on mobile, shown on lg */}
                 <div className="hidden lg:block space-y-6">
                   {/* Reward Tiers */}
-                  <div className="bg-gradient-to-br from-dark via-primary to-dark rounded-2xl p-6 text-white shadow-lg overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-secondary/20 rounded-full blur-3xl" />
-                    <h3 className="font-heading text-lg font-semibold mb-6 flex items-center gap-2 relative">
-                      <Trophy className="w-5 h-5 text-secondary" />
-                      Paliers de récompenses
+                  <div className="rounded-2xl border border-prestige-beige bg-white shadow-ia p-6">
+                    <h3 className="font-heading text-lg font-semibold text-dark mb-4 flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-primary" />
+                      Paliers de remerciement
                     </h3>
-                    <div className="space-y-3 relative">
+                    <div className="space-y-2">
                       {TIERS.map((tier) => {
                         const isReached = referralStats?.total_points >= tier.points;
                         const TierIcon = tier.icon;
                         return (
-                          <div 
+                          <div
                             key={tier.name}
-                            className={`flex items-center justify-between p-3 rounded-xl transition-all ${
-                              isReached ? 'bg-white/20' : 'bg-white/5'
+                            className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+                              isReached ? 'border-prestige-beige bg-light/80' : 'border-prestige-beige/50 bg-white'
                             }`}
                           >
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
                               {isReached ? (
-                                <CheckCircle2 className="w-5 h-5 text-secondary" />
+                                <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
                               ) : (
-                                <TierIcon className="w-5 h-5 text-white/50" />
+                                <TierIcon className="w-5 h-5 text-prestige-taupe shrink-0" />
                               )}
-                              <div>
-                                <span className={`text-sm font-medium ${isReached ? 'text-white' : 'text-white/60'}`}>
+                              <div className="min-w-0">
+                                <span className={`text-sm font-medium block truncate ${isReached ? 'text-dark' : 'text-prestige-taupe'}`}>
                                   {tier.name}
                                 </span>
-                                <p className="text-xs text-white/50">{tier.points} pts</p>
+                                <p className="text-xs text-prestige-taupe">{tier.points} pts</p>
                               </div>
                             </div>
-                            <span className={`font-semibold ${isReached ? 'text-secondary' : 'text-white/60'}`}>
+                            <span className={`font-semibold text-sm shrink-0 ${isReached ? 'text-primary' : 'text-prestige-taupe'}`}>
                               {tier.reward}
                             </span>
                           </div>
                         );
                       })}
                     </div>
-                    <p className="text-xs text-white/50 mt-4 text-center">
-                      Les paliers sont cumulatifs!
-                    </p>
-                    <Link to="/recommandations" className="inline-flex items-center gap-1 text-secondary text-sm mt-3 hover:underline w-full justify-center">
+                    <p className="text-xs text-prestige-taupe mt-4 text-center">Les paliers sont cumulatifs.</p>
+                    <Link
+                      to="/recommandations"
+                      className="inline-flex items-center justify-center gap-1 text-primary text-sm font-medium mt-3 w-full hover:underline"
+                    >
                       En savoir plus <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
@@ -1121,17 +1103,17 @@ export const Profile = () => {
 
             {/* Notifications Tab */}
             <TabsContent value="notifications">
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                <div className="bg-gradient-to-r from-primary to-primary/80 p-4 flex items-center justify-between">
-                  <h3 className="font-heading text-xl font-semibold text-white flex items-center gap-2">
-                    <Bell className="w-5 h-5" />
+              <div className="bg-white rounded-2xl border border-prestige-beige shadow-ia overflow-hidden">
+                <div className="px-6 py-4 border-b border-prestige-beige bg-light/50 flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="font-heading text-xl font-semibold text-dark flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-primary" />
                     Mes notifications
                   </h3>
-                  {notifications.some(n => !n.is_read) && (
-                    <Button 
-                      variant="outline" 
+                  {notifications.some((n) => !n.is_read) && (
+                    <Button
+                      variant="outline"
                       onClick={markAllNotificationsRead}
-                      className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                      className="border-prestige-beige text-dark hover:bg-light"
                       data-testid="mark-all-read"
                     >
                       Tout marquer comme lu
