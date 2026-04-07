@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { 
   Settings, Wrench, Users, Mail, Plus, Trash2, 
   ToggleLeft, ToggleRight, CheckCircle2, XCircle, Clock,
-  ChevronDown, Search, LineChart
+  ChevronDown, Search, LineChart, Upload
 } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -14,6 +14,10 @@ import { Textarea } from '../components/ui/textarea';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
+import {
+  extractTextFromPdfFile,
+  parseMorningstarPortfolioPdf,
+} from '../lib/morningstarPdfImport';
 
 export const Admin = () => {
   const { user, loading: authLoading } = useAuth();
@@ -47,6 +51,7 @@ export const Admin = () => {
   // Model portfolios state
   const [modelPortfolios, setModelPortfolios] = useState([]);
   const [portfolioAsOfDate, setPortfolioAsOfDate] = useState('');
+  const [portfolioPdfImporting, setPortfolioPdfImporting] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
@@ -259,6 +264,40 @@ export const Admin = () => {
       fetchAllData();
     } catch (error) {
       toast.error(error.message || 'Erreur');
+    }
+  };
+
+  const handleMorningstarPdfImport = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      toast.error('Veuillez choisir un fichier PDF.');
+      event.target.value = '';
+      return;
+    }
+    setPortfolioPdfImporting(true);
+    try {
+      const text = await extractTextFromPdfFile(file);
+      const parsed = parseMorningstarPortfolioPdf(text);
+      const patch = {
+        ytd_2026: parsed.ytd_2026,
+        year_2025: parsed.year_2025,
+      };
+      if (parsed.asOfDate) {
+        patch.as_of_date = parsed.asOfDate;
+      }
+      const { error } = await supabase.from('model_portfolios').update(patch).eq('key', parsed.key);
+      if (error) throw error;
+      toast.success(
+        `Import reussi: ${parsed.key} — YTD ${parsed.ytd_2026.toFixed(2)} %, annee ${parsed.annualSourceYear} ${parsed.year_2025.toFixed(2)} %`
+      );
+      fetchAllData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Impossible d importer ce PDF. Verifiez le format (rapport Morningstar / iA).');
+    } finally {
+      setPortfolioPdfImporting(false);
+      event.target.value = '';
     }
   };
 
@@ -694,7 +733,7 @@ export const Admin = () => {
                   <h3 className="font-heading text-xl font-semibold text-dark">
                     Rendements des portefeuilles modeles
                   </h3>
-                  <div className="flex items-end gap-2">
+                  <div className="flex flex-wrap items-end gap-2">
                     <div>
                       <Label htmlFor="portfolio-as-of-date">Donnees au</Label>
                       <Input
@@ -707,6 +746,35 @@ export const Admin = () => {
                     </div>
                     <Button onClick={savePortfolioAsOfDate} className="btn-primary">
                       Enregistrer
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="mb-6 p-4 bg-light rounded-xl border border-prestige-beige">
+                  <p className="text-sm font-medium text-dark mb-2">Import PDF (Morningstar / iA)</p>
+                  <p className="text-xs text-prestige-taupe mb-3">
+                    Un rapport par fichier. Le profil est detecte automatiquement (ex. Profil prudent, Portefeuille Audacieux).
+                    Les champs AAJ (YTD) et la derniere annee civile disponible sont mis a jour dans Supabase.
+                    Si la date du rapport est presente, elle remplit aussi « Donnees au ».
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      id="portfolio-pdf-import"
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      className="hidden"
+                      disabled={portfolioPdfImporting}
+                      onChange={handleMorningstarPdfImport}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="gap-2"
+                      disabled={portfolioPdfImporting}
+                      onClick={() => document.getElementById('portfolio-pdf-import')?.click()}
+                    >
+                      <Upload className="w-4 h-4" />
+                      {portfolioPdfImporting ? 'Import en cours...' : 'Importer un PDF'}
                     </Button>
                   </div>
                 </div>
