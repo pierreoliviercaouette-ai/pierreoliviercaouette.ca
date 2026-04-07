@@ -21,6 +21,12 @@ import { Contact, Appointment } from "./pages/Contact";
 import { Privacy, Terms } from "./pages/Legal";
 import { Referral } from "./pages/Referral";
 import { ReferralConsent } from "./pages/ReferralConsent";
+import {
+  AssuranceInvaliditeQuebec,
+  AssuranceVieVictoriaville,
+  ConseillerFinancierVictoriaville,
+  PlanificationFinanciereQuebec,
+} from "./pages/SeoLandingPages";
 
 function App() {
   return (
@@ -47,6 +53,10 @@ function App() {
               <Route path="/recommandations" element={<Referral />} />
               <Route path="/referencement/consentement" element={<Navigate to="/recommandations/consentement" replace />} />
               <Route path="/referencement" element={<Navigate to="/recommandations" replace />} />
+              <Route path="/conseiller-financier-victoriaville" element={<ConseillerFinancierVictoriaville />} />
+              <Route path="/assurance-vie-victoriaville" element={<AssuranceVieVictoriaville />} />
+              <Route path="/assurance-invalidite-quebec" element={<AssuranceInvaliditeQuebec />} />
+              <Route path="/planification-financiere-quebec" element={<PlanificationFinanciereQuebec />} />
               <Route path="/confidentialite" element={<Privacy />} />
               <Route path="/conditions" element={<Terms />} />
             </Routes>

@@ -7,4 +7,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn("Supabase credentials are not set. The Supabase client will not work properly.");
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+const fallbackUrl = 'https://placeholder.supabase.co';
+const fallbackAnon = 'public-anon-key-placeholder';
+
+export const supabase = createClient(
+  supabaseUrl || fallbackUrl,
+  supabaseAnonKey || fallbackAnon
+);

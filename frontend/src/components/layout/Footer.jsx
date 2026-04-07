@@ -18,6 +18,13 @@ export const Footer = () => {
     { name: 'Planification financière', path: '/services#planification' },
   ];
 
+  const seoGuides = [
+    { name: 'Conseiller financier Victoriaville', path: '/conseiller-financier-victoriaville' },
+    { name: 'Assurance vie Victoriaville', path: '/assurance-vie-victoriaville' },
+    { name: 'Assurance invalidite Quebec', path: '/assurance-invalidite-quebec' },
+    { name: 'Planification financiere Quebec', path: '/planification-financiere-quebec' },
+  ];
+
   const socialLinks = [
     { name: 'Facebook', icon: Facebook, url: 'https://www.facebook.com/profile.php?id=61558509312003' },
     { name: 'Instagram', icon: Instagram, url: 'https://www.instagram.com/caouettepierreolivier/' },
@@ -28,7 +35,7 @@ export const Footer = () => {
     <footer className="bg-dark text-white">
       {/* Main Footer */}
       <div className="container-max section-padding">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -91,6 +98,23 @@ export const Footer = () => {
                     {link.name}
                     <ExternalLink className="w-3 h-3" />
                   </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Guides SEO */}
+          <div>
+            <h4 className="font-heading font-semibold text-lg mb-4">Guides</h4>
+            <ul className="space-y-2">
+              {seoGuides.map((item) => (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className="text-white/70 hover:text-secondary transition-colors text-sm"
+                  >
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>
