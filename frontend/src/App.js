@@ -42,7 +42,7 @@ function App() {
           <div className="pt-20">
             <ModelPortfoliosBanner />
           </div>
-          <main className="flex-1 -mt-20">
+          <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/a-propos" element={<About />} />

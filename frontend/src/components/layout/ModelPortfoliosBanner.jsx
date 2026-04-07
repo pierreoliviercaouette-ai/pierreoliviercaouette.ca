@@ -70,7 +70,7 @@ export const ModelPortfoliosBanner = () => {
     <section className="bg-slate-50 border-b border-slate-200/70" aria-label="Apercu des portefeuilles modeles">
       <div className="container-max px-4 md:px-8 py-4">
         <p className="text-sm font-medium text-slate-700 mb-3">
-          Apercu des portefeuilles modeles
+          Mes portefeuilles modeles
         </p>
 
         <div className="hidden md:grid md:grid-cols-5 gap-3">
