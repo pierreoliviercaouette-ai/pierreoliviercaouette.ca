@@ -741,7 +741,7 @@ export const Home = () => {
   useEffect(() => {
     if (!refFromQuery?.trim()) return;
     const ref = encodeURIComponent(refFromQuery.trim());
-    const path = `/referencement/consentement?ref=${ref}`;
+    const path = `/recommandations/consentement?ref=${ref}`;
     const publicOrigin = getPublicSiteOrigin();
     if (typeof window !== 'undefined' && publicOrigin && publicOrigin !== window.location.origin) {
       window.location.replace(`${publicOrigin}${path}`);

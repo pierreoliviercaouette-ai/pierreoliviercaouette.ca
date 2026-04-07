@@ -66,8 +66,8 @@ export const Navbar = () => {
           <div className="hidden lg:flex items-center gap-3">
             {/* Referral CTA - Always visible, special styling */}
             <Link 
-              to="/referencement" 
-              onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/referencement' })}
+              to="/recommandations" 
+              onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/recommandations' })}
               className="relative group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-secondary/20 to-primary/20 hover:from-secondary/30 hover:to-primary/30 rounded-full transition-all duration-300"
               data-testid="nav-referral-cta"
             >
@@ -232,9 +232,9 @@ export const Navbar = () => {
               
               {/* Mobile Referral CTA */}
               <Link
-                to="/referencement"
+                to="/recommandations"
                 onClick={() => {
-                  trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/referencement' });
+                  trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/recommandations' });
                   setIsOpen(false);
                 }}
                 className="flex items-center gap-2 py-2 font-medium text-primary"

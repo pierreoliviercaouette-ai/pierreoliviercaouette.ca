@@ -1,5 +1,5 @@
 import "@/index.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { SupabaseAuthProvider as AuthProvider } from "./context/SupabaseAuthContext";
 import { Navbar } from "./components/layout/Navbar";
@@ -43,8 +43,10 @@ function App() {
               <Route path="/admin" element={<Admin />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/rendez-vous" element={<Appointment />} />
-              <Route path="/referencement/consentement" element={<ReferralConsent />} />
-              <Route path="/referencement" element={<Referral />} />
+              <Route path="/recommandations/consentement" element={<ReferralConsent />} />
+              <Route path="/recommandations" element={<Referral />} />
+              <Route path="/referencement/consentement" element={<Navigate to="/recommandations/consentement" replace />} />
+              <Route path="/referencement" element={<Navigate to="/recommandations" replace />} />
               <Route path="/confidentialite" element={<Privacy />} />
               <Route path="/conditions" element={<Terms />} />
             </Routes>

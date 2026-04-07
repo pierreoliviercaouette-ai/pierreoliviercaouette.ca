@@ -700,7 +700,7 @@ export const Profile = () => {
                           <span className="text-sm">Prendre rendez-vous</span>
                         </Link>
                         <Link 
-                          to="/referencement"
+                          to="/recommandations"
                           className="w-full flex items-center gap-3 p-3 bg-secondary/20 rounded-xl hover:bg-secondary/30 transition-colors border border-secondary/30"
                         >
                           <Gift className="w-5 h-5 text-secondary" />
@@ -1111,7 +1111,7 @@ export const Profile = () => {
                     <p className="text-xs text-white/50 mt-4 text-center">
                       Les paliers sont cumulatifs!
                     </p>
-                    <Link to="/referencement" className="inline-flex items-center gap-1 text-secondary text-sm mt-3 hover:underline w-full justify-center">
+                    <Link to="/recommandations" className="inline-flex items-center gap-1 text-secondary text-sm mt-3 hover:underline w-full justify-center">
                       En savoir plus <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>

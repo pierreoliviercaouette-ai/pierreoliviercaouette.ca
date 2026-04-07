@@ -37,7 +37,7 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.pierreoliviercaouette.ca/referencement</loc>
+    <loc>https://www.pierreoliviercaouette.ca/recommandations</loc>
     <lastmod>2026-04-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -55,7 +55,7 @@
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://www.pierreoliviercaouette.ca/referencement/consentement</loc>
+    <loc>https://www.pierreoliviercaouette.ca/recommandations/consentement</loc>
     <lastmod>2026-04-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>

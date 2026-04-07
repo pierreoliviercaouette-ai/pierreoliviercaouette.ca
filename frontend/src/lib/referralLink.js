@@ -27,5 +27,5 @@ export function getPublicSiteOrigin() {
 export function getReferralConsentUrl(referralCode) {
   if (!referralCode) return '';
   const origin = getPublicSiteOrigin();
-  return `${origin}/referencement/consentement?ref=${encodeURIComponent(referralCode)}`;
+  return `${origin}/recommandations/consentement?ref=${encodeURIComponent(referralCode)}`;
 }
