@@ -6,7 +6,7 @@ import { DEFAULT_MODEL_PORTFOLIOS, DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../../
 function getReturnColor(value) {
   if (value > 0) return 'text-green-600';
   if (value < 0) return 'text-red-600';
-  return 'text-gray-500';
+  return 'text-prestige-taupe';
 }
 
 function formatReturn(value) {
@@ -91,22 +91,25 @@ export const ModelPortfoliosBanner = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <section className="bg-slate-50 border-b border-slate-200/70" aria-label="Apercu des portefeuilles modeles">
-      <div className="container-max px-4 md:px-8 py-4">
-        <p className="text-sm font-medium text-slate-700 mb-3">Mes portefeuilles modeles</p>
+    <section className="bg-light border-b border-prestige-beige" aria-label="Apercu des portefeuilles modeles">
+      <div className="container-max px-4 md:px-8 py-5">
+        <div className="mb-3">
+          <p className="font-heading text-base font-semibold text-dark">Mes portefeuilles modeles</p>
+          <p className="text-xs text-prestige-taupe">Apercu des rendements saisis en administration</p>
+        </div>
 
         <div className="hidden md:grid md:grid-cols-5 gap-3">
           {portfolios.map((portfolio) => (
             <Link
               key={portfolio.key}
               to={portfolio.href}
-              className="bg-white border border-slate-200 rounded-xl px-4 py-3 hover:border-slate-300 transition-colors"
+              className="bg-white border border-prestige-beige rounded-2xl px-4 py-3 hover:border-primary/30 hover:shadow-sm transition-all"
               data-testid={`portfolio-card-${portfolio.key}`}
             >
-              <p className="font-semibold text-slate-900 text-sm mb-2">{portfolio.name}</p>
+              <p className="font-semibold text-dark text-sm mb-2">{portfolio.name}</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">
+                  <p className="text-xs text-prestige-taupe leading-tight">
                     {currentYear} (depuis le 1er janvier)
                   </p>
                   <p className={`text-sm font-semibold ${getReturnColor(portfolio.ytd2026)}`}>
@@ -114,7 +117,7 @@ export const ModelPortfoliosBanner = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">{prevYearLabel}</p>
+                  <p className="text-xs text-prestige-taupe leading-tight">{prevYearLabel}</p>
                   <p className={`text-sm font-semibold ${getReturnColor(portfolio.yearPrev)}`}>
                     {formatReturn(portfolio.yearPrev)}
                   </p>
@@ -128,13 +131,13 @@ export const ModelPortfoliosBanner = () => {
           <div className="md:hidden">
             <Link
               to={activeMobilePortfolio.href}
-              className="block bg-white border border-slate-200 rounded-xl px-4 py-3"
+              className="block bg-white border border-prestige-beige rounded-2xl px-4 py-3"
               data-testid={`portfolio-card-mobile-${activeMobilePortfolio.key}`}
             >
-              <p className="font-semibold text-slate-900 text-sm mb-2">{activeMobilePortfolio.name}</p>
+              <p className="font-semibold text-dark text-sm mb-2">{activeMobilePortfolio.name}</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">
+                  <p className="text-xs text-prestige-taupe leading-tight">
                     {currentYear} (depuis le 1er janvier)
                   </p>
                   <p className={`text-sm font-semibold ${getReturnColor(activeMobilePortfolio.ytd2026)}`}>
@@ -142,7 +145,7 @@ export const ModelPortfoliosBanner = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">{prevYearLabel}</p>
+                  <p className="text-xs text-prestige-taupe leading-tight">{prevYearLabel}</p>
                   <p className={`text-sm font-semibold ${getReturnColor(activeMobilePortfolio.yearPrev)}`}>
                     {formatReturn(activeMobilePortfolio.yearPrev)}
                   </p>
@@ -156,7 +159,7 @@ export const ModelPortfoliosBanner = () => {
                   type="button"
                   onClick={() => setMobileIndex(index)}
                   className={`h-1.5 rounded-full transition-all ${
-                    index === mobileIndex ? 'w-4 bg-slate-500' : 'w-1.5 bg-slate-300'
+                    index === mobileIndex ? 'w-4 bg-primary' : 'w-1.5 bg-prestige-beige'
                   }`}
                   aria-label={`Voir portefeuille ${portfolio.name}`}
                 />
@@ -165,7 +168,7 @@ export const ModelPortfoliosBanner = () => {
           </div>
         )}
 
-        <p className="text-xs text-slate-500 mt-3">
+        <p className="text-xs text-prestige-taupe mt-3">
           Donnees au {asOfLabel}. Portefeuilles modeles a titre indicatif seulement. Les rendements passes ne
           garantissent pas les rendements futurs.
         </p>

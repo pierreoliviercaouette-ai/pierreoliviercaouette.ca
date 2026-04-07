@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
+import { PageHero } from '../components/layout/PageHero';
 
 // Contact info centralisé
 const CONTACT_INFO = {
@@ -102,18 +103,11 @@ export const Contact = () => {
 
   return (
     <main className="pt-20 min-h-screen bg-light" data-testid="contact-page">
-      {/* Hero */}
-      <section className="section-padding gradient-hero">
-        <div className="container-max text-center">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-white mb-6">
-            Contactez-moi
-          </h1>
-          <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-            Une question? Une demande d'analyse? N'hésitez pas à me contacter, 
-            je vous répondrai rapidement.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        badge="Contact"
+        title="Contactez-moi"
+        description="Une question? Une demande d analyse? N hesitez pas a me contacter, je vous repondrai rapidement."
+      />
 
       {/* Contact Form */}
       <section className="section-padding">
@@ -310,18 +304,11 @@ export const Appointment = () => {
 
   return (
     <main className="pt-20 min-h-screen bg-light" data-testid="appointment-page">
-      {/* Hero */}
-      <section className="section-padding gradient-hero">
-        <div className="container-max text-center">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-white mb-6">
-            Prendre rendez-vous
-          </h1>
-          <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-            Réservez une consultation gratuite et sans engagement. 
-            Choisissez le moment qui vous convient.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        badge="Rendez-vous"
+        title="Prendre rendez-vous"
+        description="Reservez une consultation gratuite et sans engagement. Choisissez le moment qui vous convient."
+      />
 
       {/* GoHighLevel Calendar */}
       <section className="section-padding">

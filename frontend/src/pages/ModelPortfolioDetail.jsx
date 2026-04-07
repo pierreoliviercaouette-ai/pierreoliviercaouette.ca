@@ -231,28 +231,28 @@ export const ModelPortfolioDetail = () => {
             Retour a l accueil
           </Link>
 
-          <div className="mt-4 bg-white border border-prestige-beige rounded-2xl p-6 md:p-8">
+          <div className="mt-4 bg-white border border-prestige-beige rounded-2xl p-6 md:p-8 shadow-ia">
             <h1 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-2">
               Portefeuille {portfolio.name}
             </h1>
             <p className="text-sm text-prestige-taupe mb-6">Donnees au {asOfLabel}</p>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="rounded-xl bg-light border border-prestige-beige p-4">
+              <div className="rounded-2xl bg-light border border-prestige-beige p-4">
                 <p className="text-sm text-prestige-taupe">{currentYear} (YTD)</p>
                 <p className="text-2xl font-semibold text-dark mt-1">{formatReturn(portfolio.ytd2026)}</p>
               </div>
-              <div className="rounded-xl bg-light border border-prestige-beige p-4">
+              <div className="rounded-2xl bg-light border border-prestige-beige p-4">
                 <p className="text-sm text-prestige-taupe">{prevYear} (annee civile)</p>
                 <p className="text-2xl font-semibold text-dark mt-1">{formatReturn(portfolio.year2025)}</p>
               </div>
-              <div className="rounded-xl bg-light border border-prestige-beige p-4">
+              <div className="rounded-2xl bg-light border border-prestige-beige p-4">
                 <p className="text-sm text-prestige-taupe">3 ans (annualise)</p>
                 <p className="text-2xl font-semibold text-dark mt-1">
                   {formatReturn(portfolio.annualized3y)}
                 </p>
               </div>
-              <div className="rounded-xl bg-light border border-prestige-beige p-4">
+              <div className="rounded-2xl bg-light border border-prestige-beige p-4">
                 <p className="text-sm text-prestige-taupe">5 ans (annualise)</p>
                 <p className="text-2xl font-semibold text-dark mt-1">
                   {formatReturn(portfolio.annualized5y)}

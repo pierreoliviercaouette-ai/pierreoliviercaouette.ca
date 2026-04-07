@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Wrench, Lock, ArrowRight, Clock, ChevronRight } from 'lucide-react';
+import { PageHero } from '../components/layout/PageHero';
 
 export const Tools = () => {
   const { user } = useAuth();
@@ -36,26 +37,21 @@ export const Tools = () => {
   if (!user) {
     return (
       <main className="pt-20 min-h-screen" data-testid="tools-page-locked">
-        {/* Hero Section */}
-        <section className="section-padding gradient-hero">
+        <PageHero
+          badge="Espace membre"
+          title="Outils financiers"
+          description="Accedez a une bibliotheque d outils pour simuler, calculer et planifier vos decisions financieres."
+        />
+        <section className="bg-primary py-2">
           <div className="container-max text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-white/10 flex items-center justify-center">
-              <Lock className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-white mb-6">
-              Outils financiers
-            </h1>
-            <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-              Accédez à une bibliothèque d'outils pour simuler, calculer et planifier 
-              vos décisions financières. Connectez-vous pour commencer.
-            </p>
-            <Link 
-              to="/connexion" 
-              className="bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-light transition-all inline-flex items-center gap-2"
+            <Link
+              to="/connexion"
+              className="inline-flex items-center gap-2 text-white font-medium hover:text-secondary transition-colors"
               data-testid="tools-login-cta"
             >
-              Se connecter
-              <ArrowRight className="w-5 h-5" />
+              <Lock className="w-4 h-4" />
+              Se connecter pour debloquer les outils
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </section>

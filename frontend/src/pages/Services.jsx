@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Shield, Heart, Umbrella, PiggyBank, FileText, ChevronRight, Users, CheckCircle2, X, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { PageHero } from '../components/layout/PageHero';
 import { useSeoMeta } from '../lib/seo';
 
 const services = [
@@ -389,24 +390,11 @@ export const Services = () => {
 
   return (
     <main className="pt-20" data-testid="services-page">
-      {/* Hero Section */}
-      <section className="section-padding gradient-hero relative overflow-hidden">
-        {/* Background elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 right-20 w-96 h-96 bg-secondary rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl" />
-        </div>
-        
-        <div className="container-max text-center relative z-10">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-white mb-6">
-            Comment puis-je vous aider?
-          </h1>
-          <p className="text-white/80 text-lg md:text-xl max-w-3xl mx-auto">
-            Chaque situation est unique. Cliquez sur un service pour découvrir 
-            comment il peut répondre à vos besoins spécifiques.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        badge="Mes services"
+        title="Comment puis-je vous aider?"
+        description="Chaque situation est unique. Cliquez sur un service pour decouvrir comment il peut repondre a vos besoins specifiques."
+      />
 
       {/* Services Grid */}
       <section className="section-padding bg-white">
