@@ -23,6 +23,7 @@ export const Footer = () => {
     { name: 'Assurance vie Victoriaville', path: '/assurance-vie-victoriaville' },
     { name: 'Assurance invalidite Quebec', path: '/assurance-invalidite-quebec' },
     { name: 'Planification financiere Quebec', path: '/planification-financiere-quebec' },
+    { name: 'Recommander un conseiller financier', path: '/recommander-conseiller-financier' },
   ];
 
   const socialLinks = [

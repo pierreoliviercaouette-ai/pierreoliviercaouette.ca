@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useSeoMeta } from '../lib/seo';
+import { useFaqSchema, useSeoMeta } from '../lib/seo';
 
-function SeoPage({ title, description, canonicalPath, h1, intro, sections }) {
+function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqItems = [] }) {
   useSeoMeta({ title, description, canonicalPath });
+  useFaqSchema(faqItems);
 
   return (
     <main className="pt-20 min-h-screen bg-white">
@@ -34,6 +35,20 @@ function SeoPage({ title, description, canonicalPath, h1, intro, sections }) {
               <Link to="/services" className="btn-secondary">Voir tous les services</Link>
             </div>
           </section>
+
+          {faqItems.length > 0 && (
+            <section className="mt-10">
+              <h2 className="font-heading text-2xl font-bold text-dark mb-4">FAQ</h2>
+              <div className="space-y-4">
+                {faqItems.map((item) => (
+                  <div key={item.question} className="bg-light rounded-xl p-4">
+                    <h3 className="font-semibold text-dark mb-1">{item.question}</h3>
+                    <p className="text-prestige-taupe">{item.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </article>
       </section>
     </main>
@@ -68,6 +83,53 @@ export const ConseillerFinancierVictoriaville = () => (
           "La demarche commence par une analyse simple: revenus, depenses, dettes, objectifs et niveau de protection actuel.",
           "Vous obtenez ensuite un plan clair avec des priorites, des montants cibles et des points de suivi pour garder le cap."
         ]
+      }
+    ]}
+  />
+);
+
+export const RecommanderConseillerFinancier = () => (
+  <SeoPage
+    title="Recommander un conseiller financier | Victoriaville"
+    description="Pourquoi et comment recommander un conseiller financier a Victoriaville. Conseils pratiques pour bien orienter un proche vers un accompagnement adapte."
+    canonicalPath="/recommander-conseiller-financier"
+    h1="Recommander un conseiller financier a Victoriaville"
+    intro="Quand un proche cherche de l'aide pour ses assurances, son epargne ou sa retraite, une bonne recommandation peut faire une vraie difference."
+    sections={[
+      {
+        heading: 'Pourquoi recommander un conseiller financier',
+        paragraphs: [
+          "Un accompagnement professionnel aide a eviter des decisions couteuses et a mettre de l'ordre dans les priorites financieres.",
+          "Recommander un conseiller, c'est surtout aider un proche a obtenir de la clarte, de la structure et un plan adapte a sa realite."
+        ]
+      },
+      {
+        heading: 'Comment choisir le bon conseiller',
+        paragraphs: [
+          "Verifiez la certification, l'approche pedagogique, la transparence et la capacite a expliquer simplement les options.",
+          "Un bon conseiller prend le temps d'ecouter, pose des questions precises et propose des pistes concretes selon les objectifs."
+        ]
+      },
+      {
+        heading: 'Avantages pour la personne recommandee',
+        paragraphs: [
+          "La personne recommandee obtient une analyse personnalisee de sa situation: protection, epargne, fiscalite et retraite.",
+          "Elle peut ensuite prendre des decisions eclairees avec une vision long terme, sans improvisation."
+        ]
+      }
+    ]}
+    faqItems={[
+      {
+        question: 'Quand faut-il consulter un conseiller financier?',
+        answer: 'Des qu il y a une decision importante: assurance, achat de maison, naissance, optimisation REER/CELI ou preparation de la retraite.'
+      },
+      {
+        question: 'Comment savoir si un conseiller est legitime?',
+        answer: 'Validez sa certification, son inscription professionnelle et sa capacite a expliquer clairement les recommandations.'
+      },
+      {
+        question: 'Est-ce qu un conseiller vaut la peine?',
+        answer: 'Oui, lorsque vous voulez structurer vos decisions et eviter les erreurs qui coutent cher sur plusieurs annees.'
       }
     ]}
   />

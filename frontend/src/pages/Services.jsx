@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Shield, Heart, Umbrella, PiggyBank, FileText, ChevronRight, Users, CheckCircle2, X, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { useSeoMeta } from '../lib/seo';
 
 const services = [
   {
@@ -349,6 +350,11 @@ export const Services = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
+  useSeoMeta({
+    title: 'Services financiers | Assurance vie, retraite, invalidite',
+    description: 'Decouvrez les services: assurance vie, epargne retraite, planification financiere, invalidite et strategies de protection au Quebec.',
+    canonicalPath: '/services',
+  });
 
   // Handle scroll to anchor with offset for fixed navbar
   useEffect(() => {

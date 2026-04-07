@@ -26,6 +26,7 @@ import {
   AssuranceVieVictoriaville,
   ConseillerFinancierVictoriaville,
   PlanificationFinanciereQuebec,
+  RecommanderConseillerFinancier,
 } from "./pages/SeoLandingPages";
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
               <Route path="/assurance-vie-victoriaville" element={<AssuranceVieVictoriaville />} />
               <Route path="/assurance-invalidite-quebec" element={<AssuranceInvaliditeQuebec />} />
               <Route path="/planification-financiere-quebec" element={<PlanificationFinanciereQuebec />} />
+              <Route path="/recommander-conseiller-financier" element={<RecommanderConseillerFinancier />} />
               <Route path="/confidentialite" element={<Privacy />} />
               <Route path="/conditions" element={<Terms />} />
             </Routes>

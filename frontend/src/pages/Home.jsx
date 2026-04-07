@@ -4,6 +4,7 @@ import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, Chec
 import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
 import { trackEvent } from '../lib/analytics';
+import { useSeoMeta } from '../lib/seo';
 
 const Hero = () => (
   <section className="relative min-h-[90vh] overflow-hidden">
@@ -737,6 +738,11 @@ export const Home = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const refFromQuery = searchParams.get('ref');
+  useSeoMeta({
+    title: 'Conseiller financier au Quebec | Assurance vie, retraite et placements',
+    description: 'Conseiller en securite financiere a Victoriaville: assurance vie, invalidite, REER, CELI et planification financiere personnalisee.',
+    canonicalPath: '/',
+  });
 
   useEffect(() => {
     if (!refFromQuery?.trim()) return;

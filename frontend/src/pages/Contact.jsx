@@ -8,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
 import { trackEvent } from '../lib/analytics';
+import { useSeoMeta } from '../lib/seo';
 
 // Contact info centralisé
 const CONTACT_INFO = {
@@ -19,6 +20,12 @@ const CONTACT_INFO = {
 };
 
 export const Contact = () => {
+  useSeoMeta({
+    title: 'Contact conseiller financier | Victoriaville et Quebec',
+    description: 'Contactez un conseiller en securite financiere pour vos besoins en assurance, epargne, retraite et planification.',
+    canonicalPath: '/contact',
+  });
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -278,6 +285,12 @@ export const Contact = () => {
 };
 
 export const Appointment = () => {
+  useSeoMeta({
+    title: 'Prendre rendez-vous | Conseiller financier',
+    description: 'Prenez rendez-vous pour une consultation en assurance vie, retraite, REER, CELI et planification financiere.',
+    canonicalPath: '/rendez-vous',
+  });
+
   useEffect(() => {
     trackEvent('view_item', { item_category: 'appointment', item_id: 'booking_page' });
     // Load GoHighLevel widget script

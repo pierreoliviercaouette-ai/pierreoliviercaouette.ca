@@ -26,3 +26,34 @@ export function useSeoMeta({ title, description, canonicalPath }) {
     }
   }, [title, description, canonicalPath]);
 }
+
+export function useFaqSchema(faqItems = []) {
+  useEffect(() => {
+    if (!Array.isArray(faqItems) || faqItems.length === 0) return undefined;
+
+    const existing = document.getElementById('faq-schema-jsonld');
+    if (existing) existing.remove();
+
+    const script = document.createElement('script');
+    script.id = 'faq-schema-jsonld';
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqItems.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    });
+    document.head.appendChild(script);
+
+    return () => {
+      const current = document.getElementById('faq-schema-jsonld');
+      if (current) current.remove();
+    };
+  }, [faqItems]);
+}

@@ -2,9 +2,15 @@ import { Link } from 'react-router-dom';
 import { Gift, Users, CheckCircle2, ArrowRight, Trophy, Star, Sparkles, Heart, MessageSquare, UserCheck, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
+import { useSeoMeta } from '../lib/seo';
 
 export const Referral = () => {
   const { user } = useAuth();
+  useSeoMeta({
+    title: 'Programme de recommandations | Victoriaville',
+    description: 'Invitez des proches a decouvrir nos services via une mise en relation consentie. Programme de recommandations conforme et transparent.',
+    canonicalPath: '/recommandations',
+  });
   
   const tiers = [
     {
