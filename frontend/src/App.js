@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { SupabaseAuthProvider as AuthProvider } from "./context/SupabaseAuthContext";
 import { Navbar } from "./components/layout/Navbar";
+import { ModelPortfoliosBanner } from "./components/layout/ModelPortfoliosBanner";
 import { Footer } from "./components/layout/Footer";
 import { BackToTop } from "./components/layout/BackToTop";
 import { ScrollToTop } from "./components/layout/ScrollToTop";
@@ -21,6 +22,7 @@ import { Contact, Appointment } from "./pages/Contact";
 import { Privacy, Terms } from "./pages/Legal";
 import { Referral } from "./pages/Referral";
 import { ReferralConsent } from "./pages/ReferralConsent";
+import { ModelPortfolioDetail } from "./pages/ModelPortfolioDetail";
 import {
   AssuranceInvaliditeQuebec,
   AssuranceVieVictoriaville,
@@ -37,7 +39,10 @@ function App() {
         <AnalyticsTracker />
         <div className="min-h-screen flex flex-col">
           <Navbar />
-          <main className="flex-1">
+          <div className="pt-20">
+            <ModelPortfoliosBanner />
+          </div>
+          <main className="flex-1 -mt-20">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/a-propos" element={<About />} />
@@ -52,6 +57,7 @@ function App() {
               <Route path="/rendez-vous" element={<Appointment />} />
               <Route path="/recommandations/consentement" element={<ReferralConsent />} />
               <Route path="/recommandations" element={<Referral />} />
+              <Route path="/portefeuilles/:slug" element={<ModelPortfolioDetail />} />
               <Route path="/referencement/consentement" element={<Navigate to="/recommandations/consentement" replace />} />
               <Route path="/referencement" element={<Navigate to="/recommandations" replace />} />
               <Route path="/conseiller-financier-victoriaville" element={<ConseillerFinancierVictoriaville />} />

@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { 
   Settings, Wrench, Users, Mail, Plus, Trash2, 
   ToggleLeft, ToggleRight, CheckCircle2, XCircle, Clock,
-  ChevronDown, Search
+  ChevronDown, Search, LineChart
 } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -43,6 +43,10 @@ export const Admin = () => {
   // Users state
   const [users, setUsers] = useState([]);
   const [userSearch, setUserSearch] = useState('');
+  
+  // Model portfolios state
+  const [modelPortfolios, setModelPortfolios] = useState([]);
+  const [portfolioAsOfDate, setPortfolioAsOfDate] = useState('');
 
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +62,7 @@ export const Admin = () => {
 
   const fetchAllData = async () => {
     try {
-      const [toolsRes, referralsRes, contactsRes, usersRes] = await Promise.all([
+      const [toolsRes, referralsRes, contactsRes, usersRes, portfoliosRes] = await Promise.all([
         supabase.from('tools').select('*').order('created_at', { ascending: false }),
         supabase
           .from('referrals')
@@ -74,13 +78,15 @@ export const Admin = () => {
           )
           .order('created_at', { ascending: false }),
         supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*').order('created_at', { ascending: false })
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('model_portfolios').select('*').order('display_order', { ascending: true })
       ]);
 
       if (toolsRes.error) throw toolsRes.error;
       if (referralsRes.error) throw referralsRes.error;
       if (contactsRes.error) throw contactsRes.error;
       if (usersRes.error) throw usersRes.error;
+      if (portfoliosRes.error) throw portfoliosRes.error;
 
       const rawRefs = referralsRes.data || [];
       setTools(toolsRes.data || []);
@@ -95,6 +101,9 @@ export const Admin = () => {
       );
       setContacts(contactsRes.data || []);
       setUsers(usersRes.data || []);
+      const portfolios = portfoliosRes.data || [];
+      setModelPortfolios(portfolios);
+      setPortfolioAsOfDate(portfolios[0]?.as_of_date || '');
     } catch (error) {
       console.error('Failed to fetch admin data:', error);
       toast.error(error.message || 'Erreur lors du chargement des données');
@@ -218,6 +227,36 @@ export const Admin = () => {
     }
   };
 
+  const updateModelPortfolio = async (portfolioId, field, value) => {
+    try {
+      const updateValue = field === 'ytd_2026' || field === 'year_2025'
+        ? Number(value || 0)
+        : value;
+      const { error } = await supabase
+        .from('model_portfolios')
+        .update({ [field]: updateValue })
+        .eq('id', portfolioId);
+      if (error) throw error;
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.message || 'Erreur');
+    }
+  };
+
+  const savePortfolioAsOfDate = async () => {
+    try {
+      const { error } = await supabase
+        .from('model_portfolios')
+        .update({ as_of_date: portfolioAsOfDate })
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) throw error;
+      toast.success('Date mise a jour');
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.message || 'Erreur');
+    }
+  };
+
   const filteredReferrals = allReferrals.filter(ref => 
     referralFilter === 'all' || ref.status === referralFilter
   );
@@ -263,7 +302,7 @@ export const Admin = () => {
       <section className="section-padding">
         <div className="container-max">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4 mb-8">
+            <TabsList className="grid w-full grid-cols-5 mb-8">
               <TabsTrigger value="tools" className="flex items-center gap-2">
                 <Wrench className="w-4 h-4" />
                 <span className="hidden sm:inline">Outils</span>
@@ -279,6 +318,10 @@ export const Admin = () => {
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 <span className="hidden sm:inline">Utilisateurs</span>
+              </TabsTrigger>
+              <TabsTrigger value="portfolios" className="flex items-center gap-2">
+                <LineChart className="w-4 h-4" />
+                <span className="hidden sm:inline">Portefeuilles</span>
               </TabsTrigger>
             </TabsList>
 
@@ -629,6 +672,74 @@ export const Admin = () => {
                               {u.is_admin ? 'Retirer admin' : 'Rendre admin'}
                             </Button>
                           )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Model Portfolios Tab */}
+            <TabsContent value="portfolios">
+              <div className="bg-white rounded-2xl p-6 shadow-ia">
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+                  <h3 className="font-heading text-xl font-semibold text-dark">
+                    Rendements des portefeuilles modeles
+                  </h3>
+                  <div className="flex items-end gap-2">
+                    <div>
+                      <Label htmlFor="portfolio-as-of-date">Donnees au</Label>
+                      <Input
+                        id="portfolio-as-of-date"
+                        type="date"
+                        value={portfolioAsOfDate}
+                        onChange={(e) => setPortfolioAsOfDate(e.target.value)}
+                        className="w-[180px]"
+                      />
+                    </div>
+                    <Button onClick={savePortfolioAsOfDate} className="btn-primary">
+                      Enregistrer
+                    </Button>
+                  </div>
+                </div>
+
+                {modelPortfolios.length === 0 ? (
+                  <p className="text-prestige-taupe text-center py-8">Aucun portefeuille trouve</p>
+                ) : (
+                  <div className="space-y-3">
+                    {modelPortfolios.map((portfolio) => (
+                      <div key={portfolio.id} className="p-4 bg-light rounded-xl">
+                        <div className="grid md:grid-cols-4 gap-3 items-end">
+                          <div>
+                            <Label>Profil</Label>
+                            <Input value={portfolio.name} disabled />
+                          </div>
+                          <div>
+                            <Label>Rendement 2026 (YTD)</Label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              defaultValue={portfolio.ytd_2026}
+                              onBlur={(e) => updateModelPortfolio(portfolio.id, 'ytd_2026', e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label>Rendement 2025</Label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              defaultValue={portfolio.year_2025}
+                              onBlur={(e) => updateModelPortfolio(portfolio.id, 'year_2025', e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label>Lien detail</Label>
+                            <Input
+                              defaultValue={portfolio.href}
+                              onBlur={(e) => updateModelPortfolio(portfolio.id, 'href', e.target.value)}
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
