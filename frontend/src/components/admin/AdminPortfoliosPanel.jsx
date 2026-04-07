@@ -33,8 +33,9 @@ export function AdminPortfoliosPanel({ onRefresh }) {
 
   const updateModelPortfolio = async (portfolioId, field, value) => {
     try {
+      const numericFields = ['ytd_2026', 'year_2025', 'annualized_3y', 'annualized_5y'];
       const parsed = Number(value);
-      const updateValue = Number.isNaN(parsed) ? 0 : parsed;
+      const updateValue = numericFields.includes(field) ? (Number.isNaN(parsed) ? 0 : parsed) : value;
       const { error } = await supabase
         .from('model_portfolios')
         .update({ [field]: updateValue })
@@ -68,8 +69,8 @@ export function AdminPortfoliosPanel({ onRefresh }) {
             <div key={portfolio.id} className="p-4 bg-light rounded-xl border border-prestige-beige">
               <div className="grid md:grid-cols-5 gap-3 items-end">
                 <div>
-                  <Label>Profil</Label>
-                  <Input value={portfolio.name} disabled />
+                  <Label>Titre du portefeuille</Label>
+                  <Input defaultValue={portfolio.name} onBlur={(e) => updateModelPortfolio(portfolio.id, 'name', e.target.value)} />
                 </div>
 
                 <div>
