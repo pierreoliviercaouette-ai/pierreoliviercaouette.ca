@@ -4,6 +4,7 @@ import {
   compoundWealthFromMonthly,
   computeSnapshotKpis,
   monthKey,
+  splitAnnualIntoMonthly,
   splitYtdIntoYearMonths,
 } from './portfolioEngine';
 
@@ -174,6 +175,11 @@ export async function upsertFundFromParsed(supabase, parsed) {
           category: parsed.category,
           source: 'pdf_import',
           is_active: true,
+          metadata: {
+            sectorAllocation: parsed.sectorAllocation || [],
+            geographicAllocation: parsed.geographicAllocation || [],
+            importKind: 'ia_ecof_pdf',
+          },
         },
         { onConflict: 'external_code' }
       )
@@ -195,6 +201,11 @@ export async function upsertFundFromParsed(supabase, parsed) {
           category: parsed.category,
           source: 'pdf_import',
           is_active: true,
+          metadata: {
+            sectorAllocation: parsed.sectorAllocation || [],
+            geographicAllocation: parsed.geographicAllocation || [],
+            importKind: 'ia_ecof_pdf',
+          },
         })
         .eq('id', fundId);
       if (uErr) throw uErr;
@@ -206,6 +217,11 @@ export async function upsertFundFromParsed(supabase, parsed) {
           category: parsed.category,
           source: 'pdf_import',
           is_active: true,
+          metadata: {
+            sectorAllocation: parsed.sectorAllocation || [],
+            geographicAllocation: parsed.geographicAllocation || [],
+            importKind: 'ia_ecof_pdf',
+          },
         })
         .select('id')
         .single();
@@ -248,6 +264,37 @@ export async function persistManualFundYtd(supabase, fundId, ytdPct, asOfDateIso
     const { error: insErr } = await supabase.from('fund_monthly_returns').insert(payload);
     if (insErr) throw insErr;
   }
+
+  return recalculateAllModelPortfolios(supabase);
+}
+
+/**
+ * Manual civil-year return entry for a fund (distributed over 12 months geometrically).
+ */
+export async function persistManualFundCivilYear(supabase, fundId, year, annualPct) {
+  const y = Number(year);
+  const pct = Number(annualPct);
+  const months = splitAnnualIntoMonthly(pct);
+
+  const { error: delErr } = await supabase
+    .from('fund_monthly_returns')
+    .delete()
+    .eq('fund_id', fundId)
+    .gte('month_date', `${y}-01-01`)
+    .lte('month_date', `${y}-12-31`);
+  if (delErr) throw delErr;
+
+  const payload = [];
+  for (let m = 1; m <= 12; m += 1) {
+    payload.push({
+      fund_id: fundId,
+      month_date: monthKey(y, m),
+      return_pct: months[m - 1],
+    });
+  }
+
+  const { error: insErr } = await supabase.from('fund_monthly_returns').insert(payload);
+  if (insErr) throw insErr;
 
   return recalculateAllModelPortfolios(supabase);
 }

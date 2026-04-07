@@ -1,6 +1,8 @@
 import {
   assertAllowedIaFundFileName,
   extractCivilYearFundBlock,
+  extractIaAllocations,
+  extractIaFundName,
   extractIaDdaAndAnnualTable,
   extractLooseFundReturnBlock,
   parseFundFactsheetText,
@@ -90,5 +92,31 @@ describe('fundSheetPdfImport', () => {
     expect(() => assertAllowedIaFundFileName('ECOF test.pdf')).not.toThrow();
     expect(() => assertAllowedIaFundFileName('autre-fonds.pdf')).toThrow();
     expect(() => assertAllowedIaFundFileName('ecof-not-pdf.txt')).toThrow();
+  });
+
+  test('extractIaFundName parses Fidelity Innovations mondiales MC', () => {
+    const text = `
+      Fonds spécialisés
+      Fidelity Innovations
+      mondialesMC
+      2017 2018 2019 2020
+    `;
+    expect(extractIaFundName(text)).toBe('Fidelity Innovations mondiales MC');
+  });
+
+  test('extractIaAllocations parses sector and geography blocks', () => {
+    const text = `
+      57,19 % Technologies de l'information
+      22,04 % Services de communication
+      Répartition sectorielle
+      85,58 % États-Unis
+      13,15 % Canada
+      Répartition géographique
+    `;
+    const parsed = extractIaAllocations(text);
+    expect(parsed.sectorAllocation.length).toBe(2);
+    expect(parsed.geographicAllocation.length).toBe(2);
+    expect(parsed.sectorAllocation[0].label).toContain('Technologies');
+    expect(parsed.geographicAllocation[0].label).toContain('États-Unis');
   });
 });

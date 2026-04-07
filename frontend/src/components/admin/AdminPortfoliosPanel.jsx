@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { supabase } from '../../lib/supabaseClient';
 import { IA_ALLOWED_FUND_FILENAME, parseFundFactsheetPdfFile } from '../../lib/fundSheetPdfImport';
 import {
+  persistManualFundCivilYear,
   persistManualFundYtd,
   recalculateAllModelPortfolios,
   upsertFundFromParsed,
@@ -26,6 +27,8 @@ export function AdminPortfoliosPanel({ onRefresh }) {
   const [manualFundId, setManualFundId] = useState('');
   const [manualYtdPct, setManualYtdPct] = useState('');
   const [manualAsOfDate, setManualAsOfDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [manualPrevYear, setManualPrevYear] = useState(() => String(new Date().getFullYear() - 1));
+  const [manualPrevYearPct, setManualPrevYearPct] = useState('');
   const [manualBusy, setManualBusy] = useState(false);
   const [recalcBusy, setRecalcBusy] = useState(false);
 
@@ -151,6 +154,38 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     }
   };
 
+  const saveManualFundPrevYear = async () => {
+    if (!manualFundId) {
+      toast.error('Choisissez un fonds.');
+      return;
+    }
+    if (!manualPrevYear || Number.isNaN(Number(manualPrevYear))) {
+      toast.error('Entrez une annee valide.');
+      return;
+    }
+    if (manualPrevYearPct === '' || Number.isNaN(Number(manualPrevYearPct))) {
+      toast.error('Entrez un rendement annuel valide.');
+      return;
+    }
+    setManualBusy(true);
+    try {
+      await persistManualFundCivilYear(
+        supabase,
+        manualFundId,
+        Number(manualPrevYear),
+        Number(manualPrevYearPct)
+      );
+      toast.success('Rendement annuel enregistre et portefeuilles recalcules.');
+      await load();
+      onRefresh?.();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Erreur enregistrement rendement annuel.');
+    } finally {
+      setManualBusy(false);
+    }
+  };
+
   const weightTotal = useMemo(() => {
     return holdingRows.reduce((s, r) => s + (parseFloat(r.weight_pct) || 0), 0);
   }, [holdingRows]);
@@ -271,6 +306,8 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                 ytdPct: fundPreview.ytdPct,
                 asOfDate: fundPreview.asOfDate,
                 years: Object.keys(fundPreview.annualByYear || {}).length,
+                sectorCount: (fundPreview.sectorAllocation || []).length,
+                geographicCount: (fundPreview.geographicAllocation || []).length,
               },
               null,
               2
@@ -318,6 +355,55 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         <div className="mt-3">
           <Button type="button" variant="outline" disabled={manualBusy} onClick={saveManualFundYtd}>
             {manualBusy ? 'Enregistrement...' : 'Enregistrer AAJ manuel'}
+          </Button>
+        </div>
+      </div>
+
+      <div className="p-4 bg-light rounded-xl border border-prestige-beige">
+        <p className="text-sm font-medium text-dark mb-2">Saisie manuelle annee civile par fonds</p>
+        <p className="text-xs text-prestige-taupe mb-3">
+          Permet d entrer/modifier le rendement d une annee complete (ex: annee derniere).
+        </p>
+        <div className="grid md:grid-cols-4 gap-3 items-end">
+          <div className="md:col-span-2">
+            <Label>Fonds</Label>
+            <select
+              className="w-full mt-1 px-3 py-2 border border-prestige-beige rounded-lg bg-white"
+              value={manualFundId}
+              onChange={(e) => setManualFundId(e.target.value)}
+            >
+              <option value="">— Choisir —</option>
+              {funds.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name}
+                  {f.external_code ? ` (${f.external_code})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label>Annee</Label>
+            <Input
+              type="number"
+              min="2000"
+              max="2100"
+              value={manualPrevYear}
+              onChange={(e) => setManualPrevYear(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label>Rendement annuel (%)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={manualPrevYearPct}
+              onChange={(e) => setManualPrevYearPct(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="mt-3">
+          <Button type="button" variant="outline" disabled={manualBusy} onClick={saveManualFundPrevYear}>
+            {manualBusy ? 'Enregistrement...' : 'Enregistrer annee civile'}
           </Button>
         </div>
       </div>

@@ -150,6 +150,92 @@ export function extractFundName(text) {
   return first ? first.slice(0, 200) : 'Fonds importe';
 }
 
+function normalizeFundName(name) {
+  return name
+    .replace(/([a-z])([A-Z]{2,})/g, '$1 $2')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function extractIaFundName(text) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  const familyIdx = lines.findIndex((l) => /^Fonds\b/i.test(l));
+  if (familyIdx >= 0) {
+    const nameParts = [];
+    for (let i = familyIdx + 1; i <= Math.min(lines.length - 1, familyIdx + 4); i += 1) {
+      const line = lines[i];
+      if (
+        /\d{4}/.test(line) ||
+        /Croissance de 10 000/i.test(line) ||
+        /Rendements compos[ée]s/i.test(line) ||
+        /Rendements annuels/i.test(line) ||
+        /Option de garantie/i.test(line)
+      ) {
+        break;
+      }
+      if (!/%/.test(line) && line.length >= 3) {
+        nameParts.push(line);
+      }
+    }
+    if (nameParts.length) {
+      return normalizeFundName(nameParts.join(' ')).slice(0, 200);
+    }
+  }
+  return extractFundName(text);
+}
+
+function parseAllocationLine(line) {
+  const m = line.match(/^(-?\d+(?:,\d+)?)\s*%\s+(.+)$/);
+  if (!m) return null;
+  return {
+    label: m[2].trim(),
+    weightPct: toFloatPercent(`${m[1]}%`),
+  };
+}
+
+function extractAllocationBeforeHeading(lines, headingRegex) {
+  const idx = lines.findIndex((l) => headingRegex.test(l));
+  if (idx <= 0) return [];
+  const out = [];
+  let misses = 0;
+  for (let i = idx - 1; i >= Math.max(0, idx - 20); i -= 1) {
+    if (
+      /R[ée]partition sectorielle/i.test(lines[i]) ||
+      /R[ée]partition g[ée]ographique/i.test(lines[i]) ||
+      /Composition de l'actif/i.test(lines[i]) ||
+      /Principaux titres/i.test(lines[i]) ||
+      /Code du Fonds/i.test(lines[i])
+    ) {
+      if (out.length) break;
+      continue;
+    }
+    const parsed = parseAllocationLine(lines[i]);
+    if (parsed) {
+      out.unshift(parsed);
+      misses = 0;
+    } else if (out.length) {
+      misses += 1;
+      if (misses >= 2) break;
+    }
+  }
+  return out;
+}
+
+export function extractIaAllocations(text) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  return {
+    sectorAllocation: extractAllocationBeforeHeading(lines, /Répartition sectorielle/i),
+    geographicAllocation: extractAllocationBeforeHeading(lines, /Répartition géographique/i),
+  };
+}
+
 export function extractCategory(text) {
   const m = text.match(/Cat[ée]gorie[:\s]+(.+)/i);
   return m ? m[1].trim().slice(0, 120) : null;
@@ -184,12 +270,13 @@ export function parseFundFactsheetText(text) {
   }
 
   return {
-    fundName: extractFundName(text),
+    fundName: extractIaFundName(text),
     externalCode: extractIsin(text),
     category: extractCategory(text),
     annualByYear: cleanedAnnual,
     ytdPct: block.ytdPct,
     asOfDate: asIso,
+    ...extractIaAllocations(text),
   };
 }
 
