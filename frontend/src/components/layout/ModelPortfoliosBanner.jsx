@@ -10,42 +10,107 @@ function getReturnColor(value) {
 }
 
 function formatReturn(value) {
-  const sign = value > 0 ? '+' : value < 0 ? '-' : '';
-  const abs = Math.abs(value).toFixed(1).replace('.', ',');
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
+  const n = Number(value);
+  const sign = n > 0 ? '+' : n < 0 ? '-' : '';
+  const abs = Math.abs(n).toFixed(1).replace('.', ',');
   return `${sign}${abs} %`;
 }
 
 export const ModelPortfoliosBanner = () => {
-  const [portfolios, setPortfolios] = useState(DEFAULT_MODEL_PORTFOLIOS);
+  const [portfolios, setPortfolios] = useState(
+    DEFAULT_MODEL_PORTFOLIOS.map((p) => ({
+      key: p.key,
+      name: p.name,
+      ytd2026: p.ytd2026,
+      yearPrev: p.year2025,
+      href: p.href,
+    }))
+  );
   const [asOfLabel, setAsOfLabel] = useState(DEFAULT_MODEL_PORTFOLIOS_AS_OF);
+  const [prevYearLabel, setPrevYearLabel] = useState(2025);
   const [mobileIndex, setMobileIndex] = useState(0);
 
   useEffect(() => {
     const loadPortfolios = async () => {
       const { data, error } = await supabase
-        .from('model_portfolios')
-        .select('key,name,ytd_2026,year_2025,href,as_of_date')
-        .order('display_order', { ascending: true });
+        .from('portfolio_snapshots')
+        .select(
+          `
+          ytd_pct,
+          prev_civil_year,
+          prev_civil_year_pct,
+          as_of_date,
+          computed_at,
+          portfolio_definitions ( key, name, href, display_order )
+        `
+        )
+        .order('computed_at', { ascending: false });
 
-      if (error || !data || data.length === 0) return;
+      if (error || !data || data.length === 0) {
+        const { data: legacy } = await supabase
+          .from('model_portfolios')
+          .select('key,name,ytd_2026,year_2025,href,as_of_date')
+          .order('display_order', { ascending: true });
+        if (!legacy?.length) return;
+        setPortfolios(
+          legacy.map((item) => ({
+            key: item.key,
+            name: item.name,
+            ytd2026: Number(item.ytd_2026),
+            yearPrev: Number(item.year_2025),
+            href: item.href,
+          }))
+        );
+        setPrevYearLabel(new Date().getFullYear() - 1);
+        const firstDate = legacy[0]?.as_of_date;
+        if (firstDate) {
+          setAsOfLabel(
+            new Date(firstDate).toLocaleDateString('fr-CA', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })
+          );
+        }
+        return;
+      }
 
-      const mapped = data.map((item) => ({
-        key: item.key,
-        name: item.name,
-        ytd2026: Number(item.ytd_2026),
-        year2025: Number(item.year_2025),
-        href: item.href,
-      }));
-      setPortfolios(mapped);
+      const bestByKey = new Map();
+      for (const row of data) {
+        const def = row.portfolio_definitions;
+        if (!def?.key) continue;
+        if (!bestByKey.has(def.key)) bestByKey.set(def.key, row);
+      }
 
-      const firstDate = data[0]?.as_of_date;
+      const sorted = [...bestByKey.values()].sort(
+        (a, b) =>
+          (a.portfolio_definitions?.display_order ?? 0) -
+          (b.portfolio_definitions?.display_order ?? 0)
+      );
+
+      setPortfolios(
+        sorted.map((row) => ({
+          key: row.portfolio_definitions.key,
+          name: row.portfolio_definitions.name,
+          ytd2026: row.ytd_pct != null ? Number(row.ytd_pct) : null,
+          yearPrev: row.prev_civil_year_pct != null ? Number(row.prev_civil_year_pct) : null,
+          href: row.portfolio_definitions.href,
+        }))
+      );
+
+      const py = sorted[0]?.prev_civil_year;
+      if (py != null) setPrevYearLabel(py);
+
+      const firstDate = sorted[0]?.as_of_date;
       if (firstDate) {
-        const formatted = new Date(firstDate).toLocaleDateString('fr-CA', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        });
-        setAsOfLabel(formatted);
+        setAsOfLabel(
+          new Date(firstDate).toLocaleDateString('fr-CA', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          })
+        );
       }
     };
 
@@ -65,13 +130,12 @@ export const ModelPortfoliosBanner = () => {
   }, [mobileIndex, portfolios.length]);
 
   const activeMobilePortfolio = portfolios[mobileIndex];
+  const currentYear = new Date().getFullYear();
 
   return (
     <section className="bg-slate-50 border-b border-slate-200/70" aria-label="Apercu des portefeuilles modeles">
       <div className="container-max px-4 md:px-8 py-4">
-        <p className="text-sm font-medium text-slate-700 mb-3">
-          Mes portefeuilles modeles
-        </p>
+        <p className="text-sm font-medium text-slate-700 mb-3">Mes portefeuilles modeles</p>
 
         <div className="hidden md:grid md:grid-cols-5 gap-3">
           {portfolios.map((portfolio) => (
@@ -84,15 +148,17 @@ export const ModelPortfoliosBanner = () => {
               <p className="font-semibold text-slate-900 text-sm mb-2">{portfolio.name}</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">2026 (depuis le 1er janvier)</p>
+                  <p className="text-xs text-slate-500 leading-tight">
+                    {currentYear} (depuis le 1er janvier)
+                  </p>
                   <p className={`text-sm font-semibold ${getReturnColor(portfolio.ytd2026)}`}>
                     {formatReturn(portfolio.ytd2026)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">2025</p>
-                  <p className={`text-sm font-semibold ${getReturnColor(portfolio.year2025)}`}>
-                    {formatReturn(portfolio.year2025)}
+                  <p className="text-xs text-slate-500 leading-tight">{prevYearLabel}</p>
+                  <p className={`text-sm font-semibold ${getReturnColor(portfolio.yearPrev)}`}>
+                    {formatReturn(portfolio.yearPrev)}
                   </p>
                 </div>
               </div>
@@ -110,15 +176,17 @@ export const ModelPortfoliosBanner = () => {
               <p className="font-semibold text-slate-900 text-sm mb-2">{activeMobilePortfolio.name}</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">2026 (depuis le 1er janvier)</p>
+                  <p className="text-xs text-slate-500 leading-tight">
+                    {currentYear} (depuis le 1er janvier)
+                  </p>
                   <p className={`text-sm font-semibold ${getReturnColor(activeMobilePortfolio.ytd2026)}`}>
                     {formatReturn(activeMobilePortfolio.ytd2026)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 leading-tight">2025</p>
-                  <p className={`text-sm font-semibold ${getReturnColor(activeMobilePortfolio.year2025)}`}>
-                    {formatReturn(activeMobilePortfolio.year2025)}
+                  <p className="text-xs text-slate-500 leading-tight">{prevYearLabel}</p>
+                  <p className={`text-sm font-semibold ${getReturnColor(activeMobilePortfolio.yearPrev)}`}>
+                    {formatReturn(activeMobilePortfolio.yearPrev)}
                   </p>
                 </div>
               </div>

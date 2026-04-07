@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { 
   Settings, Wrench, Users, Mail, Plus, Trash2, 
   ToggleLeft, ToggleRight, CheckCircle2, XCircle, Clock,
-  ChevronDown, Search, LineChart, Upload
+  ChevronDown, Search,   LineChart
 } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -14,10 +14,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
-import {
-  extractTextFromPdfFile,
-  parseMorningstarPortfolioPdf,
-} from '../lib/morningstarPdfImport';
+import { AdminPortfoliosPanel } from '../components/admin/AdminPortfoliosPanel';
 
 export const Admin = () => {
   const { user, loading: authLoading } = useAuth();
@@ -48,11 +45,6 @@ export const Admin = () => {
   const [users, setUsers] = useState([]);
   const [userSearch, setUserSearch] = useState('');
   
-  // Model portfolios state
-  const [modelPortfolios, setModelPortfolios] = useState([]);
-  const [portfolioAsOfDate, setPortfolioAsOfDate] = useState('');
-  const [portfolioPdfImporting, setPortfolioPdfImporting] = useState(false);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,7 +59,7 @@ export const Admin = () => {
 
   const fetchAllData = async () => {
     try {
-      const [toolsRes, referralsRes, contactsRes, usersRes, portfoliosRes] = await Promise.all([
+      const [toolsRes, referralsRes, contactsRes, usersRes] = await Promise.all([
         supabase.from('tools').select('*').order('created_at', { ascending: false }),
         supabase
           .from('referrals')
@@ -83,24 +75,13 @@ export const Admin = () => {
           )
           .order('created_at', { ascending: false }),
         supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('model_portfolios').select('*').order('display_order', { ascending: true })
+        supabase.from('profiles').select('*').order('created_at', { ascending: false })
       ]);
 
       if (toolsRes.error) throw toolsRes.error;
       if (referralsRes.error) throw referralsRes.error;
       if (contactsRes.error) throw contactsRes.error;
       if (usersRes.error) throw usersRes.error;
-      if (portfoliosRes.error) {
-        console.warn('model_portfolios:', portfoliosRes.error.message);
-        setModelPortfolios([]);
-        setPortfolioAsOfDate('');
-      } else {
-        const portfolios = portfoliosRes.data || [];
-        setModelPortfolios(portfolios);
-        setPortfolioAsOfDate(portfolios[0]?.as_of_date || '');
-      }
-
       const rawRefs = referralsRes.data || [];
       setTools(toolsRes.data || []);
       setAllReferrals(
@@ -234,70 +215,6 @@ export const Admin = () => {
       fetchAllData();
     } catch (error) {
       toast.error(error.message || 'Erreur');
-    }
-  };
-
-  const updateModelPortfolio = async (portfolioId, field, value) => {
-    try {
-      const updateValue = field === 'ytd_2026' || field === 'year_2025'
-        ? Number(value || 0)
-        : value;
-      const { error } = await supabase
-        .from('model_portfolios')
-        .update({ [field]: updateValue })
-        .eq('id', portfolioId);
-      if (error) throw error;
-      fetchAllData();
-    } catch (error) {
-      toast.error(error.message || 'Erreur');
-    }
-  };
-
-  const savePortfolioAsOfDate = async () => {
-    try {
-      const { error } = await supabase
-        .from('model_portfolios')
-        .update({ as_of_date: portfolioAsOfDate })
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-      if (error) throw error;
-      toast.success('Date mise a jour');
-      fetchAllData();
-    } catch (error) {
-      toast.error(error.message || 'Erreur');
-    }
-  };
-
-  const handleMorningstarPdfImport = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.pdf')) {
-      toast.error('Veuillez choisir un fichier PDF.');
-      event.target.value = '';
-      return;
-    }
-    setPortfolioPdfImporting(true);
-    try {
-      const text = await extractTextFromPdfFile(file);
-      const parsed = parseMorningstarPortfolioPdf(text);
-      const patch = {
-        ytd_2026: parsed.ytd_2026,
-        year_2025: parsed.year_2025,
-      };
-      if (parsed.asOfDate) {
-        patch.as_of_date = parsed.asOfDate;
-      }
-      const { error } = await supabase.from('model_portfolios').update(patch).eq('key', parsed.key);
-      if (error) throw error;
-      toast.success(
-        `Import reussi: ${parsed.key} — YTD ${parsed.ytd_2026.toFixed(2)} %, annee ${parsed.annualSourceYear} ${parsed.year_2025.toFixed(2)} %`
-      );
-      fetchAllData();
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || 'Impossible d importer ce PDF. Verifiez le format (rapport Morningstar / iA).');
-    } finally {
-      setPortfolioPdfImporting(false);
-      event.target.value = '';
     }
   };
 
@@ -729,97 +646,7 @@ export const Admin = () => {
             {/* Model Portfolios Tab */}
             <TabsContent value="portfolios">
               <div className="bg-white rounded-2xl p-6 shadow-ia">
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-                  <h3 className="font-heading text-xl font-semibold text-dark">
-                    Rendements des portefeuilles modeles
-                  </h3>
-                  <div className="flex flex-wrap items-end gap-2">
-                    <div>
-                      <Label htmlFor="portfolio-as-of-date">Donnees au</Label>
-                      <Input
-                        id="portfolio-as-of-date"
-                        type="date"
-                        value={portfolioAsOfDate}
-                        onChange={(e) => setPortfolioAsOfDate(e.target.value)}
-                        className="w-[180px]"
-                      />
-                    </div>
-                    <Button onClick={savePortfolioAsOfDate} className="btn-primary">
-                      Enregistrer
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="mb-6 p-4 bg-light rounded-xl border border-prestige-beige">
-                  <p className="text-sm font-medium text-dark mb-2">Import PDF (Morningstar / iA)</p>
-                  <p className="text-xs text-prestige-taupe mb-3">
-                    Un rapport par fichier. Le profil est detecte automatiquement (ex. Profil prudent, Portefeuille Audacieux).
-                    Les champs AAJ (YTD) et la derniere annee civile disponible sont mis a jour dans Supabase.
-                    Si la date du rapport est presente, elle remplit aussi « Donnees au ».
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      id="portfolio-pdf-import"
-                      type="file"
-                      accept="application/pdf,.pdf"
-                      className="hidden"
-                      disabled={portfolioPdfImporting}
-                      onChange={handleMorningstarPdfImport}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="gap-2"
-                      disabled={portfolioPdfImporting}
-                      onClick={() => document.getElementById('portfolio-pdf-import')?.click()}
-                    >
-                      <Upload className="w-4 h-4" />
-                      {portfolioPdfImporting ? 'Import en cours...' : 'Importer un PDF'}
-                    </Button>
-                  </div>
-                </div>
-
-                {modelPortfolios.length === 0 ? (
-                  <p className="text-prestige-taupe text-center py-8">Aucun portefeuille trouve</p>
-                ) : (
-                  <div className="space-y-3">
-                    {modelPortfolios.map((portfolio) => (
-                      <div key={portfolio.id} className="p-4 bg-light rounded-xl">
-                        <div className="grid md:grid-cols-4 gap-3 items-end">
-                          <div>
-                            <Label>Profil</Label>
-                            <Input value={portfolio.name} disabled />
-                          </div>
-                          <div>
-                            <Label>Rendement 2026 (YTD)</Label>
-                            <Input
-                              type="number"
-                              step="0.1"
-                              defaultValue={portfolio.ytd_2026}
-                              onBlur={(e) => updateModelPortfolio(portfolio.id, 'ytd_2026', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label>Rendement 2025</Label>
-                            <Input
-                              type="number"
-                              step="0.1"
-                              defaultValue={portfolio.year_2025}
-                              onBlur={(e) => updateModelPortfolio(portfolio.id, 'year_2025', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label>Lien detail</Label>
-                            <Input
-                              defaultValue={portfolio.href}
-                              onBlur={(e) => updateModelPortfolio(portfolio.id, 'href', e.target.value)}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <AdminPortfoliosPanel onRefresh={fetchAllData} />
               </div>
             </TabsContent>
           </Tabs>
