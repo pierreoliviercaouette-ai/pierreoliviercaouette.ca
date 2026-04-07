@@ -5,8 +5,12 @@ import { Button } from '../ui/button';
 import { Upload, RefreshCw, PieChart } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabaseClient';
-import { parseFundFactsheetPdfFile } from '../../lib/fundSheetPdfImport';
-import { recalculateAllModelPortfolios, upsertFundFromParsed } from '../../lib/portfolioRecalc';
+import { IA_ALLOWED_FUND_FILENAME, parseFundFactsheetPdfFile } from '../../lib/fundSheetPdfImport';
+import {
+  persistManualFundYtd,
+  recalculateAllModelPortfolios,
+  upsertFundFromParsed,
+} from '../../lib/portfolioRecalc';
 
 export function AdminPortfoliosPanel({ onRefresh }) {
   const [modelPortfolios, setModelPortfolios] = useState([]);
@@ -23,6 +27,10 @@ export function AdminPortfoliosPanel({ onRefresh }) {
 
   const [fundPdfBusy, setFundPdfBusy] = useState(false);
   const [fundPreview, setFundPreview] = useState(null);
+  const [manualFundId, setManualFundId] = useState('');
+  const [manualYtdPct, setManualYtdPct] = useState('');
+  const [manualAsOfDate, setManualAsOfDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [manualBusy, setManualBusy] = useState(false);
   const [recalcBusy, setRecalcBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -196,6 +204,33 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     }
   };
 
+  const saveManualFundYtd = async () => {
+    if (!manualFundId) {
+      toast.error('Choisissez un fonds.');
+      return;
+    }
+    if (manualYtdPct === '' || Number.isNaN(Number(manualYtdPct))) {
+      toast.error('Entrez un rendement AAJ valide.');
+      return;
+    }
+    if (!manualAsOfDate) {
+      toast.error('Choisissez une date AAJ.');
+      return;
+    }
+    setManualBusy(true);
+    try {
+      await persistManualFundYtd(supabase, manualFundId, Number(manualYtdPct), manualAsOfDate);
+      toast.success('AAJ manuel enregistre et portefeuilles recalcules.');
+      await load();
+      onRefresh?.();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Erreur enregistrement AAJ manuel.');
+    } finally {
+      setManualBusy(false);
+    }
+  };
+
   const weightTotal = useMemo(() => {
     return holdingRows.reduce((s, r) => s + (parseFloat(r.weight_pct) || 0), 0);
   }, [holdingRows]);
@@ -281,6 +316,9 @@ export function AdminPortfoliosPanel({ onRefresh }) {
           Extraction « Rend année civile » + AAJ. Les rendements mensuels sont reconstruits (geometrique) puis les
           portefeuilles sont recalcules.
         </p>
+        <p className="text-xs text-prestige-taupe mb-3">
+          Fichiers autorises: <span className="font-semibold">ecof...pdf</span> (ex: {IA_ALLOWED_FUND_FILENAME})
+        </p>
         <div className="flex flex-wrap items-center gap-2">
           <input
             id="fund-pdf-import"
@@ -319,6 +357,49 @@ export function AdminPortfoliosPanel({ onRefresh }) {
             )}
           </pre>
         )}
+      </div>
+
+      <div className="p-4 bg-light rounded-xl border border-prestige-beige">
+        <p className="text-sm font-medium text-dark mb-2">Saisie manuelle AAJ par fonds</p>
+        <p className="text-xs text-prestige-taupe mb-3">
+          Permet d entrer le rendement depuis le 1er janvier pour un fonds sans PDF.
+        </p>
+        <div className="grid md:grid-cols-4 gap-3 items-end">
+          <div className="md:col-span-2">
+            <Label>Fonds</Label>
+            <select
+              className="w-full mt-1 px-3 py-2 border border-prestige-beige rounded-lg bg-white"
+              value={manualFundId}
+              onChange={(e) => setManualFundId(e.target.value)}
+            >
+              <option value="">— Choisir —</option>
+              {funds.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name}
+                  {f.external_code ? ` (${f.external_code})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label>Date AAJ</Label>
+            <Input type="date" value={manualAsOfDate} onChange={(e) => setManualAsOfDate(e.target.value)} />
+          </div>
+          <div>
+            <Label>Rendement AAJ (%)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={manualYtdPct}
+              onChange={(e) => setManualYtdPct(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="mt-3">
+          <Button type="button" variant="outline" disabled={manualBusy} onClick={saveManualFundYtd}>
+            {manualBusy ? 'Enregistrement...' : 'Enregistrer AAJ manuel'}
+          </Button>
+        </div>
       </div>
 
       <div className="p-4 bg-light rounded-xl border border-prestige-beige">

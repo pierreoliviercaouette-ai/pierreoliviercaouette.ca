@@ -5,6 +5,23 @@
 
 import { extractTextFromPdfFile, tryExtractReportDateIso } from './morningstarPdfImport';
 
+export const IA_ALLOWED_FUND_FILENAME = 'Ecof-FU870p.pdf';
+export const IA_ALLOWED_FUND_PREFIX = 'ecof';
+
+function normalizeFileName(name) {
+  return String(name || '').trim().toLowerCase();
+}
+
+export function assertAllowedIaFundFileName(fileName) {
+  const normalized = normalizeFileName(fileName);
+  const isAllowed = normalized.startsWith(IA_ALLOWED_FUND_PREFIX) && normalized.endsWith('.pdf');
+  if (!isAllowed) {
+    throw new Error(
+      `Seuls les fichiers de type "ecof...pdf" sont acceptes (ex: ${IA_ALLOWED_FUND_FILENAME}).`
+    );
+  }
+}
+
 function toFloatPercent(token) {
   return parseFloat(String(token).replace('%', '').replace(',', '.'), 10);
 }
@@ -104,6 +121,7 @@ export function parseFundFactsheetText(text) {
 }
 
 export async function parseFundFactsheetPdfFile(file) {
+  assertAllowedIaFundFileName(file?.name);
   const text = await extractTextFromPdfFile(file);
   return parseFundFactsheetText(text);
 }

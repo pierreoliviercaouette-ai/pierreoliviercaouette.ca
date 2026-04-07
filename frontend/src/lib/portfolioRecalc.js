@@ -3,6 +3,8 @@ import {
   computePortfolioMonthlySeries,
   compoundWealthFromMonthly,
   computeSnapshotKpis,
+  monthKey,
+  splitYtdIntoYearMonths,
 } from './portfolioEngine';
 
 function endOfMonthIsoFromMonthFirst(monthFirst) {
@@ -213,4 +215,39 @@ export async function upsertFundFromParsed(supabase, parsed) {
   }
 
   return persistFundMonthlyReturns(supabase, fundId, parsed.annualByYear, parsed.ytdPct, asOf);
+}
+
+/**
+ * Manual YTD entry for a fund (current year to a given as-of date),
+ * preserving prior-year monthly history.
+ */
+export async function persistManualFundYtd(supabase, fundId, ytdPct, asOfDateIso) {
+  const asOf = new Date(`${asOfDateIso}T12:00:00Z`);
+  const year = asOf.getUTCFullYear();
+  const monthThrough = asOf.getUTCMonth() + 1;
+  const parts = splitYtdIntoYearMonths(Number(ytdPct), monthThrough);
+
+  const { error: delErr } = await supabase
+    .from('fund_monthly_returns')
+    .delete()
+    .eq('fund_id', fundId)
+    .gte('month_date', `${year}-01-01`)
+    .lte('month_date', `${year}-12-31`);
+  if (delErr) throw delErr;
+
+  const payload = [];
+  for (let m = 1; m <= monthThrough; m += 1) {
+    payload.push({
+      fund_id: fundId,
+      month_date: monthKey(year, m),
+      return_pct: parts[m - 1],
+    });
+  }
+
+  if (payload.length) {
+    const { error: insErr } = await supabase.from('fund_monthly_returns').insert(payload);
+    if (insErr) throw insErr;
+  }
+
+  return recalculateAllModelPortfolios(supabase);
 }

@@ -28,6 +28,7 @@ export const ModelPortfolioDetail = () => {
   const [asOfLabel, setAsOfLabel] = useState(DEFAULT_MODEL_PORTFOLIOS_AS_OF);
   const [snapshot, setSnapshot] = useState(null);
   const [holdings, setHoldings] = useState([]);
+  const [fundPerfById, setFundPerfById] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export const ModelPortfolioDetail = () => {
         }
         setSnapshot(null);
         setHoldings([]);
+        setFundPerfById({});
         setLoading(false);
         return;
       }
@@ -100,6 +102,53 @@ export const ModelPortfolioDetail = () => {
         holdRows = h || [];
       }
 
+      const fundIds = holdRows.map((r) => r.fund_id).filter(Boolean);
+      const perfById = {};
+      if (fundIds.length) {
+        const { data: fundMonthlyRows } = await supabase
+          .from('fund_monthly_returns')
+          .select('fund_id, month_date, return_pct')
+          .in('fund_id', fundIds)
+          .order('month_date', { ascending: true });
+
+        const byFund = {};
+        for (const row of fundMonthlyRows || []) {
+          if (!byFund[row.fund_id]) byFund[row.fund_id] = [];
+          byFund[row.fund_id].push({
+            month_date: row.month_date,
+            return_pct: Number(row.return_pct),
+          });
+        }
+
+        const anchorMonth = snap?.meta?.anchor_month || null;
+        for (const fundId of fundIds) {
+          const arr = byFund[fundId] || [];
+          if (!arr.length) {
+            perfById[fundId] = { ytdPct: null, oneYearPct: null };
+            continue;
+          }
+
+          const asOfMonth = anchorMonth || arr[arr.length - 1].month_date;
+          const [asOfYear, asOfMonthNum] = asOfMonth.split('-').map((x) => parseInt(x, 10));
+
+          const ytdRows = arr.filter((r) => {
+            const [yy, mm] = r.month_date.split('-').map((x) => parseInt(x, 10));
+            return yy === asOfYear && mm <= asOfMonthNum;
+          });
+          let ytdFactor = 1;
+          for (const r of ytdRows) ytdFactor *= 1 + r.return_pct / 100;
+          const ytdPct = ytdRows.length ? (ytdFactor - 1) * 100 : null;
+
+          const idx = arr.findIndex((r) => r.month_date === asOfMonth);
+          const last12 = idx >= 0 ? arr.slice(Math.max(0, idx - 11), idx + 1) : [];
+          let oneYearFactor = 1;
+          for (const r of last12) oneYearFactor *= 1 + r.return_pct / 100;
+          const oneYearPct = last12.length === 12 ? (oneYearFactor - 1) * 100 : null;
+
+          perfById[fundId] = { ytdPct, oneYearPct };
+        }
+      }
+
       setPortfolio({
         key: def.key,
         name: def.name,
@@ -109,6 +158,7 @@ export const ModelPortfolioDetail = () => {
       });
       setSnapshot(snap);
       setHoldings(holdRows);
+      setFundPerfById(perfById);
 
       if (snap?.as_of_date) {
         setAsOfLabel(
@@ -227,6 +277,8 @@ export const ModelPortfolioDetail = () => {
                     <thead className="bg-light">
                       <tr>
                         <th className="text-left p-3">Fonds</th>
+                        <th className="text-right p-3">AAJ fonds</th>
+                        <th className="text-right p-3">1 an fonds</th>
                         <th className="text-right p-3">Poids</th>
                       </tr>
                     </thead>
@@ -239,6 +291,8 @@ export const ModelPortfolioDetail = () => {
                               <span className="text-prestige-taupe ml-2">{h.funds.external_code}</span>
                             ) : null}
                           </td>
+                          <td className="p-3 text-right">{formatReturn(fundPerfById[h.fund_id]?.ytdPct)}</td>
+                          <td className="p-3 text-right">{formatReturn(fundPerfById[h.fund_id]?.oneYearPct)}</td>
                           <td className="p-3 text-right font-medium">{Number(h.weight_pct).toFixed(2)} %</td>
                         </tr>
                       ))}

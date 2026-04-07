@@ -1,4 +1,8 @@
-import { extractCivilYearFundBlock, parseFundFactsheetText } from './fundSheetPdfImport';
+import {
+  assertAllowedIaFundFileName,
+  extractCivilYearFundBlock,
+  parseFundFactsheetText,
+} from './fundSheetPdfImport';
 
 describe('fundSheetPdfImport', () => {
   test('extractCivilYearFundBlock reads AAJ and years', () => {
@@ -30,5 +34,13 @@ describe('fundSheetPdfImport', () => {
     expect(parsed.ytdPct).toBeCloseTo(2, 5);
     expect(parsed.annualByYear[2026]).toBeUndefined();
     expect(parsed.annualByYear[2025]).toBeCloseTo(5, 5);
+  });
+
+  test('assertAllowedIaFundFileName accepts ecof...pdf files only', () => {
+    expect(() => assertAllowedIaFundFileName('Ecof-FU870p.pdf')).not.toThrow();
+    expect(() => assertAllowedIaFundFileName('ecof-ABC123.pdf')).not.toThrow();
+    expect(() => assertAllowedIaFundFileName('ECOF test.pdf')).not.toThrow();
+    expect(() => assertAllowedIaFundFileName('autre-fonds.pdf')).toThrow();
+    expect(() => assertAllowedIaFundFileName('ecof-not-pdf.txt')).toThrow();
   });
 });
