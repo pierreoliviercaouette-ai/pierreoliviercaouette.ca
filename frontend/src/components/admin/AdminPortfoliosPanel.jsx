@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabaseClient';
 
 export function AdminPortfoliosPanel({ onRefresh }) {
   const [modelPortfolios, setModelPortfolios] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [nameDrafts, setNameDrafts] = useState({});
+  const [draftsById, setDraftsById] = useState({});
+  const [savingById, setSavingById] = useState({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -26,9 +28,15 @@ export function AdminPortfoliosPanel({ onRefresh }) {
 
     const portfolios = data || [];
     setModelPortfolios(portfolios);
-    setNameDrafts(
+    setDraftsById(
       portfolios.reduce((acc, portfolio) => {
-        acc[portfolio.id] = portfolio.name || '';
+        acc[portfolio.id] = {
+          name: portfolio.name || '',
+          ytd_2026: portfolio.ytd_2026 ?? 0,
+          year_2025: portfolio.year_2025 ?? 0,
+          annualized_3y: portfolio.annualized_3y ?? 0,
+          annualized_5y: portfolio.annualized_5y ?? 0,
+        };
         return acc;
       }, {})
     );
@@ -39,19 +47,34 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     load();
   }, [load]);
 
-  const updateModelPortfolio = async (portfolioId, field, value) => {
+  const toNumericOrZero = (value) => {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
+  const updateModelPortfolio = async (portfolioId) => {
+    const draft = draftsById[portfolioId];
+    if (!draft) return;
+
     try {
-      const numericFields = ['ytd_2026', 'year_2025', 'annualized_3y', 'annualized_5y'];
-      const parsed = Number(value);
-      const updateValue = numericFields.includes(field) ? (Number.isNaN(parsed) ? 0 : parsed) : value;
+      setSavingById((prev) => ({ ...prev, [portfolioId]: true }));
       const { error } = await supabase
         .from('model_portfolios')
-        .update({ [field]: updateValue })
+        .update({
+          name: draft.name,
+          ytd_2026: toNumericOrZero(draft.ytd_2026),
+          year_2025: toNumericOrZero(draft.year_2025),
+          annualized_3y: toNumericOrZero(draft.annualized_3y),
+          annualized_5y: toNumericOrZero(draft.annualized_5y),
+        })
         .eq('id', portfolioId);
       if (error) throw error;
+      toast.success('Portefeuille sauvegarde');
       onRefresh?.();
     } catch (error) {
       toast.error(error.message || 'Erreur mise a jour');
+    } finally {
+      setSavingById((prev) => ({ ...prev, [portfolioId]: false }));
     }
   };
 
@@ -79,16 +102,16 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                 <div>
                   <Label>Titre du portefeuille</Label>
                   <Input
-                    value={nameDrafts[portfolio.id] ?? ''}
-                    disabled={false}
-                    readOnly={false}
+                    value={draftsById[portfolio.id]?.name ?? ''}
                     onChange={(e) =>
-                      setNameDrafts((prev) => ({
+                      setDraftsById((prev) => ({
                         ...prev,
-                        [portfolio.id]: e.target.value,
+                        [portfolio.id]: {
+                          ...(prev[portfolio.id] || {}),
+                          name: e.target.value,
+                        },
                       }))
                     }
-                    onBlur={(e) => updateModelPortfolio(portfolio.id, 'name', e.target.value)}
                   />
                 </div>
 
@@ -97,8 +120,16 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                   <Input
                     type="number"
                     step="0.01"
-                    defaultValue={portfolio.ytd_2026}
-                    onBlur={(e) => updateModelPortfolio(portfolio.id, 'ytd_2026', e.target.value)}
+                    value={draftsById[portfolio.id]?.ytd_2026 ?? 0}
+                    onChange={(e) =>
+                      setDraftsById((prev) => ({
+                        ...prev,
+                        [portfolio.id]: {
+                          ...(prev[portfolio.id] || {}),
+                          ytd_2026: e.target.value,
+                        },
+                      }))
+                    }
                   />
                 </div>
 
@@ -107,8 +138,16 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                   <Input
                     type="number"
                     step="0.01"
-                    defaultValue={portfolio.year_2025}
-                    onBlur={(e) => updateModelPortfolio(portfolio.id, 'year_2025', e.target.value)}
+                    value={draftsById[portfolio.id]?.year_2025 ?? 0}
+                    onChange={(e) =>
+                      setDraftsById((prev) => ({
+                        ...prev,
+                        [portfolio.id]: {
+                          ...(prev[portfolio.id] || {}),
+                          year_2025: e.target.value,
+                        },
+                      }))
+                    }
                   />
                 </div>
 
@@ -117,8 +156,16 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                   <Input
                     type="number"
                     step="0.01"
-                    defaultValue={portfolio.annualized_3y}
-                    onBlur={(e) => updateModelPortfolio(portfolio.id, 'annualized_3y', e.target.value)}
+                    value={draftsById[portfolio.id]?.annualized_3y ?? 0}
+                    onChange={(e) =>
+                      setDraftsById((prev) => ({
+                        ...prev,
+                        [portfolio.id]: {
+                          ...(prev[portfolio.id] || {}),
+                          annualized_3y: e.target.value,
+                        },
+                      }))
+                    }
                   />
                 </div>
 
@@ -127,10 +174,28 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                   <Input
                     type="number"
                     step="0.01"
-                    defaultValue={portfolio.annualized_5y}
-                    onBlur={(e) => updateModelPortfolio(portfolio.id, 'annualized_5y', e.target.value)}
+                    value={draftsById[portfolio.id]?.annualized_5y ?? 0}
+                    onChange={(e) =>
+                      setDraftsById((prev) => ({
+                        ...prev,
+                        [portfolio.id]: {
+                          ...(prev[portfolio.id] || {}),
+                          annualized_5y: e.target.value,
+                        },
+                      }))
+                    }
                   />
                 </div>
+              </div>
+              <div className="mt-3 flex justify-end">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => updateModelPortfolio(portfolio.id)}
+                  disabled={Boolean(savingById[portfolio.id])}
+                >
+                  {savingById[portfolio.id] ? 'Sauvegarde...' : 'Sauvegarder'}
+                </Button>
               </div>
             </div>
           ))}
