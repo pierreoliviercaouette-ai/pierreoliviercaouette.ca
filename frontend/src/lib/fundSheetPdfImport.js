@@ -79,6 +79,39 @@ export function extractLooseFundReturnBlock(text) {
   return { annualByYear, ytdPct, chunk: text };
 }
 
+/**
+ * iA layout fallback:
+ * - "Rendements composés ... DDA ..." then next line starts with the YTD value
+ * - "Rendements annuels ..." then one line of years + next line of values
+ */
+export function extractIaDdaAndAnnualTable(text) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  let ytdPct = null;
+  const ddaIdx = lines.findIndex((l) => /\bDDA\b/i.test(l));
+  if (ddaIdx >= 0 && lines[ddaIdx + 1]) {
+    const firstVal = lines[ddaIdx + 1].match(/-?\d+(?:,\d+)?/);
+    if (firstVal) ytdPct = toFloatPercent(`${firstVal[0]}%`);
+  }
+
+  const annualByYear = {};
+  const annualIdx = lines.findIndex((l) => /Rendements\s+annuels/i.test(l));
+  if (annualIdx >= 0 && lines[annualIdx + 1] && lines[annualIdx + 2]) {
+    const years = [...lines[annualIdx + 1].matchAll(/\b(20\d{2})\b/g)].map((m) => parseInt(m[1], 10));
+    const values = [...lines[annualIdx + 2].matchAll(/-?\d+(?:,\d+)?|\-/g)].map((m) => m[0]);
+    for (let i = 0; i < years.length && i < values.length; i += 1) {
+      if (values[i] === '-') continue;
+      annualByYear[years[i]] = toFloatPercent(`${values[i]}%`);
+    }
+  }
+
+  if (ytdPct === null || Object.keys(annualByYear).length === 0) return null;
+  return { annualByYear, ytdPct, chunk: text };
+}
+
 const ISIN_RE = /\b([A-Z]{2}[A-Z0-9]{9}[0-9])\b/;
 
 export function extractIsin(text) {
@@ -118,7 +151,8 @@ export function extractCategory(text) {
  * }}
  */
 export function parseFundFactsheetText(text) {
-  const block = extractCivilYearFundBlock(text) || extractLooseFundReturnBlock(text);
+  const block =
+    extractCivilYearFundBlock(text) || extractIaDdaAndAnnualTable(text) || extractLooseFundReturnBlock(text);
   if (!block) {
     throw new Error(
       'Rendements introuvables (AAJ + annees civiles). Verifiez le format du PDF iA.'

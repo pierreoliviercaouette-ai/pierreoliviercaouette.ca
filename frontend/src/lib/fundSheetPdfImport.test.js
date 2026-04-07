@@ -1,6 +1,7 @@
 import {
   assertAllowedIaFundFileName,
   extractCivilYearFundBlock,
+  extractIaDdaAndAnnualTable,
   extractLooseFundReturnBlock,
   parseFundFactsheetText,
 } from './fundSheetPdfImport';
@@ -49,6 +50,22 @@ describe('fundSheetPdfImport', () => {
     expect(parsed).not.toBeNull();
     expect(parsed.ytdPct).toBeCloseTo(3.45, 5);
     expect(parsed.annualByYear[2024]).toBeCloseTo(8.1, 5);
+  });
+
+  test('extractIaDdaAndAnnualTable handles iA table format with DDA', () => {
+    const text = `
+      Rendements composés - Série Classique 75/75
+      DDA 3 mois 6 mois 1 an 3 ans
+      18,73 -1,51 15,24 18,73 38,89
+      Rendements annuels au 31 décembre - Série Classique 75/75
+      2025 2024 2023 2022 2021
+      18,73 57,03 43,71 -31,23 1,34
+    `;
+    const parsed = extractIaDdaAndAnnualTable(text);
+    expect(parsed).not.toBeNull();
+    expect(parsed.ytdPct).toBeCloseTo(18.73, 5);
+    expect(parsed.annualByYear[2025]).toBeCloseTo(18.73, 5);
+    expect(parsed.annualByYear[2024]).toBeCloseTo(57.03, 5);
   });
 
   test('assertAllowedIaFundFileName accepts ecof...pdf files only', () => {
