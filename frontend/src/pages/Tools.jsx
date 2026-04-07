@@ -36,25 +36,22 @@ export const Tools = () => {
 
   if (!user) {
     return (
-      <main className="pt-20 min-h-screen" data-testid="tools-page-locked">
+      <main className="pt-20 min-h-screen bg-light" data-testid="tools-page-locked">
         <PageHero
           badge="Espace membre"
           title="Outils financiers"
           description="Accedez a une bibliotheque d outils pour simuler, calculer et planifier vos decisions financieres."
-        />
-        <section className="bg-primary py-2">
-          <div className="container-max text-center">
-            <Link
-              to="/connexion"
-              className="inline-flex items-center gap-2 text-white font-medium hover:text-secondary transition-colors"
-              data-testid="tools-login-cta"
-            >
-              <Lock className="w-4 h-4" />
-              Se connecter pour debloquer les outils
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </section>
+        >
+          <Link
+            to="/connexion"
+            className="group bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-secondary hover:text-white transition-all duration-300 inline-flex items-center justify-center gap-2 shadow-lg shadow-white/20"
+            data-testid="tools-login-cta"
+          >
+            <Lock className="w-5 h-5" />
+            Se connecter
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </PageHero>
 
         {/* Preview Section */}
         <section className="section-padding bg-white">
@@ -90,31 +87,23 @@ export const Tools = () => {
     );
   }
 
+  const toolsLabel =
+    loading && tools.length === 0
+      ? 'Chargement de vos outils...'
+      : `${tools.length} outil${tools.length > 1 ? 's' : ''} disponible${tools.length > 1 ? 's' : ''}`;
+
   return (
     <main className="pt-20 min-h-screen bg-light" data-testid="tools-page">
-      {/* Header */}
-      <section className="bg-white border-b border-prestige-beige py-8">
-        <div className="container-max px-4 md:px-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="font-heading text-3xl font-bold text-dark">
-                Mes outils
-              </h1>
-              <p className="text-prestige-taupe">
-                {tools.length} outil{tools.length > 1 ? 's' : ''} disponible{tools.length > 1 ? 's' : ''}
-              </p>
-            </div>
-            <Link 
-              to="/profil" 
-              className="btn-secondary inline-flex items-center gap-2"
-              data-testid="view-history-btn"
-            >
-              <Clock className="w-4 h-4" />
-              Voir mon historique
-            </Link>
-          </div>
-        </div>
-      </section>
+      <PageHero badge="Espace membre" title="Mes outils" description={toolsLabel}>
+        <Link
+          to="/profil"
+          className="group border-2 border-white/30 text-white rounded-full px-8 py-4 font-semibold hover:bg-white/10 hover:border-white/50 transition-all duration-300 inline-flex items-center justify-center gap-2 backdrop-blur-sm"
+          data-testid="view-history-btn"
+        >
+          <Clock className="w-5 h-5" />
+          Voir mon historique
+        </Link>
+      </PageHero>
 
       {/* Tools Grid */}
       <section className="section-padding">
