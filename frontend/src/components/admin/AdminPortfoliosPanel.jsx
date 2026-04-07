@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabaseClient';
 export function AdminPortfoliosPanel({ onRefresh }) {
   const [modelPortfolios, setModelPortfolios] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [nameDrafts, setNameDrafts] = useState({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -23,7 +24,14 @@ export function AdminPortfoliosPanel({ onRefresh }) {
       return;
     }
 
-    setModelPortfolios(data || []);
+    const portfolios = data || [];
+    setModelPortfolios(portfolios);
+    setNameDrafts(
+      portfolios.reduce((acc, portfolio) => {
+        acc[portfolio.id] = portfolio.name || '';
+        return acc;
+      }, {})
+    );
     setLoading(false);
   }, []);
 
@@ -70,7 +78,18 @@ export function AdminPortfoliosPanel({ onRefresh }) {
               <div className="grid md:grid-cols-5 gap-3 items-end">
                 <div>
                   <Label>Titre du portefeuille</Label>
-                  <Input defaultValue={portfolio.name} onBlur={(e) => updateModelPortfolio(portfolio.id, 'name', e.target.value)} />
+                  <Input
+                    value={nameDrafts[portfolio.id] ?? ''}
+                    disabled={false}
+                    readOnly={false}
+                    onChange={(e) =>
+                      setNameDrafts((prev) => ({
+                        ...prev,
+                        [portfolio.id]: e.target.value,
+                      }))
+                    }
+                    onBlur={(e) => updateModelPortfolio(portfolio.id, 'name', e.target.value)}
+                  />
                 </div>
 
                 <div>
