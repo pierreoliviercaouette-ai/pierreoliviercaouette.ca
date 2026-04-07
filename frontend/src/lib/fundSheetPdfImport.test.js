@@ -1,6 +1,7 @@
 import {
   assertAllowedIaFundFileName,
   extractCivilYearFundBlock,
+  extractLooseFundReturnBlock,
   parseFundFactsheetText,
 } from './fundSheetPdfImport';
 
@@ -34,6 +35,20 @@ describe('fundSheetPdfImport', () => {
     expect(parsed.ytdPct).toBeCloseTo(2, 5);
     expect(parsed.annualByYear[2026]).toBeUndefined();
     expect(parsed.annualByYear[2025]).toBeCloseTo(5, 5);
+  });
+
+  test('extractLooseFundReturnBlock works without "Rend année civile" heading', () => {
+    const text = `
+      ECOF FU607P
+      Donnees de rendement
+      AAJ 3,45
+      2024 8,10
+      2025 -1,20
+    `;
+    const parsed = extractLooseFundReturnBlock(text);
+    expect(parsed).not.toBeNull();
+    expect(parsed.ytdPct).toBeCloseTo(3.45, 5);
+    expect(parsed.annualByYear[2024]).toBeCloseTo(8.1, 5);
   });
 
   test('assertAllowedIaFundFileName accepts ecof...pdf files only', () => {

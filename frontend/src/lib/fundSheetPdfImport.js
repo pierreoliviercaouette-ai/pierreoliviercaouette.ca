@@ -55,6 +55,30 @@ export function extractCivilYearFundBlock(text) {
   return { annualByYear, ytdPct, chunk };
 }
 
+/**
+ * Fallback for iA PDFs where the "Rend année civile" heading is missing/altered.
+ * It scans the full text for AAJ and year/value pairs.
+ */
+export function extractLooseFundReturnBlock(text) {
+  const ytdMatch = text.match(/AAJ\s+(-?\d+(?:,\d+)?)/i);
+  if (!ytdMatch) return null;
+  const ytdPct = toFloatPercent(`${ytdMatch[1]}%`);
+
+  const annualByYear = {};
+  const yearRe = /\b(20\d{2})\s+(-?\d+(?:,\d+)?)\b/g;
+  let m = yearRe.exec(text);
+  while (m !== null) {
+    const y = parseInt(m[1], 10);
+    if (y >= 1990 && y <= 2040) {
+      annualByYear[y] = toFloatPercent(`${m[2]}%`);
+    }
+    m = yearRe.exec(text);
+  }
+
+  if (Object.keys(annualByYear).length === 0) return null;
+  return { annualByYear, ytdPct, chunk: text };
+}
+
 const ISIN_RE = /\b([A-Z]{2}[A-Z0-9]{9}[0-9])\b/;
 
 export function extractIsin(text) {
@@ -94,10 +118,10 @@ export function extractCategory(text) {
  * }}
  */
 export function parseFundFactsheetText(text) {
-  const block = extractCivilYearFundBlock(text);
+  const block = extractCivilYearFundBlock(text) || extractLooseFundReturnBlock(text);
   if (!block) {
     throw new Error(
-      'Section « Rend année civile » introuvable ou incomplete (AAJ + annees manquantes).'
+      'Rendements introuvables (AAJ + annees civiles). Verifiez le format du PDF iA.'
     );
   }
 
