@@ -68,6 +68,22 @@ describe('fundSheetPdfImport', () => {
     expect(parsed.annualByYear[2024]).toBeCloseTo(57.03, 5);
   });
 
+  test('extractIaDdaAndAnnualTable handles "lancement" line between DDA and values', () => {
+    const text = `
+      Rendements composés - Série Classique 75/75
+      DDA† 3 mois 6 mois 1 an 3 ans 5 ans 10 ans Depuis
+      lancement
+      43,45 8,33 29,98 43,45 23,09
+      Rendements annuels au 31 décembre - Série Classique 75/75
+      2025 2024 2023 2022
+      43,45 20,00 8,33 -4,84
+    `;
+    const parsed = extractIaDdaAndAnnualTable(text);
+    expect(parsed).not.toBeNull();
+    expect(parsed.ytdPct).toBeCloseTo(43.45, 5);
+    expect(parsed.annualByYear[2025]).toBeCloseTo(43.45, 5);
+  });
+
   test('assertAllowedIaFundFileName accepts ecof...pdf files only', () => {
     expect(() => assertAllowedIaFundFileName('Ecof-FU870p.pdf')).not.toThrow();
     expect(() => assertAllowedIaFundFileName('ecof-ABC123.pdf')).not.toThrow();

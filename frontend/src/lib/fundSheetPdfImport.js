@@ -60,7 +60,7 @@ export function extractCivilYearFundBlock(text) {
  * It scans the full text for AAJ and year/value pairs.
  */
 export function extractLooseFundReturnBlock(text) {
-  const ytdMatch = text.match(/AAJ\s+(-?\d+(?:,\d+)?)/i);
+  const ytdMatch = text.match(/(?:AAJ|DDA)\S*\s+(-?\d+(?:,\d+)?)/i);
   if (!ytdMatch) return null;
   const ytdPct = toFloatPercent(`${ytdMatch[1]}%`);
 
@@ -92,16 +92,31 @@ export function extractIaDdaAndAnnualTable(text) {
 
   let ytdPct = null;
   const ddaIdx = lines.findIndex((l) => /\bDDA\b/i.test(l));
-  if (ddaIdx >= 0 && lines[ddaIdx + 1]) {
-    const firstVal = lines[ddaIdx + 1].match(/-?\d+(?:,\d+)?/);
-    if (firstVal) ytdPct = toFloatPercent(`${firstVal[0]}%`);
+  if (ddaIdx >= 0) {
+    for (let i = ddaIdx + 1; i <= Math.min(lines.length - 1, ddaIdx + 5); i += 1) {
+      const firstVal = lines[i].match(/-?\d+(?:,\d+)?/);
+      if (firstVal) {
+        ytdPct = toFloatPercent(`${firstVal[0]}%`);
+        break;
+      }
+    }
   }
 
   const annualByYear = {};
   const annualIdx = lines.findIndex((l) => /Rendements\s+annuels/i.test(l));
-  if (annualIdx >= 0 && lines[annualIdx + 1] && lines[annualIdx + 2]) {
-    const years = [...lines[annualIdx + 1].matchAll(/\b(20\d{2})\b/g)].map((m) => parseInt(m[1], 10));
-    const values = [...lines[annualIdx + 2].matchAll(/-?\d+(?:,\d+)?|\-/g)].map((m) => m[0]);
+  if (annualIdx >= 0) {
+    let years = [];
+    let values = [];
+    for (let i = annualIdx + 1; i <= Math.min(lines.length - 1, annualIdx + 6); i += 1) {
+      if (!years.length) {
+        years = [...lines[i].matchAll(/\b(20\d{2})\b/g)].map((m) => parseInt(m[1], 10));
+        if (years.length >= 2) continue;
+      } else if (!values.length) {
+        values = [...lines[i].matchAll(/-?\d+(?:,\d+)?|\-/g)].map((m) => m[0]);
+        if (values.length) break;
+      }
+    }
+
     for (let i = 0; i < years.length && i < values.length; i += 1) {
       if (values[i] === '-') continue;
       annualByYear[years[i]] = toFloatPercent(`${values[i]}%`);
