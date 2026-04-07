@@ -45,9 +45,27 @@ export const Referral = () => {
   ];
 
   const steps = [
-    { number: '1', title: 'Créez votre compte', description: 'Vous recevez un lien de mise en relation personnel.' },
-    { number: '2', title: 'Partagez le lien', description: 'La personne donne son consentement pour être contactée.' },
-    { number: '3', title: 'Points et remerciements', description: 'Les points s’accumulent selon les règles du programme, sans lien avec une vente.' },
+    {
+      number: '01',
+      title: 'Inscrivez-vous',
+      description: 'Créez votre compte gratuit et obtenez votre lien de référencement unique.',
+    },
+    {
+      number: '02',
+      title: 'Mises en relation et interactions',
+      description: 'Recommandez des proches, laissez un avis Google ou confirmez votre statut de client existant.',
+    },
+    {
+      number: '03',
+      title: 'Validation',
+      description:
+        'Une référence est valide lorsqu’une mise en relation est faite avec le consentement de la personne référée.',
+    },
+    {
+      number: '04',
+      title: 'Remerciement',
+      description: 'Les points de remerciement sont appliqués selon les critères du programme.',
+    },
   ];
 
   const faqs = [
@@ -205,22 +223,35 @@ export const Referral = () => {
 
       <section className="section-padding bg-light">
         <div className="container-max">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-3">
-              En trois étapes
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-4">
+              Comment ça fonctionne ?
             </h2>
+            <p className="text-prestige-taupe text-lg">Un processus simple en quatre étapes</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
-              <div key={step.number} className="text-center" data-testid={`step-${index}`}>
-                <div className="w-16 h-16 mx-auto rounded-full bg-white shadow-ia flex items-center justify-center mb-4">
-                  <span className="font-heading text-2xl font-bold text-primary">{step.number}</span>
+              <div key={step.number} className="relative text-center" data-testid={`step-${index}`}>
+                {index < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-12 left-1/2 w-full h-0.5 bg-prestige-beige" aria-hidden />
+                )}
+
+                <div className="relative z-10 mb-6">
+                  <div className="w-24 h-24 mx-auto rounded-full bg-white shadow-ia flex items-center justify-center">
+                    <span className="font-heading text-3xl font-bold text-primary">{step.number}</span>
+                  </div>
                 </div>
-                <h3 className="font-heading text-lg font-semibold text-dark mb-2">{step.title}</h3>
-                <p className="text-prestige-taupe text-sm">{step.description}</p>
+                <h3 className="font-heading text-xl font-semibold text-dark mb-3">{step.title}</h3>
+                <p className="text-prestige-taupe text-sm leading-relaxed">{step.description}</p>
               </div>
             ))}
+          </div>
+
+          <div className="mt-8 max-w-3xl mx-auto text-center bg-white rounded-xl border border-prestige-beige p-4">
+            <p className="text-sm text-prestige-taupe">
+              Les points sont attribués pour la mise en relation uniquement, indépendamment des suites données.
+            </p>
           </div>
         </div>
       </section>
