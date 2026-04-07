@@ -1,8 +1,28 @@
 import { Link } from 'react-router-dom';
-import { Gift, Users, ArrowRight, Trophy, Star, MessageSquare, UserCheck, Crown } from 'lucide-react';
+import { Gift, Users, ArrowRight, MessageSquare, UserCheck } from 'lucide-react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  LabelList,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
+
+/** Valeur en $ pour l’échelle du graphique (palier individuel). Le coffret : hauteur indicative seulement. */
+const TIERS_FOR_CHART = [
+  { threshold: 10, reward: '25 $', name: 'Bronze', chartValue: 25, fill: '#ea580c' },
+  { threshold: 20, reward: '50 $', name: 'Argent', chartValue: 50, fill: '#64748b' },
+  { threshold: 40, reward: '100 $', name: 'Or', chartValue: 100, fill: '#ca8a04' },
+  { threshold: 75, reward: '250 $', name: 'Platine', chartValue: 250, fill: '#0891b2' },
+  { threshold: 100, reward: 'Coffret Privilège', name: 'Privilège', chartValue: 300, fill: '#7c3aed' },
+];
 
 export const Referral = () => {
   const { user } = useAuth();
@@ -11,14 +31,6 @@ export const Referral = () => {
     description: 'Invitez des proches a decouvrir nos services via une mise en relation consentie. Programme de recommandations conforme et transparent.',
     canonicalPath: '/recommandations',
   });
-
-  const tiers = [
-    { threshold: 10, reward: '25 $', name: 'Bronze', icon: Trophy, color: 'text-orange-700', bg: 'bg-orange-100', gradient: 'from-orange-600 to-orange-400' },
-    { threshold: 20, reward: '50 $', name: 'Argent', icon: Trophy, color: 'text-gray-500', bg: 'bg-gray-100', gradient: 'from-gray-500 to-gray-300' },
-    { threshold: 40, reward: '100 $', name: 'Or', icon: Trophy, color: 'text-yellow-600', bg: 'bg-yellow-100', gradient: 'from-yellow-500 to-yellow-300' },
-    { threshold: 75, reward: '250 $', name: 'Platine', icon: Star, color: 'text-cyan-600', bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-cyan-300' },
-    { threshold: 100, reward: 'Coffret Privilège', name: 'Privilège', icon: Crown, color: 'text-purple-600', bg: 'bg-purple-100', gradient: 'from-purple-600 to-purple-400' },
-  ];
 
   const pointsMethods = [
     {
@@ -79,7 +91,7 @@ export const Referral = () => {
     },
     {
       question: 'Les paliers sont-ils cumulatifs?',
-      answer: 'Oui. Les récompenses des paliers atteints s’additionnent (voir le tableau des paliers).',
+      answer: 'Oui. Les récompenses des paliers atteints s’additionnent (voir le graphique ci-dessus).',
     },
     {
       question: 'Dois-je parler de produits financiers?',
@@ -197,22 +209,78 @@ export const Referral = () => {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-6xl mx-auto">
-            {tiers.map((tier, index) => (
-              <div
-                key={tier.name}
-                className="bg-white rounded-2xl p-5 shadow-ia text-center relative overflow-hidden"
-                data-testid={`tier-card-${index}`}
-              >
-                <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${tier.gradient}`} />
-                <div className={`w-12 h-12 mx-auto rounded-full ${tier.bg} flex items-center justify-center mb-3 mt-1`}>
-                  <tier.icon className={`w-6 h-6 ${tier.color}`} />
-                </div>
-                <h3 className="font-heading text-base font-bold text-dark">{tier.name}</h3>
-                <p className="text-prestige-taupe text-xs mb-2">{tier.threshold} pts</p>
-                <p className="font-heading text-xl font-bold text-primary">{tier.reward}</p>
+          <div
+            className="max-w-4xl mx-auto rounded-2xl bg-white border border-prestige-beige shadow-ia p-4 sm:p-6 md:p-8"
+            data-testid="referral-tiers-chart"
+          >
+            <p className="text-center text-sm text-prestige-taupe mb-4 md:hidden">
+              Faites défiler horizontalement pour voir tous les paliers.
+            </p>
+            <div className="w-full overflow-x-auto overscroll-x-contain -mx-1 px-1 sm:mx-0 sm:px-0">
+              <div className="h-[min(380px,55vh)] min-h-[260px] min-w-[520px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={TIERS_FOR_CHART}
+                  margin={{ top: 28, right: 8, left: 4, bottom: 8 }}
+                  barCategoryGap="18%"
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2dcd0" />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e2dcd0' }}
+                    interval={0}
+                    angle={-18}
+                    textAnchor="end"
+                    height={56}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e2dcd0' }}
+                    tickFormatter={(v) => `${v} $`}
+                    width={44}
+                    domain={[0, 360]}
+                  />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(6, 77, 217, 0.06)' }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const row = payload[0].payload;
+                      return (
+                        <div className="rounded-xl border border-prestige-beige bg-white px-4 py-3 shadow-lg text-left max-w-[240px]">
+                          <p className="font-heading font-bold text-dark">{row.name}</p>
+                          <p className="text-xs text-prestige-taupe mt-0.5">{row.threshold} points cumulés</p>
+                          <p className="text-primary font-heading font-bold text-lg mt-2">{row.reward}</p>
+                          {row.name === 'Privilège' && (
+                            <p className="text-[11px] text-prestige-taupe mt-2 leading-snug">
+                              Récompense non monétaire ; la hauteur de la barre est indicative.
+                            </p>
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
+                  <Bar dataKey="chartValue" radius={[10, 10, 0, 0]} maxBarSize={72}>
+                    {TIERS_FOR_CHART.map((entry) => (
+                      <Cell key={entry.name} fill={entry.fill} />
+                    ))}
+                    <LabelList
+                      dataKey="reward"
+                      position="top"
+                      className="fill-dark"
+                      style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-heading, Georgia, serif)' }}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
               </div>
-            ))}
+            </div>
+            <p className="mt-4 text-center text-xs text-prestige-taupe max-w-2xl mx-auto leading-relaxed">
+              Chaque palier correspond à une récompense distincte ; les paliers atteints s’additionnent. La barre « Privilège »
+              représente un coffret (valeur non exprimée ici en dollars sur le graphique).
+            </p>
           </div>
 
           <p className="mt-8 text-center text-sm text-dark max-w-2xl mx-auto bg-white/60 rounded-xl px-4 py-3 border border-prestige-beige">
