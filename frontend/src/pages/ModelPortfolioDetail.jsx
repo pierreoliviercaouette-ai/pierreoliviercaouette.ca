@@ -35,9 +35,9 @@ export const ModelPortfolioDetail = () => {
     const loadPortfolio = async () => {
       if (!slug) return;
       setLoading(true);
-      const { data: legacyNameRow } = await supabase
+      const { data: legacyRow } = await supabase
         .from('model_portfolios')
-        .select('name')
+        .select('key,name,ytd_2026,year_2025,annualized_3y,annualized_5y,href,as_of_date')
         .eq('key', slug)
         .maybeSingle();
 
@@ -63,6 +63,8 @@ export const ModelPortfolioDetail = () => {
           name: legacy.name,
           ytd2026: Number(legacy.ytd_2026),
           year2025: Number(legacy.year_2025),
+          annualized3y: Number(legacy.annualized_3y),
+          annualized5y: Number(legacy.annualized_5y),
           href: legacy.href,
         });
         if (legacy.as_of_date) {
@@ -157,18 +159,24 @@ export const ModelPortfolioDetail = () => {
 
       setPortfolio({
         key: def.key,
-        name: legacyNameRow?.name || def.name,
-        ytd2026: snap?.ytd_pct != null ? Number(snap.ytd_pct) : null,
-        year2025: snap?.prev_civil_year_pct != null ? Number(snap.prev_civil_year_pct) : null,
-        href: def.href,
+        name: legacyRow?.name || def.name,
+        ytd2026: legacyRow ? Number(legacyRow.ytd_2026) : snap?.ytd_pct != null ? Number(snap.ytd_pct) : null,
+        year2025: legacyRow
+          ? Number(legacyRow.year_2025)
+          : snap?.prev_civil_year_pct != null
+            ? Number(snap.prev_civil_year_pct)
+            : null,
+        annualized3y: legacyRow ? Number(legacyRow.annualized_3y) : snap?.rolling_3y_pct != null ? Number(snap.rolling_3y_pct) : null,
+        annualized5y: legacyRow ? Number(legacyRow.annualized_5y) : snap?.rolling_5y_pct != null ? Number(snap.rolling_5y_pct) : null,
+        href: legacyRow?.href || def.href,
       });
       setSnapshot(snap);
       setHoldings(holdRows);
       setFundPerfById(perfById);
 
-      if (snap?.as_of_date) {
+      if (legacyRow?.as_of_date || snap?.as_of_date) {
         setAsOfLabel(
-          new Date(snap.as_of_date).toLocaleDateString('fr-CA', {
+          new Date(legacyRow?.as_of_date || snap.as_of_date).toLocaleDateString('fr-CA', {
             day: 'numeric',
             month: 'long',
             year: 'numeric',
@@ -191,7 +199,7 @@ export const ModelPortfolioDetail = () => {
     }));
   }, [snapshot]);
 
-  const prevYear = snapshot?.prev_civil_year ?? new Date().getFullYear() - 1;
+  const prevYear = new Date().getFullYear() - 1;
   const currentYear = new Date().getFullYear();
 
   useSeoMeta({
@@ -242,13 +250,13 @@ export const ModelPortfolioDetail = () => {
               <div className="rounded-xl bg-light border border-prestige-beige p-4">
                 <p className="text-sm text-prestige-taupe">3 ans (annualise)</p>
                 <p className="text-2xl font-semibold text-dark mt-1">
-                  {formatReturn(snapshot?.rolling_3y_pct)}
+                  {formatReturn(portfolio.annualized3y)}
                 </p>
               </div>
               <div className="rounded-xl bg-light border border-prestige-beige p-4">
                 <p className="text-sm text-prestige-taupe">5 ans (annualise)</p>
                 <p className="text-2xl font-semibold text-dark mt-1">
-                  {formatReturn(snapshot?.rolling_5y_pct)}
+                  {formatReturn(portfolio.annualized5y)}
                 </p>
               </div>
             </div>

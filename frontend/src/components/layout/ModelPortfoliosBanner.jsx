@@ -33,82 +33,22 @@ export const ModelPortfoliosBanner = () => {
 
   useEffect(() => {
     const loadPortfolios = async () => {
-      const { data: nameRows } = await supabase
+      const { data: rows, error } = await supabase
         .from('model_portfolios')
-        .select('key,name')
+        .select('key,name,ytd_2026,year_2025,href,as_of_date')
         .order('display_order', { ascending: true });
-      const namesByKey = new Map((nameRows || []).map((row) => [row.key, row.name]));
-
-      const { data, error } = await supabase
-        .from('portfolio_snapshots')
-        .select(
-          `
-          ytd_pct,
-          prev_civil_year,
-          prev_civil_year_pct,
-          as_of_date,
-          computed_at,
-          portfolio_definitions ( key, name, href, display_order )
-        `
-        )
-        .order('computed_at', { ascending: false });
-
-      if (error || !data || data.length === 0) {
-        const { data: legacy } = await supabase
-          .from('model_portfolios')
-          .select('key,name,ytd_2026,year_2025,href,as_of_date')
-          .order('display_order', { ascending: true });
-        if (!legacy?.length) return;
-        setPortfolios(
-          legacy.map((item) => ({
-            key: item.key,
-            name: item.name,
-            ytd2026: Number(item.ytd_2026),
-            yearPrev: Number(item.year_2025),
-            href: item.href,
-          }))
-        );
-        setPrevYearLabel(new Date().getFullYear() - 1);
-        const firstDate = legacy[0]?.as_of_date;
-        if (firstDate) {
-          setAsOfLabel(
-            new Date(firstDate).toLocaleDateString('fr-CA', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })
-          );
-        }
-        return;
-      }
-
-      const bestByKey = new Map();
-      for (const row of data) {
-        const def = row.portfolio_definitions;
-        if (!def?.key) continue;
-        if (!bestByKey.has(def.key)) bestByKey.set(def.key, row);
-      }
-
-      const sorted = [...bestByKey.values()].sort(
-        (a, b) =>
-          (a.portfolio_definitions?.display_order ?? 0) -
-          (b.portfolio_definitions?.display_order ?? 0)
-      );
-
+      if (error || !rows?.length) return;
       setPortfolios(
-        sorted.map((row) => ({
-          key: row.portfolio_definitions.key,
-          name: namesByKey.get(row.portfolio_definitions.key) || row.portfolio_definitions.name,
-          ytd2026: row.ytd_pct != null ? Number(row.ytd_pct) : null,
-          yearPrev: row.prev_civil_year_pct != null ? Number(row.prev_civil_year_pct) : null,
-          href: row.portfolio_definitions.href,
+        rows.map((item) => ({
+          key: item.key,
+          name: item.name,
+          ytd2026: Number(item.ytd_2026),
+          yearPrev: Number(item.year_2025),
+          href: item.href,
         }))
       );
-
-      const py = sorted[0]?.prev_civil_year;
-      if (py != null) setPrevYearLabel(py);
-
-      const firstDate = sorted[0]?.as_of_date;
+      setPrevYearLabel(new Date().getFullYear() - 1);
+      const firstDate = rows[0]?.as_of_date;
       if (firstDate) {
         setAsOfLabel(
           new Date(firstDate).toLocaleDateString('fr-CA', {
