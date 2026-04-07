@@ -13,10 +13,6 @@ import {
 } from '../../lib/portfolioRecalc';
 
 export function AdminPortfoliosPanel({ onRefresh }) {
-  const [modelPortfolios, setModelPortfolios] = useState([]);
-  const [portfolioAsOfDate, setPortfolioAsOfDate] = useState('');
-  const [portfolioPdfImporting, setPortfolioPdfImporting] = useState(false);
-
   const [funds, setFunds] = useState([]);
   const [definitions, setDefinitions] = useState([]);
   const [selectedDefKey, setSelectedDefKey] = useState('prudent');
@@ -34,17 +30,10 @@ export function AdminPortfoliosPanel({ onRefresh }) {
   const [recalcBusy, setRecalcBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const [mpRes, fRes, dRes] = await Promise.all([
-      supabase.from('model_portfolios').select('*').order('display_order', { ascending: true }),
+    const [fRes, dRes] = await Promise.all([
       supabase.from('funds').select('*').order('name', { ascending: true }),
       supabase.from('portfolio_definitions').select('*').order('display_order', { ascending: true }),
     ]);
-    if (mpRes.error) console.warn(mpRes.error);
-    else {
-      const list = mpRes.data || [];
-      setModelPortfolios(list);
-      setPortfolioAsOfDate(list[0]?.as_of_date || '');
-    }
     if (fRes.error) console.warn(fRes.error);
     else setFunds(fRes.data || []);
     if (dRes.error) console.warn(dRes.error);
@@ -99,75 +88,6 @@ export function AdminPortfoliosPanel({ onRefresh }) {
   useEffect(() => {
     if (selectedDef?.id) loadHoldingsForDef(selectedDef.id);
   }, [selectedDef?.id, loadHoldingsForDef]);
-
-  const updateModelPortfolio = async (portfolioId, field, value) => {
-    try {
-      const updateValue =
-        field === 'ytd_2026' || field === 'year_2025' ? Number(value || 0) : value;
-      const { error } = await supabase
-        .from('model_portfolios')
-        .update({ [field]: updateValue })
-        .eq('id', portfolioId);
-      if (error) throw error;
-      load();
-      onRefresh?.();
-    } catch (error) {
-      toast.error(error.message || 'Erreur');
-    }
-  };
-
-  const savePortfolioAsOfDate = async () => {
-    try {
-      const { error } = await supabase
-        .from('model_portfolios')
-        .update({ as_of_date: portfolioAsOfDate })
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-      if (error) throw error;
-      toast.success('Date mise a jour');
-      load();
-      onRefresh?.();
-    } catch (error) {
-      toast.error(error.message || 'Erreur');
-    }
-  };
-
-  const handleMorningstarPdfImport = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.pdf')) {
-      toast.error('Veuillez choisir un fichier PDF.');
-      event.target.value = '';
-      return;
-    }
-    setPortfolioPdfImporting(true);
-    try {
-      const { extractTextFromPdfFile, parseMorningstarPortfolioPdf } = await import(
-        '../../lib/morningstarPdfImport'
-      );
-      const text = await extractTextFromPdfFile(file);
-      const parsed = parseMorningstarPortfolioPdf(text);
-      const patch = {
-        ytd_2026: parsed.ytd_2026,
-        year_2025: parsed.year_2025,
-      };
-      if (parsed.asOfDate) {
-        patch.as_of_date = parsed.asOfDate;
-      }
-      const { error } = await supabase.from('model_portfolios').update(patch).eq('key', parsed.key);
-      if (error) throw error;
-      toast.success(
-        `Import reussi: ${parsed.key} — YTD ${parsed.ytd_2026.toFixed(2)} %, annee ${parsed.annualSourceYear} ${parsed.year_2025.toFixed(2)} %`
-      );
-      load();
-      onRefresh?.();
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || 'Impossible d importer ce PDF.');
-    } finally {
-      setPortfolioPdfImporting(false);
-      event.target.value = '';
-    }
-  };
 
   const handleFundPdf = async (e) => {
     const file = e.target.files?.[0];
@@ -487,96 +407,6 @@ export function AdminPortfoliosPanel({ onRefresh }) {
             </Button>
           </div>
         </div>
-      </div>
-
-      <div className="border-t border-prestige-beige pt-6">
-        <h4 className="font-heading font-semibold text-dark mb-4">Saisie manuelle + PDF portefeuille (legacy)</h4>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-          <div className="flex flex-wrap items-end gap-2">
-            <div>
-              <Label htmlFor="portfolio-as-of-date">Donnees au</Label>
-              <Input
-                id="portfolio-as-of-date"
-                type="date"
-                value={portfolioAsOfDate}
-                onChange={(e) => setPortfolioAsOfDate(e.target.value)}
-                className="w-[180px]"
-              />
-            </div>
-            <Button onClick={savePortfolioAsOfDate} className="btn-primary">
-              Enregistrer
-            </Button>
-          </div>
-        </div>
-
-        <div className="mb-6 p-4 bg-amber-50 rounded-xl border border-amber-200">
-          <p className="text-sm font-medium text-dark mb-2">Import PDF rapport de portefeuille (Morningstar / iA)</p>
-          <p className="text-xs text-prestige-taupe mb-3">
-            Met a jour directement la table legacy `model_portfolios` pour un profil detecte.
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              id="portfolio-pdf-import"
-              type="file"
-              accept="application/pdf,.pdf"
-              className="hidden"
-              disabled={portfolioPdfImporting}
-              onChange={handleMorningstarPdfImport}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="gap-2"
-              disabled={portfolioPdfImporting}
-              onClick={() => document.getElementById('portfolio-pdf-import')?.click()}
-            >
-              <Upload className="w-4 h-4" />
-              {portfolioPdfImporting ? 'Import en cours...' : 'Importer un PDF portefeuille'}
-            </Button>
-          </div>
-        </div>
-
-        {modelPortfolios.length === 0 ? (
-          <p className="text-prestige-taupe text-center py-8">Aucun portefeuille trouve</p>
-        ) : (
-          <div className="space-y-3">
-            {modelPortfolios.map((portfolio) => (
-              <div key={portfolio.id} className="p-4 bg-light rounded-xl">
-                <div className="grid md:grid-cols-4 gap-3 items-end">
-                  <div>
-                    <Label>Profil</Label>
-                    <Input value={portfolio.name} disabled />
-                  </div>
-                  <div>
-                    <Label>Rendement 2026 (YTD)</Label>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      defaultValue={portfolio.ytd_2026}
-                      onBlur={(e) => updateModelPortfolio(portfolio.id, 'ytd_2026', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Derniere annee civile (affichage)</Label>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      defaultValue={portfolio.year_2025}
-                      onBlur={(e) => updateModelPortfolio(portfolio.id, 'year_2025', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Lien detail</Label>
-                    <Input
-                      defaultValue={portfolio.href}
-                      onBlur={(e) => updateModelPortfolio(portfolio.id, 'href', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
