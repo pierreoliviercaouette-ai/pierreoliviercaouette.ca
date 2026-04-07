@@ -21,6 +21,7 @@ import json
 import os
 import re
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -81,35 +82,46 @@ def _to_float_percent(token: str) -> float:
 
 
 def extract_returns(text: str) -> tuple[float, int, float]:
-    # Strategy A: IA "Rend année civile" rows (more reliable when available)
+    # Strategy A: bloc « Rend année civile » sur le texte brut (aligné avec le parseur JS)
+    civil_match = re.search(r"Rend\s+ann[ée]e\s+civile", text, re.IGNORECASE)
+    if civil_match:
+        start = civil_match.start()
+        chunk = text[start : start + 20000]
+        aaj_m = re.search(r"AAJ\s+(-?\d+(?:,\d+)?)", chunk, re.IGNORECASE)
+        if aaj_m:
+            ytd = _to_float_percent(f"{aaj_m.group(1)}%")
+            annual_pairs: list[tuple[int, float]] = []
+            for m in re.finditer(r"\b(20\d{2})\s+(-?\d+(?:,\d+)?)\b", chunk):
+                y = int(m.group(1))
+                if 2000 <= y <= 2035:
+                    annual_pairs.append((y, _to_float_percent(f"{m.group(2)}%")))
+            if annual_pairs:
+                latest_year, latest_value = max(annual_pairs, key=lambda x: x[0])
+                return ytd, latest_year, latest_value
+
+    # Strategy B: « Rendements passés » (table courte AAJ / 1 an)
+    rp_m = re.search(r"Rendements\s+pass[ée]s", text, re.IGNORECASE)
+    if rp_m:
+        chunk = text[rp_m.start() : rp_m.start() + 6000]
+        aaj_m = re.search(r"AAJ\s+(-?\d+(?:,\d+)?)", chunk, re.IGNORECASE)
+        one_y = re.search(r"\b1\s+an\s+(-?\d+(?:,\d+)?)", chunk, re.IGNORECASE)
+        if aaj_m and one_y:
+            ytd = _to_float_percent(f"{aaj_m.group(1)}%")
+            v = _to_float_percent(f"{one_y.group(1)}%")
+            y_ref = date.today().year - 1
+            return ytd, y_ref, v
+
+    # Strategy C: tableau compact « 1 mois … AAJ … 2015 … » (fenêtre élargie)
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-    civil_idx = next((i for i, ln in enumerate(lines) if "Rend année civile" in ln), None)
-    if civil_idx is not None:
-        window = lines[civil_idx : min(len(lines), civil_idx + 30)]
-        ytd = None
-        annual_pairs: list[tuple[int, float]] = []
-        for ln in window:
-            m_aaj = re.match(r"^AAJ\s+(-?\d+(?:,\d+)?)\b", ln, flags=re.IGNORECASE)
-            if m_aaj:
-                ytd = _to_float_percent(f"{m_aaj.group(1)}%")
-                continue
-
-            m_year = re.match(r"^(20\d{2})\s+(-?\d+(?:,\d+)?)\b", ln)
-            if m_year:
-                annual_pairs.append((int(m_year.group(1)), _to_float_percent(f"{m_year.group(2)}%")))
-
-        if ytd is not None and annual_pairs:
-            latest_year, latest_value = max(annual_pairs, key=lambda x: x[0])
-            return ytd, latest_year, latest_value
-
-    # Strategy B: Legacy "1 mois 3 mois 6 mois AAJ ..." compact line
     label_idx = None
     for i, line in enumerate(lines):
         if "AAJ" in line and "1 mois" in line and "3 mois" in line:
             label_idx = i
             break
     if label_idx is None:
-        raise ValueError("Impossible de trouver la ligne des periodes (AAJ, 1 mois, etc.).")
+        raise ValueError(
+            "Impossible d extraire les rendements (sections Rend année civile, Rendements passés ou tableau AAJ)."
+        )
 
     label_line = lines[label_idx]
     years = [int(y) for y in re.findall(r"\b20\d{2}\b", label_line)]
@@ -117,8 +129,8 @@ def extract_returns(text: str) -> tuple[float, int, float]:
         raise ValueError("Impossible de trouver les colonnes annuelles (ex: 2025) dans le PDF.")
 
     expected_count = len(PERIOD_LABELS) + len(years)
-    context_start = max(0, label_idx - 25)
-    context_end = min(len(lines), label_idx + 3)
+    context_start = max(0, label_idx - 5)
+    context_end = min(len(lines), label_idx + 40)
     context = " ".join(lines[context_start:context_end])
     all_percents = PERCENT_RE.findall(context)
     if len(all_percents) < expected_count:
