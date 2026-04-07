@@ -86,7 +86,15 @@ export const Admin = () => {
       if (referralsRes.error) throw referralsRes.error;
       if (contactsRes.error) throw contactsRes.error;
       if (usersRes.error) throw usersRes.error;
-      if (portfoliosRes.error) throw portfoliosRes.error;
+      if (portfoliosRes.error) {
+        console.warn('model_portfolios:', portfoliosRes.error.message);
+        setModelPortfolios([]);
+        setPortfolioAsOfDate('');
+      } else {
+        const portfolios = portfoliosRes.data || [];
+        setModelPortfolios(portfolios);
+        setPortfolioAsOfDate(portfolios[0]?.as_of_date || '');
+      }
 
       const rawRefs = referralsRes.data || [];
       setTools(toolsRes.data || []);
@@ -101,9 +109,6 @@ export const Admin = () => {
       );
       setContacts(contactsRes.data || []);
       setUsers(usersRes.data || []);
-      const portfolios = portfoliosRes.data || [];
-      setModelPortfolios(portfolios);
-      setPortfolioAsOfDate(portfolios[0]?.as_of_date || '');
     } catch (error) {
       console.error('Failed to fetch admin data:', error);
       toast.error(error.message || 'Erreur lors du chargement des données');
@@ -261,10 +266,12 @@ export const Admin = () => {
     referralFilter === 'all' || ref.status === referralFilter
   );
 
-  const filteredUsers = users.filter(u =>
-    u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
-    `${u.first_name} ${u.last_name}`.toLowerCase().includes(userSearch.toLowerCase())
-  );
+  const filteredUsers = users.filter((u) => {
+    const q = (userSearch || '').toLowerCase();
+    const email = (u.email ?? '').toLowerCase();
+    const name = `${u.first_name ?? ''} ${u.last_name ?? ''}`.trim().toLowerCase();
+    return email.includes(q) || name.includes(q);
+  });
 
   if (authLoading) {
     return (
