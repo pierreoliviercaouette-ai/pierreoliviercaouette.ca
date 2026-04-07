@@ -10,12 +10,14 @@ export function AdminPortfoliosPanel({ onRefresh }) {
   const [loading, setLoading] = useState(true);
   const [draftsById, setDraftsById] = useState({});
   const [savingById, setSavingById] = useState({});
+  const [asOfDate, setAsOfDate] = useState('');
+  const [savingAsOfDate, setSavingAsOfDate] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('model_portfolios')
-      .select('id, key, name, ytd_2026, year_2025, annualized_3y, annualized_5y, display_order')
+      .select('id, key, name, ytd_2026, year_2025, annualized_3y, annualized_5y, as_of_date, display_order')
       .order('display_order', { ascending: true });
 
     if (error) {
@@ -28,6 +30,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
 
     const portfolios = data || [];
     setModelPortfolios(portfolios);
+    setAsOfDate(portfolios[0]?.as_of_date || '');
     setDraftsById(
       portfolios.reduce((acc, portfolio) => {
         acc[portfolio.id] = {
@@ -78,6 +81,31 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     }
   };
 
+  const updateAsOfDateForAll = async () => {
+    if (!asOfDate) {
+      toast.error('Selectionnez une date');
+      return;
+    }
+    if (!modelPortfolios.length) return;
+
+    try {
+      setSavingAsOfDate(true);
+      const ids = modelPortfolios.map((portfolio) => portfolio.id);
+      const { error } = await supabase
+        .from('model_portfolios')
+        .update({ as_of_date: asOfDate })
+        .in('id', ids);
+      if (error) throw error;
+      toast.success('Date de mise a jour appliquee a tous les portefeuilles');
+      await load();
+      onRefresh?.();
+    } catch (error) {
+      toast.error(error.message || 'Erreur mise a jour date');
+    } finally {
+      setSavingAsOfDate(false);
+    }
+  };
+
   if (loading) {
     return <p className="text-prestige-taupe">Chargement...</p>;
   }
@@ -91,6 +119,18 @@ export function AdminPortfoliosPanel({ onRefresh }) {
       <p className="text-xs text-prestige-taupe">
         Entrez manuellement les rendements AAJ, annee precedente, 3 ans annualise et 5 ans annualise pour chaque profil.
       </p>
+
+      <div className="p-4 bg-light rounded-xl border border-prestige-beige">
+        <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+          <div>
+            <Label>Date de la derniere mise a jour des rendements</Label>
+            <Input type="date" value={asOfDate} onChange={(e) => setAsOfDate(e.target.value)} />
+          </div>
+          <Button type="button" onClick={updateAsOfDateForAll} disabled={savingAsOfDate || !asOfDate}>
+            {savingAsOfDate ? 'Sauvegarde...' : 'Appliquer a tous les portefeuilles'}
+          </Button>
+        </div>
+      </div>
 
       {modelPortfolios.length === 0 ? (
         <p className="text-prestige-taupe text-center py-8">Aucun portefeuille trouve</p>
