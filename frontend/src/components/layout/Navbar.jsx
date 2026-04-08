@@ -11,6 +11,7 @@ import {
 } from '../ui/dropdown-menu';
 import { Badge } from '../ui/badge';
 import { trackEvent } from '../../lib/analytics';
+import { IA_GROUPE_FINANCIER_LOGO } from '../../lib/branding';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,8 +33,8 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-20 px-4 md:px-8">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3" data-testid="navbar-logo">
-            <img 
-              src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658b7c46935167e7514507.webp" 
+            <img
+              src={IA_GROUPE_FINANCIER_LOGO}
               alt="iA Groupe financier"
               className="h-10 w-auto object-contain bg-white rounded-md"
             />

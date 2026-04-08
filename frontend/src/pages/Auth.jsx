@@ -197,25 +197,65 @@ export const Login = () => {
 };
 
 export const Register = () => {
+  const [method, setMethod] = useState('email');
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
+    email: '',
+    password: '',
+    password_confirm: '',
     phone: '',
   });
   const [otpStep, setOtpStep] = useState(false);
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const { sendPhoneOtp, verifyPhoneOtp } = useAuth();
+  const { register, sendPhoneOtp, verifyPhoneOtp } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const switchMethod = (next) => {
+    setMethod(next);
+    setOtpStep(false);
+    setOtp('');
+  };
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.password_confirm) {
+      toast.error('Les mots de passe ne correspondent pas');
+      return;
+    }
+    if (formData.password.length < 6) {
+      toast.error('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await register({
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+      });
+      trackEvent('sign_up', { method: 'email_password' });
+      toast.success('Compte créé. Vous pouvez maintenant vous connecter.');
+      navigate('/connexion');
+    } catch (error) {
+      trackEvent('sign_up_error', { method: 'email_password' });
+      toast.error(error.message || 'Erreur lors de l\'inscription');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhoneSubmit = async (e) => {
     e.preventDefault();
     if (!formData.phone.trim()) {
       toast.error('Entrez un numéro de téléphone');
@@ -228,7 +268,7 @@ export const Register = () => {
       await sendPhoneOtp(formData.phone, {
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
-        phone: formData.phone.trim()
+        phone: formData.phone.trim(),
       });
       trackEvent('sign_up_start', { method: 'phone_otp' });
       setOtpStep(true);
@@ -265,7 +305,7 @@ export const Register = () => {
     <main className="pt-20 min-h-screen flex items-center justify-center bg-light py-12" data-testid="register-page">
       <div className="w-full max-w-md mx-4">
         <div className="bg-white rounded-2xl shadow-ia p-8">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full gradient-hero flex items-center justify-center">
               <span className="text-white font-heading font-bold text-2xl">PO</span>
             </div>
@@ -277,8 +317,113 @@ export const Register = () => {
             </p>
           </div>
 
-          {!otpStep ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-2 mb-6">
+            <button
+              type="button"
+              onClick={() => switchMethod('email')}
+              className={`rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
+                method === 'email'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-dark border-prestige-beige hover:border-primary/40'
+              }`}
+              data-testid="register-method-email"
+            >
+              Courriel
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMethod('phone')}
+              className={`rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
+                method === 'phone'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-dark border-prestige-beige hover:border-primary/40'
+              }`}
+              data-testid="register-method-phone"
+            >
+              SMS (sans mot de passe)
+            </button>
+          </div>
+
+          {method === 'email' ? (
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="first_name">Prénom</Label>
+                  <Input
+                    id="first_name"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleChange}
+                    placeholder="Jean"
+                    required
+                    data-testid="register-firstname"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="last_name">Nom</Label>
+                  <Input
+                    id="last_name"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleChange}
+                    placeholder="Tremblay"
+                    required
+                    data-testid="register-lastname"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="email">Courriel</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="vous@exemple.com"
+                  required
+                  data-testid="register-email"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password">Mot de passe</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Au moins 6 caractères"
+                  required
+                  data-testid="register-password"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password_confirm">Confirmer le mot de passe</Label>
+                <Input
+                  id="password_confirm"
+                  name="password_confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  value={formData.password_confirm}
+                  onChange={handleChange}
+                  placeholder="Retapez le mot de passe"
+                  required
+                  data-testid="register-password-confirm"
+                />
+              </div>
+
+              <Button type="submit" disabled={loading} className="w-full btn-primary" data-testid="register-submit">
+                {loading ? 'Création du compte...' : 'Créer mon compte'}
+              </Button>
+            </form>
+          ) : !otpStep ? (
+            <form onSubmit={handlePhoneSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="first_name">Prénom</Label>
@@ -326,12 +471,7 @@ export const Register = () => {
                 />
               </div>
 
-              <Button 
-                type="submit" 
-                disabled={loading}
-                className="w-full btn-primary"
-                data-testid="register-submit"
-              >
+              <Button type="submit" disabled={loading} className="w-full btn-primary" data-testid="register-submit">
                 {loading ? 'Envoi du code...' : 'Recevoir le code OTP'}
               </Button>
             </form>
@@ -357,19 +497,10 @@ export const Register = () => {
                 />
               </div>
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setOtpStep(false)}
-                >
+                <Button type="button" variant="outline" className="flex-1" onClick={() => setOtpStep(false)}>
                   Modifier le numéro
                 </Button>
-                <Button
-                  type="submit"
-                  className="flex-1 btn-primary"
-                  disabled={loading}
-                >
+                <Button type="submit" className="flex-1 btn-primary" disabled={loading}>
                   {loading ? 'Vérification...' : 'Vérifier le code'}
                 </Button>
               </div>
@@ -379,11 +510,7 @@ export const Register = () => {
           <div className="mt-6 text-center">
             <p className="text-prestige-taupe">
               Déjà un compte?{' '}
-              <Link 
-                to="/connexion" 
-                className="text-primary font-medium hover:underline"
-                data-testid="login-link"
-              >
+              <Link to="/connexion" className="text-primary font-medium hover:underline" data-testid="login-link">
                 Se connecter
               </Link>
             </p>

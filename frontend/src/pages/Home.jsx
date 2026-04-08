@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
+import { IA_GROUPE_FINANCIER_LOGO } from '../lib/branding';
 
 const Hero = () => (
   <section className="relative min-h-[90vh] overflow-hidden">
@@ -117,8 +118,8 @@ const Hero = () => (
             
             {/* Stats badge */}
             <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-2xl p-3 border border-prestige-beige flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
-              <img 
-                src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658b7c46935167e7514507.webp" 
+              <img
+                src={IA_GROUPE_FINANCIER_LOGO}
                 alt="iA Groupe financier"
                 className="h-10 w-auto object-contain"
               />
@@ -662,7 +663,7 @@ const PartnersSection = () => {
   const partners = [
     {
       name: 'iA Groupe financier',
-      logo: 'https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658b7c46935167e7514507.webp',
+      logo: IA_GROUPE_FINANCIER_LOGO,
       url: 'https://ia.ca/fr/fiche-conseiller/conseiller/pierre-olivier-caouette'
     },
     {

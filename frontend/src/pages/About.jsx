@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Award, Heart, Target, Star, Quote, ExternalLink, Shield, TrendingUp, Users } from 'lucide-react';
 import { useSeoMeta } from '../lib/seo';
+import { IA_GROUPE_FINANCIER_LOGO } from '../lib/branding';
 
 export const About = () => {
   useSeoMeta({
@@ -33,7 +34,7 @@ export const About = () => {
   const partners = [
     {
       name: 'iA Groupe financier',
-      logo: 'https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658b7c46935167e7514507.webp',
+      logo: IA_GROUPE_FINANCIER_LOGO,
       url: 'https://ia.ca/fr/fiche-conseiller/conseiller/pierre-olivier-caouette'
     },
     {
