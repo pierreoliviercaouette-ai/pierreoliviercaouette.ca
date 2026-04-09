@@ -32,12 +32,16 @@ export const Navbar = () => {
       <div className="container-max">
         <div className="flex items-center justify-between h-20 px-4 md:px-8">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3" data-testid="navbar-logo">
-            <img
-              src={IA_GROUPE_FINANCIER_LOGO}
-              alt="iA Groupe financier"
-              className="h-7 md:h-8 w-auto max-w-[140px] object-contain bg-white rounded-md"
-            />
+          <Link to="/" className="flex items-center gap-3 min-w-0" data-testid="navbar-logo">
+            <span className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-white px-2 py-1 ring-1 ring-prestige-beige/40">
+              <img
+                src={IA_GROUPE_FINANCIER_LOGO}
+                alt="iA Groupe financier"
+                className="block h-[30px] w-auto max-w-[min(132px,32vw)] object-contain object-center"
+                width={132}
+                height={30}
+              />
+            </span>
             <div className="hidden sm:block">
               <p className="font-heading font-semibold text-dark text-lg leading-tight">Pierre-Olivier</p>
               <p className="text-xs text-prestige-taupe">Conseiller en sécurité financière</p>

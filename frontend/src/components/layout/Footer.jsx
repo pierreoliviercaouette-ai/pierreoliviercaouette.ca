@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, ExternalLink, Facebook, Instagram, Linkedin } from 'lucide-react';
-import { IA_AUTO_HABITATION_URL } from '../../lib/branding';
+import { IA_AUTO_HABITATION_LOGO, IA_AUTO_HABITATION_URL } from '../../lib/branding';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -49,9 +49,9 @@ export const Footer = () => {
                 aria-label="iA Auto et Habitation — ouvrir le site"
               >
                 <img
-                  src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/675b3afd2ca280c375862eea.png"
+                  src={IA_AUTO_HABITATION_LOGO}
                   alt="iA Auto et Habitation"
-                  className="h-12 w-auto"
+                  className="h-12 w-auto object-contain object-center"
                 />
               </a>
             </div>

@@ -5,7 +5,11 @@ import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
-import { IA_GROUPE_FINANCIER_LOGO } from '../lib/branding';
+import {
+  IA_GROUPE_FINANCIER_LOGO,
+  IA_AUTO_HABITATION_LOGO,
+  IA_AUTO_HABITATION_URL,
+} from '../lib/branding';
 
 const Hero = () => (
   <section className="relative min-h-[90vh] overflow-hidden">
@@ -116,12 +120,17 @@ const Hero = () => (
               </div>
             </div>
             
-            {/* Stats badge */}
-            <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-2xl p-3 border border-prestige-beige flex items-center justify-center animate-float" style={{ animationDelay: '0.5s' }}>
+            {/* Stats badge — padding généreux pour éviter que les coins arrondis rognent le logo */}
+            <div
+              className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-2xl border border-prestige-beige flex items-center justify-center animate-float px-3 py-2.5"
+              style={{ animationDelay: '0.5s' }}
+            >
               <img
                 src={IA_GROUPE_FINANCIER_LOGO}
                 alt="iA Groupe financier"
-                className="h-7 md:h-8 w-auto max-w-[130px] object-contain"
+                className="block h-8 w-auto max-h-9 object-contain object-center"
+                width={140}
+                height={32}
               />
             </div>
           </div>
@@ -662,9 +671,9 @@ const TestimonialSection = () => {
 const PartnersSection = () => {
   const partners = [
     {
-      name: 'iA Groupe financier',
-      logo: IA_GROUPE_FINANCIER_LOGO,
-      url: 'https://ia.ca/fr/fiche-conseiller/conseiller/pierre-olivier-caouette'
+      name: 'iA Auto et Habitation',
+      logo: IA_AUTO_HABITATION_LOGO,
+      url: IA_AUTO_HABITATION_URL,
     },
     {
       name: 'Tugo Assurance Voyage',
@@ -677,16 +686,20 @@ const PartnersSection = () => {
     <section className="py-16 bg-white border-t border-prestige-beige" data-testid="partners-section">
       <div className="container-max">
         <p className="text-center text-prestige-taupe mb-8">Partenaires de confiance</p>
-        <div className="flex flex-wrap justify-center items-center gap-16">
+        <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16">
           {partners.map((partner) => (
             <a
               key={partner.name}
               href={partner.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-110"
+              className="grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-105 inline-flex items-center justify-center min-h-[3rem] px-2"
             >
-              <img src={partner.logo} alt={partner.name} className="h-11 md:h-12 w-auto max-w-[200px] object-contain" />
+              <img
+                src={partner.logo}
+                alt={partner.name}
+                className="max-h-10 md:max-h-11 w-auto max-w-[min(220px,85vw)] object-contain object-center"
+              />
             </a>
           ))}
         </div>

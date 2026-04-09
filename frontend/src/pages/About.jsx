@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Award, Heart, Target, Star, Quote, ExternalLink, Shield, TrendingUp, Users } from 'lucide-react';
 import { useSeoMeta } from '../lib/seo';
-import { IA_GROUPE_FINANCIER_LOGO } from '../lib/branding';
+import { IA_AUTO_HABITATION_LOGO, IA_AUTO_HABITATION_URL } from '../lib/branding';
 
 export const About = () => {
   useSeoMeta({
@@ -33,9 +33,9 @@ export const About = () => {
 
   const partners = [
     {
-      name: 'iA Groupe financier',
-      logo: IA_GROUPE_FINANCIER_LOGO,
-      url: 'https://ia.ca/fr/fiche-conseiller/conseiller/pierre-olivier-caouette'
+      name: 'iA Auto et Habitation',
+      logo: IA_AUTO_HABITATION_LOGO,
+      url: IA_AUTO_HABITATION_URL,
     },
     {
       name: 'Tugo Assurance Voyage',
@@ -335,16 +335,20 @@ export const About = () => {
       <section className="py-12 bg-light border-t border-prestige-beige">
         <div className="container-max">
           <p className="text-center text-prestige-taupe mb-8">Partenaires de confiance</p>
-          <div className="flex flex-wrap justify-center items-center gap-16">
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16">
             {partners.map((partner) => (
               <a
                 key={partner.name}
                 href={partner.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-110"
+                className="grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-105 inline-flex items-center justify-center min-h-[3rem] px-2"
               >
-                <img src={partner.logo} alt={partner.name} className="h-11 md:h-12 w-auto max-w-[200px] object-contain" />
+                <img
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="max-h-10 md:max-h-11 w-auto max-w-[min(220px,85vw)] object-contain object-center"
+                />
               </a>
             ))}
           </div>
