@@ -344,7 +344,7 @@ export const About = () => {
                 rel="noopener noreferrer"
                 className="grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-110"
               >
-                <img src={partner.logo} alt={partner.name} className="h-14 w-auto object-contain" />
+                <img src={partner.logo} alt={partner.name} className="h-11 md:h-12 w-auto max-w-[200px] object-contain" />
               </a>
             ))}
           </div>

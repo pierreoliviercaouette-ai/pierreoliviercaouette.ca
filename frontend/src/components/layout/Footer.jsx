@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, ExternalLink, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { IA_AUTO_HABITATION_URL } from '../../lib/branding';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const usefulLinks = [
-    { name: 'iA Auto et Habitation', url: 'https://ia.ca/campagne-iaah/reseau-carriere?uid=g8sjmw' },
+    { name: 'iA Auto et Habitation', url: IA_AUTO_HABITATION_URL },
     { name: 'Tugo Assurance Voyage', url: 'https://shop.tugo.com/store/IAJ19165' },
     { name: 'Ma fiche conseiller iA', url: 'https://ia.ca/fr/fiche-conseiller/conseiller/pierre-olivier-caouette' },
   ];
@@ -40,11 +41,19 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img 
-                src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/675b3afd2ca280c375862eea.png"
-                alt="Pierre-Olivier CSF Logo"
-                className="h-12 w-auto"
-              />
+              <a
+                href={IA_AUTO_HABITATION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded"
+                aria-label="iA Auto et Habitation — ouvrir le site"
+              >
+                <img
+                  src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/675b3afd2ca280c375862eea.png"
+                  alt="iA Auto et Habitation"
+                  className="h-12 w-auto"
+                />
+              </a>
             </div>
             <p className="text-white/70 text-sm leading-relaxed">
               Accompagnement personnalisé pour protéger ce qui compte vraiment. 

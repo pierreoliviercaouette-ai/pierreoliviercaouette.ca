@@ -36,7 +36,7 @@ export const Navbar = () => {
             <img
               src={IA_GROUPE_FINANCIER_LOGO}
               alt="iA Groupe financier"
-              className="h-10 w-auto object-contain bg-white rounded-md"
+              className="h-7 md:h-8 w-auto max-w-[140px] object-contain bg-white rounded-md"
             />
             <div className="hidden sm:block">
               <p className="font-heading font-semibold text-dark text-lg leading-tight">Pierre-Olivier</p>
