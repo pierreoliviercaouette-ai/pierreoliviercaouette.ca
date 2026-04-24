@@ -30,9 +30,13 @@ export const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-prestige-beige">
       <div className="container-max">
-        <div className="relative flex items-center h-20 px-4 md:px-8">
-          {/* Logo */}
-          <Link to="/" className="relative z-10 flex items-center gap-3 min-w-0 shrink-0" data-testid="navbar-logo">
+        <div className="flex w-full min-w-0 items-center h-20 px-4 md:px-8 gap-2">
+          {/* Logo — colonne de gauche fixe */}
+          <Link
+            to="/"
+            className="flex min-w-0 flex-shrink-0 items-center gap-2 sm:gap-3 z-10"
+            data-testid="navbar-logo"
+          >
             <span className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-white px-2 py-1 ring-1 ring-prestige-beige/40">
               <img
                 src={IA_GROUPE_FINANCIER_LOGO}
@@ -42,48 +46,48 @@ export const Navbar = () => {
                 height={30}
               />
             </span>
-            <div className="hidden sm:block">
-              <p className="font-heading font-semibold text-dark text-lg leading-tight">Pierre-Olivier</p>
-              <p className="text-xs text-prestige-taupe">Conseiller en sécurité financière</p>
+            <div className="min-w-0 hidden sm:block">
+              <p className="font-heading font-semibold text-dark text-base lg:text-lg leading-tight truncate">
+                Pierre-Olivier
+              </p>
+              <p className="text-xs text-prestige-taupe hidden md:block">Conseiller en sécurité financière</p>
             </div>
           </Link>
 
-          {/* Desktop Navigation — centré sur la barre (aligné avec le reste du site) */}
+          {/*
+            Liens : centrés dans l'espace *entre* le logo et les actions (évite le chevauchement
+            avec le pill Recommandations qu'un position:absolute pleine largeur provoquait).
+          */}
           <nav
-            className="pointer-events-none absolute left-0 right-0 top-0 bottom-0 hidden lg:flex items-center justify-center"
+            className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex xl:gap-2 2xl:gap-3"
             aria-label="Navigation principale"
           >
-            <div className="pointer-events-auto flex items-center justify-center gap-6 xl:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: link.path })}
                 data-testid={`nav-link-${link.path.replace('/', '') || 'home'}`}
-                className={`font-medium transition-colors duration-200 py-2 px-3 rounded-lg hover:bg-light/50 ${
-                  isActive(link.path)
-                    ? 'text-primary'
-                    : 'text-dark hover:text-primary'
+                className={`whitespace-nowrap px-1.5 py-2 text-sm font-medium transition-colors duration-200 xl:px-2.5 2xl:px-3 rounded-lg hover:bg-light/50 ${
+                  isActive(link.path) ? 'text-primary' : 'text-dark hover:text-primary'
                 }`}
               >
                 {link.name}
               </Link>
             ))}
-            </div>
           </nav>
 
-          {/* Desktop Actions */}
-          <div className="ml-auto relative z-10 hidden lg:flex items-center gap-3 shrink-0">
-            {/* Referral CTA - Always visible, special styling */}
-            <Link 
-              to="/recommandations" 
+          <div className="hidden min-w-0 flex-shrink-0 items-center gap-1.5 xl:gap-2 2xl:gap-3 lg:flex">
+            {/* Referral CTA */}
+            <Link
+              to="/recommandations"
               onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/recommandations' })}
-              className="relative group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-secondary/20 to-primary/20 hover:from-secondary/30 hover:to-primary/30 rounded-full transition-all duration-300"
+              className="relative group flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-r from-secondary/20 to-primary/20 px-3 py-1.5 text-sm hover:from-secondary/30 hover:to-primary/30 xl:px-4 xl:py-2"
               data-testid="nav-referral-cta"
             >
-              <Gift className="w-4 h-4 text-primary" />
-              <span className="font-medium text-primary text-sm">Recommandations</span>
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-secondary rounded-full animate-pulse" />
+              <Gift className="h-4 w-4 shrink-0 text-primary" />
+              <span className="whitespace-nowrap font-medium text-primary">Recommandations</span>
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 shrink-0 animate-pulse rounded-full bg-secondary" />
             </Link>
 
             {user ? (
