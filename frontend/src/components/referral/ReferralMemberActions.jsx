@@ -75,7 +75,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
       )}
       {hideReferralLinkCard && (
         <p className="text-center text-sm text-prestige-taupe">
-          Complétez les étapes ci-dessous : votre lien est déjà affiché dans le résumé en haut de page.
+          Complétez les étapes ci-dessous : votre lien est déjà dans le bloc résumé (sous le tableau des paliers).
         </p>
       )}
 

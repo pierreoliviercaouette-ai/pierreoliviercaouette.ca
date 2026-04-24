@@ -55,7 +55,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Où voir mon avancement ?',
-    a: 'Une fois connecté, le résumé et le tableau ci-dessous affichent vos points vérifiés et la suite des paliers.',
+    a: 'Une fois connecté, le tableau des paliers et le bloc résumé (points, barre, lien) affichent votre situation vérifiée.',
   },
 ];
 
@@ -104,7 +104,7 @@ function PageHeader({ user }) {
           {first ? `Bonjour, ${first}` : 'Programme de recommandations'}
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-prestige-taupe md:text-base">
-          Résumé, tableau des paliers, puis les actions à compléter — une seule suite logique.
+          Paliers en premier, puis comment gagner des points, puis vos outils — dans cet ordre sur la page.
         </p>
       </div>
     </header>
@@ -395,18 +395,26 @@ export const Referral = () => {
     <main className="bg-light pt-20 pb-0" data-testid="referral-page">
       <PageHeader user={user} />
 
-      {user ? <MemberSummaryCard user={user} program={program} /> : null}
-
-      <HowItWorks />
-
-      <TiersTable user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
+      {user ? (
+        <>
+          <TiersTable user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
+          <MemberSummaryCard user={user} program={program} />
+          <HowItWorks />
+        </>
+      ) : (
+        <>
+          <HowItWorks />
+          <TiersTable user={user} referralStats={referralStats} loading={false} />
+        </>
+      )}
 
       {user ? (
         <section className="border-t border-prestige-beige/80 bg-white py-12 md:py-16">
           <div className="container-max">
             <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">À compléter</h2>
             <p className="mt-2 max-w-2xl text-sm text-prestige-taupe">
-              Avis Google, statut client, saisie d’une personne et liste de suivi — le lien est dans le résumé ci-dessus.
+              Avis Google, statut client, saisie d’une personne et liste de suivi — le lien à partager figure dans le bloc résumé
+              (points et barre), placé sous le tableau des paliers.
             </p>
             <div className="mt-8">
               <ReferralMemberActions user={user} program={program} hideReferralLinkCard />
