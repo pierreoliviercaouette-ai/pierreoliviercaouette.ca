@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import { PageHero } from '../components/layout/PageHero';
 import { useFaqSchema, useSeoMeta } from '../lib/seo';
 
 function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqItems = [] }) {
@@ -6,44 +8,69 @@ function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqIt
   useFaqSchema(faqItems);
 
   return (
-    <main className="pt-20 min-h-screen bg-white">
-      <section className="section-padding gradient-hero">
-        <div className="container-max max-w-4xl text-center">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-white mb-4">{h1}</h1>
-          <p className="text-white/85 text-lg">{intro}</p>
-        </div>
-      </section>
+    <main className="pt-20 min-h-screen bg-white" data-testid="seo-landing-page">
+      <PageHero
+        badge="Guide"
+        title={h1}
+        description={intro}
+        minHeightClass="min-h-[50vh] md:min-h-[58vh]"
+      />
 
-      <section className="section-padding">
-        <article className="container-max max-w-4xl prose prose-lg max-w-none">
+      <section className="section-padding bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-10 w-48 h-48 bg-secondary/10 rounded-full blur-2xl" />
+
+        <article className="container-max max-w-4xl relative space-y-8">
           {sections.map((s) => (
-            <section key={s.heading} className="mb-10">
-              <h2 className="font-heading text-2xl font-bold text-dark mb-3">{s.heading}</h2>
-              {s.paragraphs.map((p, idx) => (
-                <p key={idx} className="text-prestige-taupe leading-relaxed mb-3">{p}</p>
-              ))}
+            <section key={s.heading}>
+              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-prestige-beige hover:shadow-xl transition-shadow duration-300">
+                <h2 className="font-heading text-2xl font-bold text-dark mb-4">{s.heading}</h2>
+                {s.paragraphs.map((p, idx) => (
+                  <p key={idx} className="text-prestige-taupe leading-relaxed mb-3 last:mb-0">
+                    {p}
+                  </p>
+                ))}
+              </div>
             </section>
           ))}
 
-          <section className="bg-light rounded-2xl p-6 mt-10">
-            <h2 className="font-heading text-2xl font-bold text-dark mb-3">Prochaine etape</h2>
-            <p className="text-prestige-taupe mb-4">
-              Obtenez une strategie personnalisee selon votre situation familiale, votre budget et vos objectifs.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link to="/rendez-vous" className="btn-primary">Prendre rendez-vous</Link>
-              <Link to="/services" className="btn-secondary">Voir tous les services</Link>
+          <div className="relative overflow-hidden rounded-3xl">
+            <div className="absolute inset-0 gradient-hero" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-secondary/20 rounded-full blur-3xl" />
+            <div className="relative px-6 py-10 md:px-10 md:py-12 text-center">
+              <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-3">Prochaine étape</h2>
+              <p className="text-white/85 text-lg mb-8 max-w-2xl mx-auto">
+                Obtenez une stratégie personnalisée selon votre situation familiale, votre budget et vos objectifs.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  to="/rendez-vous"
+                  className="group inline-flex items-center justify-center gap-2 bg-white text-primary rounded-full px-8 py-3 font-semibold shadow-lg hover:bg-secondary hover:text-white transition-all duration-300"
+                >
+                  Prendre rendez-vous
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+                <Link
+                  to="/services"
+                  className="inline-flex items-center justify-center border-2 border-white/35 text-white rounded-full px-8 py-3 font-semibold hover:bg-white/10 transition-colors"
+                >
+                  Voir tous les services
+                </Link>
+              </div>
             </div>
-          </section>
+          </div>
 
           {faqItems.length > 0 && (
-            <section className="mt-10">
-              <h2 className="font-heading text-2xl font-bold text-dark mb-4">FAQ</h2>
+            <section className="pt-2">
+              <h2 className="font-heading text-2xl font-bold text-dark mb-6 text-center">Questions fréquentes</h2>
               <div className="space-y-4">
                 {faqItems.map((item) => (
-                  <div key={item.question} className="bg-light rounded-xl p-4">
-                    <h3 className="font-semibold text-dark mb-1">{item.question}</h3>
-                    <p className="text-prestige-taupe">{item.answer}</p>
+                  <div
+                    key={item.question}
+                    className="bg-white rounded-xl p-5 md:p-6 shadow-md border border-prestige-beige"
+                  >
+                    <h3 className="font-heading font-semibold text-dark mb-2">{item.question}</h3>
+                    <p className="text-prestige-taupe leading-relaxed">{item.answer}</p>
                   </div>
                 ))}
               </div>

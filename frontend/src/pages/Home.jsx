@@ -6,7 +6,7 @@ import { getPublicSiteOrigin } from '../lib/referralLink';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 import {
-  IA_GROUPE_FINANCIER_LOGO,
+  AMF_REGISTRE_URL,
   IA_AUTO_HABITATION_LOGO,
   IA_AUTO_HABITATION_URL,
 } from '../lib/branding';
@@ -28,7 +28,7 @@ const Hero = () => (
       backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
     }} />
     
-    <div className="container-max relative z-10 min-h-[90vh] flex items-center px-4 md:px-8">
+    <div className="container-max relative z-10 min-h-[90vh] flex items-center px-5 sm:px-6 md:px-10 lg:px-14">
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center w-full py-20">
         {/* Content */}
         <div className="space-y-8">
@@ -75,15 +75,34 @@ const Hero = () => (
           {/* Trust Badges */}
           <div className="flex flex-wrap items-center gap-6 pt-4">
             {[
-              { text: 'Certifié AMF', icon: CheckCircle2 },
-              { text: 'Service personnalisé', icon: CheckCircle2 },
-              { text: 'Basé au Québec', icon: CheckCircle2 }
-            ].map((badge, i) => (
-              <div key={i} className="flex items-center gap-2 text-white/70">
-                <badge.icon className="w-5 h-5 text-secondary" />
-                <span className="text-sm">{badge.text}</span>
-              </div>
-            ))}
+              { text: 'Certifié AMF', icon: CheckCircle2, href: AMF_REGISTRE_URL },
+              { text: 'Service personnalisé', icon: CheckCircle2, href: null },
+              { text: 'Basé au Québec', icon: CheckCircle2, href: null }
+            ].map((badge, i) => {
+              const inner = (
+                <>
+                  <badge.icon className="w-5 h-5 text-secondary" />
+                  <span className="text-sm">{badge.text}</span>
+                </>
+              );
+              return (
+                <div key={i} className="flex items-center gap-2 text-white/70">
+                  {badge.href ? (
+                    <a
+                      href={badge.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackEvent('select_content', { content_type: 'external_link', item_id: 'home_amf_registre' })}
+                      className="inline-flex items-center gap-2 rounded-md hover:text-white/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                    >
+                      {inner}
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-2">{inner}</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
         
@@ -115,24 +134,37 @@ const Hero = () => (
                 <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="font-bold text-dark">Certifié AMF</p>
+                <a
+                  href={AMF_REGISTRE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent('select_content', { content_type: 'external_link', item_id: 'home_hero_badge_amf' })}
+                  className="font-bold text-dark hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                >
+                  Certifié AMF
+                </a>
                 <p className="text-xs text-prestige-taupe">Conseiller autorisé</p>
               </div>
             </div>
             
             {/* Stats badge — padding généreux pour éviter que les coins arrondis rognent le logo */}
-            <div
-              className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-2xl border border-prestige-beige flex items-center justify-center animate-float px-3 py-2.5"
+            <a
+              href={IA_AUTO_HABITATION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('select_content', { content_type: 'external_link', item_id: 'home_hero_ia_auto_logo' })}
+              className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-2xl border border-prestige-beige flex items-center justify-center animate-float px-3 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               style={{ animationDelay: '0.5s' }}
+              aria-label="iA Auto et Habitation — ouvrir le site"
             >
               <img
-                src={IA_GROUPE_FINANCIER_LOGO}
-                alt="iA Groupe financier"
+                src={IA_AUTO_HABITATION_LOGO}
+                alt="iA Auto et Habitation"
                 className="block h-8 w-auto max-h-9 object-contain object-center"
                 width={140}
                 height={32}
               />
-            </div>
+            </a>
           </div>
         </div>
       </div>
@@ -328,7 +360,15 @@ const AboutPreview = () => (
                   <Shield className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <p className="font-bold text-dark">Certifié AMF</p>
+                  <a
+                    href={AMF_REGISTRE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackEvent('select_content', { content_type: 'external_link', item_id: 'home_about_badge_amf' })}
+                    className="block font-bold text-dark hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  >
+                    Certifié AMF
+                  </a>
                   <p className="text-sm text-prestige-taupe">Conseiller autorisé</p>
                 </div>
               </div>
@@ -352,7 +392,7 @@ const AboutPreview = () => (
             Mon but est de vous accompagner dans vos objectifs tout en tenant compte de vos valeurs et de votre situation.
             Étant dûment certifié auprès de l'Autorité des marchés financiers, je vous invite à{' '}
             <a 
-              href="https://lautorite.qc.ca/grand-public/registres/registre-des-entreprises-et-des-individus-autorises-a-exercer/"
+              href={AMF_REGISTRE_URL}
               target="_blank" 
               rel="noopener noreferrer"
               className="text-primary hover:underline font-medium"
@@ -364,13 +404,25 @@ const AboutPreview = () => (
           {/* Quick benefits instead of fake stats */}
           <div className="flex flex-wrap gap-3 py-4">
             {[
-              { icon: '🎯', label: 'Conseils personnalisés' },
-              { icon: '🛡️', label: 'Certifié AMF' },
-              { icon: '🤝', label: 'Accompagnement humain' }
+              { icon: '🎯', label: 'Conseils personnalisés', href: null },
+              { icon: '🛡️', label: 'Certifié AMF', href: AMF_REGISTRE_URL },
+              { icon: '🤝', label: 'Accompagnement humain', href: null }
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 px-4 py-2 bg-light rounded-full">
                 <span>{item.icon}</span>
-                <p className="text-sm font-medium text-dark">{item.label}</p>
+                {item.href ? (
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackEvent('select_content', { content_type: 'external_link', item_id: 'home_about_pill_amf' })}
+                    className="text-sm font-medium text-dark hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <p className="text-sm font-medium text-dark">{item.label}</p>
+                )}
               </div>
             ))}
           </div>
@@ -683,7 +735,7 @@ const PartnersSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-white border-t border-prestige-beige" data-testid="partners-section">
+    <section className="py-16 px-5 sm:px-6 md:px-10 lg:px-14 bg-white border-t border-prestige-beige" data-testid="partners-section">
       <div className="container-max">
         <p className="text-center text-prestige-taupe mb-8">Partenaires de confiance</p>
         <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16">
@@ -777,7 +829,7 @@ export const Home = () => {
   }, [refFromQuery, navigate]);
 
   return (
-    <main data-testid="home-page">
+    <main data-testid="home-page" className="home-page">
       <Hero />
       <ServicesSection />
       <AdvantageSection />

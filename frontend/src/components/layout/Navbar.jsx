@@ -30,9 +30,9 @@ export const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-prestige-beige">
       <div className="container-max">
-        <div className="flex items-center justify-between h-20 px-4 md:px-8">
+        <div className="relative flex items-center h-20 px-4 md:px-8">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 min-w-0" data-testid="navbar-logo">
+          <Link to="/" className="relative z-10 flex items-center gap-3 min-w-0 shrink-0" data-testid="navbar-logo">
             <span className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-white px-2 py-1 ring-1 ring-prestige-beige/40">
               <img
                 src={IA_GROUPE_FINANCIER_LOGO}
@@ -48,8 +48,12 @@ export const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
+          {/* Desktop Navigation — centré sur la barre (aligné avec le reste du site) */}
+          <nav
+            className="pointer-events-none absolute left-0 right-0 top-0 bottom-0 hidden lg:flex items-center justify-center"
+            aria-label="Navigation principale"
+          >
+            <div className="pointer-events-auto flex items-center justify-center gap-6 xl:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -65,10 +69,11 @@ export const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-          </div>
+            </div>
+          </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="ml-auto relative z-10 hidden lg:flex items-center gap-3 shrink-0">
             {/* Referral CTA - Always visible, special styling */}
             <Link 
               to="/recommandations" 
@@ -207,7 +212,7 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2"
+            className="ml-auto relative z-10 p-2 lg:hidden"
             onClick={() => setIsOpen(!isOpen)}
             data-testid="mobile-menu-button"
           >

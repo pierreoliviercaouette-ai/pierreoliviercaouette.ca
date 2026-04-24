@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Award, Heart, Target, Star, Quote, ExternalLink, Shield, TrendingUp, Users } from 'lucide-react';
 import { useSeoMeta } from '../lib/seo';
-import { IA_AUTO_HABITATION_LOGO, IA_AUTO_HABITATION_URL } from '../lib/branding';
+import { AMF_REGISTRE_URL, IA_AUTO_HABITATION_LOGO, IA_AUTO_HABITATION_URL } from '../lib/branding';
 
 export const About = () => {
   useSeoMeta({
@@ -89,7 +89,7 @@ export const About = () => {
               
               <div className="flex items-center gap-4">
                 <a 
-                  href="https://lautorite.qc.ca/grand-public/registres/registre-des-entreprises-et-des-individus-autorises-a-exercer/" 
+                  href={AMF_REGISTRE_URL}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/20 transition-colors"
@@ -118,9 +118,16 @@ export const About = () => {
                 </div>
                 
                 {/* Floating badge */}
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white rounded-full px-6 py-2 shadow-xl flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  <span className="font-semibold text-dark">Certifié AMF</span>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white rounded-full px-4 sm:px-6 py-2 shadow-xl flex items-center gap-2 max-w-[min(100%,calc(100vw-2rem))]">
+                  <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                  <a
+                    href={AMF_REGISTRE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-dark text-center text-sm sm:text-base hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  >
+                    Certifié AMF
+                  </a>
                 </div>
               </div>
             </div>
@@ -227,10 +234,20 @@ export const About = () => {
               {/* Items */}
               <div className="space-y-8">
                 {timeline.map((item, index) => (
-                  <div key={item.year} className="relative flex gap-6 items-start">
-                    {/* Dot */}
-                    <div className="relative z-10 w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center border-4 border-primary">
-                      <span className="font-bold text-primary text-sm">{item.year}</span>
+                  <div key={`${item.title}-${index}`} className="relative flex gap-6 items-start">
+                    {/* Dot — min. largeur pour « Aujourd'hui » (ne dépasse pas du cercle) */}
+                    <div
+                      className={`relative z-10 shrink-0 rounded-full bg-white shadow-lg flex items-center justify-center border-4 border-primary px-1 ${
+                        item.year.length > 4 ? 'min-w-[4.5rem] h-16' : 'w-16 h-16'
+                      }`}
+                    >
+                      <span
+                        className={`font-bold text-primary text-center leading-tight ${
+                          item.year.length > 4 ? 'text-[11px] sm:text-xs' : 'text-sm'
+                        }`}
+                      >
+                        {item.year}
+                      </span>
                     </div>
                     
                     {/* Content */}
