@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Copy, Sparkles, Trophy, Star, Crown, ShieldCheck, Gift, Users } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Sparkles, Trophy, Star, Crown, ShieldCheck, Gift, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
-import { getReferralConsentUrl } from '../lib/referralLink';
 import { useReferralProgramData } from '../hooks/useReferralProgramData';
-import { Button } from '../components/ui/button';
 import { PageHero } from '../components/layout/PageHero';
 import { ReferralMemberActions } from '../components/referral/ReferralMemberActions';
 
@@ -58,8 +56,8 @@ function HeroBlock({ user }) {
     return (
       <PageHero
         badge="Recommandations"
-        title="Recommandez en confiance et cumulez des remerciements"
-        description="Partagez votre lien personnel, suivez vos points et debloquez des paliers Bronze, Argent, Or, Platine et Privilege."
+        title="Transformez vos recommandations en remerciements concrets"
+        description="Partagez votre lien personnel, suivez vos points en direct et debloquez les paliers Bronze, Argent, Or, Platine et Privilege."
         minHeightClass="min-h-[48vh] md:min-h-[52vh]"
       >
         <Link
@@ -88,7 +86,7 @@ function HeroBlock({ user }) {
     <PageHero
       badge="Espace membre"
       title={first ? `Bonjour, ${first}` : 'Votre programme'}
-      description="Votre lien, vos points et vos paliers sont reunis ici pour vous permettre de progresser rapidement."
+      description="Votre lien de consentement, vos points et vos paliers sont reunis ici pour maximiser vos remerciements."
       minHeightClass="min-h-[48vh] md:min-h-[52vh]"
     >
       <Link to="/profil" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
@@ -105,7 +103,7 @@ function ValueSection() {
       <div className="container-max">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Pourquoi participer</p>
-          <h2 className="mt-2 font-heading text-2xl font-bold text-dark md:text-3xl">Un programme moderne, simple et motivant</h2>
+          <h2 className="mt-2 font-heading text-2xl font-bold text-dark md:text-3xl">Un programme moderne, simple et vraiment motivant</h2>
           <p className="mt-3 text-prestige-taupe">
             Tout est concu pour rester clair du debut a la fin : comment gagner des points, ou vous en etes, et ce que vous debloquez.
           </p>
@@ -230,8 +228,7 @@ function TiersSection({ user, referralStats, loading }) {
 }
 
 function MemberSummarySection({ user, program }) {
-  const { loading, referralStats, copyReferralLink, copied } = program;
-  const link = user.referral_code ? getReferralConsentUrl(user.referral_code) : '';
+  const { loading, referralStats } = program;
 
   if (loading) {
     return (
@@ -257,10 +254,10 @@ function MemberSummarySection({ user, program }) {
         <SectionHeading
           kicker="Votre solde"
           title="Points vérifiés"
-          subtitle="Votre progression en direct sur 100 points pour garder le cap sur le prochain palier."
+          subtitle="Votre progression en direct sur 100 points pour atteindre votre prochain palier plus rapidement."
         />
         <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-prestige-beige bg-light/30 p-6 shadow-ia sm:p-8">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div>
             <div>
               <p
                 className="font-heading text-4xl font-bold tabular-nums text-primary"
@@ -280,35 +277,6 @@ function MemberSummarySection({ user, program }) {
                 <p className="mt-2 text-sm text-prestige-taupe">Continuez d’accumuler des points vérifiés.</p>
               )}
             </div>
-            {user.referral_code ? (
-              <div className="w-full min-w-0 sm:max-w-md">
-                <p className="mb-1.5 text-xs font-medium text-prestige-taupe">Lien de consentement</p>
-                <div className="flex gap-2">
-                  <div
-                    className="min-w-0 flex-1 truncate rounded-lg border border-prestige-beige bg-white px-3 py-2.5 font-mono text-xs text-dark"
-                    data-testid="referral-summary-link"
-                  >
-                    {link}
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={copyReferralLink}
-                    className="btn-primary h-10 shrink-0 px-4 py-0 text-sm"
-                    data-testid="copy-referral-link"
-                  >
-                    {copied ? (
-                      <span className="flex items-center gap-1.5">
-                        <CheckCircle2 className="h-4 w-4" /> Copié
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1.5">
-                        <Copy className="h-4 w-4" /> Copier
-                      </span>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            ) : null}
           </div>
           <div className="mt-6 h-2 overflow-hidden rounded-full bg-prestige-beige/80">
             <div
@@ -325,14 +293,14 @@ function MemberSummarySection({ user, program }) {
 
 function MemberActionsSection({ user, program }) {
   return (
-    <section className="section-padding bg-light">
+    <section className="section-padding bg-white">
       <div className="container-max">
         <SectionHeading
-          kicker="Actions"
-          title="Créditer des points"
-          subtitle="Partagez votre lien, confirmez vos bonus et suivez facilement vos références."
+          kicker="Passez a l action"
+          title="Votre lien et vos actions de progression"
+          subtitle="Commencez par partager votre lien de consentement, puis ajoutez vos bonus et suivez vos references."
         />
-        <ReferralMemberActions user={user} program={program} hideReferralLinkCard />
+        <ReferralMemberActions user={user} program={program} hideReferralLinkCard={false} />
       </div>
     </section>
   );
@@ -344,9 +312,9 @@ function GuestCtaSection() {
       <div className="container-max">
         <div className="mx-auto max-w-xl rounded-2xl border border-prestige-beige bg-light/40 p-8 text-center shadow-ia md:p-10">
           <Sparkles className="mx-auto h-8 w-8 text-primary/80" aria-hidden />
-          <h2 className="mt-4 font-heading text-xl font-bold text-dark md:text-2xl">Pret a commencer ?</h2>
+          <h2 className="mt-4 font-heading text-xl font-bold text-dark md:text-2xl">Pret a demarrer ?</h2>
           <p className="mt-2 text-sm text-prestige-taupe">
-            Creez votre compte en moins de 2 minutes pour recevoir votre lien et commencer a cumuler vos points.
+            Creez votre compte en moins de 2 minutes pour recevoir votre lien et commencer a cumuler vos points des aujourd hui.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
@@ -392,23 +360,28 @@ export const Referral = () => {
   useSeoMeta({
     title: 'Programme de recommandations | Victoriaville',
     description:
-      'Un programme de recommandations simple, moderne et motivant : points cumulatifs, paliers clairs et suivi en temps reel.',
+      'Un programme de recommandations attractif et moderne : lien de consentement, points cumulatifs, paliers clairs et suivi en temps reel.',
     canonicalPath: '/recommandations',
   });
 
   return (
     <main className="min-h-screen bg-light pt-20" data-testid="referral-page">
       <HeroBlock user={user} />
-      <ValueSection />
-      <PointsSection />
-      <TiersSection user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
       {user ? (
         <>
-          <MemberSummarySection user={user} program={program} />
           <MemberActionsSection user={user} program={program} />
+          <TiersSection user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
+          <MemberSummarySection user={user} program={program} />
+          <ValueSection />
+          <PointsSection />
         </>
       ) : (
-        <GuestCtaSection />
+        <>
+          <ValueSection />
+          <TiersSection user={user} referralStats={referralStats} loading={false} />
+          <PointsSection />
+          <GuestCtaSection />
+        </>
       )}
       <LegalLine />
     </main>
