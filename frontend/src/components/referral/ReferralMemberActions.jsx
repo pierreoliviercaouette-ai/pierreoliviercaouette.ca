@@ -30,7 +30,7 @@ function statusBadge(status) {
  * Bloc membre : actions concrètes (lien, avis, client, formulaire, liste).
  * Même esthétique que le reste de la page (cartes bordure prestige-beige).
  */
-export const ReferralMemberActions = ({ user, program }) => {
+export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = false }) => {
   if (!user) return null;
 
   const {
@@ -68,40 +68,49 @@ export const ReferralMemberActions = ({ user, program }) => {
       className="mx-auto max-w-3xl space-y-6"
       data-testid="referral-member-actions"
     >
-      <p className="text-center text-sm text-prestige-taupe">
-        Chaque action ci-dessous correspond aux trois façons d’accumuler des points décrites plus haut.
-      </p>
+      {!hideReferralLinkCard && (
+        <p className="text-center text-sm text-prestige-taupe">
+          Chaque action ci-dessous correspond aux trois façons d’accumuler des points décrites plus haut.
+        </p>
+      )}
+      {hideReferralLinkCard && (
+        <p className="text-center text-sm text-prestige-taupe">
+          Complétez les étapes ci-dessous : votre lien est déjà affiché dans le résumé en haut de page.
+        </p>
+      )}
 
       <div className="space-y-4">
-        <div className="overflow-hidden rounded-2xl border-2 border-blue-200/80 bg-gradient-to-br from-blue-50/90 to-white p-4 shadow-sm md:p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-              <Users className="h-5 w-5 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="mb-1 flex flex-wrap items-center gap-2">
-                <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Votre lien de consentement</h3>
-                <Badge className="border-0 bg-blue-500 text-xs text-white">+1 pt / réf. qualifiée</Badge>
+        {!hideReferralLinkCard && (
+          <div className="overflow-hidden rounded-2xl border-2 border-blue-200/80 bg-gradient-to-br from-blue-50/90 to-white p-4 shadow-sm md:p-5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Users className="h-5 w-5 text-white" />
               </div>
-              <p className="mb-2 text-xs text-prestige-taupe md:text-sm">
-                Partagez ce lien : la personne valide d’abord le contact.
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="min-w-0 flex-1 overflow-hidden rounded-lg border border-prestige-beige bg-white p-2.5 font-mono text-[10px] text-dark md:text-xs">
-                  {link}
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex flex-wrap items-center gap-2">
+                  <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Votre lien de consentement</h3>
+                  <Badge className="border-0 bg-blue-500 text-xs text-white">+1 pt / réf. qualifiée</Badge>
                 </div>
-                <Button
-                  type="button"
-                  onClick={copyReferralLink}
-                  className="h-9 w-9 flex-shrink-0 bg-blue-500 p-0 hover:bg-blue-600"
-                  data-testid="copy-referral-link"
-                >
-                  {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
+                <p className="mb-2 text-xs text-prestige-taupe md:text-sm">
+                  Partagez ce lien : la personne valide d’abord le contact.
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1 overflow-hidden rounded-lg border border-prestige-beige bg-white p-2.5 font-mono text-[10px] text-dark md:text-xs">
+                    {link}
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={copyReferralLink}
+                    className="h-9 w-9 flex-shrink-0 bg-blue-500 p-0 hover:bg-blue-600"
+                    data-testid="copy-referral-link"
+                  >
+                    {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="overflow-hidden rounded-2xl border-2 border-green-200/80 bg-gradient-to-br from-green-50/90 to-white p-4 shadow-sm md:p-5">
           <div className="flex items-start gap-3">

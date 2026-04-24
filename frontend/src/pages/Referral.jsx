@@ -1,5 +1,16 @@
 import { Link } from 'react-router-dom';
-import { Gift, Users, ArrowRight, MessageSquare, UserCheck, Trophy, Star, Crown, CheckCircle2, Copy } from 'lucide-react';
+import {
+  Gift,
+  Users,
+  ArrowRight,
+  MessageSquare,
+  Trophy,
+  Star,
+  Crown,
+  CheckCircle2,
+  Copy,
+  ChevronRight,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
@@ -8,335 +19,365 @@ import { useReferralProgramData } from '../hooks/useReferralProgramData';
 import { ReferralMemberActions } from '../components/referral/ReferralMemberActions';
 import { Button } from '../components/ui/button';
 
-const tiers = [
-  { threshold: 10, reward: '25 $', name: 'Bronze', icon: Trophy, color: 'text-orange-700', bg: 'bg-orange-100', gradient: 'from-orange-600 to-orange-400' },
-  { threshold: 20, reward: '50 $', name: 'Argent', icon: Trophy, color: 'text-gray-500', bg: 'bg-gray-100', gradient: 'from-gray-500 to-gray-300' },
-  { threshold: 40, reward: '100 $', name: 'Or', icon: Trophy, color: 'text-yellow-600', bg: 'bg-yellow-100', gradient: 'from-yellow-500 to-yellow-300' },
-  { threshold: 75, reward: '250 $', name: 'Platine', icon: Star, color: 'text-cyan-600', bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-cyan-300' },
-  { threshold: 100, reward: 'Coffret Privilège', name: 'Privilège', icon: Crown, color: 'text-purple-600', bg: 'bg-purple-100', gradient: 'from-purple-600 to-purple-400' },
+const TIERS = [
+  { threshold: 10, reward: '25 $', name: 'Bronze', icon: Trophy, color: 'text-orange-700', bg: 'bg-orange-50' },
+  { threshold: 20, reward: '50 $', name: 'Argent', icon: Trophy, color: 'text-gray-600', bg: 'bg-gray-50' },
+  { threshold: 40, reward: '100 $', name: 'Or', icon: Trophy, color: 'text-yellow-700', bg: 'bg-amber-50' },
+  { threshold: 75, reward: '250 $', name: 'Platine', icon: Star, color: 'text-cyan-700', bg: 'bg-cyan-50' },
+  { threshold: 100, reward: 'Coffret Privilège', name: 'Privilège', icon: Crown, color: 'text-purple-700', bg: 'bg-purple-50' },
 ];
 
-const pointsMethods = [
-  { icon: Users, title: 'Mise en relation', points: 1, short: 'Quelqu’un accepte d’être contacté via votre lien (consentement).', color: 'bg-blue-500' },
-  { icon: MessageSquare, title: 'Avis Google', points: 2, short: 'Avis publié et reconnu selon les critères du programme.', color: 'bg-green-500' },
-  { icon: UserCheck, title: 'Client existant', points: 2, short: 'Confirmation de votre statut dans notre dossier.', color: 'bg-purple-500' },
+const HOW_STEPS = [
+  {
+    icon: Users,
+    title: 'Partager le lien',
+    body: 'Vous envoyez le lien de consentement : la personne choisit librement d’être recontactée.',
+    meta: '+1 pt par mise en relation qualifiée',
+  },
+  {
+    icon: MessageSquare,
+    title: 'Bonus possibles',
+    body: 'Avis Google reconnu ou confirmation « client existant » dans notre dossier, selon les règles du programme.',
+    meta: '+2 pts chacun lorsque vérifié',
+  },
+  {
+    icon: Gift,
+    title: 'Remerciements',
+    body: 'Les points ouvrent des paliers de reconnaissance (jusqu’à 100 pts). Les récompenses des paliers atteints s’additionnent.',
+    meta: 'Sans obligation d’achat',
+  },
 ];
 
-const faqs = [
-  { question: 'Les points dépendent-ils d’un achat?', answer: 'Non. Ils récompensent la mise en relation ou les actions prévues au programme.' },
-  { question: 'Comment suivre mes points?', answer: 'Uniquement à la connexion, sur cette même page : la structure (haut de page, barre, paliers) reste la même qu’en consultation publique ; seuls s’y ajoutent les chiffres vérifiés, votre lien de consentement et l’historique des références. Aucun compteur n’existe hors compte actif.' },
-  { question: 'Les paliers sont-ils cumulatifs?', answer: 'Oui. Les récompenses des paliers atteints s’additionnent.' },
-  { question: 'Dois-je parler de produits financiers?', answer: 'Non. Vous mettez en relation ; vous ne donnez pas de conseils sur les produits.' },
+const FAQ_ITEMS = [
+  {
+    q: 'Faut-il parler de produits financiers ?',
+    a: 'Non. Vous faites une mise en relation ; vous ne présentez pas de produits ni de conseils.',
+  },
+  {
+    q: 'Où voir mon avancement ?',
+    a: 'Une fois connecté, le résumé et le tableau ci-dessous affichent vos points vérifiés et la suite des paliers.',
+  },
 ];
 
-const ReferralHero = ({ user, program }) => {
+function PageHeader({ user }) {
   if (!user) {
     return (
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero" />
-        <div className="absolute inset-0">
-          <div className="absolute right-20 top-20 h-96 w-96 rounded-full bg-secondary opacity-20 blur-3xl" />
-          <div className="absolute bottom-20 left-20 h-72 w-72 rounded-full bg-white opacity-10 blur-3xl" />
-        </div>
-        <div className="relative section-padding">
-          <div className="container-max text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2">
-              <Gift className="h-5 w-5 text-secondary" />
-              <span className="font-medium text-white">Recommandations</span>
-            </div>
-            <h1 className="mb-6 font-heading text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
-              Recommandez un proche. <span className="text-secondary">Sans pression.</span>
-            </h1>
-            <p className="mb-8 mx-auto max-w-2xl text-lg text-white/85 md:text-xl">
-              Partagez un lien : la personne choisit d’être contactée. Des remerciements selon le programme — sans obligation d’achat.
-            </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Link
-                to="/inscription"
-                onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_hero_register' })}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 font-semibold text-primary hover:bg-light"
-                data-testid="referral-cta-register"
-              >
-                Créer mon compte
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link
-                to="/connexion"
-                onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_hero_login' })}
-                className="inline-flex items-center justify-center rounded-full border-2 border-white px-8 py-4 font-semibold text-white hover:bg-white/10"
-                data-testid="referral-cta-login"
-              >
-                J’ai déjà un compte
-              </Link>
-            </div>
+      <header className="border-b border-prestige-beige/80 bg-white">
+        <div className="container-max py-12 md:py-16">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-primary">Programme</p>
+          <h1 className="max-w-3xl font-heading text-3xl font-bold leading-tight text-dark md:text-4xl lg:text-5xl">
+            Recommandations : un lien, des remerciements clairs
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-prestige-taupe md:text-lg">
+            Inscrivez-vous pour obtenir votre lien personnel, puis suivez vos points et vos paliers sur cette même page.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link
+              to="/inscription"
+              onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_hero_register' })}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
+              data-testid="referral-cta-register"
+            >
+              Créer mon compte
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/connexion"
+              onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_hero_login' })}
+              className="inline-flex items-center justify-center rounded-full border border-prestige-beige bg-light px-7 py-3.5 text-sm font-semibold text-dark transition hover:border-primary/30"
+              data-testid="referral-cta-login"
+            >
+              J’ai déjà un compte
+            </Link>
           </div>
         </div>
-      </section>
+      </header>
     );
   }
 
-  const { loading, copyReferralLink, copied } = program;
   const first = user.first_name?.trim();
+  return (
+    <header className="border-b border-prestige-beige/80 bg-white">
+      <div className="container-max py-10 md:py-12">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">Votre espace</p>
+        <h1 className="font-heading text-3xl font-bold text-dark md:text-4xl">
+          {first ? `Bonjour, ${first}` : 'Programme de recommandations'}
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-prestige-taupe md:text-base">
+          Résumé, tableau des paliers, puis les actions à compléter — une seule suite logique.
+        </p>
+      </div>
+    </header>
+  );
+}
+
+function MemberSummaryCard({ user, program }) {
+  const { loading, referralStats, copyReferralLink, copied } = program;
   const link = user.referral_code ? getReferralConsentUrl(user.referral_code) : '';
 
-  return (
-    <section className="relative overflow-hidden pb-4 sm:pb-6">
-      <div className="absolute inset-0 gradient-hero" />
-      <div className="absolute inset-0">
-        <div className="absolute right-20 top-20 h-96 w-96 rounded-full bg-secondary opacity-20 blur-3xl" />
-        <div className="absolute bottom-20 left-20 h-72 w-72 rounded-full bg-white opacity-10 blur-3xl" />
-      </div>
-      <div className="relative section-padding pb-10 sm:pb-12">
-        <div className="container-max text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2">
-            <Gift className="h-5 w-5 text-secondary" />
-            <span className="font-medium text-white">Espace membre</span>
-          </div>
-          <h1 className="mb-3 font-heading text-4xl font-bold text-white sm:text-5xl">
-            {first ? `Bonjour, ${first}` : 'Bienvenue dans votre programme'}
-          </h1>
-          <p className="mx-auto mb-8 max-w-xl text-base text-white/85 sm:text-lg">
-            Solde et paliers dans la section suivante, puis comment gagner des points et vos outils pour agir — tout sur cette page.
-          </p>
-
-          {user.referral_code && !loading && (
-            <div className="mx-auto mb-8 max-w-2xl">
-              <p className="mb-2 text-left text-xs text-white/70">Lien de consentement (raccourci)</p>
-              <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 p-2 sm:p-3">
-                <div className="min-w-0 flex-1 truncate font-mono text-left text-xs text-white/95 sm:text-sm" data-testid="referral-hero-link">
-                  {link}
-                </div>
-                <Button
-                  type="button"
-                  onClick={copyReferralLink}
-                  className="h-9 w-9 shrink-0 border border-white/30 bg-white/15 p-0 text-white hover:bg-white/25"
-                  data-testid="referral-hero-copy"
-                >
-                  {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <p className="text-sm text-white/60">
-            <Link to="/profil" className="font-medium text-white/90 underline-offset-2 hover:underline">
-              Ouvrir mon profil
-            </Link>
-            <span className="text-white/50"> — coordonnées, mot de passe, etc.</span>
-          </p>
+  if (loading) {
+    return (
+      <div className="container-max py-8">
+        <div className="mx-auto max-w-3xl animate-pulse rounded-2xl border border-prestige-beige bg-white p-8 shadow-sm">
+          <div className="h-8 w-48 rounded bg-prestige-beige/60" />
+          <div className="mt-4 h-3 w-full rounded bg-prestige-beige/40" />
         </div>
       </div>
-    </section>
-  );
-};
+    );
+  }
 
-const PointsHowSection = ({ memberLayout }) => (
-  <section
-    className={`section-padding ${memberLayout ? 'border-t border-prestige-beige/70 bg-white' : 'bg-white'}`}
-    data-testid="referral-how-points"
-  >
-    <div className="container-max">
-      <div className="mx-auto mb-12 max-w-2xl text-center">
-        <h2 className="mb-3 font-heading text-3xl font-bold text-dark md:text-4xl">Comment gagner des points</h2>
-        <p className="text-prestige-taupe">Trois façons d’accumuler des points, une fois le compte actif. Aucun point n’est retenu tant que vous n’êtes pas connecté.</p>
-      </div>
-      <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-        {pointsMethods.map((method, idx) => (
-          <div
-            key={method.title}
-            className="relative rounded-2xl border border-prestige-beige/80 bg-light p-6"
-            data-testid={`points-method-${idx}`}
-          >
-            <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${method.color}`}>
-              <method.icon className="h-6 w-6 text-white" />
-            </div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <h3 className="font-heading text-lg font-semibold text-dark">{method.title}</h3>
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold text-white ${method.color}`}>
-                +{method.points} pt{method.points > 1 ? 's' : ''}
-              </span>
-            </div>
-            <p className="text-sm leading-relaxed text-prestige-taupe">{method.short}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-const AccountGateSection = () => (
-  <section className="section-padding bg-light border-y border-prestige-beige/60">
-    <div className="container-max">
-      <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-prestige-beige bg-white p-8 text-center shadow-ia">
-        <h2 className="mb-2 font-heading text-2xl font-bold text-dark">Passez à l’action</h2>
-        <p className="mb-6 text-prestige-taupe">
-          Créez un compte ou connectez-vous : mêmes paliers visuels qu’ici, avec votre solde et vos outils uniquement en session.
-        </p>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
-          <Link
-            to="/inscription"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-white hover:opacity-95"
-            onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_gate_register' })}
-          >
-            S’inscrire
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/connexion"
-            className="inline-flex items-center justify-center rounded-full border-2 border-primary/30 px-6 py-3 font-semibold text-primary hover:bg-primary/5"
-            onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'referral_gate_login' })}
-          >
-            Connexion
-          </Link>
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-const TiersSection = ({ user, referralStats, loading }) => {
-  const isGuest = !user;
-  const isLoading = Boolean(user) && loading;
-  const total = user && !loading && referralStats != null ? referralStats.total_points : null;
+  const clamped = Math.max(0, referralStats?.total_points ?? 0);
   const next = referralStats?.next_tier;
   const toNext = referralStats?.points_to_next_tier;
-  const clamped = Math.max(0, referralStats?.total_points ?? 0);
   const barPct = Math.min(100, (clamped / 100) * 100);
 
   return (
-    <section className={`section-padding gradient-prestige ${!isGuest ? '-mt-px border-t border-white/10 pt-12 sm:pt-14' : ''}`}>
-      <div className="container-max">
-        <div className="mx-auto mb-8 max-w-2xl text-center">
-          <h2 className="mb-2 font-heading text-3xl font-bold text-dark md:text-4xl">Paliers de remerciement</h2>
-          <p className="text-sm text-prestige-taupe md:text-base">
-            {isGuest
-              ? 'Cinq étapes jusqu’à 100 points — les remerciements s’additionnent. Même présentation en visite ou connecté.'
-              : 'Votre position sur l’échelle : solde, prochain objectif et cartes des remerciements.'}
-          </p>
-        </div>
-
-        {!isGuest && isLoading && (
-          <div className="mx-auto mb-8 h-14 max-w-md animate-pulse rounded-2xl bg-prestige-beige/50" data-testid="referral-tiers-loading" />
-        )}
-
-        {!isGuest && !isLoading && (
-          <div className="mx-auto mb-8 max-w-lg px-2">
-            <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-ia">
-              <div className="text-center sm:text-left">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-prestige-taupe">Solde</p>
-                <p className="font-heading text-3xl font-bold text-primary" data-testid="referral-tiers-bar-points">
-                  {clamped}
-                  <span className="text-lg font-semibold text-prestige-taupe"> / 100</span>
-                  <span className="ml-1 text-lg font-semibold text-primary">pts</span>
-                </p>
-              </div>
+    <div className="container-max py-8 md:py-10">
+      <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-prestige-beige bg-white shadow-sm">
+        <div className="border-b border-prestige-beige/80 bg-light/80 px-5 py-5 sm:px-6 sm:py-6">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">Points vérifiés</p>
+              <p className="mt-1 font-heading text-4xl font-bold tabular-nums text-primary" data-testid="referral-tiers-bar-points">
+                {clamped}
+                <span className="text-xl font-semibold text-prestige-taupe"> / 100</span>
+              </p>
               {next && toNext > 0 ? (
-                <div className="min-w-0 border-t border-prestige-beige pt-3 text-center text-sm text-prestige-taupe sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 sm:text-left">
-                  <span className="font-medium text-dark">Prochain : {next.name}</span>
-                  <span className="block tabular-nums">Encore {toNext} pt · seuil {next.threshold}</span>
-                </div>
+                <p className="mt-2 text-sm text-dark">
+                  Prochain palier : <span className="font-semibold">{next.name}</span> — encore{' '}
+                  <span className="tabular-nums">{toNext}</span> pt (seuil {next.threshold})
+                </p>
               ) : clamped >= 100 ? (
-                <p className="max-w-xs text-center text-sm font-medium text-dark sm:text-left">Échelle complétée — merci !</p>
-              ) : null}
+                <p className="mt-2 text-sm font-medium text-dark">Échelle actuelle complétée. Merci !</p>
+              ) : (
+                <p className="mt-2 text-sm text-prestige-taupe">Continuez à accumuler des points vérifiés.</p>
+              )}
             </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-prestige-beige/80">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-[width] duration-500"
-                style={{ width: `${barPct}%` }}
-                data-testid="referral-tiers-progress-bar"
-              />
-            </div>
-          </div>
-        )}
-
-        {isGuest && (
-          <p className="mx-auto mb-8 max-w-md text-center text-sm text-prestige-taupe">
-            Connecté, une ligne de progression et votre solde s’affichent au-dessus des mêmes cartes.
-          </p>
-        )}
-
-        <div
-          className="mx-auto grid max-w-6xl gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-5"
-          data-testid="referral-tiers-cards"
-        >
-          {tiers.map((tier, idx) => {
-            const reached = total != null && total >= tier.threshold;
-            const isNext = !reached && next && next.threshold === tier.threshold;
-            const Icon = tier.icon;
-            return (
-              <div
-                key={tier.name}
-                className={`relative flex min-h-[240px] flex-col overflow-hidden rounded-2xl bg-white text-center shadow-ia transition sm:min-h-[260px] ${
-                  reached ? 'ring-2 ring-primary ring-offset-2' : isNext ? 'ring-2 ring-dashed ring-primary/50' : ''
-                }`}
-                data-testid={`tier-card-${idx}`}
-              >
-                <div className={`h-2 w-full shrink-0 bg-gradient-to-r ${tier.gradient}`} />
-                {reached && (
-                  <span className="absolute right-2 top-3 flex items-center gap-0.5 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
-                    <CheckCircle2 className="h-3 w-3" aria-hidden />
-                    Atteint
-                  </span>
-                )}
-                {isNext && (
-                  <span className="absolute right-2 top-3 rounded-full border border-dashed border-primary bg-white px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
-                    Prochain
-                  </span>
-                )}
-                <div className="flex flex-1 flex-col items-center px-4 pb-5 pt-6">
-                  <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${tier.bg} shadow-sm`}>
-                    <Icon className={`h-8 w-8 ${tier.color}`} />
+            {user.referral_code ? (
+              <div className="min-w-0 flex-1 sm:max-w-md">
+                <p className="mb-1.5 text-xs font-medium text-prestige-taupe">Lien à partager</p>
+                <div className="flex gap-2">
+                  <div
+                    className="min-w-0 flex-1 truncate rounded-lg border border-prestige-beige bg-white px-3 py-2.5 font-mono text-xs text-dark"
+                    data-testid="referral-summary-link"
+                  >
+                    {link}
                   </div>
-                  <h3 className="mt-4 font-heading text-lg font-bold text-dark">{tier.name}</h3>
-                  <span className="mt-2 rounded-full bg-light px-3 py-1 text-xs font-semibold tabular-nums text-dark">
-                    {tier.threshold} pts
-                  </span>
-                  <p className="mt-auto pt-5 font-heading text-xl font-bold leading-tight text-primary sm:text-2xl">{tier.reward}</p>
+                  <Button
+                    type="button"
+                    onClick={copyReferralLink}
+                    className="h-10 shrink-0 bg-primary px-4 text-sm text-white hover:bg-primary/90"
+                    data-testid="copy-referral-link"
+                  >
+                    {copied ? (
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="h-4 w-4" /> Copié
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <Copy className="h-4 w-4" /> Copier
+                      </span>
+                    )}
+                  </Button>
                 </div>
               </div>
-            );
-          })}
+            ) : null}
+          </div>
+          <div className="mt-5 h-2 overflow-hidden rounded-full bg-prestige-beige/70">
+            <div
+              className="h-full rounded-full bg-primary transition-[width] duration-500"
+              style={{ width: `${barPct}%` }}
+              data-testid="referral-tiers-progress-bar"
+            />
+          </div>
         </div>
+        <div className="px-5 py-3 text-center sm:px-6">
+          <Link to="/profil" className="text-sm font-medium text-primary hover:underline">
+            Profil du compte
+          </Link>
+          <span className="text-prestige-taupe"> · </span>
+          <span className="text-sm text-prestige-taupe">coordonnées, mot de passe</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        <p className="mt-8 mx-auto max-w-xl text-center text-xs text-prestige-taupe sm:text-sm">
-          {user
-            ? 'Les coches et la barre reflètent les points vérifiés dans votre dossier.'
-            : 'Aucun solde hors session : les coches et la barre n’apparaissent qu’une fois connecté.'}
+function HowItWorks() {
+  return (
+    <section className="border-b border-prestige-beige/60 bg-white py-12 md:py-16" data-testid="referral-how-points">
+      <div className="container-max">
+        <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">Comment ça fonctionne</h2>
+        <p className="mt-2 max-w-2xl text-sm text-prestige-taupe md:text-base">
+          Trois idées, dans l’ordre : partage, bonus facultatifs, reconnaissance.
         </p>
+        <ol className="mt-10 grid gap-6 md:grid-cols-3">
+          {HOW_STEPS.map((step, idx) => (
+            <li
+              key={step.title}
+              className="relative flex flex-col rounded-2xl border border-prestige-beige/80 bg-light/50 p-6"
+              data-testid={`points-method-${idx}`}
+            >
+              <span className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-heading text-sm font-bold text-white">
+                {idx + 1}
+              </span>
+              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-white shadow-sm">
+                <step.icon className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="font-heading text-lg font-semibold text-dark">{step.title}</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-prestige-taupe">{step.body}</p>
+              <p className="mt-4 text-xs font-medium text-primary">{step.meta}</p>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
-};
+}
 
-const FaqAndLegal = () => (
-  <>
-    <section className="section-padding bg-white">
+function TiersTable({ user, referralStats, loading }) {
+  const isMember = Boolean(user);
+  const total = isMember && !loading && referralStats != null ? referralStats.total_points : null;
+  const next = referralStats?.next_tier;
+
+  return (
+    <section className="bg-light py-12 md:py-16">
       <div className="container-max">
-        <h2 className="mb-10 text-center font-heading text-3xl font-bold text-dark">Questions fréquentes</h2>
-        <div className="mx-auto max-w-2xl space-y-3">
-          {faqs.map((faq, i) => (
-            <div key={faq.question} className="rounded-xl border border-prestige-beige/60 bg-light p-5" data-testid={`faq-${i}`}>
-              <h3 className="mb-1.5 font-heading text-sm font-semibold text-dark">{faq.question}</h3>
-              <p className="text-sm leading-relaxed text-prestige-taupe">{faq.answer}</p>
+        <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">Remerciements selon les points</h2>
+        <p className="mt-2 max-w-2xl text-sm text-prestige-taupe md:text-base">
+          {isMember
+            ? 'Un seul tableau : paliers et état pour votre compte.'
+            : 'Le tableau indique les seuils du programme. Votre situation personnelle n’apparaît qu’après connexion.'}
+        </p>
+
+        {isMember && loading && (
+          <div className="mt-8 h-40 max-w-3xl animate-pulse rounded-xl border border-prestige-beige bg-white" data-testid="referral-tiers-loading" />
+        )}
+
+        {!(isMember && loading) && (
+          <div className="mt-8 overflow-hidden rounded-xl border border-prestige-beige bg-white shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[320px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-prestige-beige bg-light/80 text-xs font-semibold uppercase tracking-wide text-prestige-taupe">
+                    <th className="px-4 py-3 md:px-5">Palier</th>
+                    <th className="px-4 py-3 md:px-5">Points cumulés</th>
+                    <th className="px-4 py-3 md:px-5">Remerciement</th>
+                    {isMember ? <th className="px-4 py-3 md:px-5">Votre statut</th> : null}
+                  </tr>
+                </thead>
+                <tbody>
+                  {TIERS.map((tier, idx) => {
+                    const Icon = tier.icon;
+                    const reached = total != null && total >= tier.threshold;
+                    const isNext = isMember && !reached && next && next.threshold === tier.threshold;
+                    let statusCell = '—';
+                    if (isMember) {
+                      if (reached) statusCell = 'Atteint';
+                      else if (isNext) statusCell = 'En cours';
+                    }
+                    return (
+                      <tr
+                        key={tier.name}
+                        className="border-b border-prestige-beige/60 last:border-0"
+                        data-testid={`referral-tier-row-${idx}`}
+                      >
+                        <td className="px-4 py-4 md:px-5">
+                          <div className="flex items-center gap-3">
+                            <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${tier.bg}`}>
+                              <Icon className={`h-4 w-4 ${tier.color}`} />
+                            </span>
+                            <span className="font-heading font-semibold text-dark">{tier.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 tabular-nums text-prestige-taupe md:px-5">{tier.threshold} pts</td>
+                        <td className="px-4 py-4 font-heading font-semibold text-primary md:px-5">{tier.reward}</td>
+                        {isMember ? (
+                          <td className="px-4 py-4 md:px-5">
+                            {reached ? (
+                              <span className="inline-flex items-center gap-1 text-sm font-medium text-green-700">
+                                <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
+                                Atteint
+                              </span>
+                            ) : isNext ? (
+                              <span className="text-sm font-medium text-primary">Prochain</span>
+                            ) : (
+                              <span className="text-prestige-taupe">—</span>
+                            )}
+                          </td>
+                        ) : null}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function DisclaimerBlock() {
+  return (
+    <section className="border-t border-prestige-beige/80 bg-white py-12 md:py-14">
+      <div className="container-max">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-amber-200/80 bg-amber-50/40 px-5 py-6 md:px-8 md:py-7">
+          <h2 className="font-heading text-lg font-bold text-dark md:text-xl">Avis et limites importantes</h2>
+          <ul className="mt-4 space-y-3 text-sm leading-relaxed text-dark/90">
+            <li className="flex gap-2">
+              <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden />
+              <span>
+                <strong className="font-semibold">Programme de reconnaissance</strong> pour des mises en relation — ce n’est pas une
+                offre de produits ou services financiers, ni une activité de distribution.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden />
+              <span>
+                Vous partagez un <strong className="font-semibold">lien de contact</strong> : vous ne présentez pas de produits et vous ne
+                donnez pas de conseils sur des produits financiers.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden />
+              <span>
+                Les <strong className="font-semibold">points et paliers</strong> dépendent de vérifications selon les règles du programme.
+                L’information affichée lorsque vous êtes connecté reflète l’état connu de votre dossier à ce moment.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden />
+              <span>
+                <strong className="font-semibold">Aucun suivi de points</strong> n’est conservé pour les visiteurs non connectés. Le
+                programme est <strong className="font-semibold">soumis à conditions</strong> ; les détails applicables prévalent.
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FaqCompact() {
+  return (
+    <section className="bg-light py-10 md:py-12">
+      <div className="container-max">
+        <h2 className="font-heading text-xl font-bold text-dark">Questions fréquentes</h2>
+        <div className="mt-6 max-w-3xl space-y-4">
+          {FAQ_ITEMS.map((item, i) => (
+            <div key={item.q} className="rounded-xl border border-prestige-beige bg-white px-5 py-4" data-testid={`faq-${i}`}>
+              <h3 className="font-heading text-sm font-semibold text-dark">{item.q}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{item.a}</p>
             </div>
           ))}
         </div>
       </div>
     </section>
-
-    <section className="section-padding bg-light pb-8">
-      <div className="container-max">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-prestige-beige bg-white p-6 md:p-8">
-          <h2 className="mb-4 font-heading text-xl font-bold text-dark">Rappel</h2>
-          <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-prestige-taupe">
-            <li>Programme de reconnaissance pour mises en relation, sans activité de distribution de produits.</li>
-            <li>Vous partagez un lien de contact ; vous ne présentez pas de produits ni de conseils.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-  </>
-);
+  );
+}
 
 export const Referral = () => {
   const { user } = useAuth();
@@ -346,46 +387,61 @@ export const Referral = () => {
   useSeoMeta({
     title: 'Programme de recommandations | Victoriaville',
     description:
-      'Lien de mise en relation, suivi des points et références : le programme de recommandations, au même endroit.',
+      'Lien de consentement, paliers de remerciement et actions : le programme de recommandations, expliqué simplement.',
     canonicalPath: '/recommandations',
   });
 
   return (
-    <main className="pt-20" data-testid="referral-page">
-      <ReferralHero user={user} program={program} />
-      {user ? (
-        <>
-          <TiersSection user={user} referralStats={referralStats} loading={loading} />
-          <PointsHowSection memberLayout />
-          <section className="section-padding border-t border-prestige-beige/80 bg-light">
-            <div className="container-max">
-              <div className="mx-auto mb-8 max-w-3xl text-center">
-                <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">Vos outils</h2>
-                <p className="mt-2 text-sm text-prestige-taupe md:text-base">
-                  Lien, avis Google, client existant, saisie manuelle et suivi des personnes — après la lecture du programme ci-dessus.
-                </p>
-              </div>
-              <ReferralMemberActions user={user} program={program} />
-            </div>
-          </section>
-        </>
-      ) : (
-        <>
-          <PointsHowSection />
-          <AccountGateSection />
-          <TiersSection user={user} referralStats={referralStats} loading={false} />
-        </>
-      )}
-      <FaqAndLegal />
+    <main className="bg-light pt-20 pb-0" data-testid="referral-page">
+      <PageHeader user={user} />
 
-      <section className="bg-dark py-6">
-        <div className="container-max px-4 text-center text-xs text-white/50 md:px-8">
+      {user ? <MemberSummaryCard user={user} program={program} /> : null}
+
+      <HowItWorks />
+
+      <TiersTable user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
+
+      {user ? (
+        <section className="border-t border-prestige-beige/80 bg-white py-12 md:py-16">
+          <div className="container-max">
+            <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">À compléter</h2>
+            <p className="mt-2 max-w-2xl text-sm text-prestige-taupe">
+              Avis Google, statut client, saisie d’une personne et liste de suivi — le lien est dans le résumé ci-dessus.
+            </p>
+            <div className="mt-8">
+              <ReferralMemberActions user={user} program={program} hideReferralLinkCard />
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="border-t border-prestige-beige/80 bg-white py-10 md:py-12">
+          <div className="container-max text-center">
+            <p className="text-sm text-prestige-taupe">
+              Prêt à participer ? Utilisez les boutons en haut de page pour vous inscrire ou vous connecter.
+            </p>
+            <Link
+              to="/connexion"
+              className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+              data-testid="referral-gate-login-link"
+            >
+              Connexion
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+      )}
+
+      <DisclaimerBlock />
+      <FaqCompact />
+
+      <footer className="border-t border-prestige-beige/80 bg-dark py-6">
+        <div className="container-max px-4 text-center text-xs leading-relaxed text-white/55 md:px-8">
           <p>
-            Programme soumis à conditions. L’information à jour figure sur cette page et, lorsque vous êtes connecté,
-            reflète l’état vérifié de votre compte.
+            Programme soumis à conditions. Les renseignements à jour figurent sur cette page ; en session membre, ils tiennent compte
+            des vérifications effectuées.
           </p>
         </div>
-      </section>
+      </footer>
     </main>
   );
 };
