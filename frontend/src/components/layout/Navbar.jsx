@@ -164,7 +164,7 @@ export const Navbar = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/profil?tab=referrals" className="flex items-center gap-2">
+                      <Link to="/recommandations" className="flex items-center gap-2">
                         <Gift className="w-4 h-4" />
                         Mes références
                       </Link>
