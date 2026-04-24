@@ -192,73 +192,33 @@ export const SupabaseAuthProvider = ({ children }) => {
     }
   }, [user, fetchNotifications]);
 
-  const login = async (identifier, password) => {
-    const value = (identifier || '').trim();
-    const isEmail = value.includes('@');
-    const credentials = isEmail
-      ? { email: value, password }
-      : { phone: normalizePhoneForAuth(value), password };
-    const { data, error } = await supabase.auth.signInWithPassword(credentials);
+  const login = async (email, password) => {
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
     if (error) throw error;
     await fetchUser();
     return data.user;
   };
 
-  const sendPhoneOtp = async (phone, metadata = null) => {
-    const normalizedPhone = normalizePhoneForAuth(phone);
-    const payload = {
-      phone: normalizedPhone,
-    };
-    if (metadata) {
-      payload.options = { data: metadata };
-    }
-    const { data, error } = await supabase.auth.signInWithOtp(payload);
-    if (error) throw error;
-    return { data, phone: normalizedPhone };
-  };
-
-  const verifyPhoneOtp = async (phone, token) => {
-    const normalizedPhone = normalizePhoneForAuth(phone);
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone: normalizedPhone,
-      token: (token || '').trim(),
-      type: 'sms',
-    });
-    if (error) throw error;
-    await fetchUser();
-    return data?.session;
-  };
-
   const register = async (userData) => {
-    const { email, phone, password, first_name, last_name } = userData;
-    const normalizedEmail = (email || '').trim();
-    const normalizedPhone = normalizePhoneForAuth(phone);
+    const { email, password, first_name, last_name } = userData;
+    const normalizedEmail = (email || '').trim().toLowerCase();
 
-    const signUpPayload = normalizedPhone
-      ? {
-          phone: normalizedPhone,
-          password,
-          options: {
-            emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
-            data: {
-              first_name,
-              last_name,
-              phone: normalizedPhone
-            }
-          }
-        }
-      : {
-          email: normalizedEmail,
-          password,
-          options: {
-            emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
-            data: {
-              first_name,
-              last_name,
-              phone: null
-            }
-          }
-        };
+    const signUpPayload = {
+      email: normalizedEmail,
+      password,
+      options: {
+        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+        data: {
+          first_name,
+          last_name,
+          phone: null,
+        },
+      },
+    };
 
     const { data, error } = await supabase.auth.signUp(signUpPayload);
     if (error) throw error;
@@ -327,8 +287,6 @@ export const SupabaseAuthProvider = ({ children }) => {
     notifications,
     unreadCount,
     login,
-    sendPhoneOtp,
-    verifyPhoneOtp,
     register,
     logout,
     getAuthHeaders, // Kept for legacy compatibility
