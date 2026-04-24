@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Gift, Users, ArrowRight, MessageSquare, UserCheck, Trophy, Star, Crown, CheckCircle2, Copy } from 'lucide-react';
+import { Gift, Users, ArrowRight, MessageSquare, UserCheck, Trophy, Star, Crown, CheckCircle2, Copy, MapPin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
@@ -182,6 +182,122 @@ const PointsHowSection = () => (
   </section>
 );
 
+/** Piste 0–100 pts : mêmes jalons invité / membre (membre : remplissage + curseur + détail prochain palier). */
+const ReferralTiersProgress = ({ user, loading, referralStats }) => {
+  const isGuest = !user;
+  const isLoading = Boolean(user) && loading;
+  const clamped = isGuest
+    ? 0
+    : Math.max(0, referralStats?.total_points ?? 0);
+  const barPct = Math.min(100, (clamped / 100) * 100);
+  const rawLinePct = (Math.min(clamped, 100) / 100) * 100;
+  const pinLinePct = Math.max(0.2, Math.min(99.8, rawLinePct));
+  const next = referralStats?.next_tier;
+  const toNext = referralStats?.points_to_next_tier;
+  const showPin = !isGuest && !isLoading && user;
+
+  return (
+    <div
+      className="mx-auto mb-10 max-w-4xl rounded-2xl border border-prestige-beige/80 bg-white/90 p-5 shadow-ia sm:p-7"
+      data-testid="referral-tiers-progress"
+    >
+      <div className="mb-1 flex flex-wrap items-end justify-between gap-2">
+        <h3 className="font-heading text-lg font-semibold text-dark sm:text-xl">Parcours des remerciements (0–100 pts)</h3>
+        {isLoading ? (
+          <div className="h-5 w-28 animate-pulse rounded bg-prestige-beige/60" />
+        ) : isGuest ? (
+          <span className="text-xs font-medium text-prestige-taupe sm:text-sm">Vos points s’afficheront une fois connecté</span>
+        ) : (
+          <span className="font-heading text-2xl font-bold text-primary" data-testid="referral-tiers-bar-points">
+            {clamped} pt{clamped === 1 ? '' : 's'}
+          </span>
+        )}
+      </div>
+
+      <p className="mb-5 text-sm text-prestige-taupe">
+        {isGuest
+          ? "Le segment coloré se remplit selon les points vérifiés. Créez un compte : cette même piste indiquera votre avancement."
+          : isLoading
+            ? 'Chargement de la progression…'
+            : next && toNext > 0
+              ? `Prochaine récompense : ${next.name} — encore ${toNext} point(s) (palier ${next.threshold} pts).`
+              : clamped >= 100
+                ? "Vous avez atteint l’échelle de points du programme. Merci !"
+                : "Continuez d’accumuler des points vérifiés : la barre avance en temps réel."}
+      </p>
+
+      {isLoading ? (
+        <div className="h-12 w-full animate-pulse rounded-xl bg-prestige-beige/50" />
+      ) : (
+        <div className="relative">
+          <div className="relative h-3 overflow-hidden rounded-full bg-prestige-beige/70">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-secondary transition-[width] duration-500 ease-out"
+              style={{ width: `${isGuest ? 0 : barPct}%` }}
+            />
+          </div>
+          <div className="relative -mt-1.5 h-8 w-full" aria-hidden>
+            {tiers.map((t) => {
+              const markPct = (t.threshold / 100) * 100;
+              const done = isGuest ? false : clamped >= t.threshold;
+              return (
+                <div
+                  key={t.threshold}
+                  className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
+                  style={{ left: `${markPct}%` }}
+                  title={`${t.name} — ${t.threshold} pts — ${t.reward}`}
+                >
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full border-2 border-white shadow ${
+                      done ? 'bg-primary' : isGuest ? 'bg-prestige-taupe/30' : 'bg-white ring-1 ring-prestige-beige'
+                    }`}
+                  />
+                </div>
+              );
+            })}
+            {showPin && (
+              <div
+                className="absolute -top-6 z-10 flex -translate-x-1/2 flex-col items-center sm:-top-7"
+                style={{ left: `${pinLinePct}%` }}
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-primary bg-white shadow-md sm:h-7 sm:w-7">
+                  <MapPin className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" />
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="relative mt-0 min-h-[2.75rem] w-full sm:min-h-[3rem]" aria-hidden>
+            {tiers.map((t) => {
+              const markPct = (t.threshold / 100) * 100;
+              return (
+                <div
+                  key={`lbl-${t.threshold}`}
+                  className="absolute top-0 w-0 -translate-x-1/2 text-center"
+                  style={{ left: `${markPct}%` }}
+                >
+                  <span className="block w-[3.4rem] text-[10px] font-semibold leading-tight text-dark sm:w-[3.8rem] sm:text-xs">
+                    {t.threshold} pts
+                  </span>
+                  <span className="mt-0.5 line-clamp-1 block w-[3.4rem] text-[9px] text-prestige-taupe sm:w-[3.8rem] sm:text-[10px]">
+                    {t.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {isGuest && !isLoading && (
+        <div className="mt-10 rounded-xl bg-light/80 px-3 py-2.5 text-center text-xs text-prestige-taupe sm:mt-12 sm:text-sm">
+          Une fois connecté, le remplissage bleu suit vos points jusqu’à 100 ; chaque rond indique le seuil, et chaque pastille
+          colorée signifie un palier déjà atteint.
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AccountGateSection = () => (
   <section className="section-padding bg-light border-y border-prestige-beige/60">
     <div className="container-max">
@@ -220,7 +336,7 @@ const TiersSection = ({ user, referralStats, loading }) => {
   return (
     <section className="section-padding gradient-prestige">
       <div className="container-max">
-        <div className="mx-auto mb-12 max-w-2xl text-center">
+        <div className="mx-auto mb-6 max-w-2xl text-center sm:mb-8">
           <h2 className="mb-3 font-heading text-3xl font-bold text-dark md:text-4xl">Paliers de remerciement</h2>
           <p className="text-prestige-taupe">Reconnaissance cumulative (les paliers atteints s’additionnent).</p>
           {user && loading && <p className="mt-2 text-sm text-prestige-taupe">Chargement de votre progression…</p>}
@@ -236,6 +352,7 @@ const TiersSection = ({ user, referralStats, loading }) => {
             </p>
           )}
         </div>
+        <ReferralTiersProgress user={user} loading={loading} referralStats={referralStats} />
         <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-5" data-testid="referral-tiers-cards">
           {tiers.map((tier, idx) => {
             const reached = total != null && total >= tier.threshold;
