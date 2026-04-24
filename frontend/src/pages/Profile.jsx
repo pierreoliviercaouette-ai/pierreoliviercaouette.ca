@@ -18,6 +18,30 @@ import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { PageHero } from '../components/layout/PageHero';
 import { useSeoMeta } from '../lib/seo';
+import { useReferralProgramData } from '../hooks/useReferralProgramData';
+import { ReferralMemberActions } from '../components/referral/ReferralMemberActions';
+
+function ProfileReferralProgramActions({ user }) {
+  const program = useReferralProgramData(user);
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border border-prestige-beige bg-white p-6 shadow-ia md:p-8"
+      data-testid="profile-referral-actions"
+    >
+      <h3 className="font-heading text-lg font-semibold text-dark md:text-xl">Soumissions au programme</h3>
+      <p className="mt-1 text-sm text-prestige-taupe">
+        Règles et tableau des paliers :{' '}
+        <Link to="/recommandations" className="font-medium text-primary hover:underline">
+          page Recommandations
+        </Link>
+        . Ci-dessous : votre lien, avis Google, client existant, références et suivi.
+      </p>
+      <div className="mt-6">
+        <ReferralMemberActions user={user} program={program} hideReferralLinkCard={false} />
+      </div>
+    </div>
+  );
+}
 
 export const Profile = () => {
   const { user, loading: authLoading, notifications, markNotificationRead, markAllNotificationsRead } = useAuth();
@@ -126,7 +150,7 @@ export const Profile = () => {
               >
                 <Gift className="mb-1 h-6 w-6 text-primary" />
                 <span className="text-sm font-semibold text-primary">Recommandations</span>
-                <span className="text-xs text-prestige-taupe">Lien, points, références</span>
+                <span className="text-xs text-prestige-taupe">Règles, paliers, solde</span>
               </Link>
             </div>
           </div>
@@ -176,8 +200,8 @@ export const Profile = () => {
                       <div>
                         <h2 className="font-heading text-xl font-bold text-dark md:text-2xl">Programme de recommandations</h2>
                         <p className="mt-1 text-sm text-prestige-taupe">
-                          Votre lien personnel, l’ajout d’une référence, l’avis Google, le suivi des points et des paliers :
-                          tout se gère sur la page dédiée.
+                          La page Recommandations résume les points et les paliers. Les soumissions (lien, avis, références) se font
+                          dans le bloc ci-dessous.
                         </p>
                       </div>
                     </div>
@@ -190,6 +214,8 @@ export const Profile = () => {
                     </Link>
                   </div>
                 </div>
+
+                <ProfileReferralProgramActions user={user} />
 
                 <div className="grid gap-6 lg:grid-cols-3">
                   <div className="lg:col-span-2">

@@ -68,14 +68,13 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
       className="mx-auto max-w-3xl space-y-6"
       data-testid="referral-member-actions"
     >
-      {!hideReferralLinkCard && (
+      {!hideReferralLinkCard ? (
         <p className="text-center text-sm text-prestige-taupe">
-          Chaque action ci-dessous correspond aux trois façons d’accumuler des points décrites plus haut.
+          Chaque action ci-dessous correspond aux façons d’accumuler des points décrites sur la page.
         </p>
-      )}
-      {hideReferralLinkCard && (
+      ) : (
         <p className="text-center text-sm text-prestige-taupe">
-          Complétez les étapes ci-dessous : votre lien est déjà dans le bloc résumé (sous le tableau des paliers).
+          Votre lien personnel figure dans le bloc « Points vérifiés ». Complétez les étapes pour demander d’autres crédits.
         </p>
       )}
 
