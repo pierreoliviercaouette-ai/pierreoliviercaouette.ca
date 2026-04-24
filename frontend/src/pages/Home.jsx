@@ -9,6 +9,7 @@ import {
   AMF_REGISTRE_URL,
   IA_AUTO_HABITATION_LOGO,
   IA_AUTO_HABITATION_URL,
+  IA_GROUPE_FINANCIER_LOGO,
 } from '../lib/branding';
 
 const Hero = () => (
@@ -147,24 +148,19 @@ const Hero = () => (
               </div>
             </div>
             
-            {/* Stats badge — padding généreux pour éviter que les coins arrondis rognent le logo */}
-            <a
-              href={IA_AUTO_HABITATION_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent('select_content', { content_type: 'external_link', item_id: 'home_hero_ia_auto_logo' })}
-              className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-2xl border border-prestige-beige flex items-center justify-center animate-float px-3 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            {/* Logo réseau — visuel seulement (le lien iA Auto & Habitation est dans Partenaires) */}
+            <div
+              className="absolute -top-4 -right-4 flex items-center justify-center rounded-2xl border border-prestige-beige bg-white px-3 py-2.5 shadow-2xl animate-float"
               style={{ animationDelay: '0.5s' }}
-              aria-label="iA Auto et Habitation — ouvrir le site"
             >
               <img
-                src={IA_AUTO_HABITATION_LOGO}
-                alt="iA Auto et Habitation"
+                src={IA_GROUPE_FINANCIER_LOGO}
+                alt="iA Groupe financier"
                 className="block h-8 w-auto max-h-9 object-contain object-center"
                 width={140}
                 height={32}
               />
-            </a>
+            </div>
           </div>
         </div>
       </div>
