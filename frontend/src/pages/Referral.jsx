@@ -75,54 +75,33 @@ const ReferralHero = ({ user, program }) => {
     );
   }
 
-  const { loading, referralStats, copyReferralLink, copied } = program;
+  const { loading, copyReferralLink, copied } = program;
   const first = user.first_name?.trim();
-  const totalPoints = referralStats?.total_points;
-  const next = referralStats?.next_tier;
-  const nextLine =
-    !loading && referralStats
-      ? next
-        ? `Prochain palier : ${next.name} — ${referralStats.points_to_next_tier} point(s) restant(s).`
-        : totalPoints >= 100
-          ? 'Tous les paliers du programme actuel sont atteints. Merci !'
-          : null
-      : null;
-
   const link = user.referral_code ? getReferralConsentUrl(user.referral_code) : '';
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden pb-4 sm:pb-6">
       <div className="absolute inset-0 gradient-hero" />
       <div className="absolute inset-0">
         <div className="absolute right-20 top-20 h-96 w-96 rounded-full bg-secondary opacity-20 blur-3xl" />
         <div className="absolute bottom-20 left-20 h-72 w-72 rounded-full bg-white opacity-10 blur-3xl" />
       </div>
-      <div className="relative section-padding">
+      <div className="relative section-padding pb-10 sm:pb-12">
         <div className="container-max text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2">
             <Gift className="h-5 w-5 text-secondary" />
             <span className="font-medium text-white">Espace membre</span>
           </div>
-          <h1 className="mb-4 font-heading text-4xl font-bold text-white sm:text-5xl">
+          <h1 className="mb-3 font-heading text-4xl font-bold text-white sm:text-5xl">
             {first ? `Bonjour, ${first}` : 'Bienvenue dans votre programme'}
           </h1>
-          <p className="mb-2 mx-auto max-w-2xl text-lg text-white/85">
-            Même page que plus bas : ici, votre raccourci pour les points et le lien de consentement.
+          <p className="mx-auto mb-8 max-w-xl text-base text-white/85 sm:text-lg">
+            Solde et paliers dans la section suivante, puis comment gagner des points et vos outils pour agir — tout sur cette page.
           </p>
-          {loading ? (
-            <div className="mb-6 flex justify-center">
-              <div className="h-6 w-40 animate-pulse rounded bg-white/20" />
-            </div>
-          ) : (
-            <p className="mb-1 font-heading text-3xl font-bold text-white sm:text-4xl" data-testid="referral-hero-points">
-              {totalPoints} pt{totalPoints === 1 ? '' : 's'}
-            </p>
-          )}
-          {nextLine && <p className="mb-6 text-sm text-white/80 sm:text-base">{nextLine}</p>}
 
           {user.referral_code && !loading && (
-            <div className="mx-auto max-w-2xl">
-              <p className="mb-2 text-left text-xs text-white/70">Lien de consentement</p>
+            <div className="mx-auto mb-8 max-w-2xl">
+              <p className="mb-2 text-left text-xs text-white/70">Lien de consentement (raccourci)</p>
               <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 p-2 sm:p-3">
                 <div className="min-w-0 flex-1 truncate font-mono text-left text-xs text-white/95 sm:text-sm" data-testid="referral-hero-link">
                   {link}
@@ -139,7 +118,7 @@ const ReferralHero = ({ user, program }) => {
             </div>
           )}
 
-          <p className="mt-6 text-sm text-white/60">
+          <p className="text-sm text-white/60">
             <Link to="/profil" className="font-medium text-white/90 underline-offset-2 hover:underline">
               Ouvrir mon profil
             </Link>
@@ -151,8 +130,11 @@ const ReferralHero = ({ user, program }) => {
   );
 };
 
-const PointsHowSection = () => (
-  <section className="section-padding bg-white" data-testid="referral-how-points">
+const PointsHowSection = ({ memberLayout }) => (
+  <section
+    className={`section-padding ${memberLayout ? 'border-t border-prestige-beige/70 bg-white' : 'bg-white'}`}
+    data-testid="referral-how-points"
+  >
     <div className="container-max">
       <div className="mx-auto mb-12 max-w-2xl text-center">
         <h2 className="mb-3 font-heading text-3xl font-bold text-dark md:text-4xl">Comment gagner des points</h2>
@@ -222,12 +204,14 @@ const TiersSection = ({ user, referralStats, loading }) => {
   const barPct = Math.min(100, (clamped / 100) * 100);
 
   return (
-    <section className="section-padding gradient-prestige">
+    <section className={`section-padding gradient-prestige ${!isGuest ? '-mt-px border-t border-white/10 pt-12 sm:pt-14' : ''}`}>
       <div className="container-max">
         <div className="mx-auto mb-8 max-w-2xl text-center">
           <h2 className="mb-2 font-heading text-3xl font-bold text-dark md:text-4xl">Paliers de remerciement</h2>
           <p className="text-sm text-prestige-taupe md:text-base">
-            Cinq étapes jusqu’à 100 points — les remerciements s’additionnent. Même présentation en visite ou connecté.
+            {isGuest
+              ? 'Cinq étapes jusqu’à 100 points — les remerciements s’additionnent. Même présentation en visite ou connecté.'
+              : 'Votre position sur l’échelle : solde, prochain objectif et cartes des remerciements.'}
           </p>
         </div>
 
@@ -369,22 +353,29 @@ export const Referral = () => {
   return (
     <main className="pt-20" data-testid="referral-page">
       <ReferralHero user={user} program={program} />
-      <PointsHowSection />
       {user ? (
-        <section className="section-padding border-t border-prestige-beige/80 bg-white">
-          <div className="container-max">
-            <div className="mb-2 text-center">
-              <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">Vos outils</h2>
-              <p className="mt-1 text-sm text-prestige-taupe">C’est ici que vous gagnez et suivez vos points.</p>
+        <>
+          <TiersSection user={user} referralStats={referralStats} loading={loading} />
+          <PointsHowSection memberLayout />
+          <section className="section-padding border-t border-prestige-beige/80 bg-light">
+            <div className="container-max">
+              <div className="mx-auto mb-8 max-w-3xl text-center">
+                <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">Vos outils</h2>
+                <p className="mt-2 text-sm text-prestige-taupe md:text-base">
+                  Lien, avis Google, client existant, saisie manuelle et suivi des personnes — après la lecture du programme ci-dessus.
+                </p>
+              </div>
+              <ReferralMemberActions user={user} program={program} />
             </div>
-            <ReferralMemberActions user={user} program={program} />
-          </div>
-        </section>
+          </section>
+        </>
       ) : (
-        <AccountGateSection />
+        <>
+          <PointsHowSection />
+          <AccountGateSection />
+          <TiersSection user={user} referralStats={referralStats} loading={false} />
+        </>
       )}
-
-      <TiersSection user={user} referralStats={referralStats} loading={user ? loading : false} />
       <FaqAndLegal />
 
       <section className="bg-dark py-6">
