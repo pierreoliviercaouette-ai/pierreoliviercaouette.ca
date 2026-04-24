@@ -70,11 +70,11 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
     >
       {!hideReferralLinkCard ? (
         <p className="text-center text-sm text-prestige-taupe">
-          Chaque action ci-dessous correspond aux façons d’accumuler des points décrites sur la page.
+          Chaque action vous aide à accumuler des points vérifiés.
         </p>
       ) : (
         <p className="text-center text-sm text-prestige-taupe">
-          Votre lien personnel figure dans le bloc « Points vérifiés ». Complétez les étapes pour demander d’autres crédits.
+          Continuez avec les étapes ci-dessous pour obtenir plus de points.
         </p>
       )}
 

@@ -70,7 +70,7 @@ function HeroBlock({ user }) {
     <PageHero
       badge="Espace membre"
       title={first ? `Bonjour, ${first}` : 'Votre programme'}
-      description="Même parcours que tout le monde : règles, paliers, puis votre solde et vos actions dans une seule page."
+      description="Vous retrouvez ici les règles, les paliers, votre solde et toutes les actions pour accumuler des points."
       minHeightClass="min-h-[48vh] md:min-h-[52vh]"
     >
       <Link to="/profil" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
@@ -285,7 +285,7 @@ function MemberActionsSection({ user, program }) {
         <SectionHeading
           kicker="Actions"
           title="Créditer des points"
-          subtitle="Tout est ici : votre lien, avis Google, client existant, saisie manuelle et suivi des références."
+          subtitle="Partagez votre lien, confirmez vos bonus et suivez facilement vos références."
         />
         <ReferralMemberActions user={user} program={program} hideReferralLinkCard />
       </div>
