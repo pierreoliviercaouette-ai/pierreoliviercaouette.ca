@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Copy, Sparkles, Trophy, Star, Crown } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Copy, Sparkles, Trophy, Star, Crown, ShieldCheck, Gift, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
@@ -35,13 +35,31 @@ const POINT_RULES = [
   },
 ];
 
+const VALUE_ITEMS = [
+  {
+    title: 'Simple et transparent',
+    body: 'Un lien a partager, des points faciles a comprendre, des paliers visibles en tout temps.',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'Reconnaissance cumulative',
+    body: 'Chaque palier atteint s additionne, pour valoriser chaque recommandation verifiee.',
+    icon: Gift,
+  },
+  {
+    title: 'Pensé pour votre réseau',
+    body: 'Vous mettez en relation, nous faisons le suivi, dans un cadre clair et respectueux.',
+    icon: Users,
+  },
+];
+
 function HeroBlock({ user }) {
   if (!user) {
     return (
       <PageHero
         badge="Recommandations"
-        title="Un programme de points, des remerciements clairs"
-        description="Vous partagez un lien de consentement : les points s’additionnent quand c’est vérifié, jusqu’à 100 points et des paliers de reconnaissance."
+        title="Recommandez en confiance et cumulez des remerciements"
+        description="Partagez votre lien personnel, suivez vos points et debloquez des paliers Bronze, Argent, Or, Platine et Privilege."
         minHeightClass="min-h-[48vh] md:min-h-[52vh]"
       >
         <Link
@@ -70,7 +88,7 @@ function HeroBlock({ user }) {
     <PageHero
       badge="Espace membre"
       title={first ? `Bonjour, ${first}` : 'Votre programme'}
-      description="Vous retrouvez ici les règles, les paliers, votre solde et toutes les actions pour accumuler des points."
+      description="Votre lien, vos points et vos paliers sont reunis ici pour vous permettre de progresser rapidement."
       minHeightClass="min-h-[48vh] md:min-h-[52vh]"
     >
       <Link to="/profil" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
@@ -78,6 +96,33 @@ function HeroBlock({ user }) {
         <ArrowRight className="h-4 w-4" />
       </Link>
     </PageHero>
+  );
+}
+
+function ValueSection() {
+  return (
+    <section className="section-padding bg-white">
+      <div className="container-max">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Pourquoi participer</p>
+          <h2 className="mt-2 font-heading text-2xl font-bold text-dark md:text-3xl">Un programme moderne, simple et motivant</h2>
+          <p className="mt-3 text-prestige-taupe">
+            Tout est concu pour rester clair du debut a la fin : comment gagner des points, ou vous en etes, et ce que vous debloquez.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {VALUE_ITEMS.map((item) => (
+            <article key={item.title} className="rounded-2xl border border-prestige-beige bg-light/40 p-6 shadow-ia">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                <item.icon className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="mt-4 font-heading text-lg font-semibold text-dark">{item.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{item.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -100,7 +145,7 @@ function PointsSection() {
         <SectionHeading
           kicker="Fonctionnement"
           title="Comment on gagne des points"
-          subtitle="Trois sources possibles, créditées après vérification. Les récompenses des paliers atteints s’additionnent."
+          subtitle="Trois sources possibles, creditees apres verification. Les recompenses des paliers atteints s additionnent."
         />
         <ul className="mx-auto max-w-3xl divide-y divide-prestige-beige rounded-2xl border border-prestige-beige bg-light/40 shadow-ia">
           {POINT_RULES.map((row, idx) => (
@@ -132,11 +177,11 @@ function TiersSection({ user, referralStats, loading }) {
       <div className="container-max">
         <SectionHeading
           kicker="Paliers"
-          title="Remerciements"
+          title="Paliers de remerciements"
           subtitle={
             isMember
-              ? 'Jusqu’à 100 points : chaque palier débloque la récompense indiquée.'
-              : 'Seuils applicables à tous les participants. Votre avancement s’affiche une fois le compte créé.'
+              ? 'Jusqu a 100 points : chaque palier debloque la recompense indiquee.'
+              : 'Du Bronze au Privilege : des seuils clairs et progressifs.'
           }
         />
 
@@ -212,7 +257,7 @@ function MemberSummarySection({ user, program }) {
         <SectionHeading
           kicker="Votre solde"
           title="Points vérifiés"
-          subtitle="Barre de progression sur 100 points. Partagez votre lien pour de nouvelles mises en relation."
+          subtitle="Votre progression en direct sur 100 points pour garder le cap sur le prochain palier."
         />
         <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-prestige-beige bg-light/30 p-6 shadow-ia sm:p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -299,8 +344,10 @@ function GuestCtaSection() {
       <div className="container-max">
         <div className="mx-auto max-w-xl rounded-2xl border border-prestige-beige bg-light/40 p-8 text-center shadow-ia md:p-10">
           <Sparkles className="mx-auto h-8 w-8 text-primary/80" aria-hidden />
-          <h2 className="mt-4 font-heading text-xl font-bold text-dark md:text-2xl">Participer</h2>
-          <p className="mt-2 text-sm text-prestige-taupe">Créez un compte pour recevoir un lien et suivre vos points ici.</p>
+          <h2 className="mt-4 font-heading text-xl font-bold text-dark md:text-2xl">Pret a commencer ?</h2>
+          <p className="mt-2 text-sm text-prestige-taupe">
+            Creez votre compte en moins de 2 minutes pour recevoir votre lien et commencer a cumuler vos points.
+          </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
               to="/inscription"
@@ -345,13 +392,14 @@ export const Referral = () => {
   useSeoMeta({
     title: 'Programme de recommandations | Victoriaville',
     description:
-      'Comprenez en quelques lignes comment les points s’additionnent et quels remerciements correspondent à chaque palier.',
+      'Un programme de recommandations simple, moderne et motivant : points cumulatifs, paliers clairs et suivi en temps reel.',
     canonicalPath: '/recommandations',
   });
 
   return (
     <main className="min-h-screen bg-light pt-20" data-testid="referral-page">
       <HeroBlock user={user} />
+      <ValueSection />
       <PointsSection />
       <TiersSection user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
       {user ? (
