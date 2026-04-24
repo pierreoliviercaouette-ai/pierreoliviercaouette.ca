@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Copy, Minus, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Copy, Sparkles, Trophy, Star, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
@@ -7,13 +7,14 @@ import { getReferralConsentUrl } from '../lib/referralLink';
 import { useReferralProgramData } from '../hooks/useReferralProgramData';
 import { Button } from '../components/ui/button';
 import { PageHero } from '../components/layout/PageHero';
+import { ReferralMemberActions } from '../components/referral/ReferralMemberActions';
 
 const TIERS = [
-  { threshold: 10, reward: '25 $', name: 'Bronze' },
-  { threshold: 20, reward: '50 $', name: 'Argent' },
-  { threshold: 40, reward: '100 $', name: 'Or' },
-  { threshold: 75, reward: '250 $', name: 'Platine' },
-  { threshold: 100, reward: 'Coffret Privilège', name: 'Privilège' },
+  { threshold: 10, reward: '25 $', name: 'Bronze', icon: Trophy, tone: 'from-orange-100 to-orange-50', iconColor: 'text-orange-700' },
+  { threshold: 20, reward: '50 $', name: 'Argent', icon: Trophy, tone: 'from-slate-100 to-slate-50', iconColor: 'text-slate-700' },
+  { threshold: 40, reward: '100 $', name: 'Or', icon: Star, tone: 'from-amber-100 to-amber-50', iconColor: 'text-amber-700' },
+  { threshold: 75, reward: '250 $', name: 'Platine', icon: Star, tone: 'from-cyan-100 to-cyan-50', iconColor: 'text-cyan-700' },
+  { threshold: 100, reward: 'Coffret Privilège', name: 'Privilège', icon: Crown, tone: 'from-purple-100 to-purple-50', iconColor: 'text-purple-700' },
 ];
 
 const POINT_RULES = [
@@ -69,11 +70,11 @@ function HeroBlock({ user }) {
     <PageHero
       badge="Espace membre"
       title={first ? `Bonjour, ${first}` : 'Votre programme'}
-      description="Même parcours que tout le monde : règles, paliers, puis votre solde et votre lien. Les soumissions se font depuis votre profil."
+      description="Même parcours que tout le monde : règles, paliers, puis votre solde et vos actions dans une seule page."
       minHeightClass="min-h-[48vh] md:min-h-[52vh]"
     >
       <Link to="/profil" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
-        Profil
+        Mon profil
         <ArrowRight className="h-4 w-4" />
       </Link>
     </PageHero>
@@ -139,58 +140,43 @@ function TiersSection({ user, referralStats, loading }) {
           }
         />
 
-        {isMember && loading && (
-          <div
-            className="mx-auto max-w-3xl h-40 animate-pulse rounded-2xl border border-prestige-beige bg-white shadow-ia"
-            data-testid="referral-tiers-loading"
-          />
-        )}
+        {isMember && loading && <div className="mx-auto max-w-5xl h-40 animate-pulse rounded-2xl border border-prestige-beige bg-white shadow-ia" data-testid="referral-tiers-loading" />}
 
         {!(isMember && loading) && (
-          <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-prestige-beige bg-white shadow-ia">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[300px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-prestige-beige bg-light/80 text-xs font-semibold uppercase tracking-wide text-prestige-taupe">
-                    <th className="px-4 py-3 md:px-5">Palier</th>
-                    <th className="px-4 py-3 tabular-nums md:px-5">Points</th>
-                    <th className="px-4 py-3 md:px-5">Récompense</th>
-                    {isMember ? <th className="px-4 py-3 md:px-5">Statut</th> : null}
-                  </tr>
-                </thead>
-                <tbody>
-                  {TIERS.map((tier, idx) => {
-                    const reached = total != null && total >= tier.threshold;
-                    const isNext = isMember && !reached && next && next.threshold === tier.threshold;
-                    return (
-                      <tr
-                        key={tier.name}
-                        className="border-b border-prestige-beige/50 last:border-0"
-                        data-testid={`referral-tier-row-${idx}`}
-                      >
-                        <td className="px-4 py-3.5 font-medium text-dark md:px-5">{tier.name}</td>
-                        <td className="px-4 py-3.5 tabular-nums text-prestige-taupe md:px-5">{tier.threshold}</td>
-                        <td className="px-4 py-3.5 font-heading font-semibold text-primary md:px-5">{tier.reward}</td>
-                        {isMember ? (
-                          <td className="px-4 py-3.5 md:px-5">
-                            {reached ? (
-                              <span className="inline-flex items-center gap-1 text-sm font-medium text-green-700">
-                                <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
-                                Atteint
-                              </span>
-                            ) : isNext ? (
-                              <span className="text-sm font-semibold text-primary">Prochain</span>
-                            ) : (
-                              <Minus className="h-4 w-4 text-prestige-taupe/50" aria-hidden />
-                            )}
-                          </td>
-                        ) : null}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+          <div className="mx-auto max-w-5xl grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            {TIERS.map((tier, idx) => {
+              const Icon = tier.icon;
+              const reached = total != null && total >= tier.threshold;
+              const isNext = isMember && !reached && next && next.threshold === tier.threshold;
+              return (
+                <article
+                  key={tier.name}
+                  className={`rounded-2xl border p-5 shadow-ia bg-gradient-to-br ${tier.tone} ${
+                    reached ? 'border-green-300/80' : isNext ? 'border-primary/50' : 'border-prestige-beige'
+                  }`}
+                  data-testid={`referral-tier-row-${idx}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 ${tier.iconColor}`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    {isMember ? (
+                      reached ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Atteint
+                        </span>
+                      ) : isNext ? (
+                        <span className="text-xs font-semibold text-primary">Prochain</span>
+                      ) : null
+                    ) : null}
+                  </div>
+                  <p className="mt-5 font-heading text-xl font-bold text-dark">{tier.name}</p>
+                  <p className="mt-1 text-sm text-prestige-taupe">{tier.threshold} points</p>
+                  <p className="mt-3 font-heading text-lg font-semibold text-primary">{tier.reward}</p>
+                </article>
+              );
+            })}
           </div>
         )}
       </div>
@@ -286,14 +272,22 @@ function MemberSummarySection({ user, program }) {
               data-testid="referral-tiers-progress-bar"
             />
           </div>
-          <p className="mt-6 border-t border-prestige-beige/80 pt-6 text-center text-sm text-prestige-taupe">
-            Avis Google, confirmation client existant ou saisie d’une personne :{' '}
-            <Link to="/profil" className="font-medium text-primary hover:underline">
-              ouvrir votre profil
-            </Link>
-            , section du programme.
-          </p>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function MemberActionsSection({ user, program }) {
+  return (
+    <section className="section-padding bg-light">
+      <div className="container-max">
+        <SectionHeading
+          kicker="Actions"
+          title="Créditer des points"
+          subtitle="Tout est ici : votre lien, avis Google, client existant, saisie manuelle et suivi des références."
+        />
+        <ReferralMemberActions user={user} program={program} hideReferralLinkCard />
       </div>
     </section>
   );
@@ -361,7 +355,10 @@ export const Referral = () => {
       <PointsSection />
       <TiersSection user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
       {user ? (
-        <MemberSummarySection user={user} program={program} />
+        <>
+          <MemberSummarySection user={user} program={program} />
+          <MemberActionsSection user={user} program={program} />
+        </>
       ) : (
         <GuestCtaSection />
       )}
