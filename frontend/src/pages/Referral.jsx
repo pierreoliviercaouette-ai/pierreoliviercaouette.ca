@@ -24,7 +24,7 @@ const pointsMethods = [
 
 const faqs = [
   { question: 'Les points dépendent-ils d’un achat?', answer: 'Non. Ils récompensent la mise en relation ou les actions prévues au programme.' },
-  { question: 'Comment suivre mes points?', answer: 'C’est sur cette page : inscrivez-vous, puis le même contenu s’enrichit avec votre lien, vos points et l’historique des références.' },
+  { question: 'Comment suivre mes points?', answer: 'Uniquement à la connexion, sur cette même page : la structure (haut de page, barre, paliers) reste la même qu’en consultation publique ; seuls s’y ajoutent les chiffres vérifiés, votre lien de consentement et l’historique des références. Aucun compteur n’existe hors compte actif.' },
   { question: 'Les paliers sont-ils cumulatifs?', answer: 'Oui. Les récompenses des paliers atteints s’additionnent.' },
   { question: 'Dois-je parler de produits financiers?', answer: 'Non. Vous mettez en relation ; vous ne donnez pas de conseils sur les produits.' },
 ];
@@ -156,7 +156,7 @@ const PointsHowSection = () => (
     <div className="container-max">
       <div className="mx-auto mb-12 max-w-2xl text-center">
         <h2 className="mb-3 font-heading text-3xl font-bold text-dark md:text-4xl">Comment gagner des points</h2>
-        <p className="text-prestige-taupe">Trois façons d’accumuler des points de reconnaissance — les mêmes, que vous soyez connecté ou non.</p>
+        <p className="text-prestige-taupe">Trois façons d’accumuler des points, une fois le compte actif. Aucun point n’est retenu tant que vous n’êtes pas connecté.</p>
       </div>
       <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
         {pointsMethods.map((method, idx) => (
@@ -182,7 +182,7 @@ const PointsHowSection = () => (
   </section>
 );
 
-/** Piste 0–100 pts : mêmes jalons invité / membre (membre : remplissage + curseur + détail prochain palier). */
+/** Même cadrage visuel invité / membre. Invité = référence d’interface, sans comptage (pas de suivi hors session). */
 const ReferralTiersProgress = ({ user, loading, referralStats }) => {
   const isGuest = !user;
   const isLoading = Boolean(user) && loading;
@@ -202,11 +202,20 @@ const ReferralTiersProgress = ({ user, loading, referralStats }) => {
       data-testid="referral-tiers-progress"
     >
       <div className="mb-1 flex flex-wrap items-end justify-between gap-2">
-        <h3 className="font-heading text-lg font-semibold text-dark sm:text-xl">Parcours des remerciements (0–100 pts)</h3>
+        <div>
+          <h3 className="font-heading text-lg font-semibold text-dark sm:text-xl">Parcours des remerciements (0–100 pts)</h3>
+          {isGuest && (
+            <p className="mt-1 max-w-xl text-xs text-prestige-taupe">
+              Aperçu de l’écran de suivi : mêmes jalons et même barre qu’en session membre, sans chiffre personnel.
+            </p>
+          )}
+        </div>
         {isLoading ? (
           <div className="h-5 w-28 animate-pulse rounded bg-prestige-beige/60" />
         ) : isGuest ? (
-          <span className="text-xs font-medium text-prestige-taupe sm:text-sm">Vos points s’afficheront une fois connecté</span>
+          <span className="shrink-0 rounded-full border border-dashed border-prestige-taupe/50 bg-light px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-prestige-taupe sm:text-xs">
+            Référence
+          </span>
         ) : (
           <span className="font-heading text-2xl font-bold text-primary" data-testid="referral-tiers-bar-points">
             {clamped} pt{clamped === 1 ? '' : 's'}
@@ -216,7 +225,7 @@ const ReferralTiersProgress = ({ user, loading, referralStats }) => {
 
       <p className="mb-5 text-sm text-prestige-taupe">
         {isGuest
-          ? "Le segment coloré se remplit selon les points vérifiés. Créez un compte : cette même piste indiquera votre avancement."
+          ? "Le comptage et le remplissage de la barre s’alimentent uniquement lorsque vous êtes connecté, à partir de votre dossier vérifié. Ici, vous lisez le cadre d’affichage commun — pas d’indication liée à vous hors session."
           : isLoading
             ? 'Chargement de la progression…'
             : next && toNext > 0
@@ -289,9 +298,10 @@ const ReferralTiersProgress = ({ user, loading, referralStats }) => {
       )}
 
       {isGuest && !isLoading && (
-        <div className="mt-10 rounded-xl bg-light/80 px-3 py-2.5 text-center text-xs text-prestige-taupe sm:mt-12 sm:text-sm">
-          Une fois connecté, le remplissage bleu suit vos points jusqu’à 100 ; chaque rond indique le seuil, et chaque pastille
-          colorée signifie un palier déjà atteint.
+        <div className="mt-10 rounded-xl border border-dashed border-prestige-beige/90 bg-light/50 px-3 py-2.5 text-center text-xs text-prestige-taupe sm:mt-12 sm:text-sm">
+          Cohérence avec l’espace membre : connecté, la même barre affiche <span className="text-dark">votre</span> remplissage, la
+          punaise et la couleur des jalons d’après <span className="text-dark">votre</span> solde. Déconnecté, il n’y a pas de
+          mémorisation de points.
         </div>
       )}
     </div>
@@ -304,8 +314,8 @@ const AccountGateSection = () => (
       <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-prestige-beige bg-white p-8 text-center shadow-ia">
         <h2 className="mb-2 font-heading text-2xl font-bold text-dark">Passez à l’action</h2>
         <p className="mb-6 text-prestige-taupe">
-          Créez un compte ou connectez-vous : vous retrouverez ici le lien à partager, le suivi des points et l’historique
-          de vos mises en relation.
+          Créez un compte ou connectez-vous : sur cette page, l’en-tête, la piste 0–100 et les paliers s’animent de la même
+          manière, avec l’ajout concret (lien, compteur, listes) uniquement en session.
         </p>
         <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
           <Link
@@ -394,7 +404,7 @@ const TiersSection = ({ user, referralStats, loading }) => {
         <p className="mt-6 mx-auto max-w-2xl text-center text-sm text-prestige-taupe">
           {user
             ? 'Les mises en jour des points s’affichent ici en fonction de ce qui a été vérifié côté programme.'
-            : 'Inscrivez-vous, partagez votre lien et suivez tout au même endroit dès la connexion.'}
+            : "Les cartes ci-dessus décrivent le programme. Le suivi personnalisé s’ouvre dès l’ouverture de session — pas de reprise de compteur en navigation anonyme."}
         </p>
       </div>
     </section>
