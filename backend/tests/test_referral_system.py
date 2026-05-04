@@ -1,6 +1,6 @@
 """
-Test suite for the enhanced referral system with points and tiers.
-Tests the 5 reward tiers (Bronze, Argent, Or, Platine, VIP) and 3 ways to earn points.
+Test suite for the referral program with quarterly draw rules.
+Tests the 3 ways to earn points and draw eligibility/chances logic.
 """
 import pytest
 import requests
@@ -13,14 +13,8 @@ BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 TEST_USER_EMAIL = "admin@test.com"
 TEST_USER_PASSWORD = "admin123"
 
-# Expected tier configuration
-EXPECTED_TIERS = [
-    {"threshold": 10, "reward": "Carte cadeau de 25 $", "name": "Bronze"},
-    {"threshold": 20, "reward": "Carte cadeau de 50 $", "name": "Argent"},
-    {"threshold": 40, "reward": "Carte cadeau de 100 $", "name": "Or"},
-    {"threshold": 75, "reward": "Carte cadeau de 250 $", "name": "Platine"},
-    {"threshold": 100, "reward": "Coffret Cadeau VIP", "name": "VIP"},
-]
+EXPECTED_DRAW_VALUE = 750
+EXPECTED_MINIMUM_POINTS = 5
 
 EXPECTED_GOOGLE_REVIEW_LINK = "https://g.page/r/CewlYHqUvuLyEAI/review"
 
@@ -88,8 +82,7 @@ class TestReferralStats:
         # Verify required fields exist
         assert "total_points" in data, "Missing total_points field"
         assert "points_breakdown" in data, "Missing points_breakdown field"
-        assert "current_tier" in data, "Missing current_tier field"
-        assert "next_tier" in data, "Missing next_tier field"
+        assert "quarterly_draw" in data, "Missing quarterly_draw field"
         assert "points_to_next_tier" in data, "Missing points_to_next_tier field"
         
         # Verify points_breakdown structure
@@ -126,21 +119,28 @@ class TestReferralStats:
             f"Total points mismatch: {data['total_points']} != {calculated_total}"
         print(f"✓ Points calculation verified: {calculated_total} total")
     
-    def test_tier_progression(self, authenticated_client):
-        """Test tier progression logic"""
+    def test_draw_progression(self, authenticated_client):
+        """Test quarterly draw eligibility/chances logic"""
         response = authenticated_client.get(f"{BASE_URL}/api/referrals/stats")
         assert response.status_code == 200
         data = response.json()
         
         total_points = data["total_points"]
-        next_tier = data["next_tier"]
-        points_to_next = data["points_to_next_tier"]
-        
-        if next_tier:
-            expected_points_to_next = next_tier["threshold"] - total_points
-            assert points_to_next == expected_points_to_next, \
-                f"Points to next tier mismatch: {points_to_next} != {expected_points_to_next}"
-            print(f"✓ Tier progression correct: {points_to_next} points to {next_tier['name']}")
+        draw = data["quarterly_draw"]
+        assert draw["value"] == EXPECTED_DRAW_VALUE
+        assert draw["minimum_points"] == EXPECTED_MINIMUM_POINTS
+        assert draw["chances_per_point"] == 1
+
+        expected_to_eligibility = max(0, EXPECTED_MINIMUM_POINTS - total_points)
+        assert draw["points_to_eligibility"] == expected_to_eligibility
+        assert data["points_to_next_tier"] == expected_to_eligibility
+
+        expected_eligible = total_points >= EXPECTED_MINIMUM_POINTS
+        assert draw["is_eligible"] == expected_eligible
+
+        expected_chances = total_points if expected_eligible else 0
+        assert draw["chances"] == expected_chances
+        print(f"✓ Draw progression correct: eligible={expected_eligible}, chances={expected_chances}")
 
 
 class TestGoogleReviewSubmission:

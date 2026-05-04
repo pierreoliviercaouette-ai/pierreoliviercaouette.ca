@@ -1,19 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Sparkles, Trophy, Star, Crown, ShieldCheck, Gift, Users } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Sparkles, ShieldCheck, Gift, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 import { useReferralProgramData } from '../hooks/useReferralProgramData';
 import { PageHero } from '../components/layout/PageHero';
 import { ReferralMemberActions } from '../components/referral/ReferralMemberActions';
-
-const TIERS = [
-  { threshold: 10, reward: '25 $', name: 'Bronze', icon: Trophy, tone: 'from-orange-100 to-orange-50', iconColor: 'text-orange-700' },
-  { threshold: 20, reward: '50 $', name: 'Argent', icon: Trophy, tone: 'from-slate-100 to-slate-50', iconColor: 'text-slate-700' },
-  { threshold: 40, reward: '100 $', name: 'Or', icon: Star, tone: 'from-amber-100 to-amber-50', iconColor: 'text-amber-700' },
-  { threshold: 75, reward: '250 $', name: 'Platine', icon: Star, tone: 'from-cyan-100 to-cyan-50', iconColor: 'text-cyan-700' },
-  { threshold: 100, reward: 'Coffret Privilège', name: 'Privilège', icon: Crown, tone: 'from-purple-100 to-purple-50', iconColor: 'text-purple-700' },
-];
 
 const POINT_RULES = [
   {
@@ -24,24 +16,24 @@ const POINT_RULES = [
   {
     label: 'Avis Google',
     detail: 'Après vérification de votre avis, selon les règles du programme.',
-    points: '+2 pts',
+    points: '+1 pt',
   },
   {
     label: 'Client existant',
     detail: 'Si notre dossier confirme le statut, après vérification.',
-    points: '+2 pts',
+    points: '+1 pt',
   },
 ];
 
 const VALUE_ITEMS = [
   {
     title: 'Simple et transparent',
-    body: 'Un lien a partager, des points faciles a comprendre, des paliers visibles en tout temps.',
+    body: 'Un lien a partager, des points faciles a comprendre et des regles visibles en tout temps.',
     icon: ShieldCheck,
   },
   {
     title: 'Reconnaissance cumulative',
-    body: 'Chaque palier atteint s additionne, pour valoriser chaque recommandation verifiee.',
+    body: 'Vos points s accumulent toute l annee pour augmenter vos chances au tirage trimestriel.',
     icon: Gift,
   },
   {
@@ -56,8 +48,8 @@ function HeroBlock({ user }) {
     return (
       <PageHero
         badge="Recommandations"
-        title="Transformez vos recommandations en remerciements concrets"
-        description="Partagez votre lien personnel, suivez vos points en direct et debloquez les paliers Bronze, Argent, Or, Platine et Privilege."
+        title="Transformez vos recommandations en chances au tirage trimestriel"
+        description="Partagez votre lien personnel, suivez vos points en direct et devenez admissible des 5 points. Chaque point vous donne une chance."
         minHeightClass="min-h-[48vh] md:min-h-[52vh]"
       >
         <Link
@@ -86,7 +78,7 @@ function HeroBlock({ user }) {
     <PageHero
       badge="Espace membre"
       title={first ? `Bonjour, ${first}` : 'Votre programme'}
-      description="Votre lien de consentement, vos points et vos paliers sont reunis ici pour maximiser vos remerciements."
+      description="Votre lien de consentement et vos points sont reunis ici pour maximiser vos chances au tirage trimestriel."
       minHeightClass="min-h-[48vh] md:min-h-[52vh]"
     >
       <Link to="/profil" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
@@ -143,7 +135,7 @@ function PointsSection() {
         <SectionHeading
           kicker="Fonctionnement"
           title="Comment on gagne des points"
-          subtitle="Trois sources possibles, creditees apres verification. Les recompenses des paliers atteints s additionnent."
+          subtitle="Trois sources possibles, creditees apres verification. A partir de 5 points, chaque point donne 1 chance au tirage trimestriel de 750 $."
         />
         <ul className="mx-auto max-w-3xl divide-y divide-prestige-beige rounded-2xl border border-prestige-beige bg-light/40 shadow-ia">
           {POINT_RULES.map((row, idx) => (
@@ -165,62 +157,54 @@ function PointsSection() {
   );
 }
 
-function TiersSection({ user, referralStats, loading }) {
+function DrawSection({ user, referralStats, loading }) {
   const isMember = Boolean(user);
   const total = isMember && !loading && referralStats != null ? referralStats.total_points : null;
-  const next = referralStats?.next_tier;
+  const minimum = referralStats?.quarterly_draw?.minimum_points ?? 5;
+  const drawValue = referralStats?.quarterly_draw?.value ?? 750;
+  const chances = referralStats?.quarterly_draw?.chances ?? 0;
+  const toEligibility = referralStats?.quarterly_draw?.points_to_eligibility ?? Math.max(0, minimum - (total ?? 0));
+  const eligible = referralStats?.quarterly_draw?.is_eligible ?? (total != null && total >= minimum);
 
   return (
     <section className="section-padding bg-light">
       <div className="container-max">
         <SectionHeading
-          kicker="Paliers"
-          title="Paliers de remerciements"
+          kicker="Concours trimestriel"
+          title="Un tirage de 750 $ a chaque trimestre"
           subtitle={
             isMember
-              ? 'Jusqu a 100 points : chaque palier debloque la recompense indiquee.'
-              : 'Du Bronze au Privilege : des seuils clairs et progressifs.'
+              ? 'Admissible des 5 points. Ensuite, chaque point accumule vous donne une chance.'
+              : 'Accumulez des points verifies : des 5 points, vous participez au tirage de 750 $.'
           }
         />
 
-        {isMember && loading && <div className="mx-auto max-w-5xl h-40 animate-pulse rounded-2xl border border-prestige-beige bg-white shadow-ia" data-testid="referral-tiers-loading" />}
+        {isMember && loading && <div className="mx-auto max-w-3xl h-40 animate-pulse rounded-2xl border border-prestige-beige bg-white shadow-ia" data-testid="referral-draw-loading" />}
 
         {!(isMember && loading) && (
-          <div className="mx-auto max-w-5xl grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            {TIERS.map((tier, idx) => {
-              const Icon = tier.icon;
-              const reached = total != null && total >= tier.threshold;
-              const isNext = isMember && !reached && next && next.threshold === tier.threshold;
-              return (
-                <article
-                  key={tier.name}
-                  className={`rounded-2xl border p-5 shadow-ia bg-gradient-to-br ${tier.tone} ${
-                    reached ? 'border-green-300/80' : isNext ? 'border-primary/50' : 'border-prestige-beige'
-                  }`}
-                  data-testid={`referral-tier-row-${idx}`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 ${tier.iconColor}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    {isMember ? (
-                      reached ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          Atteint
-                        </span>
-                      ) : isNext ? (
-                        <span className="text-xs font-semibold text-primary">Prochain</span>
-                      ) : null
-                    ) : null}
-                  </div>
-                  <p className="mt-5 font-heading text-xl font-bold text-dark">{tier.name}</p>
-                  <p className="mt-1 text-sm text-prestige-taupe">{tier.threshold} points</p>
-                  <p className="mt-3 font-heading text-lg font-semibold text-primary">{tier.reward}</p>
-                </article>
-              );
-            })}
-          </div>
+          <article className="mx-auto max-w-3xl rounded-2xl border border-prestige-beige bg-white p-6 shadow-ia sm:p-8" data-testid="referral-draw-card">
+            <p className="font-heading text-3xl font-bold text-primary">{drawValue} $</p>
+            <p className="mt-1 text-sm text-prestige-taupe">Valeur du tirage a chaque trimestre</p>
+            {isMember ? (
+              <div className="mt-4 space-y-2">
+                <p className="text-sm text-dark">
+                  Vos points verifies: <span className="font-semibold">{total ?? 0}</span>
+                </p>
+                {eligible ? (
+                  <p className="inline-flex items-center gap-2 text-sm font-medium text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Admissible — {chances} chance{chances > 1 ? 's' : ''} pour le prochain tirage
+                  </p>
+                ) : (
+                  <p className="text-sm text-prestige-taupe">
+                    Encore {toEligibility} point{toEligibility > 1 ? 's' : ''} pour devenir admissible.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-prestige-taupe">Inscrivez-vous pour suivre vos points et votre admissibilite.</p>
+            )}
+          </article>
         )}
       </div>
     </section>
@@ -244,9 +228,11 @@ function MemberSummarySection({ user, program }) {
   }
 
   const clamped = Math.max(0, referralStats?.total_points ?? 0);
-  const next = referralStats?.next_tier;
-  const toNext = referralStats?.points_to_next_tier;
-  const barPct = Math.min(100, (clamped / 100) * 100);
+  const minPoints = referralStats?.quarterly_draw?.minimum_points ?? 5;
+  const chances = referralStats?.quarterly_draw?.chances ?? 0;
+  const eligible = referralStats?.quarterly_draw?.is_eligible ?? clamped >= minPoints;
+  const toEligibility = referralStats?.quarterly_draw?.points_to_eligibility ?? Math.max(0, minPoints - clamped);
+  const barPct = Math.min(100, (clamped / minPoints) * 100);
 
   return (
     <section className="section-padding bg-white">
@@ -254,7 +240,7 @@ function MemberSummarySection({ user, program }) {
         <SectionHeading
           kicker="Votre solde"
           title="Points vérifiés"
-          subtitle="Votre progression en direct sur 100 points pour atteindre votre prochain palier plus rapidement."
+          subtitle="Votre progression vers le seuil d admissibilite de 5 points pour le tirage trimestriel."
         />
         <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-prestige-beige bg-light/30 p-6 shadow-ia sm:p-8">
           <div>
@@ -264,17 +250,16 @@ function MemberSummarySection({ user, program }) {
                 data-testid="referral-tiers-bar-points"
               >
                 {clamped}
-                <span className="text-xl font-semibold text-prestige-taupe"> / 100</span>
+                <span className="text-xl font-semibold text-prestige-taupe"> points</span>
               </p>
-              {next && toNext > 0 ? (
+              {eligible ? (
                 <p className="mt-2 text-sm text-dark">
-                  Prochain : <span className="font-semibold">{next.name}</span> — {toNext} point{toNext > 1 ? 's' : ''} (seuil{' '}
-                  {next.threshold})
+                  Admissible au tirage. Chances actuelles : <span className="font-semibold">{chances}</span>
                 </p>
-              ) : clamped >= 100 ? (
-                <p className="mt-2 text-sm font-medium text-dark">Échelle complétée. Merci !</p>
               ) : (
-                <p className="mt-2 text-sm text-prestige-taupe">Continuez d’accumuler des points vérifiés.</p>
+                <p className="mt-2 text-sm text-prestige-taupe">
+                  Il vous manque {toEligibility} point{toEligibility > 1 ? 's' : ''} pour etre admissible.
+                </p>
               )}
             </div>
           </div>
@@ -282,7 +267,7 @@ function MemberSummarySection({ user, program }) {
             <div
               className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-[width] duration-500"
               style={{ width: `${barPct}%` }}
-              data-testid="referral-tiers-progress-bar"
+              data-testid="referral-draw-progress-bar"
             />
           </div>
         </div>
@@ -298,7 +283,7 @@ function MemberActionsSection({ user, program }) {
         <SectionHeading
           kicker="Passez a l action"
           title="Votre lien et vos actions de progression"
-          subtitle="Commencez par partager votre lien de consentement, puis ajoutez vos bonus et suivez vos references."
+          subtitle="Commencez par partager votre lien de consentement, puis ajoutez vos actions et suivez vos references."
         />
         <ReferralMemberActions user={user} program={program} hideReferralLinkCard={false} />
       </div>
@@ -345,7 +330,7 @@ function LegalLine() {
       <div className="container-max px-4 text-center text-xs leading-relaxed text-prestige-taupe md:px-8">
         <p>
           Programme de reconnaissance, sans obligation d’achat. Vous ne présentez pas de produits : vous partagez un contact. Soumis à
-          conditions — les points et paliers suivent des vérifications. Pas de suivi de points pour les visiteurs non connectés.
+          conditions — les points sont vérifiés. Admissible au tirage trimestriel de 750 $ dès 5 points, avec 1 point = 1 chance.
         </p>
       </div>
     </div>
@@ -360,7 +345,7 @@ export const Referral = () => {
   useSeoMeta({
     title: 'Programme de recommandations | Victoriaville',
     description:
-      'Un programme de recommandations attractif et moderne : lien de consentement, points cumulatifs, paliers clairs et suivi en temps reel.',
+      'Un programme de recommandations attractif et moderne : lien de consentement, points cumulatifs et tirage trimestriel de 750 $.',
     canonicalPath: '/recommandations',
   });
 
@@ -370,7 +355,7 @@ export const Referral = () => {
       {user ? (
         <>
           <MemberActionsSection user={user} program={program} />
-          <TiersSection user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
+          <DrawSection user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
           <MemberSummarySection user={user} program={program} />
           <ValueSection />
           <PointsSection />
@@ -378,7 +363,7 @@ export const Referral = () => {
       ) : (
         <>
           <ValueSection />
-          <TiersSection user={user} referralStats={referralStats} loading={false} />
+          <DrawSection user={user} referralStats={referralStats} loading={false} />
           <PointsSection />
           <GuestCtaSection />
         </>

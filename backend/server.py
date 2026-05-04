@@ -152,20 +152,18 @@ class ReferralResponse(BaseModel):
     created_at: str
     qualified_at: Optional[str]
 
-# Reward Tiers - New point-based system
-REWARD_TIERS = [
-    {"threshold": 10, "reward": "Carte cadeau de 25 $", "name": "Bronze"},
-    {"threshold": 20, "reward": "Carte cadeau de 50 $", "name": "Argent"},
-    {"threshold": 40, "reward": "Carte cadeau de 100 $", "name": "Or"},
-    {"threshold": 75, "reward": "Carte cadeau de 250 $", "name": "Platine"},
-    {"threshold": 100, "reward": "Coffret Cadeau VIP", "name": "VIP"},
-]
+# Quarterly draw configuration
+DRAW_CONFIG = {
+    "quarterly_draw_value": 750,
+    "minimum_points_required": 5,
+    "chances_per_point": 1
+}
 
 # Points system
 POINTS_CONFIG = {
     "referral": 1,      # 1 point per confirmed referral
-    "google_review": 2, # 2 points for Google review
-    "existing_client": 2 # 2 points for existing client verification
+    "google_review": 1, # 1 point for Google review
+    "existing_client": 1 # 1 point for existing client verification
 }
 
 GOOGLE_REVIEW_LINK = "https://g.page/r/CewlYHqUvuLyEAI/review"
@@ -200,6 +198,7 @@ class ReferralStats(BaseModel):
     next_tier: Optional[dict]
     points_to_next_tier: int
     total_rewards_earned: str
+    quarterly_draw: Optional[dict] = None
 
 # Google Review Model
 class GoogleReviewCreate(BaseModel):
@@ -648,24 +647,11 @@ async def get_referral_stats(user: dict = Depends(require_auth)):
         "existing_clients": {"verified": verified_clients, "pending": pending_clients, "points": client_points}
     }
     
-    # Calculate tier based on points
-    current_tier = None
-    next_tier = None
-    points_to_next = 0
-    total_rewards = []
-    
-    for i, tier in enumerate(REWARD_TIERS):
-        if total_points >= tier["threshold"]:
-            current_tier = tier
-            total_rewards.append(tier["reward"])
-        else:
-            next_tier = tier
-            points_to_next = tier["threshold"] - total_points
-            break
-    
-    if current_tier and not next_tier and total_points >= REWARD_TIERS[-1]["threshold"]:
-        next_tier = None
-        points_to_next = 0
+    # Quarterly draw eligibility/chances
+    minimum_points = DRAW_CONFIG["minimum_points_required"]
+    points_to_eligibility = max(0, minimum_points - total_points)
+    is_eligible = total_points >= minimum_points
+    chances = total_points * DRAW_CONFIG["chances_per_point"] if is_eligible else 0
     
     return ReferralStats(
         total_referrals=total,
@@ -673,10 +659,18 @@ async def get_referral_stats(user: dict = Depends(require_auth)):
         pending_referrals=pending,
         total_points=total_points,
         points_breakdown=points_breakdown,
-        current_tier=current_tier,
-        next_tier=next_tier,
-        points_to_next_tier=points_to_next,
-        total_rewards_earned=" + ".join(total_rewards) if total_rewards else "Aucune récompense encore"
+        current_tier=None,
+        next_tier=None,
+        points_to_next_tier=points_to_eligibility,
+        total_rewards_earned="Admissible au tirage trimestriel" if is_eligible else "Non admissible au tirage",
+        quarterly_draw={
+            "value": DRAW_CONFIG["quarterly_draw_value"],
+            "minimum_points": minimum_points,
+            "chances_per_point": DRAW_CONFIG["chances_per_point"],
+            "is_eligible": is_eligible,
+            "points_to_eligibility": points_to_eligibility,
+            "chances": chances
+        }
     )
 
 # ==================== GOOGLE REVIEW ROUTES ====================

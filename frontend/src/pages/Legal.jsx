@@ -147,12 +147,20 @@ export const Terms = () => {
               Le programme de référencement est soumis aux conditions suivantes:
             </p>
             <ul className="list-disc pl-6 text-prestige-taupe mb-6">
-              <li>La récompense est accordée pour la mise en relation validée</li>
+              <li>Les points sont accordés après vérification interne des actions admissibles</li>
+              <li>Chaque action vérifiée donne 1 point (référence qualifiée, avis Google vérifié, client existant vérifié)</li>
               <li>Aucune obligation d'achat ou de souscription n'est requise de la part du référé</li>
-              <li>Les paliers de récompenses sont cumulatifs</li>
-              <li>Pierre-Olivier Caouette se réserve le droit de qualifier ou rejeter une référence</li>
+              <li>Les points s'accumulent du 1er janvier au 31 décembre et sont conservés toute l'année</li>
+              <li>Un participant devient admissible au concours trimestriel à partir de 5 points</li>
+              <li>Pour chaque tirage trimestriel, chaque point équivaut à 1 chance de participation</li>
+              <li>La valeur du tirage trimestriel est de 750 $</li>
+              <li>Pierre-Olivier Caouette se réserve le droit de qualifier ou rejeter une participation non conforme</li>
               <li>Les conditions du programme peuvent être modifiées à tout moment</li>
             </ul>
+            <p className="text-prestige-taupe mb-6">
+              Le gagnant du tirage est contacté selon les coordonnées fournies au dossier. Si le gagnant ne peut être joint dans un délai raisonnable
+              ou ne respecte pas les conditions d'admissibilité, un nouveau tirage peut être effectué.
+            </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               5. Limitation de responsabilité

@@ -119,7 +119,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex flex-wrap items-center gap-2">
                 <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Avis Google</h3>
-                <Badge className="border-0 bg-green-500 text-xs text-white">+2 pts</Badge>
+                  <Badge className="border-0 bg-green-500 text-xs text-white">+1 pt</Badge>
                 {googleReview && statusBadge(googleReview.status)}
               </div>
               {googleReview ? (
@@ -177,7 +177,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex flex-wrap items-center gap-2">
                 <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Client existant</h3>
-                <Badge className="border-0 bg-purple-500 text-xs text-white">+2 pts</Badge>
+                  <Badge className="border-0 bg-purple-500 text-xs text-white">+1 pt</Badge>
                 {existingClient && statusBadge(existingClient.status)}
               </div>
               {existingClient ? (
