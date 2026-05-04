@@ -171,11 +171,11 @@ function DrawSection({ user, referralStats, loading }) {
       <div className="container-max">
         <SectionHeading
           kicker="Concours trimestriel"
-          title="Un tirage de 750 $ a chaque trimestre"
+          title="Un tirage d une valeur d environ 750 $ a chaque trimestre"
           subtitle={
             isMember
-              ? 'Admissible des 5 points. Ensuite, chaque point accumule vous donne une chance.'
-              : 'Accumulez des points verifies : des 5 points, vous participez au tirage de 750 $.'
+              ? 'Admissible des 5 points. Ensuite, chaque point accumule vous donne une chance de participation.'
+              : 'Accumulez des points verifies : des 5 points, vous participez au tirage d une valeur d environ 750 $.'
           }
         />
 
@@ -184,7 +184,14 @@ function DrawSection({ user, referralStats, loading }) {
         {!(isMember && loading) && (
           <article className="mx-auto max-w-3xl rounded-2xl border border-prestige-beige bg-white p-6 shadow-ia sm:p-8" data-testid="referral-draw-card">
             <p className="font-heading text-3xl font-bold text-primary">{drawValue} $</p>
-            <p className="mt-1 text-sm text-prestige-taupe">Valeur du tirage a chaque trimestre</p>
+            <p className="mt-1 text-sm text-prestige-taupe">Valeur approximative du tirage a chaque trimestre</p>
+            <p className="mt-3 text-sm leading-relaxed text-dark">
+              Le concours fonctionne par points verifies: vous devenez admissible a partir de 5 points, puis chaque point vaut 1 chance.
+              Le tirage est realise chaque trimestre, selon les reglements complets du concours.
+            </p>
+            <p className="mt-2 text-sm font-medium text-dark">
+              Premier tirage prevu le 1er octobre 2026.
+            </p>
             {isMember ? (
               <div className="mt-4 space-y-2">
                 <p className="text-sm text-dark">
@@ -204,6 +211,16 @@ function DrawSection({ user, referralStats, loading }) {
             ) : (
               <p className="mt-4 text-sm text-prestige-taupe">Inscrivez-vous pour suivre vos points et votre admissibilite.</p>
             )}
+            <div className="mt-5">
+              <Link
+                to="/conditions#reglement-concours"
+                className="btn-secondary inline-flex items-center justify-center gap-2 text-sm"
+                data-testid="referral-contest-rules-link"
+              >
+                Reglement officiel du concours
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </article>
         )}
       </div>
@@ -330,7 +347,10 @@ function LegalLine() {
       <div className="container-max px-4 text-center text-xs leading-relaxed text-prestige-taupe md:px-8">
         <p>
           Programme de reconnaissance, sans obligation d’achat. Vous ne présentez pas de produits : vous partagez un contact. Soumis à
-          conditions — les points sont vérifiés. Admissible au tirage trimestriel de 750 $ dès 5 points, avec 1 point = 1 chance.
+          conditions — les points sont vérifiés. Admissible au tirage trimestriel d une valeur d environ 750 $ dès 5 points, avec 1 point = 1 chance.
+        </p>
+        <p className="mt-2">
+          Concours organise par Pierre-Olivier Caouette uniquement. Ce concours n est pas commandite, approuve, administre ni associe a Industrielle Alliance.
         </p>
       </div>
     </div>
@@ -345,7 +365,7 @@ export const Referral = () => {
   useSeoMeta({
     title: 'Programme de recommandations | Victoriaville',
     description:
-      'Un programme de recommandations attractif et moderne : lien de consentement, points cumulatifs et tirage trimestriel de 750 $.',
+      'Un programme de recommandations attractif et moderne : lien de consentement, points cumulatifs et tirage trimestriel d une valeur d environ 750 $.',
     canonicalPath: '/recommandations',
   });
 

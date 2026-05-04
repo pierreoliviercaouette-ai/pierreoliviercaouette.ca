@@ -140,7 +140,7 @@ export const Terms = () => {
               remplacent pas une consultation professionnelle personnalisée.
             </p>
 
-            <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
+            <h2 id="reglement-concours" className="font-heading text-2xl font-semibold text-dark mt-8 mb-4 scroll-mt-28">
               4. Programme de référencement
             </h2>
             <p className="text-prestige-taupe mb-4">
@@ -151,15 +151,24 @@ export const Terms = () => {
               <li>Chaque action vérifiée donne 1 point (référence qualifiée, avis Google vérifié, client existant vérifié)</li>
               <li>Aucune obligation d'achat ou de souscription n'est requise de la part du référé</li>
               <li>Les points s'accumulent du 1er janvier au 31 décembre et sont conservés toute l'année</li>
+              <li>Le premier tirage du programme est prévu le 1er octobre 2026</li>
               <li>Un participant devient admissible au concours trimestriel à partir de 5 points</li>
               <li>Pour chaque tirage trimestriel, chaque point équivaut à 1 chance de participation</li>
-              <li>La valeur du tirage trimestriel est de 750 $</li>
+              <li>La valeur du tirage trimestriel est d'environ 750 $</li>
               <li>Pierre-Olivier Caouette se réserve le droit de qualifier ou rejeter une participation non conforme</li>
               <li>Les conditions du programme peuvent être modifiées à tout moment</li>
             </ul>
             <p className="text-prestige-taupe mb-6">
               Le gagnant du tirage est contacté selon les coordonnées fournies au dossier. Si le gagnant ne peut être joint dans un délai raisonnable
               ou ne respecte pas les conditions d'admissibilité, un nouveau tirage peut être effectué.
+            </p>
+            <p className="text-prestige-taupe mb-6">
+              Ce concours est organise et administre exclusivement par Pierre-Olivier Caouette, a titre de promotion independante de son programme de
+              recommandations. Le concours n'est ni commandite, ni approuve, ni administre par Industrielle Alliance, et n'y est pas associe.
+            </p>
+            <p className="text-prestige-taupe mb-6">
+              En cas de divergence entre un contenu promotionnel et le present reglement, le present reglement prevaut. Toute contestation est regie par
+              les lois applicables du Quebec et du Canada, et releve des tribunaux competents du district judiciaire applicable au Quebec.
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
