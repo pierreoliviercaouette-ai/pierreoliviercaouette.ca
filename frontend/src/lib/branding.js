@@ -6,7 +6,7 @@ export const AMF_REGISTRE_URL =
 export const IA_GROUPE_FINANCIER_LOGO = `${process.env.PUBLIC_URL || ''}/branding/ia-groupe-financier.png`;
 
 /** Logo iA Auto et Habitation (fichier local dans `public/branding/`). */
-export const IA_AUTO_HABITATION_LOGO = `${process.env.PUBLIC_URL || ''}/branding/ia-auto-habitation.png`;
+export const IA_AUTO_HABITATION_LOGO = `${process.env.PUBLIC_URL || ''}/branding/ia-auto-habitation.svg`;
 
 /** Campagne iA Auto et Habitation (réseau carrière, soumission). */
 export const IA_AUTO_HABITATION_URL =

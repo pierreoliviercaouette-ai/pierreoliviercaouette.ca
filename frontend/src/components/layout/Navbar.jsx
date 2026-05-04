@@ -30,7 +30,7 @@ export const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 border-b border-prestige-beige/80 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/72">
       <div className="container-max">
-        <div className="flex w-full min-w-0 items-center h-20 px-4 md:px-8 gap-2">
+        <div className="flex w-full min-w-0 items-center gap-3 h-20 px-4 md:px-8">
           {/* Logo — colonne de gauche fixe */}
           <Link
             to="/"
@@ -59,7 +59,7 @@ export const Navbar = () => {
             avec le pill Recommandations qu'un position:absolute pleine largeur provoquait).
           */}
           <nav
-            className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex xl:gap-2 2xl:gap-3"
+            className="hidden min-w-max flex-1 items-center justify-center gap-4 overflow-x-auto px-2 lg:flex xl:gap-5"
             aria-label="Navigation principale"
           >
             {navLinks.map((link) => (
@@ -68,7 +68,7 @@ export const Navbar = () => {
                 to={link.path}
                 onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: link.path })}
                 data-testid={`nav-link-${link.path.replace('/', '') || 'home'}`}
-                className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center whitespace-nowrap rounded-lg px-2 text-sm font-medium transition-colors duration-200 xl:px-3 hover:bg-light/50 ${
+                className={`inline-flex shrink-0 min-h-[44px] items-center justify-center whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors duration-200 hover:bg-light/50 ${
                   isActive(link.path) ? 'text-primary' : 'text-dark hover:text-primary'
                 }`}
               >
@@ -77,7 +77,7 @@ export const Navbar = () => {
             ))}
           </nav>
 
-          <div className="hidden min-w-0 flex-shrink-0 items-center gap-1.5 xl:gap-2 2xl:gap-3 lg:flex">
+          <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
             {/* Referral CTA */}
             <Link
               to="/recommandations"
