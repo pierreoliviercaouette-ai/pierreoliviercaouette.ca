@@ -52,7 +52,7 @@ export const About = () => {
   ];
 
   return (
-    <main className="pt-20" data-testid="about-page">
+    <main data-testid="about-page">
       {/* Hero Section - Enhanced */}
       <section className="relative min-h-[70vh] overflow-hidden">
         {/* Background */}
@@ -163,7 +163,7 @@ export const About = () => {
               <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark">
                 Passé du milieu industriel au milieu financier
               </h2>
-              <div className="space-y-4 text-prestige-taupe leading-relaxed">
+              <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>
                   Beaucoup de gens, comme moi, ont suivi une voie qu'ils croyaient faite pour eux. Pour moi, c'était le milieu de l'automatisation industrielle. 
                   Après un DEP en électromécanique, une technique en électronique industrielle, et 4 ans à travailler comme programmeur industriel, 
@@ -253,7 +253,7 @@ export const About = () => {
                     {/* Content */}
                     <div className="flex-1 bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
                       <h3 className="font-heading text-xl font-semibold text-dark mb-2">{item.title}</h3>
-                      <p className="text-prestige-taupe">{item.description}</p>
+                      <p className="text-slate-600">{item.description}</p>
                     </div>
                   </div>
                 ))}
@@ -340,7 +340,7 @@ export const About = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-dark">Jacob Moreau</p>
-                  <p className="text-sm text-prestige-taupe">Client satisfait</p>
+                  <p className="text-sm text-slate-600">Client satisfait</p>
                 </div>
               </div>
             </div>
@@ -351,7 +351,7 @@ export const About = () => {
       {/* Partners Section */}
       <section className="py-12 bg-light border-t border-prestige-beige">
         <div className="container-max">
-          <p className="text-center text-prestige-taupe mb-8">Partenaires de confiance</p>
+          <p className="text-center text-slate-600 mb-8">Partenaires de confiance</p>
           <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16">
             {partners.map((partner) => (
               <a

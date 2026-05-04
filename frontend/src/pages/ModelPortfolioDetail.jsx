@@ -217,14 +217,14 @@ export const ModelPortfolioDetail = () => {
 
   if (loading) {
     return (
-      <main className="pt-20 min-h-screen bg-light flex items-center justify-center">
+      <main className="min-h-screen bg-light flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="pt-20 min-h-screen bg-light">
+    <main className="min-h-screen bg-light">
       <section className="section-padding">
         <div className="container-max max-w-4xl">
           <Link to="/" className="text-sm text-primary hover:underline">

@@ -67,7 +67,7 @@ export const Footer = () => {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-primary"
                   aria-label={social.name}
                 >
                   <social.icon className="w-5 h-5" />
@@ -84,7 +84,7 @@ export const Footer = () => {
                 <li key={service.path}>
                   <Link 
                     to={service.path}
-                    className="text-white/70 hover:text-secondary transition-colors text-sm"
+                    className="flex min-h-[44px] items-center text-sm text-white/70 transition-colors hover:text-secondary"
                   >
                     {service.name}
                   </Link>
@@ -103,7 +103,7 @@ export const Footer = () => {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/70 hover:text-secondary transition-colors text-sm flex items-center gap-1"
+                    className="flex min-h-[44px] items-center gap-1 text-sm text-white/70 transition-colors hover:text-secondary"
                   >
                     {link.name}
                     <ExternalLink className="w-3 h-3" />
@@ -121,7 +121,7 @@ export const Footer = () => {
                 <li key={item.path}>
                   <Link
                     to={item.path}
-                    className="text-white/70 hover:text-secondary transition-colors text-sm"
+                    className="flex min-h-[44px] items-center text-sm text-white/70 transition-colors hover:text-secondary"
                   >
                     {item.name}
                   </Link>
@@ -172,10 +172,10 @@ export const Footer = () => {
               © {currentYear} Pierre-Olivier Caouette. Tous droits réservés.
             </p>
             <div className="flex items-center gap-6">
-              <Link to="/confidentialite" className="text-white/50 hover:text-white text-sm transition-colors">
+              <Link to="/confidentialite" className="inline-flex min-h-[44px] items-center text-sm text-white/50 transition-colors hover:text-white">
                 Politique de confidentialité
               </Link>
-              <Link to="/conditions" className="text-white/50 hover:text-white text-sm transition-colors">
+              <Link to="/conditions" className="inline-flex min-h-[44px] items-center text-sm text-white/50 transition-colors hover:text-white">
                 Conditions d'utilisation
               </Link>
             </div>

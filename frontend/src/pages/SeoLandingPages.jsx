@@ -8,7 +8,7 @@ function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqIt
   useFaqSchema(faqItems);
 
   return (
-    <main className="pt-20 min-h-screen bg-white" data-testid="seo-landing-page">
+    <main className="min-h-screen bg-white" data-testid="seo-landing-page">
       <PageHero
         badge="Guide"
         title={h1}

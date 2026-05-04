@@ -178,7 +178,7 @@ const ServiceCard = ({ service, onOpenDetail }) => {
   return (
     <div 
       id={service.id}
-      className="group bg-white border border-prestige-beige rounded-2xl p-6 hover:border-primary hover:shadow-ia-hover transition-all duration-300 cursor-pointer relative overflow-hidden scroll-mt-24"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-prestige-beige bg-white p-6 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-primary hover:shadow-xl scroll-mt-24"
       onClick={() => onOpenDetail(service)}
       data-testid={`service-card-${service.id}`}
     >
@@ -199,14 +199,14 @@ const ServiceCard = ({ service, onOpenDetail }) => {
           <p className="text-primary text-sm font-medium">{service.subtitle}</p>
         </div>
         
-        <p className="text-prestige-taupe text-sm leading-relaxed">
+        <p className="text-slate-600 text-sm leading-relaxed">
           {service.shortDescription}
         </p>
         
         {/* Features preview */}
         <ul className="space-y-2 pt-2">
           {service.features.slice(0, 2).map((feature, idx) => (
-            <li key={idx} className="flex items-center gap-2 text-sm text-prestige-taupe">
+            <li key={idx} className="flex items-center gap-2 text-sm text-slate-600">
               <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
               <span>{feature}</span>
             </li>
@@ -260,7 +260,7 @@ const ServiceDetailModal = ({ service, isOpen, onClose }) => {
             <h4 className="font-heading text-lg font-semibold text-dark mb-3">
               C'est quoi?
             </h4>
-            <div className="space-y-3 text-prestige-taupe leading-relaxed">
+            <div className="space-y-3 text-slate-600 leading-relaxed">
               {service.fullDescription.map((para, idx) => (
                 <p key={idx}>{para}</p>
               ))}
@@ -291,7 +291,7 @@ const ServiceDetailModal = ({ service, isOpen, onClose }) => {
               {service.whoIsItFor.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <ChevronRight className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-prestige-taupe">{item}</span>
+                  <span className="text-slate-600">{item}</span>
                 </li>
               ))}
             </ul>
@@ -308,7 +308,7 @@ const ServiceDetailModal = ({ service, isOpen, onClose }) => {
                   <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${service.color} flex items-center justify-center flex-shrink-0`}>
                     <span className="text-white text-sm font-bold">{idx + 1}</span>
                   </div>
-                  <p className="text-prestige-taupe text-sm">{example}</p>
+                  <p className="text-slate-600 text-sm">{example}</p>
                 </div>
               ))}
             </div>
@@ -316,7 +316,7 @@ const ServiceDetailModal = ({ service, isOpen, onClose }) => {
           
           {/* Disclaimer */}
           <div className="bg-light border border-prestige-beige rounded-xl p-4">
-            <p className="text-xs text-prestige-taupe text-center">
+            <p className="text-xs text-slate-600 text-center">
               <strong>Note:</strong> Ces exemples sont à titre illustratif seulement et ne constituent pas des conseils financiers personnalisés.
             </p>
           </div>
@@ -389,7 +389,7 @@ export const Services = () => {
   };
 
   return (
-    <main className="pt-20" data-testid="services-page">
+    <main data-testid="services-page">
       <PageHero
         badge="Mes services"
         title="Comment puis-je vous aider?"
@@ -418,7 +418,7 @@ export const Services = () => {
             <h2 className="font-heading text-2xl md:text-3xl font-bold text-dark mb-4">
               Vous ne savez pas par où commencer?
             </h2>
-            <p className="text-prestige-taupe mb-8">
+            <p className="text-slate-600 mb-8">
               Pas de souci! Lors de notre première rencontre gratuite, nous analyserons 
               ensemble votre situation pour identifier les solutions les plus pertinentes pour vous.
             </p>
@@ -445,7 +445,7 @@ export const Services = () => {
       {/* Disclaimer */}
       <section className="py-6 bg-white border-t border-prestige-beige">
         <div className="container-max px-4 md:px-8">
-          <p className="text-xs text-prestige-taupe text-center max-w-4xl mx-auto">
+          <p className="text-xs text-slate-600 text-center max-w-4xl mx-auto">
             <strong>Information importante:</strong> Les informations présentées sur cette page sont de nature générale 
             et ne constituent pas des conseils financiers personnalisés. Chaque situation étant unique, 
             il est recommandé de consulter un conseiller qualifié avant de prendre toute décision financière.

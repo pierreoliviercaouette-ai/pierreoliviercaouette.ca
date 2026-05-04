@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import {
   Users,
   CheckCircle2,
@@ -7,6 +8,8 @@ import {
   Send,
   ExternalLink,
   AlertCircle,
+  MessageCircle,
+  Smartphone,
 } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -31,6 +34,19 @@ function statusBadge(status) {
  * Même esthétique que le reste de la page (cartes bordure prestige-beige).
  */
 export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = false }) => {
+  const referralSuccessTick = program?.referralSuccessTick ?? 0;
+  const [showReferralSentBanner, setShowReferralSentBanner] = useState(false);
+  const lastTickRef = useRef(0);
+
+  useEffect(() => {
+    if (referralSuccessTick > lastTickRef.current) {
+      lastTickRef.current = referralSuccessTick;
+      setShowReferralSentBanner(true);
+      const t = setTimeout(() => setShowReferralSentBanner(false), 9000);
+      return () => clearTimeout(t);
+    }
+  }, [referralSuccessTick]);
+
   if (!user) return null;
 
   const {
@@ -55,6 +71,13 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
 
   const link = user.referral_code ? getReferralConsentUrl(user.referral_code) : '';
 
+  const shareBody =
+    link.trim() &&
+    `Bonjour! Je te recommande Pierre-Olivier Caouette, conseiller en sécurité financière. Tu peux valider ton consentement pour la mise en relation ici : ${link}`;
+  const whatsappHref =
+    shareBody && `https://wa.me/?text=${encodeURIComponent(shareBody)}`;
+  const smsHref = shareBody && `sms:?&body=${encodeURIComponent(shareBody)}`;
+
   if (loading) {
     return (
       <div className="flex justify-center py-12" data-testid="referral-dashboard-loading">
@@ -69,11 +92,11 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
       data-testid="referral-member-actions"
     >
       {!hideReferralLinkCard ? (
-        <p className="text-center text-sm text-prestige-taupe">
+        <p className="text-center text-sm text-slate-600">
           Chaque action vous aide à accumuler des points vérifiés.
         </p>
       ) : (
-        <p className="text-center text-sm text-prestige-taupe">
+        <p className="text-center text-sm text-slate-600">
           Continuez avec les étapes ci-dessous pour obtenir plus de points.
         </p>
       )}
@@ -90,7 +113,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
                   <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Votre lien de consentement</h3>
                   <Badge className="border-0 bg-blue-500 text-xs text-white">+1 pt / réf. qualifiée</Badge>
                 </div>
-                <p className="mb-2 text-xs text-prestige-taupe md:text-sm">
+                <p className="mb-2 text-xs text-slate-600 md:text-sm">
                   Partagez ce lien : la personne valide d’abord le contact.
                 </p>
                 <div className="flex items-center gap-2">
@@ -100,12 +123,33 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
                   <Button
                     type="button"
                     onClick={copyReferralLink}
-                    className="h-9 w-9 flex-shrink-0 bg-blue-500 p-0 hover:bg-blue-600"
+                    className="h-11 w-11 shrink-0 bg-blue-500 p-0 hover:bg-blue-600"
                     data-testid="copy-referral-link"
+                    aria-label="Copier le lien"
                   >
                     {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
+                {whatsappHref && smsHref ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-green-600/30 bg-white px-3 py-2 text-xs font-semibold text-green-800 transition-colors hover:bg-green-50 sm:flex-initial sm:px-4"
+                    >
+                      <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
+                      WhatsApp
+                    </a>
+                    <a
+                      href={smsHref}
+                      className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:flex-initial sm:px-4"
+                    >
+                      <Smartphone className="h-4 w-4 shrink-0" aria-hidden />
+                      SMS
+                    </a>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
@@ -142,13 +186,13 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
                 </div>
               ) : (
                 <div className="mt-1 space-y-2">
-                  <p className="text-xs text-prestige-taupe md:text-sm">Après l’avoir laissé sur Google, confirmez ici.</p>
+                  <p className="text-xs text-slate-600 md:text-sm">Après l’avoir laissé sur Google, confirmez ici.</p>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <a
                       href={googleReviewLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-green-300/80 bg-white px-3 py-2 text-xs font-medium text-green-800 hover:bg-green-50/80 sm:w-auto"
+                      className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border-2 border-green-300/80 bg-white px-3 py-2 text-xs font-medium text-green-800 hover:bg-green-50/80 sm:w-auto"
                     >
                       <ExternalLink className="h-4 w-4 shrink-0" />
                       Ouvrir la page d’avis
@@ -157,7 +201,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
                       type="button"
                       onClick={handleGoogleReviewSubmit}
                       disabled={submittingReview}
-                      className="h-9 w-full bg-green-600 text-xs text-white hover:bg-green-700 sm:w-auto"
+                      className="min-h-[44px] w-full bg-green-600 px-4 text-xs text-white hover:bg-green-700 sm:w-auto"
                       data-testid="confirm-google-review"
                     >
                       {submittingReview ? 'Envoi…' : "J'ai laissé mon avis"}
@@ -241,66 +285,92 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
       <div className="overflow-hidden rounded-2xl border border-prestige-beige bg-white shadow-ia">
         <div className="border-b border-prestige-beige bg-light/50 px-4 py-3 md:px-6">
           <h2 className="font-heading text-lg font-semibold text-dark">Référence manuelle</h2>
-          <p className="text-xs text-prestige-taupe">Même champs que le lien, pour saisir une personne directement.</p>
+          <p className="text-xs text-slate-600">Même champs que le lien, pour saisir une personne directement.</p>
         </div>
         <div className="p-4 md:p-6">
-          <form onSubmit={handleReferralSubmit} className="space-y-3">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {showReferralSentBanner ? (
+            <div
+              className="animate-fade-in mb-4 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 shadow-sm"
+              role="status"
+              aria-live="polite"
+            >
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" aria-hidden />
               <div>
-                <Label htmlFor="ref_name" className="text-sm">Nom *</Label>
-                <Input
-                  id="ref_name"
-                  value={referralForm.referred_name}
-                  onChange={(e) => setReferralForm((p) => ({ ...p, referred_name: e.target.value }))}
-                  required
-                  className="h-9 text-sm"
-                  data-testid="referral-name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="ref_email" className="text-sm">Courriel *</Label>
-                <Input
-                  id="ref_email"
-                  type="email"
-                  value={referralForm.referred_email}
-                  onChange={(e) => setReferralForm((p) => ({ ...p, referred_email: e.target.value }))}
-                  required
-                  className="h-9 text-sm"
-                  data-testid="referral-email"
-                />
+                <p className="font-semibold text-green-900">Référence enregistrée</p>
+                <p className="mt-0.5 text-green-800/90">Merci ! La personne apparaît dans votre liste dès validation.</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="ref_phone" className="text-sm">Téléphone</Label>
+          ) : null}
+          <form onSubmit={handleReferralSubmit} className="space-y-5">
+            <fieldset className="space-y-3 rounded-xl border border-prestige-beige/80 bg-light/20 p-4">
+              <legend className="px-1 font-heading text-sm font-semibold text-dark">Coordonnées de la personne</legend>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="ref_name" className="text-sm font-medium text-slate-700">
+                    Nom complet *
+                  </Label>
+                  <Input
+                    id="ref_name"
+                    value={referralForm.referred_name}
+                    onChange={(e) => setReferralForm((p) => ({ ...p, referred_name: e.target.value }))}
+                    required
+                    autoComplete="name"
+                    className="h-11 text-sm"
+                    data-testid="referral-name"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="ref_email" className="text-sm font-medium text-slate-700">
+                    Courriel *
+                  </Label>
+                  <Input
+                    id="ref_email"
+                    type="email"
+                    value={referralForm.referred_email}
+                    onChange={(e) => setReferralForm((p) => ({ ...p, referred_email: e.target.value }))}
+                    required
+                    autoComplete="email"
+                    className="h-11 text-sm"
+                    data-testid="referral-email"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="ref_phone" className="text-sm font-medium text-slate-700">
+                  Téléphone <span className="font-normal text-slate-500">(optionnel)</span>
+                </Label>
                 <Input
                   id="ref_phone"
                   type="tel"
                   value={referralForm.referred_phone}
                   onChange={(e) => setReferralForm((p) => ({ ...p, referred_phone: e.target.value }))}
-                  className="h-9 text-sm"
+                  autoComplete="tel"
+                  className="h-11 max-w-md text-sm"
                   data-testid="referral-phone"
                 />
               </div>
-              <div>
-                <Label htmlFor="ref_notes" className="text-sm">Notes</Label>
-                <Input
-                  id="ref_notes"
-                  value={referralForm.notes}
-                  onChange={(e) => setReferralForm((p) => ({ ...p, notes: e.target.value }))}
-                  className="h-9 text-sm"
-                  data-testid="referral-notes"
-                />
-              </div>
+            </fieldset>
+            <div className="space-y-1.5">
+              <Label htmlFor="ref_notes" className="text-sm font-medium text-slate-700">
+                Notes <span className="font-normal text-slate-500">(optionnel)</span>
+              </Label>
+              <Input
+                id="ref_notes"
+                value={referralForm.notes}
+                onChange={(e) => setReferralForm((p) => ({ ...p, notes: e.target.value }))}
+                placeholder="Contexte utile pour le suivi"
+                className="h-11 text-sm"
+                data-testid="referral-notes"
+              />
             </div>
             <Button
               type="submit"
               disabled={submittingReferral}
-              className="btn-primary h-9 text-sm"
+              className="btn-primary min-h-[44px] text-sm"
               data-testid="submit-referral"
             >
               <Send className="mr-2 h-4 w-4" />
-              {submittingReferral ? 'Envoi…' : 'Envoyer'}
+              {submittingReferral ? 'Envoi…' : 'Envoyer la référence'}
             </Button>
           </form>
         </div>
@@ -312,7 +382,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
         </div>
         <div className="p-4 md:p-5">
           {referrals.length === 0 ? (
-            <p className="py-4 text-center text-sm text-prestige-taupe">Aucune référence enregistrée.</p>
+            <p className="py-4 text-center text-sm text-slate-600">Aucune référence enregistrée.</p>
           ) : (
             <ul className="space-y-2">
               {referrals.map((ref) => (

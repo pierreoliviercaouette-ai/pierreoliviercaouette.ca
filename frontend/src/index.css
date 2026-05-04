@@ -59,7 +59,7 @@
 
 @layer components {
     .btn-primary {
-        @apply bg-primary text-white rounded-full px-8 py-3 font-semibold shadow-lg;
+        @apply inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-primary text-white rounded-full px-8 py-3 font-semibold shadow-lg;
         transition: all 0.3s ease;
     }
     
@@ -72,7 +72,7 @@
     }
     
     .btn-secondary {
-        @apply bg-white text-primary border-2 border-primary rounded-full px-8 py-3 font-semibold;
+        @apply inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white text-primary border-2 border-primary rounded-full px-8 py-3 font-semibold;
         transition: all 0.3s ease;
     }
     
@@ -112,12 +112,12 @@
     }
     
     .section-padding {
-        @apply py-16 px-4;
+        @apply py-20 px-4;
     }
     
     @media (min-width: 768px) {
         .section-padding {
-            @apply py-24 px-8;
+            @apply py-28 px-8;
         }
     }
     

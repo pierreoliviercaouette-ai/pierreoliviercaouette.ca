@@ -31,6 +31,7 @@ export function useReferralProgramData(user) {
   });
   const [submittingReferral, setSubmittingReferral] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [referralSuccessTick, setReferralSuccessTick] = useState(0);
 
   const fetchData = useCallback(async () => {
     if (!user?.id) return;
@@ -102,6 +103,7 @@ export function useReferralProgramData(user) {
       }
       toast.success('Référence envoyée !');
       setReferralForm({ referred_name: '', referred_email: '', referred_phone: '', notes: '' });
+      setReferralSuccessTick((t) => t + 1);
       fetchData();
     } catch (err) {
       toast.error(err.message || "Erreur lors de l'envoi");
@@ -186,6 +188,7 @@ export function useReferralProgramData(user) {
       handleExistingClientSubmit: (e) => e?.preventDefault?.(),
       fetchData: () => {},
       googleReviewLink: GOOGLE_REVIEW_LINK,
+      referralSuccessTick: 0,
     };
   }
 
@@ -209,5 +212,6 @@ export function useReferralProgramData(user) {
     handleExistingClientSubmit,
     fetchData,
     googleReviewLink: GOOGLE_REVIEW_LINK,
+    referralSuccessTick,
   };
 }

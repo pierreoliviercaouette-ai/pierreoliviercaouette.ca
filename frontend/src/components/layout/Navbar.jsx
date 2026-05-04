@@ -28,7 +28,7 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-prestige-beige">
+    <nav className="sticky top-0 z-50 border-b border-prestige-beige/80 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/72">
       <div className="container-max">
         <div className="flex w-full min-w-0 items-center h-20 px-4 md:px-8 gap-2">
           {/* Logo — colonne de gauche fixe */}
@@ -68,7 +68,7 @@ export const Navbar = () => {
                 to={link.path}
                 onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: link.path })}
                 data-testid={`nav-link-${link.path.replace('/', '') || 'home'}`}
-                className={`whitespace-nowrap px-1.5 py-2 text-sm font-medium transition-colors duration-200 xl:px-2.5 2xl:px-3 rounded-lg hover:bg-light/50 ${
+                className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center whitespace-nowrap rounded-lg px-2 text-sm font-medium transition-colors duration-200 xl:px-3 hover:bg-light/50 ${
                   isActive(link.path) ? 'text-primary' : 'text-dark hover:text-primary'
                 }`}
               >
@@ -82,7 +82,7 @@ export const Navbar = () => {
             <Link
               to="/recommandations"
               onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/recommandations' })}
-              className="relative group flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-r from-secondary/20 to-primary/20 px-3 py-1.5 text-sm hover:from-secondary/30 hover:to-primary/30 xl:px-4 xl:py-2"
+              className="relative group flex min-h-[44px] shrink-0 items-center gap-2 rounded-full bg-gradient-to-r from-secondary/20 to-primary/20 px-3 py-2 text-sm hover:from-secondary/30 hover:to-primary/30 xl:px-4"
               data-testid="nav-referral-cta"
             >
               <Gift className="h-4 w-4 shrink-0 text-primary" />
@@ -96,7 +96,8 @@ export const Navbar = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button 
-                      className="relative p-2 rounded-full hover:bg-light transition-colors"
+                      type="button"
+                      className="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 hover:bg-light transition-colors"
                       data-testid="notifications-button"
                     >
                       <Bell className="w-5 h-5 text-dark" />
@@ -134,7 +135,8 @@ export const Navbar = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button 
-                      className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-light transition-colors"
+                      type="button"
+                      className="flex min-h-[44px] items-center gap-2 rounded-full px-3 py-2 hover:bg-light transition-colors"
                       data-testid="user-menu-button"
                     >
                       <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
@@ -197,15 +199,23 @@ export const Navbar = () => {
                 <Link 
                   to="/connexion" 
                   onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/connexion' })}
-                  className="font-medium text-dark hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-light/50"
+                  className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-3 font-medium text-dark transition-colors hover:bg-light/50 hover:text-primary"
                   data-testid="login-link"
                 >
                   Connexion
                 </Link>
                 <Link 
+                  to="/contact" 
+                  onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/contact' })}
+                  className="btn-secondary hidden text-sm lg:inline-flex"
+                  data-testid="cta-demande"
+                >
+                  Faire une demande
+                </Link>
+                <Link 
                   to="/rendez-vous" 
                   onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/rendez-vous' })}
-                  className="btn-primary"
+                  className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full bg-dark px-5 py-2.5 text-sm font-semibold text-white shadow-md ring-2 ring-dark/10 transition-all hover:bg-dark/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   data-testid="cta-rdv"
                 >
                   Prendre rendez-vous
@@ -216,9 +226,11 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="ml-auto relative z-10 p-2 lg:hidden"
+            type="button"
+            className="relative z-10 ml-auto inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 hover:bg-light/80 lg:hidden"
             onClick={() => setIsOpen(!isOpen)}
             data-testid="mobile-menu-button"
+            aria-expanded={isOpen}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -236,7 +248,7 @@ export const Navbar = () => {
                     trackEvent('navigation_click', { location: 'navbar_mobile', destination: link.path });
                     setIsOpen(false);
                   }}
-                  className={`block py-2 font-medium ${
+                  className={`flex min-h-[44px] items-center rounded-lg py-2 font-medium ${
                     isActive(link.path) ? 'text-primary' : 'text-dark'
                   }`}
                 >
@@ -251,7 +263,7 @@ export const Navbar = () => {
                   trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/recommandations' });
                   setIsOpen(false);
                 }}
-                className="flex items-center gap-2 py-2 font-medium text-primary"
+                className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-primary"
               >
                 <Gift className="w-5 h-5" />
                 Recommandations
@@ -263,7 +275,7 @@ export const Navbar = () => {
                     <Link
                       to="/profil"
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-2 py-2 font-medium text-dark"
+                      className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-dark"
                     >
                       <User className="w-5 h-5" />
                       Mon profil
@@ -275,15 +287,16 @@ export const Navbar = () => {
                       <Link
                         to="/admin"
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-2 py-2 font-medium text-dark"
+                        className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-dark"
                       >
                         <Settings className="w-5 h-5" />
                         Administration
                       </Link>
                     )}
                     <button
+                      type="button"
                       onClick={() => { logout(); setIsOpen(false); }}
-                      className="flex items-center gap-2 py-2 font-medium text-red-600 w-full"
+                      className="flex min-h-[44px] w-full items-center gap-2 py-2 font-medium text-red-600"
                     >
                       <LogOut className="w-5 h-5" />
                       Déconnexion
@@ -297,9 +310,20 @@ export const Navbar = () => {
                         trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/connexion' });
                         setIsOpen(false);
                       }}
-                      className="block py-2 font-medium text-dark"
+                      className="flex min-h-[44px] items-center py-2 font-medium text-dark"
                     >
                       Connexion
+                    </Link>
+                    <Link
+                      to="/contact"
+                      onClick={() => {
+                        trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/contact' });
+                        setIsOpen(false);
+                      }}
+                      className="btn-secondary flex min-h-[44px] items-center justify-center text-center"
+                      data-testid="cta-demande-mobile"
+                    >
+                      Faire une demande
                     </Link>
                     <Link
                       to="/rendez-vous"
@@ -307,7 +331,8 @@ export const Navbar = () => {
                         trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/rendez-vous' });
                         setIsOpen(false);
                       }}
-                      className="btn-primary block text-center"
+                      className="inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-dark px-5 py-3 text-center text-sm font-semibold text-white shadow-md hover:bg-dark/90"
+                      data-testid="cta-rdv-mobile"
                     >
                       Prendre rendez-vous
                     </Link>

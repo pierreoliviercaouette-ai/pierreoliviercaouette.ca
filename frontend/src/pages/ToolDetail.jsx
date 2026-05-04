@@ -379,7 +379,7 @@ export const ToolDetail = () => {
 
   if (loading) {
     return (
-      <main className="pt-20 min-h-screen bg-light">
+      <main className="min-h-screen bg-light">
         <div className="container-max px-4 md:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-4" />
@@ -393,7 +393,7 @@ export const ToolDetail = () => {
   if (!tool) return null;
 
   return (
-    <main className="pt-20 min-h-screen bg-light" data-testid="tool-detail-page">
+    <main className="min-h-screen bg-light" data-testid="tool-detail-page">
       {/* Header */}
       <section className="bg-white border-b border-prestige-beige py-6">
         <div className="container-max px-4 md:px-8">

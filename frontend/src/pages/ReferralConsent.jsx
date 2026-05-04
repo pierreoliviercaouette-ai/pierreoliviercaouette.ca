@@ -87,7 +87,7 @@ export const ReferralConsent = () => {
 
   if (done) {
     return (
-      <main className="pt-20 min-h-screen flex items-center justify-center bg-light px-4" data-testid="referral-consent-success">
+      <main className="min-h-screen flex items-center justify-center bg-light px-4" data-testid="referral-consent-success">
         <div className="w-full max-w-lg text-center">
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-green-600" />
@@ -113,7 +113,7 @@ export const ReferralConsent = () => {
   }
 
   return (
-    <main className="pt-20 min-h-screen bg-light" data-testid="referral-consent-page">
+    <main className="min-h-screen bg-light" data-testid="referral-consent-page">
       <section className="section-padding gradient-hero">
         <div className="container-max text-center max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-4">

@@ -60,7 +60,7 @@ export const Profile = () => {
 
   if (authLoading) {
     return (
-      <main className="pt-20 min-h-screen bg-light flex items-center justify-center">
+      <main className="min-h-screen bg-light flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-prestige-taupe">Chargement de votre profil...</p>
@@ -74,7 +74,7 @@ export const Profile = () => {
   const unreadNotif = notifications.filter((n) => !n.is_read).length;
 
   return (
-    <main className="pt-20 min-h-screen bg-light" data-testid="profile-page">
+    <main className="min-h-screen bg-light" data-testid="profile-page">
       <PageHero
         badge="Espace membre"
         title={`Bonjour, ${user.first_name}`}

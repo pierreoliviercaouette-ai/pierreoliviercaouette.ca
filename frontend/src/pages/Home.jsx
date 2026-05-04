@@ -11,6 +11,7 @@ import {
   IA_AUTO_HABITATION_URL,
   IA_GROUPE_FINANCIER_LOGO,
 } from '../lib/branding';
+import { HomeTrustBanner } from '../components/home/HomeTrustBanner';
 
 const Hero = () => (
   <section className="relative min-h-[90vh] overflow-hidden">
@@ -53,20 +54,20 @@ const Hero = () => (
             Avec mon accompagnement, vos projets financiers prennent une nouvelle dimension.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
             <Link 
               to="/rendez-vous" 
               onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'home_hero_rendez_vous' })}
-              className="group bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-secondary hover:text-white transition-all duration-300 inline-flex items-center justify-center gap-2 shadow-lg shadow-white/20"
+              className="group order-first inline-flex min-h-[52px] min-w-[44px] items-center justify-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-dark shadow-xl shadow-black/15 ring-2 ring-white/40 transition-all duration-300 hover:scale-[1.02] hover:bg-secondary hover:text-white hover:ring-secondary/50 sm:px-12"
               data-testid="hero-cta-rdv"
             >
               Prendre rendez-vous
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link 
               to="/contact" 
               onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'home_hero_contact' })}
-              className="group border-2 border-white/30 text-white rounded-full px-8 py-4 font-semibold hover:bg-white/10 hover:border-white/50 transition-all duration-300 inline-flex items-center justify-center gap-2 backdrop-blur-sm"
+              className="group inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-full border-2 border-white/35 bg-white/5 px-8 py-3.5 text-sm font-semibold text-white/95 backdrop-blur-sm transition-all duration-300 hover:border-white/55 hover:bg-white/12 sm:text-base"
               data-testid="hero-cta-contact"
             >
               Faire une demande
@@ -144,7 +145,7 @@ const Hero = () => (
                 >
                   Certifié AMF
                 </a>
-                <p className="text-xs text-prestige-taupe">Conseiller autorisé</p>
+                <p className="text-xs text-slate-600">Conseiller autorisé</p>
               </div>
             </div>
             
@@ -222,7 +223,7 @@ const ServicesSection = () => {
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-4">
             Une offre globale pour un service complet sur mesure
           </h2>
-          <p className="text-prestige-taupe text-lg">
+          <p className="text-lg text-slate-600">
             Des solutions adaptées à vos besoins pour protéger et faire fructifier votre patrimoine
           </p>
         </div>
@@ -243,7 +244,7 @@ const ServicesSection = () => {
               <h3 className="font-heading text-xl font-semibold text-dark mb-3 group-hover:text-primary transition-colors">
                 {service.title}
               </h3>
-              <p className="text-prestige-taupe text-sm leading-relaxed">
+              <p className="text-slate-600 text-sm leading-relaxed">
                 {service.description}
               </p>
             </div>
@@ -271,7 +272,7 @@ const AdvantageSection = () => (
           </h2>
           <div className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-primary">
             <Quote className="w-8 h-8 text-primary/20 mb-3" />
-            <p className="text-prestige-taupe italic leading-relaxed">
+            <p className="text-slate-600 italic leading-relaxed">
               "Des chercheurs ont démontré que les investisseurs qui font affaire avec un conseiller accumulent une valeur nette 
               <strong className="text-dark"> 1,7 fois plus élevée au bout de 4 ans</strong>, et 
               <strong className="text-dark"> 4 fois plus élevée après 15 ans</strong>."
@@ -365,7 +366,7 @@ const AboutPreview = () => (
                   >
                     Certifié AMF
                   </a>
-                  <p className="text-sm text-prestige-taupe">Conseiller autorisé</p>
+                  <p className="text-sm text-slate-600">Conseiller autorisé</p>
                 </div>
               </div>
             </div>
@@ -380,11 +381,11 @@ const AboutPreview = () => (
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark leading-tight">
             Parce qu'il est temps d'avoir les meilleurs conseils.
           </h2>
-          <p className="text-prestige-taupe text-lg leading-relaxed">
+          <p className="text-slate-600 text-lg leading-relaxed">
             Après avoir passé des années à conseiller mon entourage sur tout et rien, je me suis tourné vers une carrière 
             où je pourrai étendre cette passion avec encore plus de monde.
           </p>
-          <p className="text-prestige-taupe leading-relaxed">
+          <p className="text-slate-600 leading-relaxed">
             Mon but est de vous accompagner dans vos objectifs tout en tenant compte de vos valeurs et de votre situation.
             Étant dûment certifié auprès de l'Autorité des marchés financiers, je vous invite à{' '}
             <a 
@@ -521,7 +522,7 @@ const ProcessSection = () => {
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-4">
             Là pour vous aider à atteindre vos objectifs
           </h2>
-          <p className="text-prestige-taupe text-lg">
+          <p className="text-slate-600 text-lg">
             Un processus simple et transparent en 4 étapes
           </p>
         </div>
@@ -542,7 +543,7 @@ const ProcessSection = () => {
                   </span>
                 </div>
                 <h3 className="font-heading text-lg font-semibold text-dark mb-2">{step.title}</h3>
-                <p className="text-prestige-taupe text-sm">{step.description}</p>
+                <p className="text-slate-600 text-sm">{step.description}</p>
               </div>
             ))}
           </div>
@@ -617,7 +618,7 @@ const TestimonialSection = () => {
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-4">
             Ce que mes clients disent
           </h2>
-          <p className="text-prestige-taupe">Avis partagés sur mon profil Google</p>
+          <p className="text-slate-600">Avis partagés sur mon profil Google</p>
         </div>
         
         <div className="max-w-2xl mx-auto">
@@ -664,13 +665,13 @@ const TestimonialSection = () => {
                   <div>
                     <p className="font-heading font-semibold text-dark">{currentTestimonial.author_name}</p>
                     {currentTestimonial.time && (
-                      <p className="text-sm text-prestige-taupe">{currentTestimonial.time}</p>
+                      <p className="text-sm text-slate-600">{currentTestimonial.time}</p>
                     )}
                   </div>
                 </div>
                 
                 {/* Google logo */}
-                <div className="flex items-center gap-2 text-prestige-taupe">
+                <div className="flex items-center gap-2 text-slate-600">
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -733,7 +734,7 @@ const PartnersSection = () => {
   return (
     <section className="py-16 px-5 sm:px-6 md:px-10 lg:px-14 bg-white border-t border-prestige-beige" data-testid="partners-section">
       <div className="container-max">
-        <p className="text-center text-prestige-taupe mb-8">Partenaires de confiance</p>
+        <p className="text-center text-slate-600 mb-8">Partenaires de confiance</p>
         <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16">
           {partners.map((partner) => (
             <a
@@ -827,6 +828,7 @@ export const Home = () => {
   return (
     <main data-testid="home-page" className="home-page">
       <Hero />
+      <HomeTrustBanner />
       <ServicesSection />
       <AdvantageSection />
       <AboutPreview />

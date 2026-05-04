@@ -36,7 +36,7 @@ export const Tools = () => {
 
   if (!user) {
     return (
-      <main className="pt-20 min-h-screen bg-light" data-testid="tools-page-locked">
+      <main className="min-h-screen bg-light" data-testid="tools-page-locked">
         <PageHero
           badge="Espace membre"
           title="Outils financiers"
@@ -93,7 +93,7 @@ export const Tools = () => {
       : `${tools.length} outil${tools.length > 1 ? 's' : ''} disponible${tools.length > 1 ? 's' : ''}`;
 
   return (
-    <main className="pt-20 min-h-screen bg-light" data-testid="tools-page">
+    <main className="min-h-screen bg-light" data-testid="tools-page">
       <PageHero badge="Espace membre" title="Mes outils" description={toolsLabel}>
         <Link
           to="/profil"

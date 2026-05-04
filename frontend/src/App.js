@@ -43,7 +43,7 @@ function App() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         {isAdmin && (
-          <div className="pt-20">
+          <div>
             <ModelPortfoliosBanner />
           </div>
         )}

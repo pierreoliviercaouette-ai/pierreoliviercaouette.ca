@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export const Privacy = () => {
   return (
-    <main className="pt-20 min-h-screen bg-white" data-testid="privacy-page">
+    <main className="min-h-screen bg-white" data-testid="privacy-page">
       <section className="section-padding">
         <div className="container-max">
           <div className="max-w-3xl mx-auto prose prose-slate">
@@ -10,17 +10,17 @@ export const Privacy = () => {
               Politique de confidentialité
             </h1>
             
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Dernière mise à jour: {new Date().toLocaleDateString('fr-CA')}
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               1. Collecte des informations
             </h2>
-            <p className="text-prestige-taupe mb-4">
+            <p className="text-slate-600 mb-4">
               Nous collectons les informations que vous nous fournissez directement, notamment:
             </p>
-            <ul className="list-disc pl-6 text-prestige-taupe mb-6">
+            <ul className="list-disc pl-6 text-slate-600 mb-6">
               <li>Nom et prénom</li>
               <li>Adresse courriel</li>
               <li>Numéro de téléphone (optionnel)</li>
@@ -31,10 +31,10 @@ export const Privacy = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               2. Utilisation des informations
             </h2>
-            <p className="text-prestige-taupe mb-4">
+            <p className="text-slate-600 mb-4">
               Vos informations sont utilisées pour:
             </p>
-            <ul className="list-disc pl-6 text-prestige-taupe mb-6">
+            <ul className="list-disc pl-6 text-slate-600 mb-6">
               <li>Répondre à vos demandes et questions</li>
               <li>Vous fournir nos services de conseil financier</li>
               <li>Sauvegarder l'historique de vos calculs dans les outils</li>
@@ -45,7 +45,7 @@ export const Privacy = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               3. Protection des données
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Nous mettons en œuvre des mesures de sécurité appropriées pour protéger vos 
               informations personnelles contre tout accès non autorisé, modification, divulgation 
               ou destruction. Vos données sont stockées de manière sécurisée et ne sont accessibles 
@@ -55,7 +55,7 @@ export const Privacy = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               4. Partage des informations
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Nous ne vendons, n'échangeons ni ne transférons vos informations personnelles à des 
               tiers sans votre consentement, sauf dans les cas requis par la loi ou pour fournir 
               nos services.
@@ -64,11 +64,11 @@ export const Privacy = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               5. Vos droits
             </h2>
-            <p className="text-prestige-taupe mb-4">
+            <p className="text-slate-600 mb-4">
               Conformément à la loi québécoise sur la protection des renseignements personnels, 
               vous avez le droit de:
             </p>
-            <ul className="list-disc pl-6 text-prestige-taupe mb-6">
+            <ul className="list-disc pl-6 text-slate-600 mb-6">
               <li>Accéder à vos informations personnelles</li>
               <li>Rectifier vos informations</li>
               <li>Demander la suppression de vos données</li>
@@ -78,11 +78,11 @@ export const Privacy = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               6. Contact
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Pour toute question concernant cette politique de confidentialité ou pour exercer 
               vos droits, veuillez nous contacter à:
             </p>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               <strong>Courriel:</strong> po@pierreoliviercaouette.ca<br/>
               <strong>Téléphone:</strong> (514) 123-4567
             </p>
@@ -101,7 +101,7 @@ export const Privacy = () => {
 
 export const Terms = () => {
   return (
-    <main className="pt-20 min-h-screen bg-white" data-testid="terms-page">
+    <main className="min-h-screen bg-white" data-testid="terms-page">
       <section className="section-padding">
         <div className="container-max">
           <div className="max-w-3xl mx-auto prose prose-slate">
@@ -109,14 +109,14 @@ export const Terms = () => {
               Conditions d'utilisation
             </h1>
             
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Dernière mise à jour: {new Date().toLocaleDateString('fr-CA')}
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               1. Acceptation des conditions
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               En accédant et en utilisant ce site web, vous acceptez d'être lié par les présentes 
               conditions d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas 
               utiliser ce site.
@@ -125,7 +125,7 @@ export const Terms = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               2. Services offerts
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Ce site présente les services de conseil en sécurité financière offerts par 
               Pierre-Olivier Caouette. Les informations présentées sont à titre informatif 
               et ne constituent pas des conseils financiers personnalisés.
@@ -134,7 +134,7 @@ export const Terms = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               3. Outils financiers
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Les outils de calcul disponibles sur ce site sont fournis à titre indicatif 
               seulement. Les résultats ne garantissent pas les rendements futurs et ne 
               remplacent pas une consultation professionnelle personnalisée.
@@ -143,10 +143,10 @@ export const Terms = () => {
             <h2 id="reglement-concours" className="font-heading text-2xl font-semibold text-dark mt-8 mb-4 scroll-mt-28">
               4. Programme de référencement
             </h2>
-            <p className="text-prestige-taupe mb-4">
+            <p className="text-slate-600 mb-4">
               Le programme de référencement est soumis aux conditions suivantes:
             </p>
-            <ul className="list-disc pl-6 text-prestige-taupe mb-6">
+            <ul className="list-disc pl-6 text-slate-600 mb-6">
               <li>Les points sont accordés après vérification interne des actions admissibles</li>
               <li>Chaque action vérifiée donne 1 point (référence qualifiée, avis Google vérifié, client existant vérifié)</li>
               <li>Aucune obligation d'achat ou de souscription n'est requise de la part du référé</li>
@@ -158,15 +158,15 @@ export const Terms = () => {
               <li>Pierre-Olivier Caouette se réserve le droit de qualifier ou rejeter une participation non conforme</li>
               <li>Les conditions du programme peuvent être modifiées à tout moment</li>
             </ul>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Le gagnant du tirage est contacté selon les coordonnées fournies au dossier. Si le gagnant ne peut être joint dans un délai raisonnable
               ou ne respecte pas les conditions d'admissibilité, un nouveau tirage peut être effectué.
             </p>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Ce concours est organise et administre exclusivement par Pierre-Olivier Caouette, a titre de promotion independante de son programme de
               recommandations. Le concours n'est ni commandite, ni approuve, ni administre par Industrielle Alliance, et n'y est pas associe.
             </p>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               En cas de divergence entre un contenu promotionnel et le present reglement, le present reglement prevaut. Toute contestation est regie par
               les lois applicables du Quebec et du Canada, et releve des tribunaux competents du district judiciaire applicable au Quebec.
             </p>
@@ -174,7 +174,7 @@ export const Terms = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               5. Limitation de responsabilité
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Les informations présentées sur ce site sont de nature générale. Chaque situation 
               étant unique, il est recommandé de consulter un conseiller qualifié avant de 
               prendre toute décision financière. Les produits d'assurance et de placement 
@@ -184,7 +184,7 @@ export const Terms = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               6. Propriété intellectuelle
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Le contenu de ce site, incluant les textes, images et outils, est protégé par 
               les lois sur la propriété intellectuelle. Toute reproduction sans autorisation 
               est interdite.
@@ -193,7 +193,7 @@ export const Terms = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               7. Modifications
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Nous nous réservons le droit de modifier ces conditions à tout moment. 
               Les modifications prennent effet dès leur publication sur ce site.
             </p>
@@ -201,7 +201,7 @@ export const Terms = () => {
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               8. Droit applicable
             </h2>
-            <p className="text-prestige-taupe mb-6">
+            <p className="text-slate-600 mb-6">
               Ces conditions sont régies par les lois du Québec, Canada.
             </p>
 

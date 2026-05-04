@@ -1,5 +1,15 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Sparkles, ShieldCheck, Gift, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Sparkles,
+  ShieldCheck,
+  Gift,
+  Users,
+  UserPlus,
+  CalendarCheck,
+  Trophy,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
@@ -7,21 +17,56 @@ import { useReferralProgramData } from '../hooks/useReferralProgramData';
 import { PageHero } from '../components/layout/PageHero';
 import { ReferralMemberActions } from '../components/referral/ReferralMemberActions';
 
-const POINT_RULES = [
+const HOW_IT_WORKS_STEPS = [
   {
-    label: 'Mise en relation',
-    detail: 'La personne utilise votre lien de consentement et la mise en relation est qualifiée.',
-    points: '+1 pt',
+    title: 'Référez un contact',
+    body: 'Partagez votre lien de consentement ou saisissez la personne : +1 point vérifié par voie admise au programme.',
+    icon: UserPlus,
   },
   {
-    label: 'Avis Google',
-    detail: 'Après vérification de votre avis, selon les règles du programme.',
-    points: '+1 pt',
+    title: 'Rencontre qualifiée',
+    body: 'Lorsque la mise en relation est complétée et qualifiée selon les règles du programme, le point est crédité.',
+    icon: CalendarCheck,
   },
   {
-    label: 'Client existant',
-    detail: 'Si notre dossier confirme le statut, après vérification.',
-    points: '+1 pt',
+    title: 'Accumulez des chances',
+    body: 'À partir de 5 points vérifiés, chaque point donne 1 chance au tirage trimestriel (valeur d’environ 750 $).',
+    icon: Trophy,
+  },
+];
+
+const ENGAGEMENT_MILESTONES = [
+  {
+    id: 'bronze',
+    name: 'Bronze',
+    points: 5,
+    blurb: 'Seuil d’admissibilité au tirage',
+    frame: 'border-amber-200/70 bg-gradient-to-br from-amber-900/20 via-amber-600/10 to-amber-50/90',
+    accent: 'text-amber-900',
+  },
+  {
+    id: 'argent',
+    name: 'Argent',
+    points: 10,
+    blurb: 'Régularité de recommandation',
+    frame: 'border-slate-300/80 bg-gradient-to-br from-slate-600/20 via-slate-400/10 to-slate-50/90',
+    accent: 'text-slate-800',
+  },
+  {
+    id: 'or',
+    name: 'Or',
+    points: 20,
+    blurb: 'Réseau actif',
+    frame: 'border-amber-300/70 bg-gradient-to-br from-yellow-700/18 via-amber-500/12 to-amber-50/90',
+    accent: 'text-yellow-900',
+  },
+  {
+    id: 'platine',
+    name: 'Platine',
+    points: 35,
+    blurb: 'Engagement maximal (symbolique)',
+    frame: 'border-violet-200/80 bg-gradient-to-br from-violet-900/22 via-indigo-500/12 to-violet-50/90',
+    accent: 'text-violet-900',
   },
 ];
 
@@ -104,7 +149,7 @@ function ValueSection() {
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Pourquoi participer</p>
           <h2 className="mt-2 font-heading text-2xl font-bold text-dark md:text-3xl">Un programme moderne, simple et vraiment motivant</h2>
-          <p className="mt-3 text-prestige-taupe">
+          <p className="mt-3 text-slate-600">
             Tout est concu pour rester clair du debut a la fin: comment gagner des points, suivre votre progression et participer au tirage.
           </p>
         </div>
@@ -115,7 +160,7 @@ function ValueSection() {
                 <item.icon className="h-5 w-5 text-primary" />
               </div>
               <h3 className="mt-4 font-heading text-lg font-semibold text-dark">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{item.body}</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.body}</p>
             </article>
           ))}
         </div>
@@ -131,35 +176,122 @@ function SectionHeading({ kicker, title, subtitle }) {
         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">{kicker}</p>
       ) : null}
       <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">{title}</h2>
-      {subtitle ? <p className="mt-2 text-prestige-taupe">{subtitle}</p> : null}
+      {subtitle ? <p className="mt-2 text-slate-600">{subtitle}</p> : null}
     </div>
   );
 }
 
-function PointsSection() {
+function HowItWorksSection() {
   return (
     <section className="section-padding bg-white" data-testid="referral-how-points">
       <div className="container-max">
         <SectionHeading
           kicker="Fonctionnement"
-          title="Comment on gagne des points"
-          subtitle="Trois sources possibles, creditees apres verification. A partir de 5 points, chaque point donne 1 chance au tirage trimestriel de 750 $."
+          title="Comment ça fonctionne"
+          subtitle="Trois étapes simples : partager, qualifier, accumuler des chances au tirage trimestriel."
         />
-        <ul className="mx-auto max-w-3xl divide-y divide-prestige-beige rounded-2xl border border-prestige-beige bg-light/40 shadow-ia">
-          {POINT_RULES.map((row, idx) => (
-            <li
-              key={row.label}
-              className="flex flex-col gap-2 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6"
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {HOW_IT_WORKS_STEPS.map((step, idx) => (
+            <article
+              key={step.title}
+              className="relative flex flex-col rounded-2xl border border-prestige-beige bg-gradient-to-b from-white to-light/40 p-6 shadow-ia transition-shadow duration-300 hover:shadow-lg"
               data-testid={`points-method-${idx}`}
             >
-              <div className="min-w-0">
-                <p className="font-heading font-semibold text-dark">{row.label}</p>
-                <p className="mt-1 text-sm leading-relaxed text-prestige-taupe">{row.detail}</p>
+              <span className="absolute right-4 top-4 font-heading text-4xl font-bold tabular-nums text-primary/15">
+                {idx + 1}
+              </span>
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <step.icon className="h-6 w-6" aria-hidden />
               </div>
-              <p className="shrink-0 font-heading text-sm font-bold tabular-nums text-primary sm:text-right">{row.points}</p>
-            </li>
+              <h3 className="font-heading text-lg font-semibold text-dark">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.body}</p>
+            </article>
           ))}
-        </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function JourneyMilestonesSection({ totalPoints, loading, isMember }) {
+  const pts = typeof totalPoints === 'number' ? Math.max(0, totalPoints) : null;
+  const cap = ENGAGEMENT_MILESTONES[ENGAGEMENT_MILESTONES.length - 1].points;
+
+  let barLabel = '';
+  let barPct = 0;
+  let barIndeterminate = false;
+
+  if (isMember && loading) {
+    barLabel = 'Chargement de votre progression…';
+    barPct = 8;
+    barIndeterminate = true;
+  } else if (isMember && pts != null) {
+    if (pts >= cap) {
+      barPct = 100;
+      barLabel = `${pts} point${pts > 1 ? 's' : ''} — tous les jalons symboliques sont atteints.`;
+    } else {
+      const next = ENGAGEMENT_MILESTONES.find((m) => pts < m.points);
+      if (next) {
+        const prevTier = [...ENGAGEMENT_MILESTONES].reverse().find((m) => m.points <= pts);
+        const prev = prevTier?.points ?? 0;
+        const span = next.points - prev;
+        barPct = span > 0 ? Math.min(100, Math.round(((pts - prev) / span) * 100)) : 100;
+        barLabel = `Prochain jalon : ${next.name} (${next.points} pts)`;
+      }
+    }
+  } else if (!isMember) {
+    barLabel = 'Exemple : progression vers le prochain jalon symbolique';
+    barPct = 42;
+  }
+
+  return (
+    <section className="section-padding bg-light" data-testid="referral-journey-milestones">
+      <div className="container-max">
+        <SectionHeading
+          kicker="Parcours"
+          title="Jalons d’engagement"
+          subtitle="Cartes métalliques décoratives : elles illustrent votre progression. La récompense du programme est le tirage trimestriel, tel qu’au règlement officiel."
+        />
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {ENGAGEMENT_MILESTONES.map((m) => {
+            const unlocked = !loading && pts != null && pts >= m.points;
+            return (
+              <article
+                key={m.id}
+                className={`relative overflow-hidden rounded-2xl border p-5 shadow-ia transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg ${m.frame} ${
+                  unlocked ? 'ring-2 ring-primary/40 ring-offset-2 ring-offset-light' : ''
+                }`}
+              >
+                <p className={`font-heading text-xs font-semibold uppercase tracking-wider ${m.accent}`}>{m.name}</p>
+                <p className="mt-1 font-heading text-2xl font-bold tabular-nums text-dark">{m.points} pts</p>
+                <p className="mt-2 text-sm leading-snug text-slate-600">{m.blurb}</p>
+                {unlocked ? (
+                  <p className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                    Atteint
+                  </p>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+
+        <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-prestige-beige bg-white/90 p-5 shadow-ia sm:p-6">
+          <p className="text-sm font-medium text-dark">{barLabel}</p>
+          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-prestige-beige/90">
+            <div
+              className={`h-full rounded-full bg-gradient-to-r from-amber-700 via-slate-500 to-violet-700 transition-[width] duration-700 ease-out ${
+                barIndeterminate ? 'animate-pulse' : ''
+              }`}
+              style={{ width: `${barPct}%` }}
+              data-testid="referral-milestone-progress-bar"
+            />
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-slate-600">
+            Les montants affichés sur le tirage (environ 750 $) sont décrits au règlement du concours. Aucun montant
+            additionnel n’est lié à ces paliers décoratifs.
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -192,7 +324,7 @@ function DrawSection({ user, referralStats, loading }) {
         {!(isMember && loading) && (
           <article className="mx-auto max-w-3xl rounded-2xl border border-prestige-beige bg-white p-6 shadow-ia sm:p-8" data-testid="referral-draw-card">
             <p className="font-heading text-3xl font-bold text-primary">{drawValue} $</p>
-            <p className="mt-1 text-sm text-prestige-taupe">Valeur approximative du tirage a chaque trimestre</p>
+            <p className="mt-1 text-sm text-slate-600">Valeur approximative du tirage a chaque trimestre</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
               <div className="rounded-xl border border-prestige-beige bg-light/50 px-3 py-2 text-xs text-dark">
                 <p className="font-semibold">Aucun achat requis</p>
@@ -222,13 +354,13 @@ function DrawSection({ user, referralStats, loading }) {
                     Admissible — {chances} chance{chances > 1 ? 's' : ''} pour le prochain tirage
                   </p>
                 ) : (
-                  <p className="text-sm text-prestige-taupe">
+                  <p className="text-sm text-slate-600">
                     Encore {toEligibility} point{toEligibility > 1 ? 's' : ''} pour devenir admissible.
                   </p>
                 )}
               </div>
             ) : (
-              <p className="mt-4 text-sm text-prestige-taupe">Inscrivez-vous pour suivre vos points et votre admissibilite.</p>
+              <p className="mt-4 text-sm text-slate-600">Inscrivez-vous pour suivre vos points et votre admissibilite.</p>
             )}
             <div className="mt-5">
               <Link
@@ -286,14 +418,14 @@ function MemberSummarySection({ user, program }) {
                 data-testid="referral-tiers-bar-points"
               >
                 {clamped}
-                <span className="text-xl font-semibold text-prestige-taupe"> points</span>
+                <span className="text-xl font-semibold text-slate-600"> points</span>
               </p>
               {eligible ? (
                 <p className="mt-2 text-sm text-dark">
                   Admissible au tirage. Chances actuelles : <span className="font-semibold">{chances}</span>
                 </p>
               ) : (
-                <p className="mt-2 text-sm text-prestige-taupe">
+                <p className="mt-2 text-sm text-slate-600">
                   Il vous manque {toEligibility} point{toEligibility > 1 ? 's' : ''} pour etre admissible.
                 </p>
               )}
@@ -334,7 +466,7 @@ function GuestCtaSection() {
         <div className="mx-auto max-w-xl rounded-2xl border border-prestige-beige bg-light/40 p-8 text-center shadow-ia md:p-10">
           <Sparkles className="mx-auto h-8 w-8 text-primary/80" aria-hidden />
           <h2 className="mt-4 font-heading text-xl font-bold text-dark md:text-2xl">Pret a demarrer ?</h2>
-          <p className="mt-2 text-sm text-prestige-taupe">
+          <p className="mt-2 text-sm text-slate-600">
             Creez votre compte en moins de 2 minutes pour recevoir votre lien, suivre vos points et participer au programme des aujourd hui.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -363,7 +495,7 @@ function GuestCtaSection() {
 function LegalLine() {
   return (
     <div className="border-t border-prestige-beige/80 bg-white py-6">
-      <div className="container-max px-4 text-center text-xs leading-relaxed text-prestige-taupe md:px-8">
+      <div className="container-max px-4 text-center text-xs leading-relaxed text-slate-600 md:px-8">
         <p>
           Programme de reconnaissance, sans obligation d’achat. Vous ne présentez pas de produits : vous partagez un contact. Soumis à
           conditions — les points sont vérifiés. Admissible au tirage trimestriel d une valeur d environ 750 $ dès 5 points, avec 1 point = 1 chance.
@@ -389,21 +521,27 @@ export const Referral = () => {
   });
 
   return (
-    <main className="min-h-screen bg-light pt-20" data-testid="referral-page">
+    <main className="min-h-screen bg-light" data-testid="referral-page">
       <HeroBlock user={user} />
       {user ? (
         <>
+          <HowItWorksSection />
+          <JourneyMilestonesSection
+            isMember
+            loading={Boolean(user) && loading}
+            totalPoints={user ? referralStats?.total_points ?? 0 : null}
+          />
           <MemberActionsSection user={user} program={program} />
           <DrawSection user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
           <MemberSummarySection user={user} program={program} />
           <ValueSection />
-          <PointsSection />
         </>
       ) : (
         <>
+          <HowItWorksSection />
+          <JourneyMilestonesSection isMember={false} loading={false} totalPoints={null} />
           <ValueSection />
           <DrawSection user={user} referralStats={referralStats} loading={false} />
-          <PointsSection />
           <GuestCtaSection />
         </>
       )}

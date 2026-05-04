@@ -47,7 +47,7 @@ export const Login = () => {
   };
 
   return (
-    <main className="pt-20 min-h-screen flex items-center justify-center bg-light" data-testid="login-page">
+    <main className="min-h-screen flex items-center justify-center bg-light" data-testid="login-page">
       <div className="w-full max-w-md mx-4">
         <div className="bg-white rounded-2xl shadow-ia p-8">
           <div className="text-center mb-8">
@@ -190,7 +190,7 @@ export const Register = () => {
   };
 
   return (
-    <main className="pt-20 min-h-screen flex items-center justify-center bg-light py-12" data-testid="register-page">
+    <main className="min-h-screen flex items-center justify-center bg-light py-12" data-testid="register-page">
       <div className="w-full max-w-md mx-4">
         <div className="bg-white rounded-2xl shadow-ia p-8">
           <div className="text-center mb-6">
