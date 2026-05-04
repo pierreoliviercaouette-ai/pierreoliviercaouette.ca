@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, ExternalLink, Facebook, Instagram, Linkedin } from 'lucide-react';
-import { IA_AUTO_HABITATION_LOGO, IA_AUTO_HABITATION_URL } from '../../lib/branding';
+import { IA_AUTO_HABITATION_LOGO, IA_AUTO_HABITATION_URL, TUGO_ASSURANCE_VOYAGE_URL } from '../../lib/branding';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const usefulLinks = [
     { name: 'iA Auto et Habitation', url: IA_AUTO_HABITATION_URL },
-    { name: 'Tugo Assurance Voyage', url: 'https://shop.tugo.com/store/IAJ19165' },
+    { name: 'Tugo Assurance Voyage', url: TUGO_ASSURANCE_VOYAGE_URL },
     { name: 'Ma fiche conseiller iA', url: 'https://ia.ca/fr/fiche-conseiller/conseiller/pierre-olivier-caouette' },
   ];
 

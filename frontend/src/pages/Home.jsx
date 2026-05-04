@@ -7,11 +7,10 @@ import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 import {
   AMF_REGISTRE_URL,
-  IA_AUTO_HABITATION_LOGO,
-  IA_AUTO_HABITATION_URL,
   IA_GROUPE_FINANCIER_LOGO,
 } from '../lib/branding';
 import { HomeTrustBanner } from '../components/home/HomeTrustBanner';
+import { PartnersTrustSection } from '../components/partners/PartnersTrustSection';
 
 const Hero = () => (
   <section className="relative min-h-[90vh] overflow-hidden">
@@ -717,46 +716,6 @@ const TestimonialSection = () => {
   );
 };
 
-const PartnersSection = () => {
-  const partners = [
-    {
-      name: 'iA Auto et Habitation',
-      logo: IA_AUTO_HABITATION_LOGO,
-      url: IA_AUTO_HABITATION_URL,
-    },
-    {
-      name: 'Tugo Assurance Voyage',
-      logo: 'https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/67658c1c37faab7caff071db.webp',
-      url: 'https://shop.tugo.com/store/IAJ19165'
-    }
-  ];
-
-  return (
-    <section className="py-16 px-5 sm:px-6 md:px-10 lg:px-14 bg-white border-t border-prestige-beige" data-testid="partners-section">
-      <div className="container-max">
-        <p className="text-center text-slate-600 mb-8">Partenaires de confiance</p>
-        <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16">
-          {partners.map((partner) => (
-            <a
-              key={partner.name}
-              href={partner.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-105 inline-flex items-center justify-center min-h-[3rem] px-2"
-            >
-              <img
-                src={partner.logo}
-                alt={partner.name}
-                className="max-h-10 md:max-h-11 w-auto max-w-[min(220px,85vw)] object-contain object-center"
-              />
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
 const CTASection = () => (
   <section className="section-padding relative overflow-hidden" data-testid="cta-section">
     {/* Gradient background */}
@@ -835,7 +794,7 @@ export const Home = () => {
       <DifferentiatorSection />
       <ProcessSection />
       <TestimonialSection />
-      <PartnersSection />
+      <PartnersTrustSection sectionClassName="border-t border-prestige-beige bg-white py-16 px-5 sm:px-6 md:px-10 lg:px-14" />
       <CTASection />
     </main>
   );

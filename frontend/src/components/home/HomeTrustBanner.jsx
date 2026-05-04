@@ -4,10 +4,10 @@ import {
   AMF_REGISTRE_URL,
   IA_AUTO_HABITATION_LOGO,
   IA_AUTO_HABITATION_URL,
+  IA_FICHE_CONSEILLER_URL,
   IA_GROUPE_FINANCIER_LOGO,
+  TUGO_ASSURANCE_VOYAGE_URL,
 } from '../../lib/branding';
-
-const TUGO_ASSURANCE_VOYAGE_URL = 'https://shop.tugo.com/store/IAJ19165';
 
 /**
  * Bandeau de réassurance sous le hero : AMF + logos partenaires (gris → couleur au survol).
@@ -38,7 +38,7 @@ export function HomeTrustBanner() {
 
           <div className="flex flex-wrap items-center justify-center gap-6 md:justify-end md:gap-8">
             <a
-              href="https://ia.ca/fr/fiche-conseiller/conseiller/pierre-olivier-caouette"
+              href={IA_FICHE_CONSEILLER_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2 py-2 transition-transform duration-300 hover:scale-[1.02]"
