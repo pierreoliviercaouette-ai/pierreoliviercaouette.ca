@@ -27,18 +27,18 @@ const POINT_RULES = [
 
 const VALUE_ITEMS = [
   {
-    title: 'Simple et transparent',
-    body: 'Un lien a partager, des points faciles a comprendre et des regles visibles en tout temps.',
+    title: 'Simple a utiliser',
+    body: 'Un lien personnel a partager, un suivi clair et des etapes faciles a comprendre.',
     icon: ShieldCheck,
   },
   {
-    title: 'Reconnaissance cumulative',
-    body: 'Vos points s accumulent toute l annee pour augmenter vos chances au tirage trimestriel.',
+    title: 'Des chances qui augmentent',
+    body: 'Vos points s accumulent toute l annee pour augmenter vos chances a chaque tirage trimestriel.',
     icon: Gift,
   },
   {
-    title: 'Pensé pour votre réseau',
-    body: 'Vous mettez en relation, nous faisons le suivi, dans un cadre clair et respectueux.',
+    title: 'Respectueux et encadre',
+    body: 'Vous mettez une personne en relation, nous faisons le suivi dans un cadre conforme et transparent.',
     icon: Users,
   },
 ];
@@ -48,8 +48,8 @@ function HeroBlock({ user }) {
     return (
       <PageHero
         badge="Recommandations"
-        title="Transformez vos recommandations en chances au tirage trimestriel"
-        description="Partagez votre lien personnel, suivez vos points en direct et devenez admissible des 5 points. Chaque point vous donne une chance."
+        title="Recommandez en toute simplicite et multipliez vos chances"
+        description="Accumulez vos points verifies, devenez admissible des 5 points et participez au tirage trimestriel d une valeur d environ 750 $."
         minHeightClass="min-h-[48vh] md:min-h-[52vh]"
       >
         <Link
@@ -69,6 +69,11 @@ function HeroBlock({ user }) {
         >
           Connexion
         </Link>
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
+          <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-white/90">Aucun achat requis</span>
+          <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-white/90">5 points = admissible</span>
+          <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-white/90">1 point = 1 chance</span>
+        </div>
       </PageHero>
     );
   }
@@ -78,12 +83,15 @@ function HeroBlock({ user }) {
     <PageHero
       badge="Espace membre"
       title={first ? `Bonjour, ${first}` : 'Votre programme'}
-      description="Votre lien de consentement et vos points sont reunis ici pour maximiser vos chances au tirage trimestriel."
+      description="Votre lien de consentement et vos points verifies sont reunis ici pour maximiser vos chances au tirage trimestriel."
       minHeightClass="min-h-[48vh] md:min-h-[52vh]"
     >
       <Link to="/profil" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
         Mon profil
         <ArrowRight className="h-4 w-4" />
+      </Link>
+      <Link to="/conditions#reglement-concours" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
+        Reglement officiel
       </Link>
     </PageHero>
   );
@@ -97,7 +105,7 @@ function ValueSection() {
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Pourquoi participer</p>
           <h2 className="mt-2 font-heading text-2xl font-bold text-dark md:text-3xl">Un programme moderne, simple et vraiment motivant</h2>
           <p className="mt-3 text-prestige-taupe">
-            Tout est concu pour rester clair du debut a la fin : comment gagner des points, ou vous en etes, et ce que vous debloquez.
+            Tout est concu pour rester clair du debut a la fin: comment gagner des points, suivre votre progression et participer au tirage.
           </p>
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -185,6 +193,17 @@ function DrawSection({ user, referralStats, loading }) {
           <article className="mx-auto max-w-3xl rounded-2xl border border-prestige-beige bg-white p-6 shadow-ia sm:p-8" data-testid="referral-draw-card">
             <p className="font-heading text-3xl font-bold text-primary">{drawValue} $</p>
             <p className="mt-1 text-sm text-prestige-taupe">Valeur approximative du tirage a chaque trimestre</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <div className="rounded-xl border border-prestige-beige bg-light/50 px-3 py-2 text-xs text-dark">
+                <p className="font-semibold">Aucun achat requis</p>
+              </div>
+              <div className="rounded-xl border border-prestige-beige bg-light/50 px-3 py-2 text-xs text-dark">
+                <p className="font-semibold">Admissible des 5 points</p>
+              </div>
+              <div className="rounded-xl border border-prestige-beige bg-light/50 px-3 py-2 text-xs text-dark">
+                <p className="font-semibold">1 point = 1 chance</p>
+              </div>
+            </div>
             <p className="mt-3 text-sm leading-relaxed text-dark">
               Le concours fonctionne par points verifies: vous devenez admissible a partir de 5 points, puis chaque point vaut 1 chance.
               Le tirage est realise chaque trimestre, selon les reglements complets du concours.
@@ -316,7 +335,7 @@ function GuestCtaSection() {
           <Sparkles className="mx-auto h-8 w-8 text-primary/80" aria-hidden />
           <h2 className="mt-4 font-heading text-xl font-bold text-dark md:text-2xl">Pret a demarrer ?</h2>
           <p className="mt-2 text-sm text-prestige-taupe">
-            Creez votre compte en moins de 2 minutes pour recevoir votre lien et commencer a cumuler vos points des aujourd hui.
+            Creez votre compte en moins de 2 minutes pour recevoir votre lien, suivre vos points et participer au programme des aujourd hui.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
