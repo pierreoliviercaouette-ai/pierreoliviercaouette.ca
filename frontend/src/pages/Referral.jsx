@@ -87,17 +87,17 @@ const HOW_IT_WORKS_ACCENTS = [
 
 const VALUE_ITEMS = [
   {
-    title: 'Simple a utiliser',
-    body: 'Un lien personnel a partager, un suivi clair et des etapes faciles a comprendre.',
+    title: 'Simple à utiliser',
+    body: 'Un lien personnel à partager, un suivi clair et des étapes faciles à comprendre.',
     icon: ShieldCheck,
   },
   {
     title: 'Des chances qui augmentent',
-    body: 'Vos points s accumulent toute l annee pour augmenter vos chances a chaque tirage trimestriel.',
+    body: 'Vos points s’accumulent toute l’année pour augmenter vos chances à chaque tirage trimestriel.',
     icon: Gift,
   },
   {
-    title: 'Respectueux et encadre',
+    title: 'Respectueux et encadré',
     body: 'Vous mettez une personne en relation, nous faisons le suivi dans un cadre conforme et transparent.',
     icon: Users,
   },
@@ -108,8 +108,8 @@ function HeroBlock({ user }) {
     return (
       <PageHero
         badge="Recommandations"
-        title="Recommandez en toute simplicite et multipliez vos chances"
-        description="Accumulez vos points verifies, devenez admissible des 5 points et participez au tirage trimestriel d une valeur d environ 750 $."
+        title="Recommandez en toute simplicité et multipliez vos chances"
+        description="Accumulez vos points vérifiés, devenez admissible dès 5 points et participez au tirage trimestriel d’une valeur d’environ 750 $."
         minHeightClass="min-h-[48vh] md:min-h-[52vh]"
       >
         <Link
@@ -143,7 +143,7 @@ function HeroBlock({ user }) {
     <PageHero
       badge="Espace membre"
       title={first ? `Bonjour, ${first}` : 'Votre programme'}
-      description="Votre lien de consentement et vos points verifies sont reunis ici pour maximiser vos chances au tirage trimestriel."
+      description="Votre lien de consentement et vos points vérifiés sont réunis ici pour maximiser vos chances au tirage trimestriel."
       minHeightClass="min-h-[48vh] md:min-h-[52vh]"
     >
       <Link to="/profil" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
@@ -151,7 +151,7 @@ function HeroBlock({ user }) {
         <ArrowRight className="h-4 w-4" />
       </Link>
       <Link to="/conditions#reglement-concours" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
-        Reglement officiel
+        Règlement officiel
       </Link>
     </PageHero>
   );
@@ -165,7 +165,7 @@ function ValueSection() {
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Pourquoi participer</p>
           <h2 className="mt-2 font-heading text-2xl font-bold text-dark md:text-3xl">Un programme moderne, simple et vraiment motivant</h2>
           <p className="mt-3 text-slate-600">
-            Tout est concu pour rester clair du debut a la fin: comment gagner des points, suivre votre progression et participer au tirage.
+            Tout est conçu pour rester clair du début à la fin : comment gagner des points, suivre votre progression et participer au tirage.
           </p>
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -220,7 +220,7 @@ function HowItWorksSection() {
         <SectionHeading
           kicker="Fonctionnement"
           title="Comment ça fonctionne"
-          subtitle="Trois étapes simples : partager, qualifier, accumuler des chances au tirage trimestriel."
+          subtitle="Trois étapes simples : partager, rencontrer, puis accumuler des chances au tirage trimestriel."
         />
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {HOW_IT_WORKS_STEPS.map((step, idx) => (
@@ -232,6 +232,9 @@ function HowItWorksSection() {
               <span className="absolute right-4 top-4 font-heading text-4xl font-bold tabular-nums text-primary/12">
                 {idx + 1}
               </span>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Étape {idx + 1}
+              </p>
               <div
                 className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${HOW_IT_WORKS_ACCENTS[idx] ?? 'bg-primary/10 text-primary'}`}
               >
@@ -287,7 +290,7 @@ function JourneyMilestonesSection({ totalPoints, loading, isMember }) {
         <SectionHeading
           kicker="Parcours"
           title="Jalons d’engagement"
-          subtitle="Cartes métalliques décoratives : elles illustrent votre progression. La récompense du programme est le tirage trimestriel, tel qu’au règlement officiel."
+          subtitle="Ces jalons illustrent votre progression. La récompense du programme demeure le tirage trimestriel, selon le règlement officiel."
         />
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {ENGAGEMENT_MILESTONES.map((m) => {
@@ -352,11 +355,11 @@ function DrawSection({ user, referralStats, loading }) {
       <div className="container-max">
         <SectionHeading
           kicker="Concours trimestriel"
-          title="Un tirage d une valeur d environ 750 $ a chaque trimestre"
+          title="Un tirage d’une valeur d’environ 750 $ à chaque trimestre"
           subtitle={
             isMember
-              ? 'Admissible des 5 points. Ensuite, chaque point accumule vous donne une chance de participation.'
-              : 'Accumulez des points verifies : des 5 points, vous participez au tirage d une valeur d environ 750 $.'
+              ? 'Admissible dès 5 points. Ensuite, chaque point accumulé vous donne une chance de participation.'
+              : 'Accumulez des points vérifiés : dès 5 points, vous participez au tirage d’une valeur d’environ 750 $.'
           }
         />
 
@@ -368,7 +371,7 @@ function DrawSection({ user, referralStats, loading }) {
             data-testid="referral-draw-card"
           >
             <p className="font-heading text-3xl font-bold text-primary">{drawValue} $</p>
-            <p className="mt-1 text-sm text-slate-600">Valeur approximative du tirage a chaque trimestre</p>
+            <p className="mt-1 text-sm text-slate-600">Valeur approximative du tirage à chaque trimestre</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-sky-200/80 bg-sky-50/90 px-3 py-2.5 text-xs text-sky-950 shadow-sm">
                 <p className="font-semibold text-sky-950">Aucun achat requis</p>
@@ -381,16 +384,16 @@ function DrawSection({ user, referralStats, loading }) {
               </div>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-dark">
-              Le concours fonctionne par points verifies: vous devenez admissible a partir de 5 points, puis chaque point vaut 1 chance.
-              Le tirage est realise chaque trimestre, selon les reglements complets du concours.
+              Le concours fonctionne par points vérifiés : vous devenez admissible à partir de 5 points, puis chaque
+              point vaut 1 chance. Le tirage est réalisé chaque trimestre, selon le règlement officiel.
             </p>
             <p className="mt-2 text-sm font-medium text-dark">
-              Premier tirage prevu le 1er octobre 2026.
+              Premier tirage prévu le 1er octobre 2026.
             </p>
             {isMember ? (
               <div className="mt-4 space-y-2">
                 <p className="text-sm text-dark">
-                  Vos points verifies: <span className="font-semibold">{total ?? 0}</span>
+                  Vos points vérifiés : <span className="font-semibold">{total ?? 0}</span>
                 </p>
                 {eligible ? (
                   <p className="inline-flex items-center gap-2 text-sm font-medium text-green-700">
@@ -404,7 +407,7 @@ function DrawSection({ user, referralStats, loading }) {
                 )}
               </div>
             ) : (
-              <p className="mt-4 text-sm text-slate-600">Inscrivez-vous pour suivre vos points et votre admissibilite.</p>
+              <p className="mt-4 text-sm text-slate-600">Inscrivez-vous pour suivre vos points et votre admissibilité.</p>
             )}
             <div className="mt-5">
               <Link
@@ -412,7 +415,7 @@ function DrawSection({ user, referralStats, loading }) {
                 className="btn-secondary inline-flex items-center justify-center gap-2 text-sm"
                 data-testid="referral-contest-rules-link"
               >
-                Reglement officiel du concours
+                Règlement officiel du concours
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -452,7 +455,7 @@ function MemberSummarySection({ user, program }) {
         <SectionHeading
           kicker="Votre solde"
           title="Points vérifiés"
-          subtitle="Votre progression vers le seuil d admissibilite de 5 points pour le tirage trimestriel."
+          subtitle="Votre progression vers le seuil d’admissibilité de 5 points pour le tirage trimestriel."
         />
         <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-sky-200/70 bg-gradient-to-br from-white via-sky-50/35 to-indigo-50/30 p-6 shadow-ia sm:p-8">
           <div>
@@ -470,7 +473,7 @@ function MemberSummarySection({ user, program }) {
                 </p>
               ) : (
                 <p className="mt-2 text-sm text-slate-600">
-                  Il vous manque {toEligibility} point{toEligibility > 1 ? 's' : ''} pour etre admissible.
+                  Il vous manque {toEligibility} point{toEligibility > 1 ? 's' : ''} pour être admissible.
                 </p>
               )}
             </div>
@@ -493,9 +496,9 @@ function MemberActionsSection({ user, program }) {
     <section className="section-padding bg-white">
       <div className="container-max">
         <SectionHeading
-          kicker="Passez a l action"
-          title="Votre lien et vos actions de progression"
-          subtitle="Commencez par partager votre lien de consentement, puis ajoutez vos actions et suivez vos references."
+          kicker="Actions rapides"
+          title="Complétez votre progression en quelques étapes"
+          subtitle="Ajoutez une référence, complétez les actions encore disponibles et partagez votre lien personnalisé."
         />
         <ReferralMemberActions user={user} program={program} hideReferralLinkCard={false} />
       </div>
@@ -509,9 +512,9 @@ function GuestCtaSection() {
       <div className="container-max">
         <div className="mx-auto max-w-xl rounded-2xl border border-prestige-beige bg-light/40 p-8 text-center shadow-ia md:p-10">
           <Sparkles className="mx-auto h-8 w-8 text-primary/80" aria-hidden />
-          <h2 className="mt-4 font-heading text-xl font-bold text-dark md:text-2xl">Pret a demarrer ?</h2>
+          <h2 className="mt-4 font-heading text-xl font-bold text-dark md:text-2xl">Prêt à démarrer ?</h2>
           <p className="mt-2 text-sm text-slate-600">
-            Creez votre compte en moins de 2 minutes pour recevoir votre lien, suivre vos points et participer au programme des aujourd hui.
+            Créez votre compte en moins de 2 minutes pour recevoir votre lien, suivre vos points et participer au programme dès aujourd’hui.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
@@ -542,10 +545,11 @@ function LegalLine() {
       <div className="container-max px-4 text-center text-xs leading-relaxed text-slate-600 md:px-8">
         <p>
           Programme de reconnaissance, sans obligation d’achat. Vous ne présentez pas de produits : vous partagez un contact. Soumis à
-          conditions — les points sont vérifiés. Admissible au tirage trimestriel d une valeur d environ 750 $ dès 5 points, avec 1 point = 1 chance.
+          conditions — les points sont vérifiés. Admissible au tirage trimestriel d’une valeur d’environ 750 $ dès 5 points, avec 1 point = 1 chance.
         </p>
         <p className="mt-2">
-          Concours organise par Pierre-Olivier Caouette uniquement. Ce concours n est pas commandite, approuve, administre ni associe a Industrielle Alliance.
+          Concours organisé par Pierre-Olivier Caouette uniquement. Ce concours n’est pas commandité, approuvé,
+          administré ni associé à Industrielle Alliance.
         </p>
       </div>
     </div>
@@ -560,7 +564,7 @@ export const Referral = () => {
   useSeoMeta({
     title: 'Programme de recommandations | Victoriaville',
     description:
-      'Un programme de recommandations attractif et moderne : lien de consentement, points cumulatifs et tirage trimestriel d une valeur d environ 750 $.',
+      'Un programme de recommandations attractif et moderne : lien de consentement, points cumulatifs et tirage trimestriel d’une valeur d’environ 750 $.',
     canonicalPath: '/recommandations',
   });
 
@@ -569,16 +573,8 @@ export const Referral = () => {
       <HeroBlock user={user} />
       {user ? (
         <>
-          <HowItWorksSection />
-          <JourneyMilestonesSection
-            isMember
-            loading={Boolean(user) && loading}
-            totalPoints={user ? referralStats?.total_points ?? 0 : null}
-          />
-          <MemberActionsSection user={user} program={program} />
-          <DrawSection user={user} referralStats={referralStats} loading={Boolean(user) && loading} />
           <MemberSummarySection user={user} program={program} />
-          <ValueSection />
+          <MemberActionsSection user={user} program={program} />
         </>
       ) : (
         <>

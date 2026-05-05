@@ -84,18 +84,28 @@ export function useReferralProgramData(user) {
     if (!user) return;
     setSubmittingReferral(true);
     try {
+      const normalizedEmail = referralForm.referred_email.trim().toLowerCase();
+      const phoneDigits = referralForm.referred_phone.replace(/\D/g, '');
+      const fallbackEmail = phoneDigits ? `tel-${phoneDigits}@reference.local` : '';
+      const referralEmail = normalizedEmail || fallbackEmail;
+
+      if (!referralForm.referred_name.trim() || !phoneDigits) {
+        toast.error('Veuillez entrer le nom complet et le numéro de téléphone.');
+        return;
+      }
+
       const { error } = await supabase.from('referrals').insert({
         referrer_id: user.id,
         referrer_code: user.referral_code,
-        referred_email: referralForm.referred_email.trim().toLowerCase(),
+        referred_email: referralEmail,
         referred_name: referralForm.referred_name.trim(),
-        referred_phone: referralForm.referred_phone?.trim() || null,
+        referred_phone: referralForm.referred_phone.trim(),
         notes: referralForm.notes?.trim() || null,
         status: 'pending',
       });
       if (error) {
         if (error.code === '23505') {
-          toast.error('Vous avez déjà référé cette personne');
+          toast.error('Cette personne est déjà dans vos références.');
         } else {
           throw error;
         }
@@ -106,7 +116,7 @@ export function useReferralProgramData(user) {
       setReferralSuccessTick((t) => t + 1);
       fetchData();
     } catch (err) {
-      toast.error(err.message || "Erreur lors de l'envoi");
+      toast.error(err.message || "Une erreur est survenue lors de l'envoi.");
     } finally {
       setSubmittingReferral(false);
     }
@@ -122,7 +132,7 @@ export function useReferralProgramData(user) {
       });
       if (error) {
         if (error.code === '23505') {
-          toast.error('Vous avez déjà soumis un avis Google');
+          toast.error('Votre avis Google a déjà été soumis.');
         } else {
           throw error;
         }
@@ -151,7 +161,7 @@ export function useReferralProgramData(user) {
       });
       if (error) {
         if (error.code === '23505') {
-          toast.error('Vous avez déjà soumis une vérification de client existant');
+          toast.error('La vérification de client existant a déjà été soumise.');
         } else {
           throw error;
         }

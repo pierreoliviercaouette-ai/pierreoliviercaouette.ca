@@ -15,7 +15,7 @@ const CONSENT_TEXT =
 const errorMessages = {
   consent_required: 'Vous devez accepter le consentement pour continuer.',
   required_fields: 'Veuillez remplir tous les champs obligatoires.',
-  invalid_code: 'Ce lien de parrainage n’est pas valide. Demandez un nouveau lien à la personne qui vous a invité.',
+  invalid_code: 'Ce lien de parrainage n’est pas valide. Demandez un nouveau lien à la personne qui vous l’a envoyé.',
   duplicate: 'Une demande avec cette adresse courriel existe déjà pour ce parrainage.'
 };
 
@@ -75,7 +75,7 @@ export const ReferralConsent = () => {
         has_phone: Boolean(phone.trim()),
         has_email: Boolean(email.trim()),
       });
-      toast.success('Merci! Votre demande a été transmise.');
+      toast.success('Merci ! Votre demande a été transmise.');
     } catch (err) {
       console.error(err);
       trackEvent('referral_consent_error', { reason: 'rpc_exception' });
@@ -95,7 +95,7 @@ export const ReferralConsent = () => {
           <h1 className="font-heading text-2xl md:text-3xl font-bold text-dark mb-4">
             Merci pour votre confiance
           </h1>
-          <p className="text-prestige-taupe mb-8">
+          <p className="text-slate-600 mb-8">
             Pierre-Olivier Caouette communiquera avec vous sous peu en fonction du consentement que vous avez accordé.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -136,7 +136,7 @@ export const ReferralConsent = () => {
               <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-dark mb-2">Lien invalide</p>
-                <p className="text-prestige-taupe text-sm mb-4">
+                <p className="text-slate-600 text-sm mb-4">
                   Ce lien ne contient pas de code de parrainage. Utilisez le lien complet qui vous a été envoyé, ou{' '}
                   <Link to="/contact" className="text-primary font-medium hover:underline">
                     écrivez-nous
@@ -206,7 +206,7 @@ export const ReferralConsent = () => {
 
                 <div className="rounded-xl bg-light/80 border border-prestige-beige p-4 space-y-3">
                   <p className="text-sm font-medium text-dark">Consentement aux communications</p>
-                  <p className="text-sm text-prestige-taupe leading-relaxed">{CONSENT_TEXT}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">{CONSENT_TEXT}</p>
                   <label className="flex items-start gap-3 cursor-pointer pt-1">
                     <Checkbox
                       checked={consent}
@@ -221,7 +221,7 @@ export const ReferralConsent = () => {
                   </label>
                 </div>
 
-                <p className="text-xs text-prestige-taupe">
+                <p className="text-xs text-slate-600">
                   Consultez notre{' '}
                   <Link to="/confidentialite" className="text-primary hover:underline">
                     politique de confidentialité

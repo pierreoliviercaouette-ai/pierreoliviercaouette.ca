@@ -70,10 +70,12 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
   } = program;
 
   const link = user.referral_code ? getReferralConsentUrl(user.referral_code) : '';
+  const googleIsQualified = googleReview?.status === 'verified' || googleReview?.status === 'qualified';
+  const existingClientIsQualified = existingClient?.status === 'verified' || existingClient?.status === 'qualified';
 
   const shareBody =
     link.trim() &&
-    `Bonjour! Je te recommande Pierre-Olivier Caouette, conseiller en sécurité financière. Tu peux valider ton consentement pour la mise en relation ici : ${link}`;
+    `Bonjour ! Je vous recommande Pierre-Olivier Caouette, conseiller en sécurité financière. Vous pouvez confirmer votre consentement pour la mise en relation ici : ${link}`;
   const whatsappHref =
     shareBody && `https://wa.me/?text=${encodeURIComponent(shareBody)}`;
   const smsHref = shareBody && `sms:?&body=${encodeURIComponent(shareBody)}`;
@@ -93,7 +95,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
     >
       {!hideReferralLinkCard ? (
         <p className="text-center text-sm text-slate-600">
-          Chaque action vous aide à accumuler des points vérifiés.
+          Vue rapide : 1) vos points, 2) ajouter une référence, 3) client existant, 4) avis Google, 5) partager votre lien.
         </p>
       ) : (
         <p className="text-center text-sm text-slate-600">
@@ -101,61 +103,90 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
         </p>
       )}
 
-      <div className="space-y-4">
-        {!hideReferralLinkCard && (
-          <div className="overflow-hidden rounded-2xl border-2 border-blue-200/80 bg-gradient-to-br from-blue-50/90 to-white p-4 shadow-sm md:p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                <Users className="h-5 w-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Votre lien de consentement</h3>
-                  <Badge className="border-0 bg-blue-500 text-xs text-white">+1 pt / réf. qualifiée</Badge>
-                </div>
-                <p className="mb-2 text-xs text-slate-600 md:text-sm">
-                  Partagez ce lien : la personne valide d’abord le contact.
-                </p>
-                <div className="flex items-center gap-2">
-                  <div className="min-w-0 flex-1 overflow-hidden rounded-lg border border-prestige-beige bg-white p-2.5 font-mono text-[10px] text-dark md:text-xs">
-                    {link}
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={copyReferralLink}
-                    className="h-11 w-11 shrink-0 bg-blue-500 p-0 hover:bg-blue-600"
-                    data-testid="copy-referral-link"
-                    aria-label="Copier le lien"
-                  >
-                    {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-                {whatsappHref && smsHref ? (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <a
-                      href={whatsappHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-green-600/30 bg-white px-3 py-2 text-xs font-semibold text-green-800 transition-colors hover:bg-green-50 sm:flex-initial sm:px-4"
-                    >
-                      <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
-                      WhatsApp
-                    </a>
-                    <a
-                      href={smsHref}
-                      className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:flex-initial sm:px-4"
-                    >
-                      <Smartphone className="h-4 w-4 shrink-0" aria-hidden />
-                      SMS
-                    </a>
-                  </div>
-                ) : null}
+      <div className="overflow-hidden rounded-2xl border border-prestige-beige bg-white shadow-ia">
+        <div className="border-b border-prestige-beige bg-light/50 px-4 py-3 md:px-6">
+          <h2 className="font-heading text-lg font-semibold text-dark">Ajouter une référence</h2>
+          <p className="text-xs text-slate-600">Formulaire simplifié : nom et numéro de téléphone en priorité.</p>
+        </div>
+        <div className="p-4 md:p-6">
+          {showReferralSentBanner ? (
+            <div
+              className="animate-fade-in mb-4 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 shadow-sm"
+              role="status"
+              aria-live="polite"
+            >
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" aria-hidden />
+              <div>
+                <p className="font-semibold text-green-900">Référence enregistrée</p>
+                <p className="mt-0.5 text-green-800/90">Merci ! La personne apparaît dans votre liste dès validation.</p>
               </div>
             </div>
-          </div>
-        )}
+          ) : null}
+          <form onSubmit={handleReferralSubmit} className="space-y-5">
+            <fieldset className="space-y-3 rounded-xl border border-prestige-beige/80 bg-light/20 p-4">
+              <legend className="px-1 font-heading text-sm font-semibold text-dark">Coordonnées de la personne</legend>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="ref_name" className="text-sm font-medium text-slate-700">
+                    Nom complet *
+                  </Label>
+                  <Input
+                    id="ref_name"
+                    value={referralForm.referred_name}
+                    onChange={(e) => setReferralForm((p) => ({ ...p, referred_name: e.target.value }))}
+                    required
+                    autoComplete="name"
+                    className="h-11 text-sm"
+                    data-testid="referral-name"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="ref_phone" className="text-sm font-medium text-slate-700">
+                    Numéro de téléphone *
+                  </Label>
+                  <Input
+                    id="ref_phone"
+                    type="tel"
+                    value={referralForm.referred_phone}
+                    onChange={(e) => setReferralForm((p) => ({ ...p, referred_phone: e.target.value }))}
+                    required
+                    autoComplete="tel"
+                    className="h-11 text-sm"
+                    data-testid="referral-phone"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="ref_email" className="text-sm font-medium text-slate-700">
+                  Courriel <span className="font-normal text-slate-500">(optionnel)</span>
+                </Label>
+                <Input
+                  id="ref_email"
+                  type="email"
+                  value={referralForm.referred_email}
+                  onChange={(e) => setReferralForm((p) => ({ ...p, referred_email: e.target.value }))}
+                  autoComplete="email"
+                  className="h-11 text-sm"
+                  data-testid="referral-email"
+                />
+              </div>
+            </fieldset>
+            <Button
+              type="submit"
+              disabled={submittingReferral}
+              className="btn-primary min-h-[44px] text-sm"
+              data-testid="submit-referral"
+            >
+              <Send className="mr-2 h-4 w-4" />
+              {submittingReferral ? 'Envoi…' : 'Envoyer la référence'}
+            </Button>
+          </form>
+        </div>
+      </div>
 
-        <div className="overflow-hidden rounded-2xl border-2 border-green-200/80 bg-gradient-to-br from-green-50/90 to-white p-4 shadow-sm md:p-5">
+      <div className="space-y-4">
+        {!googleIsQualified && (
+          <div className="overflow-hidden rounded-2xl border-2 border-green-200/80 bg-gradient-to-br from-green-50/90 to-white p-4 shadow-sm md:p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
               <MessageSquare className="h-5 w-5 text-white" />
@@ -163,7 +194,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex flex-wrap items-center gap-2">
                 <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Avis Google</h3>
-                  <Badge className="border-0 bg-green-500 text-xs text-white">+1 pt</Badge>
+                <Badge className="border-0 bg-green-500 text-xs text-white">+1 pt</Badge>
                 {googleReview && statusBadge(googleReview.status)}
               </div>
               {googleReview ? (
@@ -186,7 +217,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
                 </div>
               ) : (
                 <div className="mt-1 space-y-2">
-                  <p className="text-xs text-slate-600 md:text-sm">Après l’avoir laissé sur Google, confirmez ici.</p>
+                  <p className="text-xs text-slate-600 md:text-sm">Étape 2 : laissez un avis Google, puis confirmez-le ici.</p>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <a
                       href={googleReviewLink}
@@ -211,9 +242,11 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
               )}
             </div>
           </div>
-        </div>
+          </div>
+        )}
 
-        <div className="overflow-hidden rounded-2xl border-2 border-purple-200/80 bg-gradient-to-br from-purple-50/90 to-white p-4 shadow-sm md:p-5">
+        {!existingClientIsQualified && (
+          <div className="overflow-hidden rounded-2xl border-2 border-purple-200/80 bg-gradient-to-br from-purple-50/90 to-white p-4 shadow-sm md:p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
               <UserCheck className="h-5 w-5 text-white" />
@@ -221,7 +254,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex flex-wrap items-center gap-2">
                 <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Client existant</h3>
-                  <Badge className="border-0 bg-purple-500 text-xs text-white">+1 pt</Badge>
+                <Badge className="border-0 bg-purple-500 text-xs text-white">+1 pt</Badge>
                 {existingClient && statusBadge(existingClient.status)}
               </div>
               {existingClient ? (
@@ -241,6 +274,7 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
                 </div>
               ) : (
                 <form onSubmit={handleExistingClientSubmit} className="mt-2 space-y-2">
+                  <p className="text-xs text-slate-600">Étape 3 : confirmez votre statut de client existant.</p>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                     <Input
                       value={existingClientForm.first_name}
@@ -279,102 +313,62 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
               )}
             </div>
           </div>
-        </div>
+          </div>
+        )}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-prestige-beige bg-white shadow-ia">
-        <div className="border-b border-prestige-beige bg-light/50 px-4 py-3 md:px-6">
-          <h2 className="font-heading text-lg font-semibold text-dark">Référence manuelle</h2>
-          <p className="text-xs text-slate-600">Même champs que le lien, pour saisir une personne directement.</p>
-        </div>
-        <div className="p-4 md:p-6">
-          {showReferralSentBanner ? (
-            <div
-              className="animate-fade-in mb-4 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 shadow-sm"
-              role="status"
-              aria-live="polite"
-            >
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" aria-hidden />
-              <div>
-                <p className="font-semibold text-green-900">Référence enregistrée</p>
-                <p className="mt-0.5 text-green-800/90">Merci ! La personne apparaît dans votre liste dès validation.</p>
-              </div>
+      {!hideReferralLinkCard && (
+        <div className="overflow-hidden rounded-2xl border-2 border-blue-200/80 bg-gradient-to-br from-blue-50/90 to-white p-4 shadow-sm md:p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <Users className="h-5 w-5 text-white" />
             </div>
-          ) : null}
-          <form onSubmit={handleReferralSubmit} className="space-y-5">
-            <fieldset className="space-y-3 rounded-xl border border-prestige-beige/80 bg-light/20 p-4">
-              <legend className="px-1 font-heading text-sm font-semibold text-dark">Coordonnées de la personne</legend>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="ref_name" className="text-sm font-medium text-slate-700">
-                    Nom complet *
-                  </Label>
-                  <Input
-                    id="ref_name"
-                    value={referralForm.referred_name}
-                    onChange={(e) => setReferralForm((p) => ({ ...p, referred_name: e.target.value }))}
-                    required
-                    autoComplete="name"
-                    className="h-11 text-sm"
-                    data-testid="referral-name"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="ref_email" className="text-sm font-medium text-slate-700">
-                    Courriel *
-                  </Label>
-                  <Input
-                    id="ref_email"
-                    type="email"
-                    value={referralForm.referred_email}
-                    onChange={(e) => setReferralForm((p) => ({ ...p, referred_email: e.target.value }))}
-                    required
-                    autoComplete="email"
-                    className="h-11 text-sm"
-                    data-testid="referral-email"
-                  />
-                </div>
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 flex flex-wrap items-center gap-2">
+                <h3 className="font-heading text-sm font-semibold text-dark md:text-base">Partager votre lien personnalisé</h3>
+                <Badge className="border-0 bg-blue-500 text-xs text-white">Référence directe</Badge>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="ref_phone" className="text-sm font-medium text-slate-700">
-                  Téléphone <span className="font-normal text-slate-500">(optionnel)</span>
-                </Label>
-                <Input
-                  id="ref_phone"
-                  type="tel"
-                  value={referralForm.referred_phone}
-                  onChange={(e) => setReferralForm((p) => ({ ...p, referred_phone: e.target.value }))}
-                  autoComplete="tel"
-                  className="h-11 max-w-md text-sm"
-                  data-testid="referral-phone"
-                />
+              <p className="mb-2 text-xs text-slate-600 md:text-sm">
+                Envoyez votre lien par message : la personne confirme son consentement en quelques clics.
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1 overflow-hidden rounded-lg border border-prestige-beige bg-white p-2.5 font-mono text-[10px] text-dark md:text-xs">
+                  {link}
+                </div>
+                <Button
+                  type="button"
+                  onClick={copyReferralLink}
+                  className="h-11 w-11 shrink-0 bg-blue-500 p-0 hover:bg-blue-600"
+                  data-testid="copy-referral-link"
+                  aria-label="Copier le lien"
+                >
+                  {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
               </div>
-            </fieldset>
-            <div className="space-y-1.5">
-              <Label htmlFor="ref_notes" className="text-sm font-medium text-slate-700">
-                Notes <span className="font-normal text-slate-500">(optionnel)</span>
-              </Label>
-              <Input
-                id="ref_notes"
-                value={referralForm.notes}
-                onChange={(e) => setReferralForm((p) => ({ ...p, notes: e.target.value }))}
-                placeholder="Contexte utile pour le suivi"
-                className="h-11 text-sm"
-                data-testid="referral-notes"
-              />
+              {whatsappHref && smsHref ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-green-600/30 bg-white px-3 py-2 text-xs font-semibold text-green-800 transition-colors hover:bg-green-50 sm:flex-initial sm:px-4"
+                  >
+                    <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
+                    WhatsApp
+                  </a>
+                  <a
+                    href={smsHref}
+                    className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:flex-initial sm:px-4"
+                  >
+                    <Smartphone className="h-4 w-4 shrink-0" aria-hidden />
+                    SMS
+                  </a>
+                </div>
+              ) : null}
             </div>
-            <Button
-              type="submit"
-              disabled={submittingReferral}
-              className="btn-primary min-h-[44px] text-sm"
-              data-testid="submit-referral"
-            >
-              <Send className="mr-2 h-4 w-4" />
-              {submittingReferral ? 'Envoi…' : 'Envoyer la référence'}
-            </Button>
-          </form>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="overflow-hidden rounded-2xl border border-prestige-beige bg-white shadow-ia">
         <div className="border-b border-prestige-beige bg-light/50 px-4 py-3 md:px-6">
@@ -393,11 +387,11 @@ export const ReferralMemberActions = ({ user, program, hideReferralLinkCard = fa
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-dark">{ref.referred_name}</p>
-                    <p className="truncate text-xs text-prestige-taupe">{ref.referred_email}</p>
+                    <p className="truncate text-xs text-slate-600">{ref.referred_email}</p>
                   </div>
                   <div className="flex flex-shrink-0 flex-col items-end">
                     {statusBadge(ref.status)}
-                    <span className="text-[10px] text-prestige-taupe">
+                    <span className="text-[10px] text-slate-600">
                       {new Date(ref.created_at).toLocaleDateString('fr-CA')}
                     </span>
                   </div>
