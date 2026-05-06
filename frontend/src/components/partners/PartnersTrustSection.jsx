@@ -59,6 +59,9 @@ export function PartnersTrustSection({ sectionClassName = '' }) {
         <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-slate-600">
           Accès directs aux partenaires et au registre officiel — cliquez sur le libellé pour ouvrir le site.
         </p>
+        <p className="mx-auto mt-2 max-w-2xl text-center text-xs text-slate-600">
+          Ces liens sont fournis à titre informatif. Les concours et promotions du site sont organisés par Pierre-Olivier Caouette.
+        </p>
 
         <ul className="mx-auto mt-10 grid max-w-5xl list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2 lg:grid-cols-4">
           {PARTNERS.map((p) => (

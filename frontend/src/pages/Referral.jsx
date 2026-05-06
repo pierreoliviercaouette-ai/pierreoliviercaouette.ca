@@ -385,7 +385,9 @@ function DrawSection({ user, referralStats, loading }) {
             </div>
             <p className="mt-3 text-sm leading-relaxed text-dark">
               Le concours fonctionne par points vérifiés : vous devenez admissible à partir de 5 points, puis chaque
-              point vaut 1 chance. Le tirage est réalisé chaque trimestre, selon le règlement officiel.
+              point vaut 1 chance. Les points proviennent des actions admissibles du programme : référence qualifiée,
+              avis Google vérifié et statut de client existant vérifié. Le tirage est réalisé chaque trimestre, selon
+              le règlement officiel.
             </p>
             <p className="mt-2 text-sm font-medium text-dark">
               Premier tirage prévu le 1er octobre 2026.
@@ -546,6 +548,10 @@ function LegalLine() {
         <p>
           Programme de reconnaissance, sans obligation d’achat. Vous ne présentez pas de produits : vous partagez un contact. Soumis à
           conditions — les points sont vérifiés. Admissible au tirage trimestriel d’une valeur d’environ 750 $ dès 5 points, avec 1 point = 1 chance.
+        </p>
+        <p className="mt-2">
+          Exclusions et règles d’admissibilité applicables : résidence au Québec, majorité légale, pas d’auto-référence, pas de doublons, et toute
+          participation non conforme peut être refusée selon le règlement officiel.
         </p>
         <p className="mt-2">
           Concours organisé par Pierre-Olivier Caouette uniquement. Ce concours n’est pas commandité, approuvé,

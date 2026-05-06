@@ -21,7 +21,7 @@ export const About = () => {
     {
       icon: Target,
       title: 'L\'honnêteté',
-      description: 'Grâce à une étude détaillée de vos finances, je vous offre des conseils basés sur des faits concrets, afin de garantir des décisions éclairées.',
+      description: 'Grâce à une étude détaillée de vos finances, je vous offre des conseils basés sur des faits concrets pour vous aider à prendre des décisions éclairées.',
       gradient: 'from-blue-500 to-cyan-500'
     },
     {
@@ -114,7 +114,7 @@ export const About = () => {
                     rel="noopener noreferrer"
                     className="font-semibold text-dark text-center text-sm sm:text-base hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                   >
-                    Certifié AMF
+                    Inscrit AMF
                   </a>
                 </div>
               </div>

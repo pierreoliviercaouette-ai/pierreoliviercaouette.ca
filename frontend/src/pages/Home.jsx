@@ -35,13 +35,13 @@ const Hero = () => (
         <div className="space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
             <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
-            <span className="text-white/90 text-sm font-medium">Maximisez vos profits, sans compromis</span>
+            <span className="text-white/90 text-sm font-medium">Des conseils clairs pour améliorer votre santé financière</span>
           </div>
           
           <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1]">
             Parce qu'il est temps d'avoir{' '}
             <span className="relative">
-              <span className="text-secondary">les meilleurs conseils.</span>
+              <span className="text-secondary">des conseils adaptés.</span>
               <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" fill="none">
                 <path d="M1 5.5C47 2 153 2 199 5.5" stroke="#C9A227" strokeWidth="3" strokeLinecap="round"/>
               </svg>
@@ -49,8 +49,8 @@ const Hero = () => (
           </h1>
           
           <p className="text-white/80 text-lg md:text-xl max-w-xl leading-relaxed">
-            Maximisez vos gains, réduisez vos coûts, optimisez vos protections et atteignez vos objectifs. 
-            Avec mon accompagnement, vos projets financiers prennent une nouvelle dimension.
+            Réduisez les zones d'incertitude, optimisez vos protections et avancez vers vos objectifs.
+            Mon accompagnement s'ajuste à votre situation, à votre rythme.
           </p>
           
           <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
@@ -76,7 +76,7 @@ const Hero = () => (
           {/* Trust Badges */}
           <div className="flex flex-wrap items-center gap-6 pt-4">
             {[
-              { text: 'Certifié AMF', icon: CheckCircle2, href: AMF_REGISTRE_URL },
+              { text: 'Inscrit au registre de l’AMF', icon: CheckCircle2, href: AMF_REGISTRE_URL },
               { text: 'Service personnalisé', icon: CheckCircle2, href: null },
               { text: 'Basé au Québec', icon: CheckCircle2, href: null }
             ].map((badge, i) => {
@@ -142,7 +142,7 @@ const Hero = () => (
                   onClick={() => trackEvent('select_content', { content_type: 'external_link', item_id: 'home_hero_badge_amf' })}
                   className="font-bold text-dark hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                 >
-                  Certifié AMF
+                  Inscrit AMF
                 </a>
                 <p className="text-xs text-slate-600">Conseiller autorisé</p>
               </div>
@@ -186,7 +186,7 @@ const ServicesSection = () => {
     {
       icon: TrendingUp,
       title: 'Augmentation du patrimoine',
-      description: 'Avec des stratégies d\'assurances et d\'épargnes, vous gardez plus d\'argent dans vos poches.',
+      description: 'Avec des stratégies d\'assurance et d\'épargne, vous visez une croissance plus stable de votre patrimoine.',
       color: 'from-blue-500 to-blue-600'
     },
     {
@@ -204,7 +204,7 @@ const ServicesSection = () => {
     {
       icon: Umbrella,
       title: 'Optimisation fiscale',
-      description: 'Analysons les meilleures solutions afin de payer le moins d\'impôts possible.',
+      description: 'Analysons des stratégies adaptées pour optimiser votre situation fiscale selon les règles en vigueur.',
       color: 'from-orange-500 to-orange-600'
     }
   ];
@@ -363,7 +363,7 @@ const AboutPreview = () => (
                     onClick={() => trackEvent('select_content', { content_type: 'external_link', item_id: 'home_about_badge_amf' })}
                     className="block font-bold text-dark hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                   >
-                    Certifié AMF
+                    Inscrit AMF
                   </a>
                   <p className="text-sm text-slate-600">Conseiller autorisé</p>
                 </div>
@@ -378,7 +378,7 @@ const AboutPreview = () => (
             À propos de moi
           </span>
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark leading-tight">
-            Parce qu'il est temps d'avoir les meilleurs conseils.
+            Parce qu'il est temps d'avoir des conseils adaptés.
           </h2>
           <p className="text-slate-600 text-lg leading-relaxed">
             Après avoir passé des années à conseiller mon entourage sur tout et rien, je me suis tourné vers une carrière 
@@ -386,7 +386,7 @@ const AboutPreview = () => (
           </p>
           <p className="text-slate-600 leading-relaxed">
             Mon but est de vous accompagner dans vos objectifs tout en tenant compte de vos valeurs et de votre situation.
-            Étant dûment certifié auprès de l'Autorité des marchés financiers, je vous invite à{' '}
+            Étant inscrit au registre de l'Autorité des marchés financiers, je vous invite à{' '}
             <a 
               href={AMF_REGISTRE_URL}
               target="_blank" 
@@ -401,7 +401,7 @@ const AboutPreview = () => (
           <div className="flex flex-wrap gap-3 py-4">
             {[
               { icon: '🎯', label: 'Conseils personnalisés', href: null },
-              { icon: '🛡️', label: 'Certifié AMF', href: AMF_REGISTRE_URL },
+              { icon: '🛡️', label: 'Inscrit AMF', href: AMF_REGISTRE_URL },
               { icon: '🤝', label: 'Accompagnement humain', href: null }
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 px-4 py-2 bg-light rounded-full">
@@ -733,7 +733,7 @@ const CTASection = () => (
           Prêt à commencer?
         </span>
         <h2 className="font-heading text-3xl md:text-5xl font-bold text-white">
-          Prêt à maximiser vos profits?
+          Prêt à structurer vos finances?
         </h2>
         <p className="text-white/80 text-lg md:text-xl max-w-xl mx-auto">
           Prenez rendez-vous pour une consultation gratuite et sans engagement.

@@ -11,7 +11,7 @@ export const Privacy = () => {
             </h1>
             
             <p className="text-slate-600 mb-6">
-              Dernière mise à jour: {new Date().toLocaleDateString('fr-CA')}
+              Dernière mise à jour : 2026-05-06
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
@@ -23,7 +23,7 @@ export const Privacy = () => {
             <ul className="list-disc pl-6 text-slate-600 mb-6">
               <li>Nom et prénom</li>
               <li>Adresse courriel</li>
-              <li>Numéro de téléphone (optionnel)</li>
+              <li>Numéro de téléphone (requis pour les demandes de recommandation)</li>
               <li>Informations saisies dans nos outils financiers</li>
               <li>Messages envoyés via nos formulaires de contact</li>
             </ul>
@@ -84,7 +84,7 @@ export const Privacy = () => {
             </p>
             <p className="text-slate-600 mb-6">
               <strong>Courriel:</strong> po@pierreoliviercaouette.ca<br/>
-              <strong>Téléphone:</strong> (514) 123-4567
+              <strong>Téléphone:</strong> 819 806-1164
             </p>
 
             <div className="mt-12">
@@ -110,7 +110,7 @@ export const Terms = () => {
             </h1>
             
             <p className="text-slate-600 mb-6">
-              Dernière mise à jour: {new Date().toLocaleDateString('fr-CA')}
+              Dernière mise à jour : 2026-05-06
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
@@ -158,17 +158,27 @@ export const Terms = () => {
               <li>Pierre-Olivier Caouette se réserve le droit de qualifier ou rejeter une participation non conforme</li>
               <li>Les conditions du programme peuvent être modifiées à tout moment</li>
             </ul>
+            <p className="text-slate-600 mb-4">
+              <strong>Admissibilité et exclusions :</strong>
+            </p>
+            <ul className="list-disc pl-6 text-slate-600 mb-6">
+              <li>Le participant doit être résident du Québec et majeur au moment de la participation</li>
+              <li>Les auto-références et les références fictives, incomplètes ou dupliquées sont refusées</li>
+              <li>Une même personne référée ne peut être comptabilisée qu'une seule fois par participant</li>
+              <li>Les participations non conformes, frauduleuses ou contraires aux règles peuvent être annulées</li>
+              <li>Les exclusions légales applicables aux concours promotionnels au Québec s'appliquent</li>
+            </ul>
             <p className="text-slate-600 mb-6">
               Le gagnant du tirage est contacté selon les coordonnées fournies au dossier. Si le gagnant ne peut être joint dans un délai raisonnable
               ou ne respecte pas les conditions d'admissibilité, un nouveau tirage peut être effectué.
             </p>
             <p className="text-slate-600 mb-6">
-              Ce concours est organise et administre exclusivement par Pierre-Olivier Caouette, a titre de promotion independante de son programme de
-              recommandations. Le concours n'est ni commandite, ni approuve, ni administre par Industrielle Alliance, et n'y est pas associe.
+              Ce concours est organisé et administré exclusivement par Pierre-Olivier Caouette, à titre de promotion indépendante de son programme de
+              recommandations. Le concours n'est ni commandité, ni approuvé, ni administré par Industrielle Alliance, et n'y est pas associé.
             </p>
             <p className="text-slate-600 mb-6">
-              En cas de divergence entre un contenu promotionnel et le present reglement, le present reglement prevaut. Toute contestation est regie par
-              les lois applicables du Quebec et du Canada, et releve des tribunaux competents du district judiciaire applicable au Quebec.
+              En cas de divergence entre un contenu promotionnel et le présent règlement, le présent règlement prévaut. Toute contestation est régie par
+              les lois applicables du Québec et du Canada, et relève des tribunaux compétents du district judiciaire applicable au Québec.
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">

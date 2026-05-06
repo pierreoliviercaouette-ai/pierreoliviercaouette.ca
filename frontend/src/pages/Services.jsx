@@ -11,14 +11,14 @@ const services = [
     icon: Shield,
     title: 'Protéger ma famille',
     subtitle: 'Assurance vie',
-    shortDescription: 'Garantissez la sécurité financière de vos proches avec une couverture adaptée.',
+    shortDescription: 'Aidez à sécuriser financièrement vos proches avec une couverture adaptée.',
     features: [
       'Protection du conjoint survivant',
       'Remboursement de l\'hypothèque',
       'Fonds d\'études pour les enfants'
     ],
     fullDescription: [
-      "L'assurance vie est la pierre angulaire de toute stratégie de protection financière. Elle garantit que vos proches seront à l'abri financièrement si vous n'êtes plus là pour subvenir à leurs besoins.",
+      "L'assurance vie est une base importante de protection financière. Elle peut aider vos proches à maintenir leur stabilité financière si vous n'êtes plus là pour subvenir à leurs besoins.",
       "Plusieurs types de couvertures existent: temporaire, permanente, universelle. Ensemble, nous déterminons celle qui correspond le mieux à votre situation et vos objectifs."
     ],
     whoIsItFor: [
