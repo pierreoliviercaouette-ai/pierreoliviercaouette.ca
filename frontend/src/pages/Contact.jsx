@@ -17,7 +17,7 @@ const CONTACT_INFO = {
   phoneLink: 'tel:8198061164',
   email: 'p-o.caouette@agc.ia.ca',
   region: 'Victoriaville, Québec',
-  bookingUrl: 'https://api.leadconnectorhq.com/widget/booking/8l6InqNxGKrSWjVMyHDJ'
+  bookingUrl: 'https://outlook.office.com/book/PierreOlivierCaouetteiAGroupefinancier@ia.ca/'
 };
 
 export const Contact = () => {
@@ -287,19 +287,6 @@ export const Appointment = () => {
 
   useEffect(() => {
     trackEvent('view_item', { item_category: 'appointment', item_id: 'booking_page' });
-    // Load GoHighLevel widget script
-    const script = document.createElement('script');
-    script.src = 'https://link.msgsndr.com/js/form_embed.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      // Cleanup script on unmount
-      const existingScript = document.querySelector('script[src="https://link.msgsndr.com/js/form_embed.js"]');
-      if (existingScript) {
-        existingScript.remove();
-      }
-    };
   }, []);
 
   return (
@@ -310,7 +297,7 @@ export const Appointment = () => {
         description="Reservez une consultation gratuite et sans engagement. Choisissez le moment qui vous convient."
       />
 
-      {/* GoHighLevel Calendar */}
+      {/* Outlook Bookings */}
       <section className="section-padding">
         <div className="container-max">
           <div className="max-w-4xl mx-auto">
@@ -322,12 +309,21 @@ export const Appointment = () => {
                 <p className="text-prestige-taupe">
                   Sélectionnez une date et une heure qui vous conviennent
                 </p>
+                <a
+                  href={CONTACT_INFO.bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'outlook_booking_external' })}
+                  className="inline-flex items-center gap-2 mt-4 text-primary font-medium hover:underline"
+                >
+                  Planifier en ligne
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
               
-              {/* GoHighLevel Calendar Embed */}
               <div 
                 className="min-h-[600px] rounded-xl overflow-hidden"
-                data-testid="ghl-calendar"
+                data-testid="booking-calendar"
               >
                 <iframe
                   src={CONTACT_INFO.bookingUrl}
@@ -339,7 +335,6 @@ export const Appointment = () => {
                   }}
                   scrolling="no"
                   title="Calendrier de rendez-vous"
-                  allow="payment"
                 />
               </div>
 
