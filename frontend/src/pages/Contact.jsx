@@ -322,18 +322,15 @@ export const Appointment = () => {
               </div>
               
               <div 
-                className="min-h-[600px] rounded-xl overflow-hidden"
+                className="min-h-[600px] h-[700px] rounded-xl overflow-hidden"
                 data-testid="booking-calendar"
               >
                 <iframe
                   src={CONTACT_INFO.bookingUrl}
-                  style={{
-                    width: '100%',
-                    height: '700px',
-                    border: 'none',
-                    overflow: 'hidden'
-                  }}
-                  scrolling="no"
+                  width="100%"
+                  height="100%"
+                  scrolling="yes"
+                  style={{ border: 0 }}
                   title="Calendrier de rendez-vous"
                 />
               </div>
