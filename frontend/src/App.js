@@ -1,6 +1,7 @@
 import "@/index.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+import { Analytics } from "@vercel/analytics/react";
 import { SupabaseAuthProvider as AuthProvider } from "./context/SupabaseAuthContext";
 import { Navbar } from "./components/layout/Navbar";
 import { ModelPortfoliosBanner } from "./components/layout/ModelPortfoliosBanner";
@@ -81,6 +82,7 @@ function App() {
         <BackToTop />
       </div>
       <Toaster position="top-right" richColors />
+      <Analytics />
     </BrowserRouter>
   );
 }
