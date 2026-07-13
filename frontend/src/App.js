@@ -31,6 +31,7 @@ import {
   PlanificationFinanciereQuebec,
   RecommanderConseillerFinancier,
 } from "./pages/SeoLandingPages";
+import { JemceeLanding } from "./pages/JemceeLanding";
 
 function App() {
   const { user, loading } = useSupabaseAuth();
@@ -73,6 +74,7 @@ function App() {
             <Route path="/assurance-invalidite-quebec" element={<AssuranceInvaliditeQuebec />} />
             <Route path="/planification-financiere-quebec" element={<PlanificationFinanciereQuebec />} />
             <Route path="/recommander-conseiller-financier" element={<RecommanderConseillerFinancier />} />
+            <Route path="/jemcee" element={<JemceeLanding />} />
             <Route path="/confidentialite" element={<Privacy />} />
             <Route path="/conditions" element={<Terms />} />
           </Routes>
