@@ -370,11 +370,12 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
       .eq('key', p.key)
       .maybeSingle();
     if (def?.id) {
-      const { wealth_series, growth_meta } = wealthSeriesForSnapshot(
-        p.periodReturns,
-        p.incompleteByPeriod,
-        asOfDate
-      );
+      const holdings = getProfileHoldingsResolved(p.key);
+      const perfByCode = {};
+      for (const f of funds) {
+        perfByCode[f.externalCode] = f;
+      }
+      const { wealth_series, growth_meta } = wealthSeriesForSnapshot(holdings, perfByCode, asOfDate);
       await supabase.from('portfolio_snapshots').insert({
         portfolio_definition_id: def.id,
         as_of_date: asOfDate,

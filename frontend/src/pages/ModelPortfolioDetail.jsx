@@ -29,7 +29,7 @@ import {
 } from '../lib/portfolioCompliance';
 import { computeWeightedPeriodReturns } from '../lib/portfolioCsvImport';
 import { mergeFundRowsIntoPerfMap } from '../lib/portfolioFundPerf';
-import { buildGrowthSeriesFromPeriodReturns } from '../lib/portfolioGrowth';
+import { buildGrowthSeriesFromFundReturns } from '../lib/portfolioGrowth';
 import { getFundFicheUrl } from '../lib/portfolioFiches';
 import { useSeoMeta } from '../lib/seo';
 import { supabase } from '../lib/supabaseClient';
@@ -200,15 +200,16 @@ export const ModelPortfolioDetail = () => {
   }, [slug, profile, fallbackPortfolio, staticHoldings]);
 
   const liveGrowth = useMemo(() => {
-    const periodReturns = portfolio?.periodReturns;
-    if (!periodReturns) return { series: [], meta: null };
-    return buildGrowthSeriesFromPeriodReturns(
-      periodReturns,
-      incompleteByPeriod,
+    if (!staticHoldings.length || !Object.keys(fundPerfByCode).length) {
+      return { series: [], meta: null };
+    }
+    return buildGrowthSeriesFromFundReturns(
+      staticHoldings,
+      fundPerfByCode,
       asOfIso,
       GROWTH_PRINCIPAL
     );
-  }, [portfolio?.periodReturns, incompleteByPeriod, asOfIso]);
+  }, [staticHoldings, fundPerfByCode, asOfIso]);
 
   const chartData = useMemo(() => {
     // 1) Toujours prioriser la courbe recalculée depuis les mêmes rendements pondérés (CSV)
@@ -446,17 +447,24 @@ export const ModelPortfolioDetail = () => {
                   </span>
                 </summary>
                 <p className="text-sm text-prestige-taupe mt-3 mb-4">
-                  Illustration d’un placement de {formatMoneyCad(GROWTH_PRINCIPAL)} compoundé au
-                  rendement annualisé pondéré sur{' '}
-                  {chartGrowthMeta?.horizon_years ?? '—'} ans
-                  {chartGrowthMeta?.annualized_pct != null
-                    ? ` (${String(chartGrowthMeta.annualized_pct).replace('.', ',')} %)`
+                  Illustration d’un placement de {formatMoneyCad(GROWTH_PRINCIPAL)} : chaque fonds
+                  du portefeuille croît selon <em>son</em> rendement annualisé importé (CSV), selon
+                  les poids du modèle
+                  {chartGrowthMeta?.horizon_years != null
+                    ? ` (horizon ${chartGrowthMeta.horizon_years} ans`
                     : ''}
-                  , au {asOfLabel}. Mêmes chiffres que le tableau de rendements (import CSV). Le
-                  chemin entre les années est une approximation à taux constant — ce n’est ni une
-                  projection ni une garantie de résultats futurs
+                  {chartGrowthMeta?.annualized_pct != null
+                    ? `, rendement annualisé réalisé de la courbe ≈ ${String(
+                        chartGrowthMeta.annualized_pct
+                      ).replace('.', ',')} %)`
+                    : chartGrowthMeta?.horizon_years != null
+                      ? ')'
+                      : ''}
+                  , au {asOfLabel}. Aux jalons 1 / 3 / 5 / 10 ans, le taux de chaque fonds pour
+                  cette période est utilisé lorsqu’il est disponible. Pas de rééquilibrage annuel —
+                  ce n’est ni une projection ni une garantie de résultats futurs
                   {chartGrowthMeta?.incomplete
-                    ? ' ; l’horizon utilisé comporte un historique de fonds incomplet (*)'
+                    ? ' ; un ou plusieurs fonds ont un historique incomplet (*) sur l’horizon'
                     : ''}
                   .
                 </p>
