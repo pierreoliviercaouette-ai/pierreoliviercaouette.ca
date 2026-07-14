@@ -74,6 +74,27 @@ const RISK_ACCENTS = {
 };
 
 /**
+ * Rendements fonds (CSV iA performance-fonds-2026_07_13) — fallback avant import admin.
+ * Valeurs en %.
+ */
+export const DEFAULT_FUND_PERFORMANCE = {
+  FU021: { ytdPct: 0.43, prevYearPct: 2.62, oneMonthPct: 0.21, threeMonthPct: 1.74, sixMonthPct: 1.35, oneYearPct: 2.8, threeYearPct: 4.6, fiveYearPct: 0.46, tenYearPct: 1.0 },
+  FU762: { ytdPct: 1.79, prevYearPct: 4.28, oneMonthPct: 0.43, threeMonthPct: 1.77, sixMonthPct: 1.94, oneYearPct: 4.5, threeYearPct: 5.62, fiveYearPct: 2.73, tenYearPct: 3.35 },
+  FU530: { ytdPct: 7.87, prevYearPct: 6.23, oneMonthPct: 3.44, threeMonthPct: 9.7, sixMonthPct: 8.81, oneYearPct: 15.98, threeYearPct: 13.52, fiveYearPct: 6.46, tenYearPct: 8.55 },
+  FU920: { ytdPct: 7.73, prevYearPct: 9.72, oneMonthPct: 1.8, threeMonthPct: 7.81, sixMonthPct: 8.73, oneYearPct: 15.36, threeYearPct: 12.42, fiveYearPct: 6.16, tenYearPct: 5.73 },
+  FU870: { ytdPct: 15.08, prevYearPct: 43.45, oneMonthPct: -3.36, threeMonthPct: 4.03, sixMonthPct: 15.46, oneYearPct: 50.08, threeYearPct: 28.6, fiveYearPct: 16.08, tenYearPct: 13.97 },
+  FU280: { ytdPct: 3.67, prevYearPct: 14.58, oneMonthPct: -4.75, threeMonthPct: -0.57, sixMonthPct: 4.65, oneYearPct: 16.26, threeYearPct: 11.89, fiveYearPct: 9.44, tenYearPct: 11.34 },
+  FU707: { ytdPct: 11.36, prevYearPct: 10.49, oneMonthPct: 2.97, threeMonthPct: 14.09, sixMonthPct: 11.76, oneYearPct: 21.09, threeYearPct: 19.29, fiveYearPct: 11.87, tenYearPct: 10.37 },
+  FU705: { ytdPct: 14.97, prevYearPct: 4.96, oneMonthPct: 4.12, threeMonthPct: 20.43, sixMonthPct: 16.45, oneYearPct: 23.47, threeYearPct: 19.26, fiveYearPct: 12.24, tenYearPct: 10.85 },
+  FU607: { ytdPct: 38.87, prevYearPct: 18.73, oneMonthPct: 2.28, threeMonthPct: 43.34, sixMonthPct: 43.27, oneYearPct: 65.12, threeYearPct: 43.99, fiveYearPct: 21.81, tenYearPct: null },
+  FU505: { ytdPct: 21.31, prevYearPct: 21.02, oneMonthPct: 1.73, threeMonthPct: 20.87, sixMonthPct: 26.69, oneYearPct: 43.88, threeYearPct: 24.44, fiveYearPct: 5.62, tenYearPct: 10.79 },
+};
+
+export function getDefaultFundPerformance(fuCode) {
+  return DEFAULT_FUND_PERFORMANCE[fuCode] || null;
+}
+
+/**
  * Profils modèles — composition / philosophie / allocation (source: illustrations iA, 30 juin 2026)
  * holdings: illustrationCode + weightPct; fuCode dérivé du mapping
  */
@@ -112,6 +133,28 @@ export const PORTFOLIO_PROFILES = {
     ],
     /** KPI illustration PDF au 30 juin 2026 */
     defaults: { ytd: 6.69, prevYear: 8.13, annualized3y: 10.77, annualized5y: 4.99 },
+    periodReturns: {
+      oneMonth: 0.74,
+      threeMonth: 6.08,
+      sixMonth: 6.69,
+      ytd: 6.69,
+      oneYear: 12.84,
+      threeYear: 10.77,
+      fiveYear: 4.99,
+      tenYear: null,
+    },
+    /** Croissance illustration (base 100 000 $ fin 2017 → fin d'année) */
+    growthSeries: [
+      { year: 2017, value: 100000 },
+      { year: 2018, value: 97440 },
+      { year: 2019, value: 107038 },
+      { year: 2020, value: 118362 },
+      { year: 2021, value: 123227 },
+      { year: 2022, value: 110103 },
+      { year: 2023, value: 119583 },
+      { year: 2024, value: 134651 },
+      { year: 2025, value: 145598 },
+    ],
   },
   modere: {
     key: 'modere',
@@ -146,6 +189,27 @@ export const PORTFOLIO_PROFILES = {
       { illustrationCode: '608', weightPct: 10 },
     ],
     defaults: { ytd: 10.33, prevYear: 11.56, annualized3y: 14.96, annualized5y: 7.46 },
+    periodReturns: {
+      oneMonth: 0.86,
+      threeMonth: 9.19,
+      sixMonth: 10.33,
+      ytd: 10.33,
+      oneYear: 19.7,
+      threeYear: 14.96,
+      fiveYear: 7.46,
+      tenYear: null,
+    },
+    growthSeries: [
+      { year: 2017, value: 100000 },
+      { year: 2018, value: 96060 },
+      { year: 2019, value: 108644 },
+      { year: 2020, value: 126168 },
+      { year: 2021, value: 134117 },
+      { year: 2022, value: 118345 },
+      { year: 2023, value: 131457 },
+      { year: 2024, value: 154318 },
+      { year: 2025, value: 172157 },
+    ],
   },
   equilibre: {
     key: 'equilibre',
@@ -179,6 +243,27 @@ export const PORTFOLIO_PROFILES = {
       { illustrationCode: '608', weightPct: 10 },
     ],
     defaults: { ytd: 12.66, prevYear: 16.1, annualized3y: 18.62, annualized5y: 9.71 },
+    periodReturns: {
+      oneMonth: 0.73,
+      threeMonth: 10.65,
+      sixMonth: 12.66,
+      ytd: 12.66,
+      oneYear: 25.91,
+      threeYear: 18.62,
+      fiveYear: 9.71,
+      tenYear: null,
+    },
+    growthSeries: [
+      { year: 2017, value: 100000 },
+      { year: 2018, value: 93830 },
+      { year: 2019, value: 108777 },
+      { year: 2020, value: 129325 },
+      { year: 2021, value: 141249 },
+      { year: 2022, value: 124045 },
+      { year: 2023, value: 139315 },
+      { year: 2024, value: 168431 },
+      { year: 2025, value: 195549 },
+    ],
   },
   croissance: {
     key: 'croissance',
@@ -215,6 +300,27 @@ export const PORTFOLIO_PROFILES = {
       { illustrationCode: '608', weightPct: 25 },
     ],
     defaults: { ytd: 17.98, prevYear: 16.61, annualized3y: 23.09, annualized5y: 12.3 },
+    periodReturns: {
+      oneMonth: 1.06,
+      threeMonth: 16.68,
+      sixMonth: 17.98,
+      ytd: 17.98,
+      oneYear: 32.61,
+      threeYear: 23.09,
+      fiveYear: 12.3,
+      tenYear: null,
+    },
+    growthSeries: [
+      { year: 2017, value: 100000 },
+      { year: 2018, value: 93190 },
+      { year: 2019, value: 111679 },
+      { year: 2020, value: 146143 },
+      { year: 2021, value: 162000 },
+      { year: 2022, value: 138429 },
+      { year: 2023, value: 163235 },
+      { year: 2024, value: 208157 },
+      { year: 2025, value: 242732 },
+    ],
   },
   audacieux: {
     key: 'audacieux',
@@ -249,6 +355,27 @@ export const PORTFOLIO_PROFILES = {
       { illustrationCode: '500', weightPct: 10 },
     ],
     defaults: { ytd: 23.79, prevYear: 20.93, annualized3y: 28.83, annualized5y: 15.03 },
+    periodReturns: {
+      oneMonth: 1.29,
+      threeMonth: 21.73,
+      sixMonth: 23.79,
+      ytd: 23.79,
+      oneYear: 42.72,
+      threeYear: 28.83,
+      fiveYear: 15.03,
+      tenYear: null,
+    },
+    growthSeries: [
+      { year: 2017, value: 100000 },
+      { year: 2018, value: 90280 },
+      { year: 2019, value: 112751 },
+      { year: 2020, value: 158516 },
+      { year: 2021, value: 177744 },
+      { year: 2022, value: 147172 },
+      { year: 2023, value: 178623 },
+      { year: 2024, value: 238962 },
+      { year: 2025, value: 288976 },
+    ],
   },
 };
 

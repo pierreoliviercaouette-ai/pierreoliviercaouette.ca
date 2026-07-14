@@ -16,6 +16,7 @@ import {
 import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
 import { DEFAULT_MODEL_PORTFOLIOS, DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../data/modelPortfolios';
 import {
+  getDefaultFundPerformance,
   getPortfolioProfile,
   getProfileHoldingsResolved,
 } from '../data/portfolioProfiles';
@@ -31,12 +32,48 @@ const ALLOCATION_COLORS = {
   autres: '#e2dcd0',
 };
 
+const FUND_RETURN_COLUMNS = [
+  { key: 'oneMonthPct', label: '1 mois' },
+  { key: 'threeMonthPct', label: '3 mois' },
+  { key: 'sixMonthPct', label: '6 mois' },
+  { key: 'ytdPct', label: 'AAJ' },
+  { key: 'oneYearPct', label: '1 an' },
+  { key: 'threeYearPct', label: '3 ans' },
+  { key: 'fiveYearPct', label: '5 ans' },
+  { key: 'tenYearPct', label: '10 ans' },
+];
+
+const PORTFOLIO_PERIOD_COLUMNS = [
+  { key: 'oneMonth', label: '1 mois' },
+  { key: 'threeMonth', label: '3 mois' },
+  { key: 'sixMonth', label: '6 mois' },
+  { key: 'ytd', label: 'AAJ' },
+  { key: 'oneYear', label: '1 an' },
+  { key: 'threeYear', label: '3 ans' },
+  { key: 'fiveYear', label: '5 ans' },
+  { key: 'tenYear', label: '10 ans' },
+];
+
 function formatReturn(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
   const n = Number(value);
   const sign = n > 0 ? '+' : n < 0 ? '-' : '';
   const abs = Math.abs(n).toFixed(1).replace('.', ',');
   return `${sign}${abs} %`;
+}
+
+function formatMoneyCad(value) {
+  return new Intl.NumberFormat('fr-CA', {
+    style: 'currency',
+    currency: 'CAD',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function pickPerfField(row, meta, column, metaKey) {
+  if (row?.[column] != null && row[column] !== '') return Number(row[column]);
+  if (meta?.[metaKey] != null && meta[metaKey] !== '') return Number(meta[metaKey]);
+  return null;
 }
 
 function formatIsoDateLabel(isoDate) {
@@ -113,28 +150,41 @@ export const ModelPortfolioDetail = () => {
 
       const codes = staticHoldings.map((h) => h.fuCode).filter(Boolean);
       const perfByCode = {};
+      for (const code of codes) {
+        const defaults = getDefaultFundPerformance(code);
+        if (defaults) perfByCode[code] = { ...defaults };
+      }
       if (codes.length) {
         const { data: fundRows } = await supabase
           .from('funds')
-          .select('external_code, ytd_pct, prev_year_pct, one_year_pct, three_year_pct, five_year_pct, metadata')
+          .select(
+            'external_code, ytd_pct, prev_year_pct, one_year_pct, three_year_pct, five_year_pct, ten_year_pct, metadata'
+          )
           .in('external_code', codes);
 
         for (const row of fundRows || []) {
           const meta = row.metadata || {};
+          const defaults = getDefaultFundPerformance(row.external_code) || {};
           perfByCode[row.external_code] = {
-            ytdPct: row.ytd_pct != null ? Number(row.ytd_pct) : meta.ytd_pct != null ? Number(meta.ytd_pct) : null,
+            ytdPct: pickPerfField(row, meta, 'ytd_pct', 'ytd_pct') ?? defaults.ytdPct ?? null,
             prevYearPct:
-              row.prev_year_pct != null
-                ? Number(row.prev_year_pct)
-                : meta.prev_year_pct != null
-                  ? Number(meta.prev_year_pct)
-                  : null,
+              pickPerfField(row, meta, 'prev_year_pct', 'prev_year_pct') ?? defaults.prevYearPct ?? null,
+            oneMonthPct:
+              pickPerfField(row, meta, null, 'one_month_pct') ?? defaults.oneMonthPct ?? null,
+            threeMonthPct:
+              pickPerfField(row, meta, null, 'three_month_pct') ?? defaults.threeMonthPct ?? null,
+            sixMonthPct:
+              pickPerfField(row, meta, null, 'six_month_pct') ?? defaults.sixMonthPct ?? null,
             oneYearPct:
-              row.one_year_pct != null
-                ? Number(row.one_year_pct)
-                : meta.one_year_pct != null
-                  ? Number(meta.one_year_pct)
-                  : null,
+              pickPerfField(row, meta, 'one_year_pct', 'one_year_pct') ?? defaults.oneYearPct ?? null,
+            threeYearPct:
+              pickPerfField(row, meta, 'three_year_pct', 'three_year_pct') ??
+              defaults.threeYearPct ??
+              null,
+            fiveYearPct:
+              pickPerfField(row, meta, 'five_year_pct', 'five_year_pct') ?? defaults.fiveYearPct ?? null,
+            tenYearPct:
+              pickPerfField(row, meta, 'ten_year_pct', 'ten_year_pct') ?? defaults.tenYearPct ?? null,
           };
         }
       }
@@ -179,12 +229,27 @@ export const ModelPortfolioDetail = () => {
 
   const chartData = useMemo(() => {
     const ws = snapshot?.wealth_series;
-    if (!Array.isArray(ws) || !ws.length) return [];
-    return ws.map((p) => ({
-      t: p.month_date,
-      label: p.month_date?.slice(0, 7),
-      v: Number(p.value),
+    if (Array.isArray(ws) && ws.length > 1) {
+      return ws.map((p) => ({
+        label: p.month_date?.slice(0, 7) || p.label,
+        v: Number(p.value),
+        display: Number(p.value),
+      }));
+    }
+    const series = profile?.growthSeries;
+    if (!Array.isArray(series) || series.length < 2) return [];
+    const base = Number(series[0].value) || 100000;
+    return series.map((p) => ({
+      label: String(p.year),
+      v: (Number(p.value) / base) * 100,
+      display: Number(p.value),
+      year: p.year,
     }));
+  }, [snapshot, profile]);
+
+  const chartIsMoney = useMemo(() => {
+    const ws = snapshot?.wealth_series;
+    return !(Array.isArray(ws) && ws.length > 1);
   }, [snapshot]);
 
   const allocationData = useMemo(() => {
@@ -342,60 +407,140 @@ export const ModelPortfolioDetail = () => {
               </div>
             )}
 
-            {staticHoldings.length > 0 && (
+            {chartData.length > 1 && (
               <div className="mb-10">
-                <h2 className="font-heading text-xl font-bold text-dark mb-4">Composition</h2>
+                <h2 className="font-heading text-xl font-bold text-dark mb-2">
+                  Croissance du placement
+                </h2>
+                <p className="text-sm text-prestige-taupe mb-4">
+                  {chartIsMoney
+                    ? 'Illustration : évolution d’un placement de 100 000 $ (fin d’année civile).'
+                    : 'Série reconstruite (base 100).'}
+                </p>
+                <div className="h-80 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-prestige-beige" />
+                      <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                      <YAxis
+                        domain={['auto', 'auto']}
+                        tick={{ fontSize: 11 }}
+                        tickFormatter={(v) =>
+                          chartIsMoney ? `${Math.round(Number(v))}` : Number(v).toFixed(0)
+                        }
+                      />
+                      <Tooltip
+                        formatter={(v, _n, item) => {
+                          const money = item?.payload?.display;
+                          if (chartIsMoney && money != null) {
+                            return [formatMoneyCad(money), 'Valeur'];
+                          }
+                          return [`${Number(v).toFixed(2)}`, 'Indice'];
+                        }}
+                        labelFormatter={(l) => (chartIsMoney ? `Fin ${l}` : l)}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey={chartIsMoney ? 'display' : 'v'}
+                        stroke={accent}
+                        strokeWidth={2.5}
+                        dot={{ r: 3, fill: accent }}
+                        activeDot={{ r: 5 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {profile?.periodReturns && (
+              <div className="mb-10">
+                <h2 className="font-heading text-xl font-bold text-dark mb-4">
+                  Rendements du portefeuille
+                </h2>
                 <div className="overflow-x-auto rounded-xl border border-prestige-beige">
                   <table className="w-full text-sm">
                     <thead className="bg-light">
                       <tr>
-                        <th className="text-left p-3">Fonds</th>
+                        {PORTFOLIO_PERIOD_COLUMNS.map((col) => (
+                          <th key={col.key} className="text-right p-3 font-semibold text-dark">
+                            {col.label}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        {PORTFOLIO_PERIOD_COLUMNS.map((col) => (
+                          <td key={col.key} className="p-3 text-right tabular-nums font-medium">
+                            {formatReturn(profile.periodReturns[col.key])}
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-prestige-taupe mt-2">
+                  Rendements nets illustratifs (portefeuille modèle). Les périodes de 3 ans et plus sont
+                  annualisées lorsque disponibles.
+                </p>
+              </div>
+            )}
+
+            {staticHoldings.length > 0 && (
+              <div className="mb-10">
+                <h2 className="font-heading text-xl font-bold text-dark mb-4">
+                  Rendements par fonds
+                </h2>
+                <div className="overflow-x-auto rounded-xl border border-prestige-beige">
+                  <table className="w-full text-sm min-w-[720px]">
+                    <thead className="bg-light">
+                      <tr>
+                        <th className="text-left p-3 sticky left-0 bg-light z-10">Fonds</th>
                         <th className="text-left p-3">Code</th>
-                        <th className="text-right p-3">AAJ</th>
-                        <th className="text-right p-3">1 an</th>
                         <th className="text-right p-3">Poids</th>
+                        {FUND_RETURN_COLUMNS.map((col) => (
+                          <th key={col.key} className="text-right p-3 whitespace-nowrap">
+                            {col.label}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       {staticHoldings.map((h) => {
-                        const perf = fundPerfByCode[h.fuCode] || {};
+                        const perf = fundPerfByCode[h.fuCode] || getDefaultFundPerformance(h.fuCode) || {};
                         return (
-                          <tr key={`${h.fuCode}-${h.illustrationCode}`} className="border-t border-prestige-beige">
-                            <td className="p-3 text-dark">{h.name}</td>
-                            <td className="p-3 text-prestige-taupe font-mono text-xs">
+                          <tr
+                            key={`${h.fuCode}-${h.illustrationCode}`}
+                            className="border-t border-prestige-beige"
+                          >
+                            <td className="p-3 text-dark sticky left-0 bg-white z-10 max-w-[200px]">
+                              <span className="line-clamp-2">{h.name}</span>
+                            </td>
+                            <td className="p-3 text-prestige-taupe font-mono text-xs whitespace-nowrap">
                               {h.fuCode || h.illustrationCode}
                             </td>
-                            <td className="p-3 text-right tabular-nums">{formatReturn(perf.ytdPct)}</td>
-                            <td className="p-3 text-right tabular-nums">{formatReturn(perf.oneYearPct)}</td>
-                            <td className="p-3 text-right font-medium tabular-nums">{h.weightPct} %</td>
+                            <td className="p-3 text-right font-medium tabular-nums whitespace-nowrap">
+                              {h.weightPct} %
+                            </td>
+                            {FUND_RETURN_COLUMNS.map((col) => (
+                              <td
+                                key={col.key}
+                                className="p-3 text-right tabular-nums whitespace-nowrap"
+                              >
+                                {formatReturn(perf[col.key])}
+                              </td>
+                            ))}
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
                 </div>
-              </div>
-            )}
-
-            {chartData.length > 1 && (
-              <div className="mb-10">
-                <h2 className="font-heading text-xl font-bold text-dark mb-3">
-                  Évolution (base 100)
-                </h2>
-                <div className="h-72 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 8, right: 8, bottom: 8, left: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-prestige-beige" />
-                      <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                      <YAxis domain={['auto', 'auto']} tick={{ fontSize: 11 }} />
-                      <Tooltip
-                        formatter={(v) => [`${Number(v).toFixed(2)}`, 'Valeur']}
-                        labelFormatter={(l) => l}
-                      />
-                      <Line type="monotone" dataKey="v" stroke={accent} strokeWidth={2} dot={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                <p className="text-xs text-prestige-taupe mt-2">
+                  Rendements nets des fonds (série Classique 75/75). Mis à jour via import CSV admin ;
+                  les périodes multi-années sont annualisées.
+                </p>
               </div>
             )}
 
