@@ -9,6 +9,7 @@ Disallow: /profil
 Disallow: /admin
 Disallow: /outils/
 Disallow: /portefeuilles/
+# Ancien chemin public des fiches (fichiers déplacés hors /public)
 Disallow: /fiches-fonds/
 
 Sitemap: https://www.pierreoliviercaouette.ca/sitemap.xml

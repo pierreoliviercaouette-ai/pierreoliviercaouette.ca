@@ -36,8 +36,11 @@ import {
   buildDefaultFundPerfByCode,
   mergeFundRowsIntoPerfMap,
 } from '../lib/portfolioFundPerf';
+import { getFundFicheUrl } from '../lib/portfolioFiches';
 import { useSeoMeta } from '../lib/seo';
 import { supabase } from '../lib/supabaseClient';
+
+const ILLUSTRATION_GROWTH_AS_OF = '30 juin 2026';
 
 const ALLOCATION_COLORS = {
   revenu_fixe: '#01233f',
@@ -227,11 +230,14 @@ export const ModelPortfolioDetail = () => {
   }, [profile]);
 
   const ficheHoldings = useMemo(
-    () => staticHoldings.filter((h) => h.fichePath),
+    () =>
+      staticHoldings
+        .filter((h) => h.hasFiche && getFundFicheUrl(h.fuCode))
+        .map((h) => ({ ...h, ficheUrl: getFundFicheUrl(h.fuCode) })),
     [staticHoldings]
   );
   const missingFicheHoldings = useMemo(
-    () => staticHoldings.filter((h) => h.fuCode && !h.fichePath),
+    () => staticHoldings.filter((h) => h.fuCode && !h.hasFiche),
     [staticHoldings]
   );
 
@@ -416,14 +422,17 @@ export const ModelPortfolioDetail = () => {
             )}
 
             {chartData.length > 1 && (
-              <div className="mb-10">
-                <h2 className="font-heading text-xl font-bold text-dark mb-2">
-                  Croissance du placement
-                </h2>
-                <p className="text-sm text-prestige-taupe mb-4">
+              <details className="mb-10 group rounded-xl border border-prestige-beige p-4">
+                <summary className="font-heading text-xl font-bold text-dark cursor-pointer list-none flex items-center justify-between gap-3">
+                  <span>Illustration de croissance (source distincte)</span>
+                  <span className="text-xs font-sans font-normal text-prestige-taupe group-open:hidden">
+                    Afficher
+                  </span>
+                </summary>
+                <p className="text-sm text-prestige-taupe mt-3 mb-4">
                   {chartIsMoney
-                    ? 'Illustration historique (PDF iA, 30 juin 2026) : évolution d’un placement de 100 000 $ (fin d’année civile). Cette courbe peut différer des KPI pondérés ci-dessus, recalculés à la date de rendement affichée. Ce n’est pas une projection ni une garantie de résultats futurs.'
-                    : 'Série reconstruite (base 100). Peut différer des KPI pondérés à la date de rendement affichée. Ce n’est pas une projection ni une garantie de résultats futurs.'}
+                    ? `Illustration historique PDF iA au ${ILLUSTRATION_GROWTH_AS_OF} (placement de 100 000 $, fin d’année civile). Ce n’est pas la même série ni la même date que les KPI pondérés ci-dessus (au ${asOfLabel}). Ce n’est ni une projection ni une garantie de résultats futurs.`
+                    : `Série reconstruite (base 100). Peut différer des KPI pondérés au ${asOfLabel}. Ce n’est ni une projection ni une garantie de résultats futurs.`}
                 </p>
                 <div className="h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -458,7 +467,7 @@ export const ModelPortfolioDetail = () => {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-              </div>
+              </details>
             )}
 
             {periodReturns && (
@@ -574,7 +583,7 @@ export const ModelPortfolioDetail = () => {
                   {ficheHoldings.map((h) => (
                     <a
                       key={h.fuCode}
-                      href={h.fichePath}
+                      href={h.ficheUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-between gap-3 rounded-xl border border-prestige-beige bg-light/50 px-4 py-3 hover:border-primary hover:bg-white transition-colors"
@@ -593,13 +602,21 @@ export const ModelPortfolioDetail = () => {
                   {missingFicheHoldings.map((h) => (
                     <div
                       key={h.fuCode}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-prestige-beige bg-light/30 px-4 py-3"
+                      className="flex flex-col gap-1 rounded-xl border border-dashed border-amber-300/80 bg-amber-50/40 px-4 py-3"
                     >
-                      <div className="min-w-0">
-                        <p className="font-medium text-dark text-sm truncate">{h.name}</p>
-                        <p className="text-xs text-prestige-taupe font-mono">{h.fuCode}</p>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-dark text-sm truncate">{h.name}</p>
+                          <p className="text-xs text-prestige-taupe font-mono">{h.fuCode}</p>
+                        </div>
+                        <span className="text-xs text-amber-800 shrink-0 font-medium">
+                          Fiche manquante
+                        </span>
                       </div>
-                      <span className="text-xs text-prestige-taupe shrink-0">Fiche non disponible</span>
+                      <p className="text-[11px] text-amber-900/80 leading-snug">
+                        Document non inclus dans le lot fourni — à obtenir auprès d&apos;iA avant
+                        usage client. Les rendements CSV restent affichés.
+                      </p>
                     </div>
                   ))}
                 </div>

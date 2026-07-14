@@ -12,11 +12,10 @@ import {
 
 export function AdminPortfoliosPanel({ onRefresh }) {
   const [modelPortfolios, setModelPortfolios] = useState([]);
+  const [importLogs, setImportLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [draftsById, setDraftsById] = useState({});
   const [savingById, setSavingById] = useState({});
-  const [asOfDate, setAsOfDate] = useState('');
-  const [savingAsOfDate, setSavingAsOfDate] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importSummary, setImportSummary] = useState(null);
   const fileInputRef = useRef(null);
@@ -38,7 +37,6 @@ export function AdminPortfoliosPanel({ onRefresh }) {
 
     const portfolios = data || [];
     setModelPortfolios(portfolios);
-    setAsOfDate(portfolios[0]?.as_of_date || '');
     setDraftsById(
       portfolios.reduce((acc, portfolio) => {
         acc[portfolio.id] = {
@@ -47,6 +45,14 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         return acc;
       }, {})
     );
+
+    const { data: logs } = await supabase
+      .from('portfolio_import_logs')
+      .select('id, imported_at, filename, as_of_date, funds_updated, portfolios_updated, missing_codes')
+      .order('imported_at', { ascending: false })
+      .limit(8);
+    setImportLogs(logs || []);
+
     setLoading(false);
   }, []);
 
@@ -77,32 +83,6 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     }
   };
 
-  const updateAsOfDateForAll = async () => {
-    if (!asOfDate) {
-      toast.error('Selectionnez une date');
-      return;
-    }
-    if (!modelPortfolios.length) return;
-
-    try {
-      setSavingAsOfDate(true);
-      const ids = modelPortfolios.map((portfolio) => portfolio.id);
-      const { error } = await supabase
-        .from('model_portfolios')
-        .update({ as_of_date: asOfDate })
-        .in('id', ids);
-      if (error) throw error;
-      toast.success('Date de mise a jour appliquee a tous les portefeuilles');
-      window.dispatchEvent(new Event('model-portfolios-updated'));
-      await load();
-      onRefresh?.();
-    } catch (error) {
-      toast.error(error.message || 'Erreur mise a jour date');
-    } finally {
-      setSavingAsOfDate(false);
-    }
-  };
-
   const handleCsvImport = async (event) => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -113,8 +93,12 @@ export function AdminPortfoliosPanel({ onRefresh }) {
       setImportSummary(null);
       const text = await file.text();
       const { funds, warnings } = parsePerformanceFundsCsv(text);
-      const asOf = asOfDateFromFilename(file.name) || asOfDate || new Date().toISOString().slice(0, 10);
-      const result = await applyPerformanceCsvImport(supabase, { funds, asOfDate: asOf });
+      const asOf = asOfDateFromFilename(file.name) || new Date().toISOString().slice(0, 10);
+      const result = await applyPerformanceCsvImport(supabase, {
+        funds,
+        asOfDate: asOf,
+        filename: file.name,
+      });
 
       setImportSummary({
         filename: file.name,
@@ -132,7 +116,6 @@ export function AdminPortfoliosPanel({ onRefresh }) {
           `Import OK : ${result.fundsUpdated} fonds, ${result.portfoliosUpdated} portefeuilles recalculés`
         );
         window.dispatchEvent(new Event('model-portfolios-updated'));
-        setAsOfDate(asOf);
         await load();
         onRefresh?.();
       } else {
@@ -150,6 +133,8 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     return <p className="text-prestige-taupe">Chargement...</p>;
   }
 
+  const asOfLabel = modelPortfolios[0]?.as_of_date || '—';
+
   return (
     <div className="space-y-4">
       <h3 className="font-heading text-xl font-semibold text-dark">Portefeuilles modeles</h3>
@@ -158,8 +143,9 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         <div>
           <p className="font-semibold text-dark">Importer performances (CSV iA)</p>
           <p className="text-xs text-prestige-taupe mt-1">
-            Source de vérité de l&apos;affichage : import CSV → rendements des fonds, puis moyenne
-            pondérée des 5 portefeuilles (bannière et fiches). Ne pas saisir manuellement les KPI.
+            Source unique de l&apos;affichage et de la date de référence : le nom du fichier CSV
+            (ex. performance-fonds-2026_07_13…). La date n&apos;est plus modifiable manuellement,
+            pour éviter un décalage avec les rendements.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -178,6 +164,9 @@ export function AdminPortfoliosPanel({ onRefresh }) {
           >
             {importing ? 'Import en cours…' : 'Choisir un fichier CSV'}
           </Button>
+          <p className="text-xs text-prestige-taupe">
+            Date de référence actuelle : <span className="font-medium text-dark">{asOfLabel}</span>
+          </p>
         </div>
         {importSummary && (
           <div className="text-sm text-prestige-taupe space-y-1 border-t border-prestige-beige pt-3">
@@ -206,17 +195,27 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         )}
       </div>
 
-      <div className="p-4 bg-light rounded-xl border border-prestige-beige">
-        <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
-          <div>
-            <Label>Date de reference des rendements (as of)</Label>
-            <Input type="date" value={asOfDate} onChange={(e) => setAsOfDate(e.target.value)} />
-          </div>
-          <Button type="button" onClick={updateAsOfDateForAll} disabled={savingAsOfDate || !asOfDate}>
-            {savingAsOfDate ? 'Sauvegarde...' : 'Appliquer a tous les portefeuilles'}
-          </Button>
+      {importLogs.length > 0 && (
+        <div className="p-4 bg-light rounded-xl border border-prestige-beige">
+          <p className="font-semibold text-dark text-sm mb-2">Journal des imports récents</p>
+          <ul className="space-y-1 text-xs text-prestige-taupe">
+            {importLogs.map((log) => (
+              <li key={log.id} className="flex flex-wrap gap-x-2">
+                <span className="font-medium text-dark">
+                  {log.imported_at
+                    ? new Date(log.imported_at).toLocaleString('fr-CA')
+                    : '—'}
+                </span>
+                <span>{log.filename || 'fichier'}</span>
+                <span>as of {log.as_of_date || '—'}</span>
+                <span>
+                  {log.funds_updated ?? 0} fonds / {log.portfolios_updated ?? 0} portefeuilles
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      )}
 
       {modelPortfolios.length === 0 ? (
         <p className="text-prestige-taupe text-center py-8">Aucun portefeuille trouve</p>
@@ -275,10 +274,6 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                   {savingById[portfolio.id] ? '…' : 'Sauver titre'}
                 </Button>
               </div>
-              <p className="text-[11px] text-prestige-taupe mt-2">
-                Les KPI sont en lecture seule (sync import CSV / pondération). L&apos;affichage site
-                recalcule aussi depuis les fonds — même source.
-              </p>
             </div>
           ))}
         </div>

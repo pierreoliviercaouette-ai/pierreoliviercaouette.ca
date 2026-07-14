@@ -16,52 +16,52 @@ export const FUND_CATALOG = {
   FU021: {
     name: 'Obligations de sociétés canadiennes (iA)',
     category: 'Fonds de revenu',
-    fichePath: '/fiches-fonds/FU021.pdf',
+    hasFiche: true,
   },
   FU762: {
     name: "Stratégie d'obligations de sociétés (iA) - SPÉCIALISÉ",
     category: 'Fonds de revenu',
-    fichePath: '/fiches-fonds/FU762.pdf',
+    hasFiche: true,
   },
   FU920: {
     name: 'Fidelity Revenu mensuel mondial',
     category: 'Fonds diversifiés',
-    fichePath: '/fiches-fonds/FU920.pdf',
+    hasFiche: true,
   },
   FU870: {
     name: 'Actions canadiennes à petite capitalisation (iA)',
     category: "Fonds d'actions canadiennes",
-    fichePath: '/fiches-fonds/FU870.pdf',
+    hasFiche: true,
   },
   FU707: {
     name: 'Actions mondiales (iA)',
     category: "Fonds d'actions américaines et internationales",
-    fichePath: '/fiches-fonds/FU707.pdf',
+    hasFiche: true,
   },
   FU705: {
     name: 'Actions américaines (iA)',
     category: "Fonds d'actions américaines et internationales",
-    fichePath: '/fiches-fonds/FU705.pdf',
+    hasFiche: true,
   },
   FU607: {
     name: 'Fidelity Innovations mondiales',
     category: 'Fonds spécialisés',
-    fichePath: '/fiches-fonds/FU607.pdf',
+    hasFiche: true,
   },
   FU280: {
     name: 'Potentiel Canada Fidelity',
     category: "Fonds d'actions canadiennes",
-    fichePath: '/fiches-fonds/FU280.pdf',
+    hasFiche: true,
   },
   FU505: {
     name: 'Asie pacifique (iA)',
     category: 'Fonds spécialisés',
-    fichePath: null, // fiche absente du lot fourni
+    hasFiche: false, // fiche absente du lot — à ajouter lorsqu'elle sera disponible auprès d'iA
   },
   FU530: {
     name: 'Diversifié mondial (Loomis Sayles)',
     category: 'Fonds diversifiés',
-    fichePath: '/fiches-fonds/FU530.pdf',
+    hasFiche: true,
   },
 };
 
@@ -133,16 +133,6 @@ export const PORTFOLIO_PROFILES = {
     ],
     /** KPI illustration PDF au 30 juin 2026 */
     defaults: { ytd: 6.69, prevYear: 8.13, annualized3y: 10.77, annualized5y: 4.99 },
-    periodReturns: {
-      oneMonth: 0.74,
-      threeMonth: 6.08,
-      sixMonth: 6.69,
-      ytd: 6.69,
-      oneYear: 12.84,
-      threeYear: 10.77,
-      fiveYear: 4.99,
-      tenYear: null,
-    },
     /** Croissance illustration (base 100 000 $ fin 2017 → fin d'année) */
     growthSeries: [
       { year: 2017, value: 100000 },
@@ -189,16 +179,6 @@ export const PORTFOLIO_PROFILES = {
       { illustrationCode: '608', weightPct: 10 },
     ],
     defaults: { ytd: 10.33, prevYear: 11.56, annualized3y: 14.96, annualized5y: 7.46 },
-    periodReturns: {
-      oneMonth: 0.86,
-      threeMonth: 9.19,
-      sixMonth: 10.33,
-      ytd: 10.33,
-      oneYear: 19.7,
-      threeYear: 14.96,
-      fiveYear: 7.46,
-      tenYear: null,
-    },
     growthSeries: [
       { year: 2017, value: 100000 },
       { year: 2018, value: 96060 },
@@ -243,16 +223,6 @@ export const PORTFOLIO_PROFILES = {
       { illustrationCode: '608', weightPct: 10 },
     ],
     defaults: { ytd: 12.66, prevYear: 16.1, annualized3y: 18.62, annualized5y: 9.71 },
-    periodReturns: {
-      oneMonth: 0.73,
-      threeMonth: 10.65,
-      sixMonth: 12.66,
-      ytd: 12.66,
-      oneYear: 25.91,
-      threeYear: 18.62,
-      fiveYear: 9.71,
-      tenYear: null,
-    },
     growthSeries: [
       { year: 2017, value: 100000 },
       { year: 2018, value: 93830 },
@@ -300,16 +270,6 @@ export const PORTFOLIO_PROFILES = {
       { illustrationCode: '608', weightPct: 25 },
     ],
     defaults: { ytd: 17.98, prevYear: 16.61, annualized3y: 23.09, annualized5y: 12.3 },
-    periodReturns: {
-      oneMonth: 1.06,
-      threeMonth: 16.68,
-      sixMonth: 17.98,
-      ytd: 17.98,
-      oneYear: 32.61,
-      threeYear: 23.09,
-      fiveYear: 12.3,
-      tenYear: null,
-    },
     growthSeries: [
       { year: 2017, value: 100000 },
       { year: 2018, value: 93190 },
@@ -355,16 +315,6 @@ export const PORTFOLIO_PROFILES = {
       { illustrationCode: '500', weightPct: 10 },
     ],
     defaults: { ytd: 23.79, prevYear: 20.93, annualized3y: 28.83, annualized5y: 15.03 },
-    periodReturns: {
-      oneMonth: 1.29,
-      threeMonth: 21.73,
-      sixMonth: 23.79,
-      ytd: 23.79,
-      oneYear: 42.72,
-      threeYear: 28.83,
-      fiveYear: 15.03,
-      tenYear: null,
-    },
     growthSeries: [
       { year: 2017, value: 100000 },
       { year: 2018, value: 90280 },
@@ -398,7 +348,7 @@ export function getProfileHoldingsResolved(profileKey) {
       sortOrder: index + 1,
       name: fund?.name || `Fonds ${h.illustrationCode}`,
       category: fund?.category || null,
-      fichePath: fund?.fichePath || null,
+      hasFiche: Boolean(fund?.hasFiche),
     };
   });
 }

@@ -242,7 +242,7 @@ export function recalculatePortfoliosFromFundPerf(fundRows) {
 /**
  * Upsert fund performances + sync model_portfolios via Supabase (admin session).
  */
-export async function applyPerformanceCsvImport(supabase, { funds, asOfDate }) {
+export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, filename }) {
   let fundsUpdated = 0;
   const fundErrors = [];
 
@@ -262,8 +262,8 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate }) {
       nav: fund.nav,
       perf_as_of: asOfDate,
       metadata: {
-        ...(FUND_CATALOG[fund.externalCode]?.fichePath
-          ? { fiche: FUND_CATALOG[fund.externalCode].fichePath }
+        ...(FUND_CATALOG[fund.externalCode]?.hasFiche
+          ? { fiche_code: fund.externalCode }
           : {}),
         one_month_pct: fund.oneMonthPct,
         three_month_pct: fund.threeMonthPct,
@@ -306,7 +306,7 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate }) {
           six_month_pct: fund.sixMonthPct,
           nav: fund.nav,
           perf_as_of: asOfDate,
-          fiche: FUND_CATALOG[fund.externalCode]?.fichePath || null,
+          fiche_code: FUND_CATALOG[fund.externalCode]?.hasFiche ? fund.externalCode : null,
           incomplete_fields: fund.incompleteFields || [],
         },
         updated_at: new Date().toISOString(),
@@ -367,6 +367,31 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate }) {
     }
   }
 
+  let importLogId = null;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data: logRow, error: logError } = await supabase
+      .from('portfolio_import_logs')
+      .insert({
+        imported_by: user?.id || null,
+        filename: filename || null,
+        as_of_date: asOfDate,
+        funds_parsed: funds.length,
+        funds_updated: fundsUpdated,
+        portfolios_updated: portfoliosUpdated,
+        missing_codes: missingCodes || [],
+        warnings: [...fundErrors, ...portfolioErrors],
+        meta: { source: 'csv_import' },
+      })
+      .select('id')
+      .maybeSingle();
+    if (!logError) importLogId = logRow?.id || null;
+  } catch {
+    // table absente (migration 011) — non bloquant
+  }
+
   return {
     fundsUpdated,
     portfoliosUpdated,
@@ -374,5 +399,6 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate }) {
     missingCodes,
     fundErrors,
     portfolioErrors,
+    importLogId,
   };
 }

@@ -14,12 +14,6 @@ import {
   loadPortfolioFundPerfMap,
 } from '../../lib/portfolioFundPerf';
 
-function getReturnColor(value) {
-  if (value > 0) return 'text-emerald-700';
-  if (value < 0) return 'text-red-600';
-  return 'text-prestige-taupe';
-}
-
 function PortfolioCard({ portfolio, currentYear, prevYearLabel }) {
   return (
     <Link
@@ -31,11 +25,11 @@ function PortfolioCard({ portfolio, currentYear, prevYearLabel }) {
         <p className="font-semibold text-dark text-sm truncate">{portfolio.name}</p>
         <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs">
           <span className="text-prestige-taupe">AAJ {currentYear}</span>
-          <span className={`text-right font-semibold tabular-nums ${getReturnColor(portfolio.ytd2026)}`}>
+          <span className="text-right font-semibold tabular-nums text-dark">
             {formatReturnWithIncomplete(portfolio.ytd2026, portfolio.ytdIncomplete)}
           </span>
           <span className="text-prestige-taupe">{prevYearLabel}</span>
-          <span className={`text-right font-medium tabular-nums ${getReturnColor(portfolio.yearPrev)}`}>
+          <span className="text-right font-medium tabular-nums text-dark">
             {formatReturnWithIncomplete(portfolio.yearPrev, portfolio.prevIncomplete)}
           </span>
         </div>

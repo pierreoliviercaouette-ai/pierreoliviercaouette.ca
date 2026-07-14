@@ -192,6 +192,32 @@ export const Terms = () => {
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
+              5.1 Fonds distincts et illustrations de portefeuilles
+            </h2>
+            <p className="text-slate-600 mb-4">
+              Les fonds distincts sont des produits d&apos;assurance offerts par contrat
+              d&apos;assurance (et non des dépôts bancaires ni des fonds communs de placement
+              classiques). Tout affichage de rendements, de compositions ou d&apos;illustrations
+              de portefeuilles modèles sur ce site, y compris via un outil interne
+              d&apos;administration, est fourni à titre indicatif seulement.
+            </p>
+            <ul className="list-disc pl-6 text-slate-600 mb-6">
+              <li>Les rendements passés ne garantissent pas les rendements futurs.</li>
+              <li>
+                Les garanties contractuelles éventuelles (ex. au décès ou à l&apos;échéance)
+                ne s&apos;appliquent pas à la valeur marchande courante, qui fluctue.
+              </li>
+              <li>
+                Les moyennes pondérées ou recalculs internes ne constituent pas un rendement
+                officiel de compte ni une publication de l&apos;assureur.
+              </li>
+              <li>
+                Ces contenus ne constituent pas un conseil personnalisé ni une recommandation
+                d&apos;achat ; une analyse de la situation est requise avant toute souscription.
+              </li>
+            </ul>
+
+            <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               6. Propriété intellectuelle
             </h2>
             <p className="text-slate-600 mb-6">
