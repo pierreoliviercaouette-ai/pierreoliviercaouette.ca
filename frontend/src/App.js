@@ -2,6 +2,7 @@ import "@/index.css";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+import { Analytics } from "@vercel/analytics/react";
 import { SupabaseAuthProvider as AuthProvider } from "./context/SupabaseAuthContext";
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
@@ -104,6 +105,7 @@ function App() {
         <BackToTop />
       </div>
       <Toaster position="top-right" richColors />
+      <Analytics />
     </BrowserRouter>
   );
 }
