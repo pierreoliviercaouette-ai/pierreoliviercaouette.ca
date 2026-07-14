@@ -12,11 +12,12 @@ export const Footer = () => {
   ];
 
   const services = [
-    { name: 'Assurance vie', path: '/services#assurance-vie' },
-    { name: 'Assurance maladie grave', path: '/services#maladie-grave' },
-    { name: 'Assurance invalidité', path: '/services#invalidite' },
-    { name: 'Épargne et retraite', path: '/services#epargne' },
-    { name: 'Planification financière', path: '/services#planification' },
+    { name: 'Assurance vie', path: '/services/assurance-vie' },
+    { name: 'Assurance maladie grave', path: '/services/maladie-grave' },
+    { name: 'Assurance invalidité', path: '/services/invalidite' },
+    { name: 'Épargne et retraite', path: '/services/epargne' },
+    { name: 'Planification financière', path: '/services/planification' },
+    { name: 'Solutions entrepreneur', path: '/services/entreprise' },
   ];
 
   const seoGuides = [

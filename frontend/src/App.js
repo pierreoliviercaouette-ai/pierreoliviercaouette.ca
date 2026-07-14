@@ -14,6 +14,7 @@ import { useSupabaseAuth } from "./context/SupabaseAuthContext";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Services } from "./pages/Services";
+import { ServiceDetail } from "./pages/ServiceDetail";
 import { Tools } from "./pages/Tools";
 import { ToolDetail } from "./pages/ToolDetail";
 import { Login, Register } from "./pages/Auth";
@@ -53,6 +54,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/a-propos" element={<About />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/services/:slug" element={<ServiceDetail />} />
             <Route path="/outils" element={<Tools />} />
             <Route path="/outils/:slug" element={<ToolDetail />} />
             <Route path="/connexion" element={<Login />} />
