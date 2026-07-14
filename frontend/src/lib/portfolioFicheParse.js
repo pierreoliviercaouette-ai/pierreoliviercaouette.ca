@@ -3,19 +3,40 @@
  * (section « Rendements annuels au 31 décembre - Série Classique 75/75 »).
  */
 
+function ensurePromiseWithResolvers() {
+  if (typeof Promise.withResolvers === 'function') return;
+  Promise.withResolvers = function withResolvers() {
+    let resolve;
+    let reject;
+    const promise = new Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return { promise, resolve, reject };
+  };
+}
+
 /**
- * Detect FUxxx from filename patterns: FU021.pdf, Ecof-FU505p.pdf, 021.pdf
+ * Detect FUxxx from iA filenames: Ecof-FU021.pdf, Ecof-FU505p.pdf, FU021.pdf
  */
 export function detectFuCodeFromFilename(filename) {
   const base = String(filename || '')
     .replace(/^.*[/\\]/, '')
     .replace(/\.pdf$/i, '');
+
+  // Prefixe iA courant : Ecof-FUxxx[p]
+  const ecof = base.match(/^Ecof[-_\s]?FU\s*0*(\d{2,4})\s*p?$/i);
+  if (ecof) {
+    const n = Number(ecof[1]);
+    if (Number.isFinite(n) && n > 0) return `FU${String(n).padStart(3, '0')}`;
+  }
+
   const fu = base.match(/FU\s*0*(\d{2,4})/i);
   if (fu) {
     const n = Number(fu[1]);
     if (Number.isFinite(n) && n > 0) return `FU${String(n).padStart(3, '0')}`;
   }
-  const bare = base.match(/^0*(\d{2,4})p?$/i);
+  const bare = base.match(/^(?:Ecof[-_\s]?)?0*(\d{2,4})p?$/i);
   if (bare) {
     const n = Number(bare[1]);
     if (Number.isFinite(n) && n > 0) return `FU${String(n).padStart(3, '0')}`;
@@ -52,7 +73,6 @@ export function parseCalendarReturnsFromFicheText(text) {
     }
     const numPart = tok.replace(/\*/g, '');
     if (!/^-?\d+[.,]\d+$/.test(numPart)) {
-      // Stop once values started and we leave the return block (composition %, etc.)
       if (values.length > 0) break;
       continue;
     }
@@ -83,20 +103,85 @@ export function parseCalendarReturnsFromFicheText(text) {
   return { calendarReturns, seriesLabel };
 }
 
+async function resolveWorkerSrc(version) {
+  const publicUrl = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
+  const candidates = [];
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    candidates.push(new URL(`${publicUrl}/pdf.worker.min.mjs`, window.location.origin).href);
+  }
+  candidates.push(`https://unpkg.com/pdfjs-dist@${version}/legacy/build/pdf.worker.min.mjs`);
+  candidates.push(
+    `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.mjs`
+  );
+
+  // Blob URL évite beaucoup de soucis CORS / MIME avec les workers module
+  if (typeof fetch === 'function' && typeof Blob !== 'undefined' && typeof URL !== 'undefined') {
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const code = await res.text();
+        const blob = new Blob([code], { type: 'text/javascript' });
+        return URL.createObjectURL(blob);
+      } catch (err) {
+        console.warn('[fiche-import] fetch worker failed', url, err?.message || err);
+      }
+    }
+  }
+
+  return candidates[0] || null;
+}
+
+async function loadPdfWithWorker(getDocument, GlobalWorkerOptions, version, data) {
+  const workerSrc = await resolveWorkerSrc(version);
+  if (!workerSrc) {
+    throw new Error('Aucun worker PDF.js disponible');
+  }
+
+  GlobalWorkerOptions.workerSrc = workerSrc;
+  const loadingTask = getDocument({
+    data: data.slice(),
+    useSystemFonts: true,
+    isEvalSupported: false,
+  });
+  return Promise.race([
+    loadingTask.promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Timeout lecture PDF (45s)')), 45000);
+    }),
+  ]);
+}
+
 /**
- * Extract plain text from a PDF ArrayBuffer (admin import, no worker).
+ * Extract plain text from a PDF ArrayBuffer (admin import).
+ * PDF.js 4 exige un workerSrc — sans cela l'import plantait dans le navigateur.
  */
 export async function extractPdfText(arrayBuffer) {
+  ensurePromiseWithResolvers();
+
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-  const data = arrayBuffer instanceof Uint8Array ? arrayBuffer : new Uint8Array(arrayBuffer);
-  const doc = await pdfjs.getDocument({ data, disableWorker: true }).promise;
-  const parts = [];
-  for (let i = 1; i <= doc.numPages; i += 1) {
-    const page = await doc.getPage(i);
-    const content = await page.getTextContent();
-    parts.push(content.items.map((item) => item.str).join(' '));
+  const { getDocument, GlobalWorkerOptions, version } = pdfjs;
+  const data =
+    arrayBuffer instanceof Uint8Array
+      ? arrayBuffer
+      : new Uint8Array(arrayBuffer);
+
+  const doc = await loadPdfWithWorker(getDocument, GlobalWorkerOptions, version, data);
+  try {
+    const parts = [];
+    for (let i = 1; i <= doc.numPages; i += 1) {
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      parts.push(content.items.map((item) => item.str).join(' '));
+    }
+    return parts.join('\n');
+  } finally {
+    try {
+      await doc.destroy();
+    } catch {
+      // ignore
+    }
   }
-  return parts.join('\n');
 }
 
 /**
@@ -105,14 +190,41 @@ export async function extractPdfText(arrayBuffer) {
 export async function parseFundFichePdf(fileOrBuffer, filenameHint = '') {
   const filename =
     typeof fileOrBuffer?.name === 'string' ? fileOrBuffer.name : filenameHint;
-  const buffer =
-    fileOrBuffer instanceof ArrayBuffer
-      ? fileOrBuffer
-      : fileOrBuffer instanceof Uint8Array
-        ? fileOrBuffer.buffer
-        : await fileOrBuffer.arrayBuffer();
 
-  const text = await extractPdfText(buffer);
+  let buffer;
+  try {
+    if (fileOrBuffer instanceof ArrayBuffer) {
+      buffer = fileOrBuffer;
+    } else if (fileOrBuffer instanceof Uint8Array) {
+      buffer = fileOrBuffer.buffer.slice(
+        fileOrBuffer.byteOffset,
+        fileOrBuffer.byteOffset + fileOrBuffer.byteLength
+      );
+    } else if (typeof fileOrBuffer?.arrayBuffer === 'function') {
+      buffer = await fileOrBuffer.arrayBuffer();
+    } else {
+      throw new Error('Fichier PDF invalide');
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      fuCode: detectFuCodeFromFilename(filename),
+      error: `Lecture fichier: ${err?.message || err}`,
+    };
+  }
+
+  let text;
+  try {
+    text = await extractPdfText(buffer);
+  } catch (err) {
+    console.error('[fiche-import] PDF.js error', filename, err);
+    return {
+      ok: false,
+      fuCode: detectFuCodeFromFilename(filename),
+      error: `Lecture PDF (pdf.js): ${err?.message || err}`,
+    };
+  }
+
   const parsed = parseCalendarReturnsFromFicheText(text);
   const fuCode = detectFuCodeFromFilename(filename);
   const codeFromText = text.match(/Code du Fonds\s*:\s*(\d{2,4})/i);
@@ -127,8 +239,8 @@ export async function parseFundFichePdf(fileOrBuffer, filenameHint = '') {
       ok: false,
       fuCode: resolvedCode,
       error: !resolvedCode
-        ? 'Code fonds introuvable (nommez le fichier FUxxx.pdf)'
-        : 'Section « Rendements annuels au 31 décembre » introuvable',
+        ? 'Code fonds introuvable (utilisez Ecof-FUxxx.pdf)'
+        : 'Section « Rendements annuels au 31 décembre » introuvable dans le PDF',
     };
   }
 

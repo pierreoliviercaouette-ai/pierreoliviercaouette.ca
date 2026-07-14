@@ -33,16 +33,31 @@ export async function applyFundFicheImports(supabase, files) {
 
       const fuCode = parsed.fuCode;
       const storagePath = `${fuCode}.pdf`;
-      const { error: uploadError } = await supabase.storage
+      const pdfBlob =
+        file instanceof Blob
+          ? file
+          : new Blob([await file.arrayBuffer()], { type: 'application/pdf' });
+
+      let uploadError = null;
+      const uploadOpts = {
+        contentType: 'application/pdf',
+        cacheControl: '3600',
+      };
+      const first = await supabase.storage
         .from(STORAGE_BUCKET)
-        .upload(storagePath, file, {
-          upsert: true,
-          contentType: 'application/pdf',
-          cacheControl: '3600',
-        });
+        .upload(storagePath, pdfBlob, { ...uploadOpts, upsert: true });
+      uploadError = first.error;
+      // Repli : supprimer puis re-uploader (si policy upsert/update absente)
+      if (uploadError) {
+        await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
+        const second = await supabase.storage
+          .from(STORAGE_BUCKET)
+          .upload(storagePath, pdfBlob, { ...uploadOpts, upsert: false });
+        uploadError = second.error;
+      }
 
       if (uploadError) {
-        // Bucket manquant : on sauvegarde quand même les rendements année civile
+        // Bucket manquant / RLS : on sauvegarde quand même les rendements année civile
         errors.push(`${fuCode}: stockage PDF — ${uploadError.message}`);
       }
 

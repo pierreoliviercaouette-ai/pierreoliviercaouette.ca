@@ -7,6 +7,7 @@ import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
 import { BackToTop } from "./components/layout/BackToTop";
 import { ScrollToTop } from "./components/layout/ScrollToTop";
+import { Analytics } from "@vercel/analytics/react";
 import { AnalyticsTracker } from "./components/layout/AnalyticsTracker";
 
 // Pages
@@ -49,6 +50,7 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AnalyticsTracker />
+      <Analytics />
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <Suspense fallback={null}>

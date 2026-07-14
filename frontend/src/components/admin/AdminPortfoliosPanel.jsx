@@ -147,15 +147,21 @@ export function AdminPortfoliosPanel({ onRefresh }) {
 
       if (result.fundsUpdated > 0) {
         toast.success(
-          `Fiches OK : ${result.fundsUpdated} fonds mis à jour (années civiles + PDF)`
+          `Fiches OK : ${result.fundsUpdated} fonds mis à jour (années civiles${
+            result.results?.some((r) => r.pdfStored) ? ' + PDF' : ''
+          })`
         );
         window.dispatchEvent(new Event('model-portfolios-updated'));
         await load();
         onRefresh?.();
       } else {
-        toast.error('Aucune fiche importée');
+        const firstErr =
+          result.results?.find((r) => !r.ok)?.error ||
+          result.errors?.[0] ||
+          'Aucune fiche importée';
+        toast.error(firstErr);
       }
-      if (result.errors?.length) {
+      if (result.fundsUpdated > 0 && result.errors?.length) {
         toast.message(`${result.errors.length} avertissement(s) — voir le résumé`);
       }
     } catch (error) {
@@ -237,9 +243,10 @@ export function AdminPortfoliosPanel({ onRefresh }) {
           <p className="font-semibold text-dark">Importer fiches de fonds (PDF)</p>
           <p className="text-xs text-prestige-taupe mt-1">
             Extrait les rendements par année civile (Série Classique 75/75) pour la courbe de
-            croissance, et dépose le PDF à jour pour le téléchargement public. Nommez les
-            fichiers <span className="font-medium text-dark">FUxxx.pdf</span> (ex. FU021.pdf).
-            Plusieurs fiches à la fois possibles.
+            croissance, et dépose le PDF à jour pour le téléchargement public. Conservez le
+            nom iA{' '}
+            <span className="font-medium text-dark">Ecof-FUxxx.pdf</span> (ex. Ecof-FU021.pdf,
+            Ecof-FU505p.pdf). Plusieurs fiches à la fois possibles.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">

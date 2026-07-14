@@ -69,6 +69,16 @@ const webpackConfig = {
       if (config.enableHealthCheck && healthPluginInstance) {
         webpackConfig.plugins.push(healthPluginInstance);
       }
+
+      // pdfjs-dist (ESM .mjs) — éviter les erreurs fullySpecified sous webpack 5
+      webpackConfig.module = webpackConfig.module || {};
+      webpackConfig.module.rules = webpackConfig.module.rules || [];
+      webpackConfig.module.rules.push({
+        test: /\.mjs$/,
+        include: /node_modules\/pdfjs-dist/,
+        type: 'javascript/auto',
+      });
+
       return webpackConfig;
     },
   },
