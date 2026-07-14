@@ -17,7 +17,7 @@ export const PORTFOLIO_BANNER_PRODUCT_LINE =
 
 
 export const PORTFOLIO_INCOMPLETE_HISTORY_NOTE =
-  'Un astérisque (*) indique une période pour laquelle l’historique d’un ou plusieurs fonds est incomplet, ou où des fonds ont été exclus du calcul pondéré.';
+  'Un astérisque (*) indique une période pour laquelle l’historique d’un ou plusieurs fonds est incomplet selon iA (rendement partiellement simulé / historique trop court), ou où des fonds ont été exclus du calcul pondéré. Le rendement du portefeuille pour cette période est alors aussi noté *.';
 
 export const PORTFOLIO_GUARANTEE_DISCLAIMER =
   'Les fonds distincts peuvent comporter des garanties contractuelles (ex. garantie au décès / à l’échéance selon le contrat et l’option choisie, dont la série Classique 75/75). Ces garanties ne s’appliquent pas à la valeur marchande courante. Les chiffres présentés ici reflètent la valeur marchande / les rendements de placement, pas le paiement garanti.';

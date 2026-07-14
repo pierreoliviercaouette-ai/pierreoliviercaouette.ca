@@ -1,4 +1,9 @@
 import { PORTFOLIO_PROFILE_LIST, getProfileHoldingsResolved } from '../data/portfolioProfiles';
+import {
+  KNOWN_INCOMPLETE_FUND_FIELDS,
+  getDefaultFundPerformance,
+  resolveIncompleteFields,
+} from '../data/portfolioFundPerfDefaults';
 import { computeWeightedPeriodReturns } from './portfolioCsvImport';
 
 function pickPerfField(row, meta, column, metaKey) {
@@ -27,10 +32,13 @@ export function mergeFundRowsIntoPerfMap(perfByCode, fundRows, packagedDefaults 
   const next = { ...perfByCode };
   for (const row of fundRows || []) {
     const meta = row.metadata || {};
-    const defaults = packagedDefaults[row.external_code] || {};
-    const incompleteFields = Array.isArray(meta.incomplete_fields)
-      ? meta.incomplete_fields
-      : defaults.incompleteFields || [];
+    const defaults =
+      packagedDefaults[row.external_code] || getDefaultFundPerformance(row.external_code) || {};
+    const incompleteFields = resolveIncompleteFields(
+      row.external_code,
+      meta.incomplete_fields,
+      defaults.incompleteFields
+    );
     next[row.external_code] = {
       ytdPct: pickPerfField(row, meta, 'ytd_pct', 'ytd_pct') ?? defaults.ytdPct ?? null,
       prevYearPct:
@@ -47,6 +55,25 @@ export function mergeFundRowsIntoPerfMap(perfByCode, fundRows, packagedDefaults 
       tenYearPct: pickPerfField(row, meta, 'ten_year_pct', 'ten_year_pct') ?? defaults.tenYearPct ?? null,
       incompleteFields,
       perfAsOf: meta.perf_as_of || row.perf_as_of || null,
+    };
+  }
+  return ensureIncompleteFlagsOnPerfMap(next);
+}
+
+/**
+ * Union incomplete flags from CSV metadata, defaults and known iA asterisk periods.
+ */
+export function ensureIncompleteFlagsOnPerfMap(perfByCode) {
+  const next = { ...perfByCode };
+  for (const code of Object.keys(KNOWN_INCOMPLETE_FUND_FIELDS)) {
+    if (!next[code]) continue;
+    next[code] = {
+      ...next[code],
+      incompleteFields: resolveIncompleteFields(
+        code,
+        next[code].incompleteFields,
+        getDefaultFundPerformance(code)?.incompleteFields
+      ),
     };
   }
   return next;

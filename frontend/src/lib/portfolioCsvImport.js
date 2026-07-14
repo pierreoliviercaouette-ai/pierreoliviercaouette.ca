@@ -156,9 +156,13 @@ function weightedAvg(holdings, perfByCode, field) {
   let sumW = 0;
   let sum = 0;
   const missing = [];
+  let anyIncompleteHistory = false;
   const totalW = holdings.reduce((acc, h) => acc + Number(h.weightPct || 0), 0);
   for (const h of holdings) {
     const perf = perfByCode[h.fuCode];
+    if (Array.isArray(perf?.incompleteFields) && perf.incompleteFields.includes(field)) {
+      anyIncompleteHistory = true;
+    }
     const val = perf?.[field];
     if (val === null || val === undefined || Number.isNaN(Number(val))) {
       missing.push(h.fuCode || h.illustrationCode);
@@ -167,8 +171,15 @@ function weightedAvg(holdings, perfByCode, field) {
     sum += Number(val) * Number(h.weightPct);
     sumW += Number(h.weightPct);
   }
-  if (sumW <= 0) return { value: null, missing, incomplete: missing.length > 0 || totalW > 0 };
-  const incomplete = missing.length > 0 || (totalW > 0 && sumW < totalW - 0.01);
+  if (sumW <= 0) {
+    return {
+      value: null,
+      missing,
+      incomplete: anyIncompleteHistory || missing.length > 0 || totalW > 0,
+    };
+  }
+  const incomplete =
+    anyIncompleteHistory || missing.length > 0 || (totalW > 0 && sumW < totalW - 0.01);
   return { value: Math.round((sum / sumW) * 100) / 100, missing, incomplete };
 }
 
