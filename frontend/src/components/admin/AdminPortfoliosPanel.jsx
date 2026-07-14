@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabaseClient';
+import {
+  applyPerformanceCsvImport,
+  asOfDateFromFilename,
+  parsePerformanceFundsCsv,
+} from '../../lib/portfolioCsvImport';
 
 export function AdminPortfoliosPanel({ onRefresh }) {
   const [modelPortfolios, setModelPortfolios] = useState([]);
@@ -12,6 +17,9 @@ export function AdminPortfoliosPanel({ onRefresh }) {
   const [savingById, setSavingById] = useState({});
   const [asOfDate, setAsOfDate] = useState('');
   const [savingAsOfDate, setSavingAsOfDate] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importSummary, setImportSummary] = useState(null);
+  const fileInputRef = useRef(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -108,18 +116,112 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     }
   };
 
+  const handleCsvImport = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    try {
+      setImporting(true);
+      setImportSummary(null);
+      const text = await file.text();
+      const { funds, warnings } = parsePerformanceFundsCsv(text);
+      const asOf = asOfDateFromFilename(file.name) || asOfDate || new Date().toISOString().slice(0, 10);
+      const result = await applyPerformanceCsvImport(supabase, { funds, asOfDate: asOf });
+
+      setImportSummary({
+        filename: file.name,
+        asOf,
+        fundsParsed: funds.length,
+        fundsUpdated: result.fundsUpdated,
+        portfoliosUpdated: result.portfoliosUpdated,
+        portfolios: result.portfolios,
+        missingCodes: result.missingCodes,
+        warnings: [...warnings, ...result.fundErrors, ...result.portfolioErrors],
+      });
+
+      if (result.portfoliosUpdated > 0) {
+        toast.success(
+          `Import OK : ${result.fundsUpdated} fonds, ${result.portfoliosUpdated} portefeuilles recalculés`
+        );
+        window.dispatchEvent(new Event('model-portfolios-updated'));
+        setAsOfDate(asOf);
+        await load();
+        onRefresh?.();
+      } else {
+        toast.error('Import terminé sans mise à jour de portefeuille');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Erreur import CSV');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   if (loading) {
     return <p className="text-prestige-taupe">Chargement...</p>;
   }
 
   return (
     <div className="space-y-4">
-      <h3 className="font-heading text-xl font-semibold text-dark">
-        Portefeuilles modeles (saisie manuelle)
-      </h3>
+      <h3 className="font-heading text-xl font-semibold text-dark">Portefeuilles modeles</h3>
+
+      <div className="p-4 bg-white rounded-xl border border-primary/20 space-y-3">
+        <div>
+          <p className="font-semibold text-dark">Importer performances (CSV iA)</p>
+          <p className="text-xs text-prestige-taupe mt-1">
+            Déposez un fichier <code className="text-xs">performance-fonds-….csv</code>. Les
+            rendements des fonds sont enregistrés, puis les 5 portefeuilles sont recalculés en
+            pondération (AAJ, année précédente, 3 ans, 5 ans).
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={handleCsvImport}
+          />
+          <Button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            data-testid="admin-import-performance-csv"
+          >
+            {importing ? 'Import en cours…' : 'Choisir un fichier CSV'}
+          </Button>
+        </div>
+        {importSummary && (
+          <div className="text-sm text-prestige-taupe space-y-1 border-t border-prestige-beige pt-3">
+            <p>
+              <span className="font-medium text-dark">{importSummary.filename}</span>
+              {' · '}données au {importSummary.asOf}
+            </p>
+            <p>
+              {importSummary.fundsParsed} fonds lus · {importSummary.fundsUpdated} fonds maj ·{' '}
+              {importSummary.portfoliosUpdated} portefeuilles maj
+            </p>
+            {importSummary.missingCodes?.length > 0 && (
+              <p className="text-amber-700">
+                Codes sans rendement dans le CSV (exclus du pondéré) :{' '}
+                {importSummary.missingCodes.join(', ')}
+              </p>
+            )}
+            {importSummary.warnings?.length > 0 && (
+              <ul className="list-disc pl-5 text-xs">
+                {importSummary.warnings.slice(0, 8).map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
 
       <p className="text-xs text-prestige-taupe">
-        Entrez manuellement les rendements AAJ, annee precedente, 3 ans annualise et 5 ans annualise pour chaque profil.
+        Secours : saisie manuelle des rendements AAJ, année précédente, 3 ans et 5 ans annualisés.
       </p>
 
       <div className="p-4 bg-light rounded-xl border border-prestige-beige">
