@@ -29,11 +29,12 @@ import {
 } from '../lib/portfolioCompliance';
 import { computeWeightedPeriodReturns } from '../lib/portfolioCsvImport';
 import { mergeFundRowsIntoPerfMap } from '../lib/portfolioFundPerf';
+import { buildGrowthSeriesFromPeriodReturns } from '../lib/portfolioGrowth';
 import { getFundFicheUrl } from '../lib/portfolioFiches';
 import { useSeoMeta } from '../lib/seo';
 import { supabase } from '../lib/supabaseClient';
 
-const ILLUSTRATION_GROWTH_AS_OF = '30 juin 2026';
+const GROWTH_PRINCIPAL = 100000;
 
 const ALLOCATION_COLORS = {
   revenu_fixe: '#01233f',
@@ -100,6 +101,7 @@ export const ModelPortfolioDetail = () => {
   const fallbackPortfolio = DEFAULT_MODEL_PORTFOLIOS.find((item) => item.key === slug);
   const [portfolio, setPortfolio] = useState(fallbackPortfolio || null);
   const [asOfLabel, setAsOfLabel] = useState(DEFAULT_MODEL_PORTFOLIOS_AS_OF);
+  const [asOfIso, setAsOfIso] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
   const [fundPerfByCode, setFundPerfByCode] = useState({});
   const [incompleteByPeriod, setIncompleteByPeriod] = useState({});
@@ -188,6 +190,7 @@ export const ModelPortfolioDetail = () => {
         snap?.as_of_date ||
         Object.values(perfByCode).find((p) => p.perfAsOf)?.perfAsOf;
       if (asOfCandidate) {
+        setAsOfIso(asOfCandidate);
         setAsOfLabel(formatIsoDateLabelFr(asOfCandidate) || asOfCandidate);
       }
 
@@ -196,30 +199,41 @@ export const ModelPortfolioDetail = () => {
     loadPortfolio();
   }, [slug, profile, fallbackPortfolio, staticHoldings]);
 
+  const liveGrowth = useMemo(() => {
+    const periodReturns = portfolio?.periodReturns;
+    if (!periodReturns) return { series: [], meta: null };
+    return buildGrowthSeriesFromPeriodReturns(
+      periodReturns,
+      incompleteByPeriod,
+      asOfIso,
+      GROWTH_PRINCIPAL
+    );
+  }, [portfolio?.periodReturns, incompleteByPeriod, asOfIso]);
+
   const chartData = useMemo(() => {
+    // 1) Toujours prioriser la courbe recalculée depuis les mêmes rendements pondérés (CSV)
+    if (liveGrowth.series.length > 1) {
+      return liveGrowth.series.map((p) => ({
+        label: p.label,
+        v: p.value,
+        display: p.value,
+        year: p.year,
+      }));
+    }
+    // 2) Snapshot importé (si déjà stocké)
     const ws = snapshot?.wealth_series;
     if (Array.isArray(ws) && ws.length > 1) {
       return ws.map((p) => ({
-        label: p.month_date?.slice(0, 7) || p.label,
+        label: p.label || p.month_date?.slice(0, 7) || String(p.year),
         v: Number(p.value),
         display: Number(p.value),
+        year: p.year,
       }));
     }
-    const series = profile?.growthSeries;
-    if (!Array.isArray(series) || series.length < 2) return [];
-    const base = Number(series[0].value) || 100000;
-    return series.map((p) => ({
-      label: String(p.year),
-      v: (Number(p.value) / base) * 100,
-      display: Number(p.value),
-      year: p.year,
-    }));
-  }, [snapshot, profile]);
+    return [];
+  }, [liveGrowth, snapshot]);
 
-  const chartIsMoney = useMemo(() => {
-    const ws = snapshot?.wealth_series;
-    return !(Array.isArray(ws) && ws.length > 1);
-  }, [snapshot]);
+  const chartGrowthMeta = liveGrowth.meta || snapshot?.meta?.growth || null;
 
   const allocationData = useMemo(() => {
     const rows = (profile?.assetAllocation || []).filter((a) => Number(a.pct) > 0);
@@ -424,17 +438,27 @@ export const ModelPortfolioDetail = () => {
             )}
 
             {chartData.length > 1 && (
-              <details className="mb-10 group rounded-xl border border-prestige-beige p-4">
+              <details className="mb-10 group rounded-xl border border-prestige-beige p-4" open>
                 <summary className="font-heading text-xl font-bold text-dark cursor-pointer list-none flex items-center justify-between gap-3">
-                  <span>Illustration de croissance (source distincte)</span>
+                  <span>Croissance du placement</span>
                   <span className="text-xs font-sans font-normal text-prestige-taupe group-open:hidden">
                     Afficher
                   </span>
                 </summary>
                 <p className="text-sm text-prestige-taupe mt-3 mb-4">
-                  {chartIsMoney
-                    ? `Illustration historique PDF iA au ${ILLUSTRATION_GROWTH_AS_OF} (placement de 100 000 $, fin d’année civile). Ce n’est pas la même série ni la même date que les KPI pondérés ci-dessus (au ${asOfLabel}). Ce n’est ni une projection ni une garantie de résultats futurs.`
-                    : `Série reconstruite (base 100). Peut différer des KPI pondérés au ${asOfLabel}. Ce n’est ni une projection ni une garantie de résultats futurs.`}
+                  Illustration d’un placement de {formatMoneyCad(GROWTH_PRINCIPAL)} compoundé au
+                  rendement annualisé pondéré sur{' '}
+                  {chartGrowthMeta?.horizon_years ?? '—'} ans
+                  {chartGrowthMeta?.annualized_pct != null
+                    ? ` (${String(chartGrowthMeta.annualized_pct).replace('.', ',')} %)`
+                    : ''}
+                  , au {asOfLabel}. Mêmes chiffres que le tableau de rendements (import CSV). Le
+                  chemin entre les années est une approximation à taux constant — ce n’est ni une
+                  projection ni une garantie de résultats futurs
+                  {chartGrowthMeta?.incomplete
+                    ? ' ; l’horizon utilisé comporte un historique de fonds incomplet (*)'
+                    : ''}
+                  .
                 </p>
                 <div className="h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -444,23 +468,18 @@ export const ModelPortfolioDetail = () => {
                       <YAxis
                         domain={['auto', 'auto']}
                         tick={{ fontSize: 11 }}
-                        tickFormatter={(v) =>
-                          chartIsMoney ? `${Math.round(Number(v))}` : Number(v).toFixed(0)
-                        }
+                        tickFormatter={(v) => `${Math.round(Number(v))}`}
                       />
                       <Tooltip
-                        formatter={(v, _n, item) => {
+                        formatter={(_v, _n, item) => {
                           const money = item?.payload?.display;
-                          if (chartIsMoney && money != null) {
-                            return [formatMoneyCad(money), 'Valeur'];
-                          }
-                          return [`${Number(v).toFixed(2)}`, 'Indice'];
+                          return [formatMoneyCad(money), 'Valeur'];
                         }}
-                        labelFormatter={(l) => (chartIsMoney ? `Fin ${l}` : l)}
+                        labelFormatter={(l) => l}
                       />
                       <Line
                         type="monotone"
-                        dataKey={chartIsMoney ? 'display' : 'v'}
+                        dataKey="display"
                         stroke={accent}
                         strokeWidth={2.5}
                         dot={{ r: 3, fill: accent }}

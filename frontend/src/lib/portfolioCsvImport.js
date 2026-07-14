@@ -4,6 +4,7 @@ import {
   PORTFOLIO_PROFILE_LIST,
   getProfileHoldingsResolved,
 } from '../data/portfolioProfiles';
+import { wealthSeriesForSnapshot } from './portfolioGrowth';
 
 function stripHtml(value) {
   return String(value || '')
@@ -226,7 +227,10 @@ export function recalculatePortfoliosFromFundPerf(fundRows) {
 
   for (const profile of PORTFOLIO_PROFILE_LIST) {
     const holdings = getProfileHoldingsResolved(profile.key);
-    const { periodReturns, missingByPeriod } = computeWeightedPeriodReturns(holdings, perfByCode);
+    const { periodReturns, missingByPeriod, incompleteByPeriod } = computeWeightedPeriodReturns(
+      holdings,
+      perfByCode
+    );
     Object.values(missingByPeriod).forEach((codes) => codes.forEach((c) => allMissing.add(c)));
 
     results.push({
@@ -237,6 +241,7 @@ export function recalculatePortfoliosFromFundPerf(fundRows) {
       annualized3y: periodReturns.threeYear,
       annualized5y: periodReturns.fiveYear,
       periodReturns,
+      incompleteByPeriod,
       missingCodes: [
         ...new Set(
           Object.values(missingByPeriod)
@@ -365,6 +370,11 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
       .eq('key', p.key)
       .maybeSingle();
     if (def?.id) {
+      const { wealth_series, growth_meta } = wealthSeriesForSnapshot(
+        p.periodReturns,
+        p.incompleteByPeriod,
+        asOfDate
+      );
       await supabase.from('portfolio_snapshots').insert({
         portfolio_definition_id: def.id,
         as_of_date: asOfDate,
@@ -373,7 +383,12 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
         prev_civil_year_pct: p.prevYearPct,
         rolling_3y_pct: p.annualized3y,
         rolling_5y_pct: p.annualized5y,
-        meta: { source: 'csv_weighted', missing_codes: p.missingCodes },
+        wealth_series,
+        meta: {
+          source: 'csv_weighted',
+          missing_codes: p.missingCodes,
+          growth: growth_meta,
+        },
       });
     }
   }
