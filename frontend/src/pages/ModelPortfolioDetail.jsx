@@ -20,6 +20,15 @@ import {
   getPortfolioProfile,
   getProfileHoldingsResolved,
 } from '../data/portfolioProfiles';
+import {
+  PORTFOLIO_GENERAL_DISCLAIMER,
+  PORTFOLIO_GUARANTEE_DISCLAIMER,
+  PORTFOLIO_INCOMPLETE_HISTORY_NOTE,
+  PORTFOLIO_METHOD_NOTE,
+  formatIsoDateLabelFr,
+  formatReturnWithIncomplete,
+} from '../lib/portfolioCompliance';
+import { computeWeightedPeriodReturns } from '../lib/portfolioCsvImport';
 import { useSeoMeta } from '../lib/seo';
 import { supabase } from '../lib/supabaseClient';
 
@@ -54,14 +63,6 @@ const PORTFOLIO_PERIOD_COLUMNS = [
   { key: 'tenYear', label: '10 ans' },
 ];
 
-function formatReturn(value) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
-  const n = Number(value);
-  const sign = n > 0 ? '+' : n < 0 ? '-' : '';
-  const abs = Math.abs(n).toFixed(1).replace('.', ',');
-  return `${sign}${abs} %`;
-}
-
 function formatMoneyCad(value) {
   return new Intl.NumberFormat('fr-CA', {
     style: 'currency',
@@ -74,17 +75,6 @@ function pickPerfField(row, meta, column, metaKey) {
   if (row?.[column] != null && row[column] !== '') return Number(row[column]);
   if (meta?.[metaKey] != null && meta[metaKey] !== '') return Number(meta[metaKey]);
   return null;
-}
-
-function formatIsoDateLabel(isoDate) {
-  if (!isoDate || typeof isoDate !== 'string') return '';
-  const [year, month, day] = isoDate.split('-').map((value) => Number(value));
-  if (!year || !month || !day) return '';
-  return new Date(year, month - 1, day).toLocaleDateString('fr-CA', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
 }
 
 function RiskBars({ level, accent }) {
@@ -165,6 +155,9 @@ export const ModelPortfolioDetail = () => {
         for (const row of fundRows || []) {
           const meta = row.metadata || {};
           const defaults = getDefaultFundPerformance(row.external_code) || {};
+          const incompleteFields = Array.isArray(meta.incomplete_fields)
+            ? meta.incomplete_fields
+            : defaults.incompleteFields || [];
           perfByCode[row.external_code] = {
             ytdPct: pickPerfField(row, meta, 'ytd_pct', 'ytd_pct') ?? defaults.ytdPct ?? null,
             prevYearPct:
@@ -185,41 +178,54 @@ export const ModelPortfolioDetail = () => {
               pickPerfField(row, meta, 'five_year_pct', 'five_year_pct') ?? defaults.fiveYearPct ?? null,
             tenYearPct:
               pickPerfField(row, meta, 'ten_year_pct', 'ten_year_pct') ?? defaults.tenYearPct ?? null,
+            incompleteFields,
           };
         }
       }
 
+      // Source unique : moyenne pondérée des fonds (alignée bannière après import CSV)
+      const { periodReturns: weighted } = computeWeightedPeriodReturns(staticHoldings, perfByCode);
       const defaults = profile?.defaults;
+
       setPortfolio({
         key: slug,
         name: legacyRow?.name || profile?.name || fallbackPortfolio?.name || slug,
-        ytd2026: legacyRow
-          ? Number(legacyRow.ytd_2026)
-          : snap?.ytd_pct != null
-            ? Number(snap.ytd_pct)
-            : defaults?.ytd ?? fallbackPortfolio?.ytd2026 ?? null,
-        year2025: legacyRow
-          ? Number(legacyRow.year_2025)
-          : snap?.prev_civil_year_pct != null
-            ? Number(snap.prev_civil_year_pct)
-            : defaults?.prevYear ?? fallbackPortfolio?.year2025 ?? null,
-        annualized3y: legacyRow
-          ? Number(legacyRow.annualized_3y)
-          : snap?.rolling_3y_pct != null
-            ? Number(snap.rolling_3y_pct)
-            : defaults?.annualized3y ?? fallbackPortfolio?.annualized3y ?? null,
-        annualized5y: legacyRow
-          ? Number(legacyRow.annualized_5y)
-          : snap?.rolling_5y_pct != null
-            ? Number(snap.rolling_5y_pct)
-            : defaults?.annualized5y ?? fallbackPortfolio?.annualized5y ?? null,
+        ytd2026:
+          weighted.ytd ??
+          (legacyRow ? Number(legacyRow.ytd_2026) : null) ??
+          (snap?.ytd_pct != null ? Number(snap.ytd_pct) : null) ??
+          defaults?.ytd ??
+          fallbackPortfolio?.ytd2026 ??
+          null,
+        year2025:
+          weighted.prevYear ??
+          (legacyRow ? Number(legacyRow.year_2025) : null) ??
+          (snap?.prev_civil_year_pct != null ? Number(snap.prev_civil_year_pct) : null) ??
+          defaults?.prevYear ??
+          fallbackPortfolio?.year2025 ??
+          null,
+        annualized3y:
+          weighted.threeYear ??
+          (legacyRow ? Number(legacyRow.annualized_3y) : null) ??
+          (snap?.rolling_3y_pct != null ? Number(snap.rolling_3y_pct) : null) ??
+          defaults?.annualized3y ??
+          fallbackPortfolio?.annualized3y ??
+          null,
+        annualized5y:
+          weighted.fiveYear ??
+          (legacyRow ? Number(legacyRow.annualized_5y) : null) ??
+          (snap?.rolling_5y_pct != null ? Number(snap.rolling_5y_pct) : null) ??
+          defaults?.annualized5y ??
+          fallbackPortfolio?.annualized5y ??
+          null,
         href: legacyRow?.href || profile?.href || `/portefeuilles/${slug}`,
+        periodReturns: weighted,
       });
       setSnapshot(snap);
       setFundPerfByCode(perfByCode);
 
       if (legacyRow?.as_of_date || snap?.as_of_date) {
-        setAsOfLabel(formatIsoDateLabel(legacyRow?.as_of_date || snap.as_of_date));
+        setAsOfLabel(formatIsoDateLabelFr(legacyRow?.as_of_date || snap.as_of_date));
       }
 
       setLoading(false);
@@ -266,7 +272,18 @@ export const ModelPortfolioDetail = () => {
     () => staticHoldings.filter((h) => h.fichePath),
     [staticHoldings]
   );
+  const missingFicheHoldings = useMemo(
+    () => staticHoldings.filter((h) => h.fuCode && !h.fichePath),
+    [staticHoldings]
+  );
 
+  const hasIncompleteHistory = useMemo(() => {
+    return Object.values(fundPerfByCode).some(
+      (perf) => Array.isArray(perf?.incompleteFields) && perf.incompleteFields.length > 0
+    );
+  }, [fundPerfByCode]);
+
+  const periodReturns = portfolio?.periodReturns || null;
   const prevYear = new Date().getFullYear() - 1;
   const currentYear = new Date().getFullYear();
 
@@ -314,7 +331,10 @@ export const ModelPortfolioDetail = () => {
                 <h1 className="font-heading text-3xl md:text-4xl font-bold text-dark">
                   {portfolio.name}
                 </h1>
-                <p className="text-sm text-prestige-taupe mt-2">Données au {asOfLabel}</p>
+                <p className="text-sm text-prestige-taupe mt-2">
+                  Données de rendement au {asOfLabel}
+                  <span className="text-prestige-taupe/80"> · série Classique 75/75</span>
+                </p>
                 {profile?.merPct != null && (
                   <p className="text-xs text-prestige-taupe mt-1">
                     RFG du portefeuille (illustration) : {String(profile.merPct).replace('.', ',')} %
@@ -324,7 +344,7 @@ export const ModelPortfolioDetail = () => {
               {profile && <RiskBars level={profile.riskLevel} accent={accent} />}
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
               {[
                 { label: `${currentYear} (AAJ)`, value: portfolio.ytd2026 },
                 { label: `${prevYear} (année civile)`, value: portfolio.year2025 },
@@ -334,11 +354,12 @@ export const ModelPortfolioDetail = () => {
                 <div key={kpi.label} className="rounded-2xl bg-light border border-prestige-beige p-4">
                   <p className="text-sm text-prestige-taupe">{kpi.label}</p>
                   <p className="text-2xl font-semibold text-dark mt-1 tabular-nums">
-                    {formatReturn(kpi.value)}
+                    {formatReturnWithIncomplete(kpi.value)}
                   </p>
                 </div>
               ))}
             </div>
+            <p className="text-xs text-prestige-taupe leading-relaxed mb-10">{PORTFOLIO_METHOD_NOTE}</p>
 
             {profile?.philosophy && (
               <div className="mb-10">
@@ -414,8 +435,8 @@ export const ModelPortfolioDetail = () => {
                 </h2>
                 <p className="text-sm text-prestige-taupe mb-4">
                   {chartIsMoney
-                    ? 'Illustration : évolution d’un placement de 100 000 $ (fin d’année civile).'
-                    : 'Série reconstruite (base 100).'}
+                    ? 'Illustration historique (PDF iA, 30 juin 2026) : évolution d’un placement de 100 000 $ (fin d’année civile). Cette courbe peut différer des KPI pondérés ci-dessus, recalculés à la date de rendement affichée.'
+                    : 'Série reconstruite (base 100). Peut différer des KPI pondérés à la date de rendement affichée.'}
                 </p>
                 <div className="h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -453,11 +474,12 @@ export const ModelPortfolioDetail = () => {
               </div>
             )}
 
-            {profile?.periodReturns && (
+            {periodReturns && (
               <div className="mb-10">
-                <h2 className="font-heading text-xl font-bold text-dark mb-4">
+                <h2 className="font-heading text-xl font-bold text-dark mb-2">
                   Rendements du portefeuille
                 </h2>
+                <p className="text-xs text-prestige-taupe mb-4">{PORTFOLIO_METHOD_NOTE}</p>
                 <div className="overflow-x-auto rounded-xl border border-prestige-beige">
                   <table className="w-full text-sm">
                     <thead className="bg-light">
@@ -473,7 +495,7 @@ export const ModelPortfolioDetail = () => {
                       <tr>
                         {PORTFOLIO_PERIOD_COLUMNS.map((col) => (
                           <td key={col.key} className="p-3 text-right tabular-nums font-medium">
-                            {formatReturn(profile.periodReturns[col.key])}
+                            {formatReturnWithIncomplete(periodReturns[col.key])}
                           </td>
                         ))}
                       </tr>
@@ -481,17 +503,21 @@ export const ModelPortfolioDetail = () => {
                   </table>
                 </div>
                 <p className="text-xs text-prestige-taupe mt-2">
-                  Rendements nets illustratifs (portefeuille modèle). Les périodes de 3 ans et plus sont
-                  annualisées lorsque disponibles.
+                  Date de référence : {asOfLabel}. Les périodes de 3 ans et plus sont annualisées
+                  lorsque disponibles.
                 </p>
               </div>
             )}
 
             {staticHoldings.length > 0 && (
               <div className="mb-10">
-                <h2 className="font-heading text-xl font-bold text-dark mb-4">
+                <h2 className="font-heading text-xl font-bold text-dark mb-2">
                   Rendements par fonds
                 </h2>
+                <p className="text-xs text-prestige-taupe mb-4">
+                  Rendements nets des fonds (série Classique 75/75), au {asOfLabel}. Les périodes
+                  multi-années sont annualisées.
+                </p>
                 <div className="overflow-x-auto rounded-xl border border-prestige-beige">
                   <table className="w-full text-sm min-w-[720px]">
                     <thead className="bg-light">
@@ -508,7 +534,9 @@ export const ModelPortfolioDetail = () => {
                     </thead>
                     <tbody>
                       {staticHoldings.map((h) => {
-                        const perf = fundPerfByCode[h.fuCode] || getDefaultFundPerformance(h.fuCode) || {};
+                        const perf =
+                          fundPerfByCode[h.fuCode] || getDefaultFundPerformance(h.fuCode) || {};
+                        const incomplete = new Set(perf.incompleteFields || []);
                         return (
                           <tr
                             key={`${h.fuCode}-${h.illustrationCode}`}
@@ -528,7 +556,10 @@ export const ModelPortfolioDetail = () => {
                                 key={col.key}
                                 className="p-3 text-right tabular-nums whitespace-nowrap"
                               >
-                                {formatReturn(perf[col.key])}
+                                {formatReturnWithIncomplete(
+                                  perf[col.key],
+                                  incomplete.has(col.key)
+                                )}
                               </td>
                             ))}
                           </tr>
@@ -537,14 +568,13 @@ export const ModelPortfolioDetail = () => {
                     </tbody>
                   </table>
                 </div>
-                <p className="text-xs text-prestige-taupe mt-2">
-                  Rendements nets des fonds (série Classique 75/75). Mis à jour via import CSV admin ;
-                  les périodes multi-années sont annualisées.
-                </p>
+                {hasIncompleteHistory && (
+                  <p className="text-xs text-prestige-taupe mt-2">{PORTFOLIO_INCOMPLETE_HISTORY_NOTE}</p>
+                )}
               </div>
             )}
 
-            {ficheHoldings.length > 0 && (
+            {(ficheHoldings.length > 0 || missingFicheHoldings.length > 0) && (
               <div className="mb-8">
                 <h2 className="font-heading text-xl font-bold text-dark mb-4">Fiches de fonds</h2>
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -567,18 +597,27 @@ export const ModelPortfolioDetail = () => {
                       </span>
                     </a>
                   ))}
+                  {missingFicheHoldings.map((h) => (
+                    <div
+                      key={h.fuCode}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-prestige-beige bg-light/30 px-4 py-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium text-dark text-sm truncate">{h.name}</p>
+                        <p className="text-xs text-prestige-taupe font-mono">{h.fuCode}</p>
+                      </div>
+                      <span className="text-xs text-prestige-taupe shrink-0">Fiche non disponible</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
-            <p className="text-xs text-prestige-taupe leading-relaxed border-t border-prestige-beige pt-4">
-              Illustration de portefeuille modèle à titre indicatif seulement — ceci ne constitue
-              pas un conseil personnalisé. Les rendements passés ne garantissent pas les
-              rendements futurs. Les KPI de portefeuille mis à jour via import CSV sont des
-              moyennes pondérées des rendements des fonds (méthode indicative) ; les résultats
-              réels d&apos;un compte peuvent différer. Bien que les fonds distincts offrent des
-              garanties, leur valeur change fréquemment.
-            </p>
+            <div className="text-xs text-prestige-taupe leading-relaxed border-t border-prestige-beige pt-4 space-y-2">
+              <p>{PORTFOLIO_GENERAL_DISCLAIMER}</p>
+              <p>{PORTFOLIO_METHOD_NOTE}</p>
+              <p>{PORTFOLIO_GUARANTEE_DISCLAIMER}</p>
+            </div>
           </div>
         </div>
       </section>

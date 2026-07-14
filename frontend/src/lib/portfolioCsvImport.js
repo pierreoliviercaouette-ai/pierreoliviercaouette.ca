@@ -14,11 +14,17 @@ function stripHtml(value) {
 }
 
 function parsePct(raw) {
-  if (raw === null || raw === undefined) return null;
-  const cleaned = String(raw).replace(/\*/g, '').replace('%', '').replace(',', '.').replace(/−/g, '-').trim();
-  if (!cleaned || cleaned === '-' || cleaned === '—') return null;
+  if (raw === null || raw === undefined) return { value: null, incomplete: false };
+  const original = String(raw);
+  const incomplete = original.includes('*');
+  const cleaned = original.replace(/\*/g, '').replace('%', '').replace(',', '.').replace(/−/g, '-').trim();
+  if (!cleaned || cleaned === '-' || cleaned === '—') return { value: null, incomplete };
   const n = Number(cleaned);
-  return Number.isFinite(n) ? n : null;
+  return { value: Number.isFinite(n) ? n : null, incomplete };
+}
+
+function pctValue(raw) {
+  return parsePct(raw).value;
 }
 
 /** Minimal CSV line parser respecting quotes */
@@ -94,20 +100,41 @@ export function parsePerformanceFundsCsv(text) {
       continue;
     }
     const name = stripHtml(cells[iFonds] || FUND_CATALOG[fuCode]?.name || fuCode);
+    const ytd = parsePct(cells[iYtd]);
+    const prev = iPrev >= 0 ? parsePct(cells[iPrev]) : { value: null, incomplete: false };
+    const oneMonth = i1m >= 0 ? parsePct(cells[i1m]) : { value: null, incomplete: false };
+    const threeMonth = i3m >= 0 ? parsePct(cells[i3m]) : { value: null, incomplete: false };
+    const sixMonth = i6m >= 0 ? parsePct(cells[i6m]) : { value: null, incomplete: false };
+    const oneYear = i1y >= 0 ? parsePct(cells[i1y]) : { value: null, incomplete: false };
+    const threeYear = i3y >= 0 ? parsePct(cells[i3y]) : { value: null, incomplete: false };
+    const fiveYear = i5y >= 0 ? parsePct(cells[i5y]) : { value: null, incomplete: false };
+    const tenYear = i10y >= 0 ? parsePct(cells[i10y]) : { value: null, incomplete: false };
+    const incompleteFields = [];
+    if (ytd.incomplete) incompleteFields.push('ytdPct');
+    if (prev.incomplete) incompleteFields.push('prevYearPct');
+    if (oneMonth.incomplete) incompleteFields.push('oneMonthPct');
+    if (threeMonth.incomplete) incompleteFields.push('threeMonthPct');
+    if (sixMonth.incomplete) incompleteFields.push('sixMonthPct');
+    if (oneYear.incomplete) incompleteFields.push('oneYearPct');
+    if (threeYear.incomplete) incompleteFields.push('threeYearPct');
+    if (fiveYear.incomplete) incompleteFields.push('fiveYearPct');
+    if (tenYear.incomplete) incompleteFields.push('tenYearPct');
+
     funds.push({
       externalCode: fuCode,
       name,
       category: iCat >= 0 ? stripHtml(cells[iCat]) : FUND_CATALOG[fuCode]?.category || null,
-      nav: iNav >= 0 ? parsePct(cells[iNav]) : null,
-      ytdPct: parsePct(cells[iYtd]),
-      prevYearPct: iPrev >= 0 ? parsePct(cells[iPrev]) : null,
-      oneMonthPct: i1m >= 0 ? parsePct(cells[i1m]) : null,
-      threeMonthPct: i3m >= 0 ? parsePct(cells[i3m]) : null,
-      sixMonthPct: i6m >= 0 ? parsePct(cells[i6m]) : null,
-      oneYearPct: i1y >= 0 ? parsePct(cells[i1y]) : null,
-      threeYearPct: i3y >= 0 ? parsePct(cells[i3y]) : null,
-      fiveYearPct: i5y >= 0 ? parsePct(cells[i5y]) : null,
-      tenYearPct: i10y >= 0 ? parsePct(cells[i10y]) : null,
+      nav: iNav >= 0 ? pctValue(cells[iNav]) : null,
+      ytdPct: ytd.value,
+      prevYearPct: prev.value,
+      oneMonthPct: oneMonth.value,
+      threeMonthPct: threeMonth.value,
+      sixMonthPct: sixMonth.value,
+      oneYearPct: oneYear.value,
+      threeYearPct: threeYear.value,
+      fiveYearPct: fiveYear.value,
+      tenYearPct: tenYear.value,
+      incompleteFields,
     });
   }
 
@@ -144,12 +171,39 @@ function weightedAvg(holdings, perfByCode, field) {
 }
 
 /**
+ * Moyenne pondérée pour toutes les périodes d’un portefeuille (source unique d’affichage).
+ * @param {Array} holdings - holdings résolus (fuCode, weightPct)
+ * @param {Record<string, object>} perfByCode - perf indexée par FUxxx
+ */
+export function computeWeightedPeriodReturns(holdings, perfByCode) {
+  const fields = [
+    ['oneMonth', 'oneMonthPct'],
+    ['threeMonth', 'threeMonthPct'],
+    ['sixMonth', 'sixMonthPct'],
+    ['ytd', 'ytdPct'],
+    ['prevYear', 'prevYearPct'],
+    ['oneYear', 'oneYearPct'],
+    ['threeYear', 'threeYearPct'],
+    ['fiveYear', 'fiveYearPct'],
+    ['tenYear', 'tenYearPct'],
+  ];
+  const periodReturns = {};
+  const missingByPeriod = {};
+  for (const [outKey, field] of fields) {
+    const { value, missing } = weightedAvg(holdings, perfByCode, field);
+    periodReturns[outKey] = value;
+    if (missing.length) missingByPeriod[outKey] = missing;
+  }
+  return { periodReturns, missingByPeriod };
+}
+
+/**
  * Recalculate portfolio KPIs as weighted averages of fund returns.
  */
 export function recalculatePortfoliosFromFundPerf(fundRows) {
   const perfByCode = {};
   for (const f of fundRows) {
-    perfByCode[f.externalCode] = f;
+    perfByCode[f.externalCode || f.fuCode] = f;
   }
 
   const results = [];
@@ -157,21 +211,24 @@ export function recalculatePortfoliosFromFundPerf(fundRows) {
 
   for (const profile of PORTFOLIO_PROFILE_LIST) {
     const holdings = getProfileHoldingsResolved(profile.key);
-    const ytd = weightedAvg(holdings, perfByCode, 'ytdPct');
-    const prev = weightedAvg(holdings, perfByCode, 'prevYearPct');
-    const y3 = weightedAvg(holdings, perfByCode, 'threeYearPct');
-    const y5 = weightedAvg(holdings, perfByCode, 'fiveYearPct');
-    ytd.missing.forEach((c) => allMissing.add(c));
-    prev.missing.forEach((c) => allMissing.add(c));
+    const { periodReturns, missingByPeriod } = computeWeightedPeriodReturns(holdings, perfByCode);
+    Object.values(missingByPeriod).forEach((codes) => codes.forEach((c) => allMissing.add(c)));
 
     results.push({
       key: profile.key,
       name: profile.name,
-      ytdPct: ytd.value,
-      prevYearPct: prev.value,
-      annualized3y: y3.value,
-      annualized5y: y5.value,
-      missingCodes: [...new Set([...ytd.missing, ...prev.missing, ...y3.missing, ...y5.missing])],
+      ytdPct: periodReturns.ytd,
+      prevYearPct: periodReturns.prevYear,
+      annualized3y: periodReturns.threeYear,
+      annualized5y: periodReturns.fiveYear,
+      periodReturns,
+      missingCodes: [
+        ...new Set(
+          Object.values(missingByPeriod)
+            .flat()
+            .filter(Boolean)
+        ),
+      ],
     });
   }
 
@@ -207,6 +264,7 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate }) {
         one_month_pct: fund.oneMonthPct,
         three_month_pct: fund.threeMonthPct,
         six_month_pct: fund.sixMonthPct,
+        incomplete_fields: fund.incompleteFields || [],
       },
       updated_at: new Date().toISOString(),
     };
@@ -239,9 +297,13 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate }) {
           three_year_pct: fund.threeYearPct,
           five_year_pct: fund.fiveYearPct,
           ten_year_pct: fund.tenYearPct,
+          one_month_pct: fund.oneMonthPct,
+          three_month_pct: fund.threeMonthPct,
+          six_month_pct: fund.sixMonthPct,
           nav: fund.nav,
           perf_as_of: asOfDate,
           fiche: FUND_CATALOG[fund.externalCode]?.fichePath || null,
+          incomplete_fields: fund.incompleteFields || [],
         },
         updated_at: new Date().toISOString(),
       };

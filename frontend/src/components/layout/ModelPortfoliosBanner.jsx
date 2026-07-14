@@ -2,32 +2,37 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
-import { DEFAULT_MODEL_PORTFOLIOS, DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../../data/modelPortfolios';
-import { PORTFOLIO_PROFILE_LIST } from '../../data/portfolioProfiles';
+import { DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../../data/modelPortfolios';
+import {
+  DEFAULT_FUND_PERFORMANCE,
+  PORTFOLIO_PROFILE_LIST,
+  getProfileHoldingsResolved,
+} from '../../data/portfolioProfiles';
+import {
+  PORTFOLIO_BANNER_DISCLAIMER,
+  formatIsoDateLabelFr,
+  formatReturnFr,
+} from '../../lib/portfolioCompliance';
+import { computeWeightedPeriodReturns } from '../../lib/portfolioCsvImport';
+
+function fallbackPortfoliosFromWeighted() {
+  return PORTFOLIO_PROFILE_LIST.map((p) => {
+    const holdings = getProfileHoldingsResolved(p.key);
+    const { periodReturns } = computeWeightedPeriodReturns(holdings, DEFAULT_FUND_PERFORMANCE);
+    return {
+      key: p.key,
+      name: p.name,
+      ytd2026: periodReturns.ytd ?? p.defaults.ytd,
+      yearPrev: periodReturns.prevYear ?? p.defaults.prevYear,
+      href: p.href,
+    };
+  });
+}
 
 function getReturnColor(value) {
   if (value > 0) return 'text-emerald-700';
   if (value < 0) return 'text-red-600';
   return 'text-prestige-taupe';
-}
-
-function formatReturn(value) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
-  const n = Number(value);
-  const sign = n > 0 ? '+' : n < 0 ? '-' : '';
-  const abs = Math.abs(n).toFixed(1).replace('.', ',');
-  return `${sign}${abs} %`;
-}
-
-function formatIsoDateLabel(isoDate) {
-  if (!isoDate || typeof isoDate !== 'string') return '';
-  const [year, month, day] = isoDate.split('-').map((value) => Number(value));
-  if (!year || !month || !day) return '';
-  return new Date(year, month - 1, day).toLocaleDateString('fr-CA', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
 }
 
 function PortfolioCard({ portfolio, currentYear, prevYearLabel }) {
@@ -42,11 +47,11 @@ function PortfolioCard({ portfolio, currentYear, prevYearLabel }) {
         <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs">
           <span className="text-prestige-taupe">AAJ {currentYear}</span>
           <span className={`text-right font-semibold tabular-nums ${getReturnColor(portfolio.ytd2026)}`}>
-            {formatReturn(portfolio.ytd2026)}
+            {formatReturnFr(portfolio.ytd2026)}
           </span>
           <span className="text-prestige-taupe">{prevYearLabel}</span>
           <span className={`text-right font-medium tabular-nums ${getReturnColor(portfolio.yearPrev)}`}>
-            {formatReturn(portfolio.yearPrev)}
+            {formatReturnFr(portfolio.yearPrev)}
           </span>
         </div>
       </div>
@@ -56,15 +61,7 @@ function PortfolioCard({ portfolio, currentYear, prevYearLabel }) {
 }
 
 export const ModelPortfoliosBanner = () => {
-  const [portfolios, setPortfolios] = useState(
-    DEFAULT_MODEL_PORTFOLIOS.map((p) => ({
-      key: p.key,
-      name: p.name,
-      ytd2026: p.ytd2026,
-      yearPrev: p.year2025,
-      href: p.href,
-    }))
-  );
+  const [portfolios, setPortfolios] = useState(fallbackPortfoliosFromWeighted);
   const [asOfLabel, setAsOfLabel] = useState(DEFAULT_MODEL_PORTFOLIOS_AS_OF);
   const [prevYearLabel, setPrevYearLabel] = useState(2025);
 
@@ -75,15 +72,7 @@ export const ModelPortfoliosBanner = () => {
         .select('key,name,ytd_2026,year_2025,href,as_of_date')
         .order('display_order', { ascending: true });
       if (error || !rows?.length) {
-        setPortfolios(
-          PORTFOLIO_PROFILE_LIST.map((p) => ({
-            key: p.key,
-            name: p.name,
-            ytd2026: p.defaults.ytd,
-            yearPrev: p.defaults.prevYear,
-            href: p.href,
-          }))
-        );
+        setPortfolios(fallbackPortfoliosFromWeighted());
         return;
       }
       setPortfolios(
@@ -98,7 +87,7 @@ export const ModelPortfoliosBanner = () => {
       setPrevYearLabel(new Date().getFullYear() - 1);
       const firstDate = rows[0]?.as_of_date;
       if (firstDate) {
-        setAsOfLabel(formatIsoDateLabel(firstDate));
+        setAsOfLabel(formatIsoDateLabelFr(firstDate));
       }
     };
 
@@ -133,9 +122,7 @@ export const ModelPortfoliosBanner = () => {
           ))}
         </div>
 
-        <p className="text-xs text-prestige-taupe mt-3">
-          Indicatif seulement. Les rendements passés ne garantissent pas les rendements futurs.
-        </p>
+        <p className="text-xs text-prestige-taupe mt-3 leading-relaxed">{PORTFOLIO_BANNER_DISCLAIMER}</p>
       </div>
     </section>
   );
