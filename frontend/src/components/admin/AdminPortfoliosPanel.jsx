@@ -43,10 +43,6 @@ export function AdminPortfoliosPanel({ onRefresh }) {
       portfolios.reduce((acc, portfolio) => {
         acc[portfolio.id] = {
           name: portfolio.name || '',
-          ytd_2026: portfolio.ytd_2026 ?? 0,
-          year_2025: portfolio.year_2025 ?? 0,
-          annualized_3y: portfolio.annualized_3y ?? 0,
-          annualized_5y: portfolio.annualized_5y ?? 0,
         };
         return acc;
       }, {})
@@ -58,11 +54,6 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     load();
   }, [load]);
 
-  const toNumericOrZero = (value) => {
-    const parsed = Number(value);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  };
-
   const updateModelPortfolio = async (portfolioId) => {
     const draft = draftsById[portfolioId];
     if (!draft) return;
@@ -73,14 +64,10 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         .from('model_portfolios')
         .update({
           name: draft.name,
-          ytd_2026: toNumericOrZero(draft.ytd_2026),
-          year_2025: toNumericOrZero(draft.year_2025),
-          annualized_3y: toNumericOrZero(draft.annualized_3y),
-          annualized_5y: toNumericOrZero(draft.annualized_5y),
         })
         .eq('id', portfolioId);
       if (error) throw error;
-      toast.success('Portefeuille sauvegarde');
+      toast.success('Titre sauvegarde');
       window.dispatchEvent(new Event('model-portfolios-updated'));
       onRefresh?.();
     } catch (error) {
@@ -171,9 +158,8 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         <div>
           <p className="font-semibold text-dark">Importer performances (CSV iA)</p>
           <p className="text-xs text-prestige-taupe mt-1">
-            Déposez un fichier <code className="text-xs">performance-fonds-….csv</code>. Les
-            rendements des fonds sont enregistrés, puis les 5 portefeuilles sont recalculés en
-            pondération (AAJ, année précédente, 3 ans, 5 ans).
+            Source de vérité de l&apos;affichage : import CSV → rendements des fonds, puis moyenne
+            pondérée des 5 portefeuilles (bannière et fiches). Ne pas saisir manuellement les KPI.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -220,14 +206,10 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         )}
       </div>
 
-      <p className="text-xs text-prestige-taupe">
-        Secours : saisie manuelle des rendements AAJ, année précédente, 3 ans et 5 ans annualisés.
-      </p>
-
       <div className="p-4 bg-light rounded-xl border border-prestige-beige">
         <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
           <div>
-            <Label>Date de la derniere mise a jour des rendements</Label>
+            <Label>Date de reference des rendements (as of)</Label>
             <Input type="date" value={asOfDate} onChange={(e) => setAsOfDate(e.target.value)} />
           </div>
           <Button type="button" onClick={updateAsOfDateForAll} disabled={savingAsOfDate || !asOfDate}>
@@ -242,7 +224,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         <div className="space-y-3">
           {modelPortfolios.map((portfolio) => (
             <div key={portfolio.id} className="p-4 bg-light rounded-xl border border-prestige-beige">
-              <div className="grid md:grid-cols-5 gap-3 items-end">
+              <div className="grid md:grid-cols-[1.2fr_repeat(4,minmax(0,1fr))_auto] gap-3 items-end">
                 <div>
                   <Label>Titre du portefeuille</Label>
                   <Input
@@ -258,89 +240,45 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                     }
                   />
                 </div>
-
                 <div>
-                  <Label>Rendement AAJ (%)</Label>
+                  <Label>AAJ (sync)</Label>
+                  <Input type="text" readOnly value={portfolio.ytd_2026 ?? '—'} className="bg-white/60" />
+                </div>
+                <div>
+                  <Label>Année préc. (sync)</Label>
+                  <Input type="text" readOnly value={portfolio.year_2025 ?? '—'} className="bg-white/60" />
+                </div>
+                <div>
+                  <Label>3 ans (sync)</Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    value={draftsById[portfolio.id]?.ytd_2026 ?? 0}
-                    onChange={(e) =>
-                      setDraftsById((prev) => ({
-                        ...prev,
-                        [portfolio.id]: {
-                          ...(prev[portfolio.id] || {}),
-                          ytd_2026: e.target.value,
-                        },
-                      }))
-                    }
+                    type="text"
+                    readOnly
+                    value={portfolio.annualized_3y ?? '—'}
+                    className="bg-white/60"
                   />
                 </div>
-
                 <div>
-                  <Label>Rendement annee precedente (%)</Label>
+                  <Label>5 ans (sync)</Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    value={draftsById[portfolio.id]?.year_2025 ?? 0}
-                    onChange={(e) =>
-                      setDraftsById((prev) => ({
-                        ...prev,
-                        [portfolio.id]: {
-                          ...(prev[portfolio.id] || {}),
-                          year_2025: e.target.value,
-                        },
-                      }))
-                    }
+                    type="text"
+                    readOnly
+                    value={portfolio.annualized_5y ?? '—'}
+                    className="bg-white/60"
                   />
                 </div>
-
-                <div>
-                  <Label>Rendement 3 ans annualise (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={draftsById[portfolio.id]?.annualized_3y ?? 0}
-                    onChange={(e) =>
-                      setDraftsById((prev) => ({
-                        ...prev,
-                        [portfolio.id]: {
-                          ...(prev[portfolio.id] || {}),
-                          annualized_3y: e.target.value,
-                        },
-                      }))
-                    }
-                  />
-                </div>
-
-                <div>
-                  <Label>Rendement 5 ans annualise (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={draftsById[portfolio.id]?.annualized_5y ?? 0}
-                    onChange={(e) =>
-                      setDraftsById((prev) => ({
-                        ...prev,
-                        [portfolio.id]: {
-                          ...(prev[portfolio.id] || {}),
-                          annualized_5y: e.target.value,
-                        },
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-              <div className="mt-3 flex justify-end">
                 <Button
                   type="button"
                   size="sm"
                   onClick={() => updateModelPortfolio(portfolio.id)}
                   disabled={Boolean(savingById[portfolio.id])}
                 >
-                  {savingById[portfolio.id] ? 'Sauvegarde...' : 'Sauvegarder'}
+                  {savingById[portfolio.id] ? '…' : 'Sauver titre'}
                 </Button>
               </div>
+              <p className="text-[11px] text-prestige-taupe mt-2">
+                Les KPI sont en lecture seule (sync import CSV / pondération). L&apos;affichage site
+                recalcule aussi depuis les fonds — même source.
+              </p>
             </div>
           ))}
         </div>

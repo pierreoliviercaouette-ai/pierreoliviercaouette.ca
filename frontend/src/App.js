@@ -1,9 +1,9 @@
 import "@/index.css";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { SupabaseAuthProvider as AuthProvider } from "./context/SupabaseAuthContext";
 import { Navbar } from "./components/layout/Navbar";
-import { ModelPortfoliosBanner } from "./components/layout/ModelPortfoliosBanner";
 import { Footer } from "./components/layout/Footer";
 import { BackToTop } from "./components/layout/BackToTop";
 import { ScrollToTop } from "./components/layout/ScrollToTop";
@@ -24,7 +24,6 @@ import { Contact, Appointment } from "./pages/Contact";
 import { Privacy, Terms } from "./pages/Legal";
 import { Referral } from "./pages/Referral";
 import { ReferralConsent } from "./pages/ReferralConsent";
-import { ModelPortfolioDetail } from "./pages/ModelPortfolioDetail";
 import {
   AssuranceInvaliditeQuebec,
   AssuranceVieVictoriaville,
@@ -33,6 +32,15 @@ import {
   RecommanderConseillerFinancier,
 } from "./pages/SeoLandingPages";
 import { JemceeLanding } from "./pages/JemceeLanding";
+
+const ModelPortfoliosBanner = lazy(() =>
+  import("./components/layout/ModelPortfoliosBanner").then((m) => ({
+    default: m.ModelPortfoliosBanner,
+  }))
+);
+const ModelPortfolioDetail = lazy(() =>
+  import("./pages/ModelPortfolioDetail").then((m) => ({ default: m.ModelPortfolioDetail }))
+);
 
 function App() {
   const { user, loading } = useSupabaseAuth();
@@ -45,9 +53,9 @@ function App() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         {isAdmin && (
-          <div>
+          <Suspense fallback={null}>
             <ModelPortfoliosBanner />
-          </div>
+          </Suspense>
         )}
         <main className="flex-1">
           <Routes>
@@ -67,7 +75,15 @@ function App() {
             <Route path="/recommandations" element={<Referral />} />
             <Route
               path="/portefeuilles/:slug"
-              element={loading ? null : isAdmin ? <ModelPortfolioDetail /> : <Navigate to="/" replace />}
+              element={
+                loading ? null : isAdmin ? (
+                  <Suspense fallback={null}>
+                    <ModelPortfolioDetail />
+                  </Suspense>
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              }
             />
             <Route path="/referencement/consentement" element={<Navigate to="/recommandations/consentement" replace />} />
             <Route path="/referencement" element={<Navigate to="/recommandations" replace />} />

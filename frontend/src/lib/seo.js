@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-export function useSeoMeta({ title, description, canonicalPath }) {
+export function useSeoMeta({ title, description, canonicalPath, noindex = false }) {
   useEffect(() => {
     if (title) document.title = title;
 
@@ -14,6 +14,18 @@ export function useSeoMeta({ title, description, canonicalPath }) {
       meta.setAttribute('content', description);
     }
 
+    let robots = document.querySelector('meta[name="robots"]');
+    if (noindex) {
+      if (!robots) {
+        robots = document.createElement('meta');
+        robots.setAttribute('name', 'robots');
+        document.head.appendChild(robots);
+      }
+      robots.setAttribute('content', 'noindex, nofollow');
+    } else if (robots && robots.getAttribute('content') === 'noindex, nofollow') {
+      robots.remove();
+    }
+
     if (canonicalPath) {
       let link = document.querySelector('link[rel="canonical"]');
       if (!link) {
@@ -24,7 +36,16 @@ export function useSeoMeta({ title, description, canonicalPath }) {
       const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.pierreoliviercaouette.ca';
       link.setAttribute('href', `${origin}${canonicalPath}`);
     }
-  }, [title, description, canonicalPath]);
+
+    return () => {
+      if (noindex) {
+        const currentRobots = document.querySelector('meta[name="robots"]');
+        if (currentRobots && currentRobots.getAttribute('content') === 'noindex, nofollow') {
+          currentRobots.remove();
+        }
+      }
+    };
+  }, [title, description, canonicalPath, noindex]);
 }
 
 export function useFaqSchema(faqItems = []) {

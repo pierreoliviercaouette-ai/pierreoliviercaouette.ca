@@ -4,30 +4,15 @@ import { ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../../data/modelPortfolios';
 import {
-  DEFAULT_FUND_PERFORMANCE,
-  PORTFOLIO_PROFILE_LIST,
-  getProfileHoldingsResolved,
-} from '../../data/portfolioProfiles';
-import {
   PORTFOLIO_BANNER_DISCLAIMER,
   formatIsoDateLabelFr,
-  formatReturnFr,
+  formatReturnWithIncomplete,
 } from '../../lib/portfolioCompliance';
-import { computeWeightedPeriodReturns } from '../../lib/portfolioCsvImport';
-
-function fallbackPortfoliosFromWeighted() {
-  return PORTFOLIO_PROFILE_LIST.map((p) => {
-    const holdings = getProfileHoldingsResolved(p.key);
-    const { periodReturns } = computeWeightedPeriodReturns(holdings, DEFAULT_FUND_PERFORMANCE);
-    return {
-      key: p.key,
-      name: p.name,
-      ytd2026: periodReturns.ytd ?? p.defaults.ytd,
-      yearPrev: periodReturns.prevYear ?? p.defaults.prevYear,
-      href: p.href,
-    };
-  });
-}
+import {
+  buildDefaultFundPerfByCode,
+  buildWeightedPortfolioCards,
+  loadPortfolioFundPerfMap,
+} from '../../lib/portfolioFundPerf';
 
 function getReturnColor(value) {
   if (value > 0) return 'text-emerald-700';
@@ -47,11 +32,11 @@ function PortfolioCard({ portfolio, currentYear, prevYearLabel }) {
         <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs">
           <span className="text-prestige-taupe">AAJ {currentYear}</span>
           <span className={`text-right font-semibold tabular-nums ${getReturnColor(portfolio.ytd2026)}`}>
-            {formatReturnFr(portfolio.ytd2026)}
+            {formatReturnWithIncomplete(portfolio.ytd2026, portfolio.ytdIncomplete)}
           </span>
           <span className="text-prestige-taupe">{prevYearLabel}</span>
           <span className={`text-right font-medium tabular-nums ${getReturnColor(portfolio.yearPrev)}`}>
-            {formatReturnFr(portfolio.yearPrev)}
+            {formatReturnWithIncomplete(portfolio.yearPrev, portfolio.prevIncomplete)}
           </span>
         </div>
       </div>
@@ -61,33 +46,19 @@ function PortfolioCard({ portfolio, currentYear, prevYearLabel }) {
 }
 
 export const ModelPortfoliosBanner = () => {
-  const [portfolios, setPortfolios] = useState(fallbackPortfoliosFromWeighted);
+  const [portfolios, setPortfolios] = useState(() =>
+    buildWeightedPortfolioCards(buildDefaultFundPerfByCode())
+  );
   const [asOfLabel, setAsOfLabel] = useState(DEFAULT_MODEL_PORTFOLIOS_AS_OF);
-  const [prevYearLabel, setPrevYearLabel] = useState(2025);
+  const [prevYearLabel, setPrevYearLabel] = useState(() => new Date().getFullYear() - 1);
 
   useEffect(() => {
     const loadPortfolios = async () => {
-      const { data: rows, error } = await supabase
-        .from('model_portfolios')
-        .select('key,name,ytd_2026,year_2025,href,as_of_date')
-        .order('display_order', { ascending: true });
-      if (error || !rows?.length) {
-        setPortfolios(fallbackPortfoliosFromWeighted());
-        return;
-      }
-      setPortfolios(
-        rows.map((item) => ({
-          key: item.key,
-          name: item.name,
-          ytd2026: Number(item.ytd_2026),
-          yearPrev: Number(item.year_2025),
-          href: item.href,
-        }))
-      );
+      const { perfByCode, asOfIso } = await loadPortfolioFundPerfMap(supabase);
+      setPortfolios(buildWeightedPortfolioCards(perfByCode));
       setPrevYearLabel(new Date().getFullYear() - 1);
-      const firstDate = rows[0]?.as_of_date;
-      if (firstDate) {
-        setAsOfLabel(formatIsoDateLabelFr(firstDate));
+      if (asOfIso) {
+        setAsOfLabel(formatIsoDateLabelFr(asOfIso) || asOfIso);
       }
     };
 
@@ -108,7 +79,7 @@ export const ModelPortfoliosBanner = () => {
       <div className="container-max px-4 md:px-8 py-4">
         <div className="mb-3 flex items-baseline justify-between gap-3">
           <p className="font-heading text-base font-semibold text-dark">Portefeuilles modèles</p>
-          <p className="text-xs text-prestige-taupe shrink-0">Au {asOfLabel}</p>
+          <p className="text-xs text-prestige-taupe shrink-0">Au {asOfLabel} · CAD</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">

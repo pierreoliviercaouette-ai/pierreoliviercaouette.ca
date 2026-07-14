@@ -156,6 +156,7 @@ function weightedAvg(holdings, perfByCode, field) {
   let sumW = 0;
   let sum = 0;
   const missing = [];
+  const totalW = holdings.reduce((acc, h) => acc + Number(h.weightPct || 0), 0);
   for (const h of holdings) {
     const perf = perfByCode[h.fuCode];
     const val = perf?.[field];
@@ -166,8 +167,9 @@ function weightedAvg(holdings, perfByCode, field) {
     sum += Number(val) * Number(h.weightPct);
     sumW += Number(h.weightPct);
   }
-  if (sumW <= 0) return { value: null, missing };
-  return { value: Math.round((sum / sumW) * 100) / 100, missing };
+  if (sumW <= 0) return { value: null, missing, incomplete: missing.length > 0 || totalW > 0 };
+  const incomplete = missing.length > 0 || (totalW > 0 && sumW < totalW - 0.01);
+  return { value: Math.round((sum / sumW) * 100) / 100, missing, incomplete };
 }
 
 /**
@@ -189,12 +191,14 @@ export function computeWeightedPeriodReturns(holdings, perfByCode) {
   ];
   const periodReturns = {};
   const missingByPeriod = {};
+  const incompleteByPeriod = {};
   for (const [outKey, field] of fields) {
-    const { value, missing } = weightedAvg(holdings, perfByCode, field);
+    const { value, missing, incomplete } = weightedAvg(holdings, perfByCode, field);
     periodReturns[outKey] = value;
     if (missing.length) missingByPeriod[outKey] = missing;
+    if (incomplete) incompleteByPeriod[outKey] = true;
   }
-  return { periodReturns, missingByPeriod };
+  return { periodReturns, missingByPeriod, incompleteByPeriod };
 }
 
 /**

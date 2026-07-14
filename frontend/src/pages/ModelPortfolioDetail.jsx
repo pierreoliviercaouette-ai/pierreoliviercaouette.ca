@@ -24,11 +24,18 @@ import {
   PORTFOLIO_GENERAL_DISCLAIMER,
   PORTFOLIO_GUARANTEE_DISCLAIMER,
   PORTFOLIO_INCOMPLETE_HISTORY_NOTE,
+  PORTFOLIO_MER_NOTE,
   PORTFOLIO_METHOD_NOTE,
+  PORTFOLIO_PRODUCT_NOTICE,
+  PORTFOLIO_RISK_SCALE_NOTE,
   formatIsoDateLabelFr,
   formatReturnWithIncomplete,
 } from '../lib/portfolioCompliance';
 import { computeWeightedPeriodReturns } from '../lib/portfolioCsvImport';
+import {
+  buildDefaultFundPerfByCode,
+  mergeFundRowsIntoPerfMap,
+} from '../lib/portfolioFundPerf';
 import { useSeoMeta } from '../lib/seo';
 import { supabase } from '../lib/supabaseClient';
 
@@ -71,25 +78,22 @@ function formatMoneyCad(value) {
   }).format(value);
 }
 
-function pickPerfField(row, meta, column, metaKey) {
-  if (row?.[column] != null && row[column] !== '') return Number(row[column]);
-  if (meta?.[metaKey] != null && meta[metaKey] !== '') return Number(meta[metaKey]);
-  return null;
-}
-
 function RiskBars({ level, accent }) {
   return (
-    <div className="flex items-end gap-1" aria-label={`Niveau de risque ${level} sur 5`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span
-          key={i}
-          className="w-1.5 rounded-sm"
-          style={{
-            height: `${8 + i * 3}px`,
-            backgroundColor: i <= level ? accent : '#e2dcd0',
-          }}
-        />
-      ))}
+    <div className="space-y-1">
+      <div className="flex items-end gap-1" aria-label={`Niveau de risque indicatif ${level} sur 5`}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <span
+            key={i}
+            className="w-1.5 rounded-sm"
+            style={{
+              height: `${8 + i * 3}px`,
+              backgroundColor: i <= level ? accent : '#e2dcd0',
+            }}
+          />
+        ))}
+      </div>
+      <p className="text-[10px] text-prestige-taupe max-w-[9rem] leading-snug">Risque modèle {level}/5</p>
     </div>
   );
 }
@@ -102,6 +106,7 @@ export const ModelPortfolioDetail = () => {
   const [asOfLabel, setAsOfLabel] = useState(DEFAULT_MODEL_PORTFOLIOS_AS_OF);
   const [snapshot, setSnapshot] = useState(null);
   const [fundPerfByCode, setFundPerfByCode] = useState({});
+  const [incompleteByPeriod, setIncompleteByPeriod] = useState({});
   const [loading, setLoading] = useState(true);
 
   const staticHoldings = useMemo(
@@ -116,7 +121,7 @@ export const ModelPortfolioDetail = () => {
 
       const { data: legacyRow } = await supabase
         .from('model_portfolios')
-        .select('key,name,ytd_2026,year_2025,annualized_3y,annualized_5y,href,as_of_date')
+        .select('key,name,href,as_of_date')
         .eq('key', slug)
         .maybeSingle();
 
@@ -139,93 +144,46 @@ export const ModelPortfolioDetail = () => {
       }
 
       const codes = staticHoldings.map((h) => h.fuCode).filter(Boolean);
-      const perfByCode = {};
-      for (const code of codes) {
-        const defaults = getDefaultFundPerformance(code);
-        if (defaults) perfByCode[code] = { ...defaults };
-      }
+      let perfByCode = buildDefaultFundPerfByCode(codes);
+
       if (codes.length) {
         const { data: fundRows } = await supabase
           .from('funds')
           .select(
-            'external_code, ytd_pct, prev_year_pct, one_year_pct, three_year_pct, five_year_pct, ten_year_pct, metadata'
+            'external_code, ytd_pct, prev_year_pct, one_year_pct, three_year_pct, five_year_pct, ten_year_pct, perf_as_of, metadata'
           )
           .in('external_code', codes);
-
-        for (const row of fundRows || []) {
-          const meta = row.metadata || {};
-          const defaults = getDefaultFundPerformance(row.external_code) || {};
-          const incompleteFields = Array.isArray(meta.incomplete_fields)
-            ? meta.incomplete_fields
-            : defaults.incompleteFields || [];
-          perfByCode[row.external_code] = {
-            ytdPct: pickPerfField(row, meta, 'ytd_pct', 'ytd_pct') ?? defaults.ytdPct ?? null,
-            prevYearPct:
-              pickPerfField(row, meta, 'prev_year_pct', 'prev_year_pct') ?? defaults.prevYearPct ?? null,
-            oneMonthPct:
-              pickPerfField(row, meta, null, 'one_month_pct') ?? defaults.oneMonthPct ?? null,
-            threeMonthPct:
-              pickPerfField(row, meta, null, 'three_month_pct') ?? defaults.threeMonthPct ?? null,
-            sixMonthPct:
-              pickPerfField(row, meta, null, 'six_month_pct') ?? defaults.sixMonthPct ?? null,
-            oneYearPct:
-              pickPerfField(row, meta, 'one_year_pct', 'one_year_pct') ?? defaults.oneYearPct ?? null,
-            threeYearPct:
-              pickPerfField(row, meta, 'three_year_pct', 'three_year_pct') ??
-              defaults.threeYearPct ??
-              null,
-            fiveYearPct:
-              pickPerfField(row, meta, 'five_year_pct', 'five_year_pct') ?? defaults.fiveYearPct ?? null,
-            tenYearPct:
-              pickPerfField(row, meta, 'ten_year_pct', 'ten_year_pct') ?? defaults.tenYearPct ?? null,
-            incompleteFields,
-          };
-        }
+        perfByCode = mergeFundRowsIntoPerfMap(perfByCode, fundRows);
       }
 
-      // Source unique : moyenne pondérée des fonds (alignée bannière après import CSV)
-      const { periodReturns: weighted } = computeWeightedPeriodReturns(staticHoldings, perfByCode);
+      const {
+        periodReturns: weighted,
+        incompleteByPeriod: incomplete,
+      } = computeWeightedPeriodReturns(staticHoldings, perfByCode);
       const defaults = profile?.defaults;
 
       setPortfolio({
         key: slug,
         name: legacyRow?.name || profile?.name || fallbackPortfolio?.name || slug,
-        ytd2026:
-          weighted.ytd ??
-          (legacyRow ? Number(legacyRow.ytd_2026) : null) ??
-          (snap?.ytd_pct != null ? Number(snap.ytd_pct) : null) ??
-          defaults?.ytd ??
-          fallbackPortfolio?.ytd2026 ??
-          null,
-        year2025:
-          weighted.prevYear ??
-          (legacyRow ? Number(legacyRow.year_2025) : null) ??
-          (snap?.prev_civil_year_pct != null ? Number(snap.prev_civil_year_pct) : null) ??
-          defaults?.prevYear ??
-          fallbackPortfolio?.year2025 ??
-          null,
+        ytd2026: weighted.ytd ?? defaults?.ytd ?? fallbackPortfolio?.ytd2026 ?? null,
+        year2025: weighted.prevYear ?? defaults?.prevYear ?? fallbackPortfolio?.year2025 ?? null,
         annualized3y:
-          weighted.threeYear ??
-          (legacyRow ? Number(legacyRow.annualized_3y) : null) ??
-          (snap?.rolling_3y_pct != null ? Number(snap.rolling_3y_pct) : null) ??
-          defaults?.annualized3y ??
-          fallbackPortfolio?.annualized3y ??
-          null,
+          weighted.threeYear ?? defaults?.annualized3y ?? fallbackPortfolio?.annualized3y ?? null,
         annualized5y:
-          weighted.fiveYear ??
-          (legacyRow ? Number(legacyRow.annualized_5y) : null) ??
-          (snap?.rolling_5y_pct != null ? Number(snap.rolling_5y_pct) : null) ??
-          defaults?.annualized5y ??
-          fallbackPortfolio?.annualized5y ??
-          null,
+          weighted.fiveYear ?? defaults?.annualized5y ?? fallbackPortfolio?.annualized5y ?? null,
         href: legacyRow?.href || profile?.href || `/portefeuilles/${slug}`,
         periodReturns: weighted,
       });
+      setIncompleteByPeriod(incomplete || {});
       setSnapshot(snap);
       setFundPerfByCode(perfByCode);
 
-      if (legacyRow?.as_of_date || snap?.as_of_date) {
-        setAsOfLabel(formatIsoDateLabelFr(legacyRow?.as_of_date || snap.as_of_date));
+      const asOfCandidate =
+        legacyRow?.as_of_date ||
+        snap?.as_of_date ||
+        Object.values(perfByCode).find((p) => p.perfAsOf)?.perfAsOf;
+      if (asOfCandidate) {
+        setAsOfLabel(formatIsoDateLabelFr(asOfCandidate) || asOfCandidate);
       }
 
       setLoading(false);
@@ -278,10 +236,12 @@ export const ModelPortfolioDetail = () => {
   );
 
   const hasIncompleteHistory = useMemo(() => {
-    return Object.values(fundPerfByCode).some(
+    const fromFunds = Object.values(fundPerfByCode).some(
       (perf) => Array.isArray(perf?.incompleteFields) && perf.incompleteFields.length > 0
     );
-  }, [fundPerfByCode]);
+    const fromWeighted = Object.keys(incompleteByPeriod || {}).length > 0;
+    return fromFunds || fromWeighted;
+  }, [fundPerfByCode, incompleteByPeriod]);
 
   const periodReturns = portfolio?.periodReturns || null;
   const prevYear = new Date().getFullYear() - 1;
@@ -295,6 +255,7 @@ export const ModelPortfolioDetail = () => {
       ? `Fiche detaillee du portefeuille ${portfolio.name}: philosophie, repartition, rendements et fiches de fonds.`
       : 'Fiche portefeuille modele.',
     canonicalPath: portfolio?.href ?? '/portefeuilles',
+    noindex: true,
   });
 
   if (!loading && !profile && !portfolio) {
@@ -326,14 +287,14 @@ export const ModelPortfolioDetail = () => {
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
               <div>
                 <p className="text-xs uppercase tracking-widest text-prestige-taupe mb-1">
-                  Portefeuille modèle
+                  Portefeuille modèle · outil interne
                 </p>
                 <h1 className="font-heading text-3xl md:text-4xl font-bold text-dark">
                   {portfolio.name}
                 </h1>
                 <p className="text-sm text-prestige-taupe mt-2">
                   Données de rendement au {asOfLabel}
-                  <span className="text-prestige-taupe/80"> · série Classique 75/75</span>
+                  <span className="text-prestige-taupe/80"> · série Classique 75/75 · CAD</span>
                 </p>
                 {profile?.merPct != null && (
                   <p className="text-xs text-prestige-taupe mt-1">
@@ -344,17 +305,43 @@ export const ModelPortfolioDetail = () => {
               {profile && <RiskBars level={profile.riskLevel} accent={accent} />}
             </div>
 
+            <p className="text-xs text-prestige-taupe leading-relaxed mb-2">{PORTFOLIO_RISK_SCALE_NOTE}</p>
+            {profile?.merPct != null && (
+              <p className="text-xs text-prestige-taupe leading-relaxed mb-4">{PORTFOLIO_MER_NOTE}</p>
+            )}
+
+            <div className="rounded-xl border border-prestige-beige bg-light/60 p-3 mb-4 space-y-2">
+              <p className="text-xs text-prestige-taupe leading-relaxed">{PORTFOLIO_PRODUCT_NOTICE}</p>
+              <p className="text-xs text-prestige-taupe leading-relaxed">{PORTFOLIO_GUARANTEE_DISCLAIMER}</p>
+            </div>
+
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
               {[
-                { label: `${currentYear} (AAJ)`, value: portfolio.ytd2026 },
-                { label: `${prevYear} (année civile)`, value: portfolio.year2025 },
-                { label: '3 ans (annualisé)', value: portfolio.annualized3y },
-                { label: '5 ans (annualisé)', value: portfolio.annualized5y },
+                {
+                  label: `${currentYear} (AAJ)`,
+                  value: portfolio.ytd2026,
+                  incomplete: incompleteByPeriod.ytd,
+                },
+                {
+                  label: `${prevYear} (année civile)`,
+                  value: portfolio.year2025,
+                  incomplete: incompleteByPeriod.prevYear,
+                },
+                {
+                  label: '3 ans (annualisé)',
+                  value: portfolio.annualized3y,
+                  incomplete: incompleteByPeriod.threeYear,
+                },
+                {
+                  label: '5 ans (annualisé)',
+                  value: portfolio.annualized5y,
+                  incomplete: incompleteByPeriod.fiveYear,
+                },
               ].map((kpi) => (
                 <div key={kpi.label} className="rounded-2xl bg-light border border-prestige-beige p-4">
                   <p className="text-sm text-prestige-taupe">{kpi.label}</p>
                   <p className="text-2xl font-semibold text-dark mt-1 tabular-nums">
-                    {formatReturnWithIncomplete(kpi.value)}
+                    {formatReturnWithIncomplete(kpi.value, kpi.incomplete)}
                   </p>
                 </div>
               ))}
@@ -363,7 +350,7 @@ export const ModelPortfolioDetail = () => {
 
             {profile?.philosophy && (
               <div className="mb-10">
-                <h2 className="font-heading text-xl font-bold text-dark mb-3">Philosophie</h2>
+                <h2 className="font-heading text-xl font-bold text-dark mb-3">Philosophie du modèle</h2>
                 <p className="text-prestige-taupe leading-relaxed mb-4">{profile.philosophy.summary}</p>
                 <ul className="space-y-2">
                   {profile.philosophy.bullets.map((b) => (
@@ -435,8 +422,8 @@ export const ModelPortfolioDetail = () => {
                 </h2>
                 <p className="text-sm text-prestige-taupe mb-4">
                   {chartIsMoney
-                    ? 'Illustration historique (PDF iA, 30 juin 2026) : évolution d’un placement de 100 000 $ (fin d’année civile). Cette courbe peut différer des KPI pondérés ci-dessus, recalculés à la date de rendement affichée.'
-                    : 'Série reconstruite (base 100). Peut différer des KPI pondérés à la date de rendement affichée.'}
+                    ? 'Illustration historique (PDF iA, 30 juin 2026) : évolution d’un placement de 100 000 $ (fin d’année civile). Cette courbe peut différer des KPI pondérés ci-dessus, recalculés à la date de rendement affichée. Ce n’est pas une projection ni une garantie de résultats futurs.'
+                    : 'Série reconstruite (base 100). Peut différer des KPI pondérés à la date de rendement affichée. Ce n’est pas une projection ni une garantie de résultats futurs.'}
                 </p>
                 <div className="h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -495,7 +482,10 @@ export const ModelPortfolioDetail = () => {
                       <tr>
                         {PORTFOLIO_PERIOD_COLUMNS.map((col) => (
                           <td key={col.key} className="p-3 text-right tabular-nums font-medium">
-                            {formatReturnWithIncomplete(periodReturns[col.key])}
+                            {formatReturnWithIncomplete(
+                              periodReturns[col.key],
+                              incompleteByPeriod[col.key]
+                            )}
                           </td>
                         ))}
                       </tr>
@@ -506,6 +496,9 @@ export const ModelPortfolioDetail = () => {
                   Date de référence : {asOfLabel}. Les périodes de 3 ans et plus sont annualisées
                   lorsque disponibles.
                 </p>
+                {hasIncompleteHistory && (
+                  <p className="text-xs text-prestige-taupe mt-1">{PORTFOLIO_INCOMPLETE_HISTORY_NOTE}</p>
+                )}
               </div>
             )}
 
@@ -515,8 +508,8 @@ export const ModelPortfolioDetail = () => {
                   Rendements par fonds
                 </h2>
                 <p className="text-xs text-prestige-taupe mb-4">
-                  Rendements nets des fonds (série Classique 75/75), au {asOfLabel}. Les périodes
-                  multi-années sont annualisées.
+                  Rendements nets des fonds (série Classique 75/75), au {asOfLabel}, en CAD. Les
+                  périodes multi-années sont annualisées.
                 </p>
                 <div className="overflow-x-auto rounded-xl border border-prestige-beige">
                   <table className="w-full text-sm min-w-[720px]">
@@ -615,6 +608,7 @@ export const ModelPortfolioDetail = () => {
 
             <div className="text-xs text-prestige-taupe leading-relaxed border-t border-prestige-beige pt-4 space-y-2">
               <p>{PORTFOLIO_GENERAL_DISCLAIMER}</p>
+              <p>{PORTFOLIO_PRODUCT_NOTICE}</p>
               <p>{PORTFOLIO_METHOD_NOTE}</p>
               <p>{PORTFOLIO_GUARANTEE_DISCLAIMER}</p>
             </div>

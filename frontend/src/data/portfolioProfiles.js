@@ -109,11 +109,11 @@ export const PORTFOLIO_PROFILES = {
     accent: RISK_ACCENTS.prudent.accent,
     philosophy: {
       summary:
-        'Prioriser la préservation du capital et un revenu plus stable, avec une exposition limitée aux actions.',
+        'Orientation du modèle : préserver davantage le capital et viser un revenu plus stable, avec une exposition limitée aux actions.',
       bullets: [
-        'Horizon typique plus court ou tolérance au risque faible',
-        'Accent sur le revenu fixe et la diversification prudente',
-        'Convient si la stabilité prime sur la croissance maximale',
+        'Profil de modèle associé à un horizon typiquement plus court ou une volatilité plus faible',
+        'Accent sur le revenu fixe et une diversification prudente',
+        'Description informative seulement — ne constitue pas une recommandation personnalisée',
       ],
     },
     assetAllocation: [
@@ -166,11 +166,11 @@ export const PORTFOLIO_PROFILES = {
     accent: RISK_ACCENTS.modere.accent,
     philosophy: {
       summary:
-        'Équilibrer protection et croissance modérée : une majorité de revenu fixe, avec une part d’actions pour participer aux marchés.',
+        'Orientation du modèle : articuler protection et croissance modérée — majorité de revenu fixe, avec une part d’actions.',
       bullets: [
-        'Tolérance au risque faible à moyenne',
-        'Revenu fixe dominant, actions en soutien',
-        'Objectif : progression progressive du capital sans trop de volatilité',
+        'Profil de modèle à volatilité faible à moyenne',
+        'Revenu fixe dominant, actions en complément',
+        'Description informative seulement — ne constitue pas une recommandation personnalisée',
       ],
     },
     assetAllocation: [
@@ -221,11 +221,11 @@ export const PORTFOLIO_PROFILES = {
     accent: RISK_ACCENTS.equilibre.accent,
     philosophy: {
       summary:
-        'Chercher un équilibre entre croissance et protection, avec une plus grande part en actions tout en conservant une base de revenu fixe.',
+        'Orientation du modèle : doser croissance et protection, avec une part accrue en actions et une base de revenu fixe.',
       bullets: [
-        'Tolérance au risque moyenne',
-        'Mix actions / revenu fixe pour lisser les cycles',
-        'Horizon de placement moyen à long terme',
+        'Profil de modèle à volatilité moyenne',
+        'Mix actions / revenu fixe visant à traverser les cycles de marché',
+        'Description informative seulement — ne constitue pas une recommandation personnalisée',
       ],
     },
     assetAllocation: [
@@ -275,11 +275,11 @@ export const PORTFOLIO_PROFILES = {
     accent: RISK_ACCENTS.croissance.accent,
     philosophy: {
       summary:
-        'Viser la croissance du capital sur le long terme, avec une forte composante actions et une part moindre de revenu fixe.',
+        'Orientation du modèle : croissance du capital sur le long terme, forte composante actions et part moindre de revenu fixe.',
       bullets: [
-        'Tolérance au risque moyenne à élevée',
-        'Acceptation de la volatilité en échange d’un potentiel de rendement plus élevé',
-        'Horizon long terme recommandé',
+        'Profil de modèle à volatilité moyenne à élevée',
+        'Exposition actions dominante ; volatilité potentielle plus importante',
+        'Description informative seulement — ne constitue pas une recommandation personnalisée',
       ],
     },
     assetAllocation: [
@@ -332,11 +332,11 @@ export const PORTFOLIO_PROFILES = {
     accent: RISK_ACCENTS.audacieux.accent,
     philosophy: {
       summary:
-        'Maximiser le potentiel de croissance à long terme avec un portefeuille quasi entièrement en actions.',
+        'Orientation du modèle : exposition quasi entière aux actions, en vue d’un potentiel de croissance à long terme plus élevé.',
       bullets: [
-        'Tolérance au risque élevée',
+        'Profil de modèle à volatilité élevée',
         'Peu ou pas de revenu fixe — forte exposition actions',
-        'Convient à un horizon long et à une capacité d’absorber les baisses de marché',
+        'Description informative seulement — ne constitue pas une recommandation personnalisée',
       ],
     },
     assetAllocation: [
