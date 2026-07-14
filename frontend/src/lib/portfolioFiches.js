@@ -26,7 +26,12 @@ const FUND_FICHE_URLS = {
   FU920,
 };
 
-export function getFundFicheUrl(fuCode) {
+/**
+ * @param {string} fuCode
+ * @param {string|null} [uploadedPublicUrl] - URL Storage après import admin
+ */
+export function getFundFicheUrl(fuCode, uploadedPublicUrl = null) {
+  if (uploadedPublicUrl) return uploadedPublicUrl;
   return FUND_FICHE_URLS[fuCode] || null;
 }
 

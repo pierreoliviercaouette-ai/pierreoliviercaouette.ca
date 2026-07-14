@@ -5,6 +5,7 @@ import {
   getProfileHoldingsResolved,
 } from '../data/portfolioProfiles';
 import { wealthSeriesForSnapshot } from './portfolioGrowth';
+import { PORTFOLIO_CALENDAR_RETURNS_DEFAULTS } from '../data/portfolioCalendarReturnsDefaults';
 
 function stripHtml(value) {
   return String(value || '')
@@ -263,6 +264,15 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
   const fundErrors = [];
 
   for (const fund of funds) {
+    const { data: existing } = await supabase
+      .from('funds')
+      .select('id, metadata')
+      .eq('external_code', fund.externalCode)
+      .maybeSingle();
+
+    const prevMeta =
+      existing?.metadata && typeof existing.metadata === 'object' ? existing.metadata : {};
+
     const payload = {
       external_code: fund.externalCode,
       name: fund.name,
@@ -278,6 +288,7 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
       nav: fund.nav,
       perf_as_of: asOfDate,
       metadata: {
+        ...prevMeta,
         ...(FUND_CATALOG[fund.externalCode]?.hasFiche
           ? { fiche_code: fund.externalCode }
           : {}),
@@ -285,15 +296,11 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
         three_month_pct: fund.threeMonthPct,
         six_month_pct: fund.sixMonthPct,
         incomplete_fields: fund.incompleteFields || [],
+        perf_as_of: asOfDate,
+        // conserver calendar_returns / fiche_* déjà importés
       },
       updated_at: new Date().toISOString(),
     };
-
-    const { data: existing } = await supabase
-      .from('funds')
-      .select('id')
-      .eq('external_code', fund.externalCode)
-      .maybeSingle();
 
     let error;
     if (existing?.id) {
@@ -311,6 +318,7 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
         source: 'csv_import',
         is_active: true,
         metadata: {
+          ...prevMeta,
           ytd_pct: fund.ytdPct,
           prev_year_pct: fund.prevYearPct,
           one_year_pct: fund.oneYearPct,
@@ -344,6 +352,26 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
   let portfoliosUpdated = 0;
   const portfolioErrors = [];
 
+  // Perf + calendrier fiches pour la courbe (évite d’écraser les années civiles)
+  const codes = funds.map((f) => f.externalCode);
+  const { data: fundRowsForGrowth } = await supabase
+    .from('funds')
+    .select('external_code, ytd_pct, metadata')
+    .in('external_code', codes);
+  const calByCode = Object.fromEntries(
+    (fundRowsForGrowth || []).map((row) => [
+      row.external_code,
+      row.metadata?.calendar_returns || PORTFOLIO_CALENDAR_RETURNS_DEFAULTS[row.external_code] || null,
+    ])
+  );
+  const perfByCodeForGrowth = {};
+  for (const f of funds) {
+    perfByCodeForGrowth[f.externalCode] = {
+      ...f,
+      calendarReturns: calByCode[f.externalCode] || PORTFOLIO_CALENDAR_RETURNS_DEFAULTS[f.externalCode] || null,
+    };
+  }
+
   for (const p of portfolios) {
     if (p.ytdPct === null && p.prevYearPct === null) {
       portfolioErrors.push(`${p.key}: rendements insuffisants pour recalcul`);
@@ -371,11 +399,11 @@ export async function applyPerformanceCsvImport(supabase, { funds, asOfDate, fil
       .maybeSingle();
     if (def?.id) {
       const holdings = getProfileHoldingsResolved(p.key);
-      const perfByCode = {};
-      for (const f of funds) {
-        perfByCode[f.externalCode] = f;
-      }
-      const { wealth_series, growth_meta } = wealthSeriesForSnapshot(holdings, perfByCode, asOfDate);
+      const { wealth_series, growth_meta } = wealthSeriesForSnapshot(
+        holdings,
+        perfByCodeForGrowth,
+        asOfDate
+      );
       await supabase.from('portfolio_snapshots').insert({
         portfolio_definition_id: def.id,
         as_of_date: asOfDate,

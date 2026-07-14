@@ -9,6 +9,7 @@ import {
   asOfDateFromFilename,
   parsePerformanceFundsCsv,
 } from '../../lib/portfolioCsvImport';
+import { applyFundFicheImports } from '../../lib/portfolioFicheImport';
 
 export function AdminPortfoliosPanel({ onRefresh }) {
   const [modelPortfolios, setModelPortfolios] = useState([]);
@@ -17,8 +18,11 @@ export function AdminPortfoliosPanel({ onRefresh }) {
   const [draftsById, setDraftsById] = useState({});
   const [savingById, setSavingById] = useState({});
   const [importing, setImporting] = useState(false);
+  const [importingFiches, setImportingFiches] = useState(false);
   const [importSummary, setImportSummary] = useState(null);
+  const [ficheSummary, setFicheSummary] = useState(null);
   const fileInputRef = useRef(null);
+  const ficheInputRef = useRef(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -48,7 +52,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
 
     const { data: logs } = await supabase
       .from('portfolio_import_logs')
-      .select('id, imported_at, filename, as_of_date, funds_updated, portfolios_updated, missing_codes')
+      .select('id, imported_at, filename, as_of_date, funds_updated, portfolios_updated, missing_codes, meta')
       .order('imported_at', { ascending: false })
       .limit(8);
     setImportLogs(logs || []);
@@ -129,6 +133,39 @@ export function AdminPortfoliosPanel({ onRefresh }) {
     }
   };
 
+  const handleFicheImport = async (event) => {
+    const list = event.target.files;
+    event.target.value = '';
+    if (!list?.length) return;
+
+    try {
+      setImportingFiches(true);
+      setFicheSummary(null);
+      const files = Array.from(list);
+      const result = await applyFundFicheImports(supabase, files);
+      setFicheSummary(result);
+
+      if (result.fundsUpdated > 0) {
+        toast.success(
+          `Fiches OK : ${result.fundsUpdated} fonds mis à jour (années civiles + PDF)`
+        );
+        window.dispatchEvent(new Event('model-portfolios-updated'));
+        await load();
+        onRefresh?.();
+      } else {
+        toast.error('Aucune fiche importée');
+      }
+      if (result.errors?.length) {
+        toast.message(`${result.errors.length} avertissement(s) — voir le résumé`);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Erreur import fiches PDF');
+    } finally {
+      setImportingFiches(false);
+    }
+  };
+
   if (loading) {
     return <p className="text-prestige-taupe">Chargement...</p>;
   }
@@ -159,7 +196,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
           <Button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={importing}
+            disabled={importing || importingFiches}
             data-testid="admin-import-performance-csv"
           >
             {importing ? 'Import en cours…' : 'Choisir un fichier CSV'}
@@ -195,6 +232,70 @@ export function AdminPortfoliosPanel({ onRefresh }) {
         )}
       </div>
 
+      <div className="p-4 bg-white rounded-xl border border-primary/20 space-y-3">
+        <div>
+          <p className="font-semibold text-dark">Importer fiches de fonds (PDF)</p>
+          <p className="text-xs text-prestige-taupe mt-1">
+            Extrait les rendements par année civile (Série Classique 75/75) pour la courbe de
+            croissance, et dépose le PDF à jour pour le téléchargement public. Nommez les
+            fichiers <span className="font-medium text-dark">FUxxx.pdf</span> (ex. FU021.pdf).
+            Plusieurs fiches à la fois possibles.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            ref={ficheInputRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            multiple
+            className="hidden"
+            onChange={handleFicheImport}
+          />
+          <Button
+            type="button"
+            onClick={() => ficheInputRef.current?.click()}
+            disabled={importing || importingFiches}
+            data-testid="admin-import-fund-fiches"
+          >
+            {importingFiches ? 'Analyse des PDF…' : 'Choisir des fiches PDF'}
+          </Button>
+        </div>
+        {ficheSummary && (
+          <div className="text-sm text-prestige-taupe space-y-1 border-t border-prestige-beige pt-3">
+            <p>
+              {ficheSummary.fundsUpdated} fonds maj · {ficheSummary.portfoliosUpdated}{' '}
+              courbes recalculées
+            </p>
+            <ul className="list-disc pl-5 text-xs max-h-40 overflow-y-auto">
+              {ficheSummary.results?.map((r) => (
+                <li key={`${r.filename}-${r.fuCode || 'x'}`}>
+                  {r.ok ? (
+                    <>
+                      <span className="font-medium text-dark">{r.fuCode}</span>
+                      {' · '}
+                      {r.yearCount} années
+                      {r.years?.length ? ` (${r.years[0]}–${r.years[r.years.length - 1]})` : ''}
+                      {r.pdfStored === false ? ' · PDF non stocké (bucket?)' : ''}
+                    </>
+                  ) : (
+                    <span className="text-amber-700">
+                      {r.filename}: {r.error}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {ficheSummary.errors?.length > 0 && (
+              <ul className="list-disc pl-5 text-xs text-amber-700">
+                {ficheSummary.errors.slice(0, 6).map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+
       {importLogs.length > 0 && (
         <div className="p-4 bg-light rounded-xl border border-prestige-beige">
           <p className="font-semibold text-dark text-sm mb-2">Journal des imports récents</p>
@@ -206,7 +307,7 @@ export function AdminPortfoliosPanel({ onRefresh }) {
                     ? new Date(log.imported_at).toLocaleString('fr-CA')
                     : '—'}
                 </span>
-                <span>{log.filename || 'fichier'}</span>
+                <span>{log.meta?.source === 'fiche_pdf_import' ? 'fiches PDF' : log.filename || 'fichier'}</span>
                 <span>as of {log.as_of_date || '—'}</span>
                 <span>
                   {log.funds_updated ?? 0} fonds / {log.portfolios_updated ?? 0} portefeuilles

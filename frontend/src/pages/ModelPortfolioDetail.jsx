@@ -200,7 +200,7 @@ export const ModelPortfolioDetail = () => {
   }, [slug, profile, fallbackPortfolio, staticHoldings]);
 
   const liveGrowth = useMemo(() => {
-    if (!staticHoldings.length || !Object.keys(fundPerfByCode).length) {
+    if (!staticHoldings.length) {
       return { series: [], meta: null };
     }
     return buildGrowthSeriesFromFundReturns(
@@ -212,7 +212,7 @@ export const ModelPortfolioDetail = () => {
   }, [staticHoldings, fundPerfByCode, asOfIso]);
 
   const chartData = useMemo(() => {
-    // 1) Toujours prioriser la courbe recalculée depuis les mêmes rendements pondérés (CSV)
+    // 1) Courbe depuis les rendements année civile des fiches
     if (liveGrowth.series.length > 1) {
       return liveGrowth.series.map((p) => ({
         label: p.label,
@@ -249,9 +249,16 @@ export const ModelPortfolioDetail = () => {
   const ficheHoldings = useMemo(
     () =>
       staticHoldings
-        .filter((h) => h.hasFiche && getFundFicheUrl(h.fuCode))
-        .map((h) => ({ ...h, ficheUrl: getFundFicheUrl(h.fuCode) })),
-    [staticHoldings]
+        .filter(
+          (h) =>
+            h.hasFiche &&
+            getFundFicheUrl(h.fuCode, fundPerfByCode[h.fuCode]?.fichePublicUrl)
+        )
+        .map((h) => ({
+          ...h,
+          ficheUrl: getFundFicheUrl(h.fuCode, fundPerfByCode[h.fuCode]?.fichePublicUrl),
+        })),
+    [staticHoldings, fundPerfByCode]
   );
   const missingFicheHoldings = useMemo(
     () => staticHoldings.filter((h) => h.fuCode && !h.hasFiche),
@@ -447,24 +454,22 @@ export const ModelPortfolioDetail = () => {
                   </span>
                 </summary>
                 <p className="text-sm text-prestige-taupe mt-3 mb-4">
-                  Illustration d’un placement de {formatMoneyCad(GROWTH_PRINCIPAL)} : chaque fonds
-                  du portefeuille croît selon <em>son</em> rendement annualisé importé (CSV), selon
-                  les poids du modèle
-                  {chartGrowthMeta?.horizon_years != null
-                    ? ` (horizon ${chartGrowthMeta.horizon_years} ans`
+                  Illustration d’un placement de {formatMoneyCad(GROWTH_PRINCIPAL)} : chaque année
+                  civile, le portefeuille est rééquilibré aux poids cibles et applique le
+                  rendement annuel des fiches de fonds (Série Classique 75/75)
+                  {chartGrowthMeta?.first_year != null && chartGrowthMeta?.last_year != null
+                    ? ` (${chartGrowthMeta.first_year}–${chartGrowthMeta.last_year}`
                     : ''}
                   {chartGrowthMeta?.annualized_pct != null
-                    ? `, rendement annualisé réalisé de la courbe ≈ ${String(
+                    ? `${chartGrowthMeta?.first_year != null ? ',' : ' ('} annualisé réalisé ≈ ${String(
                         chartGrowthMeta.annualized_pct
                       ).replace('.', ',')} %)`
-                    : chartGrowthMeta?.horizon_years != null
+                    : chartGrowthMeta?.first_year != null
                       ? ')'
                       : ''}
-                  , au {asOfLabel}. Aux jalons 1 / 3 / 5 / 10 ans, le taux de chaque fonds pour
-                  cette période est utilisé lorsqu’il est disponible. Pas de rééquilibrage annuel —
-                  ce n’est ni une projection ni une garantie de résultats futurs
+                  , au {asOfLabel}. Ce n’est ni une projection ni une garantie de résultats futurs
                   {chartGrowthMeta?.incomplete
-                    ? ' ; un ou plusieurs fonds ont un historique incomplet (*) sur l’horizon'
+                    ? ' ; un ou plusieurs fonds ont un historique incomplet (*) sur certaines années'
                     : ''}
                   .
                 </p>

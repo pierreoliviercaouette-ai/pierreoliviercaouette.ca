@@ -4,6 +4,7 @@ import {
   getDefaultFundPerformance,
   resolveIncompleteFields,
 } from '../data/portfolioFundPerfDefaults';
+import { PORTFOLIO_CALENDAR_RETURNS_DEFAULTS } from '../data/portfolioCalendarReturnsDefaults';
 import { computeWeightedPeriodReturns } from './portfolioCsvImport';
 
 function pickPerfField(row, meta, column, metaKey) {
@@ -39,6 +40,13 @@ export function mergeFundRowsIntoPerfMap(perfByCode, fundRows, packagedDefaults 
       meta.incomplete_fields,
       defaults.incompleteFields
     );
+    const calendarReturns =
+      (meta.calendar_returns && Object.keys(meta.calendar_returns).length
+        ? meta.calendar_returns
+        : null) ||
+      PORTFOLIO_CALENDAR_RETURNS_DEFAULTS[row.external_code] ||
+      null;
+
     next[row.external_code] = {
       ytdPct: pickPerfField(row, meta, 'ytd_pct', 'ytd_pct') ?? defaults.ytdPct ?? null,
       prevYearPct:
@@ -55,6 +63,8 @@ export function mergeFundRowsIntoPerfMap(perfByCode, fundRows, packagedDefaults 
       tenYearPct: pickPerfField(row, meta, 'ten_year_pct', 'ten_year_pct') ?? defaults.tenYearPct ?? null,
       incompleteFields,
       perfAsOf: meta.perf_as_of || row.perf_as_of || null,
+      calendarReturns,
+      fichePublicUrl: meta.fiche_public_url || null,
     };
   }
   return ensureIncompleteFlagsOnPerfMap(next);
