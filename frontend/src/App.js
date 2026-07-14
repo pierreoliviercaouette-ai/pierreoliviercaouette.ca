@@ -8,7 +8,6 @@ import { Footer } from "./components/layout/Footer";
 import { BackToTop } from "./components/layout/BackToTop";
 import { ScrollToTop } from "./components/layout/ScrollToTop";
 import { AnalyticsTracker } from "./components/layout/AnalyticsTracker";
-import { useSupabaseAuth } from "./context/SupabaseAuthContext";
 
 // Pages
 import { Home } from "./pages/Home";
@@ -41,22 +40,20 @@ const ModelPortfoliosBanner = lazy(() =>
 const ModelPortfolioDetail = lazy(() =>
   import("./pages/ModelPortfolioDetail").then((m) => ({ default: m.ModelPortfolioDetail }))
 );
+const ModelPortfoliosIndex = lazy(() =>
+  import("./pages/ModelPortfoliosIndex").then((m) => ({ default: m.ModelPortfoliosIndex }))
+);
 
 function App() {
-  const { user, loading } = useSupabaseAuth();
-  const isAdmin = Boolean(user?.is_admin);
-
   return (
     <BrowserRouter>
       <ScrollToTop />
       <AnalyticsTracker />
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        {isAdmin && (
-          <Suspense fallback={null}>
-            <ModelPortfoliosBanner />
-          </Suspense>
-        )}
+        <Suspense fallback={null}>
+          <ModelPortfoliosBanner />
+        </Suspense>
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -74,15 +71,19 @@ function App() {
             <Route path="/recommandations/consentement" element={<ReferralConsent />} />
             <Route path="/recommandations" element={<Referral />} />
             <Route
+              path="/portefeuilles"
+              element={
+                <Suspense fallback={null}>
+                  <ModelPortfoliosIndex />
+                </Suspense>
+              }
+            />
+            <Route
               path="/portefeuilles/:slug"
               element={
-                loading ? null : isAdmin ? (
-                  <Suspense fallback={null}>
-                    <ModelPortfolioDetail />
-                  </Suspense>
-                ) : (
-                  <Navigate to="/" replace />
-                )
+                <Suspense fallback={null}>
+                  <ModelPortfolioDetail />
+                </Suspense>
               }
             />
             <Route path="/referencement/consentement" element={<Navigate to="/recommandations/consentement" replace />} />

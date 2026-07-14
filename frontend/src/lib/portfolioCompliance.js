@@ -10,7 +10,11 @@ export const PORTFOLIO_METHOD_NOTE =
   'Moyenne pondérée interne des rendements nets des fonds (série Classique 75/75), selon les poids du portefeuille modèle. Calcul à titre indicatif seulement — non fourni ni vérifié par l’assureur ; un compte réel peut différer.';
 
 export const PORTFOLIO_BANNER_DISCLAIMER =
-  'Outil interne · fonds distincts (contrat d’assurance) · moyenne pondérée indicative (non officielle assureur) · rendements passés ≠ futurs · ne constitue pas un conseil personnalisé · valeur marchande ≠ garanties contractuelles.';
+  'Fonds distincts (contrat d’assurance) · moyenne pondérée indicative (non officielle assureur) · rendements passés ≠ futurs · ne constitue pas un conseil personnalisé · valeur marchande ≠ garanties contractuelles.';
+
+export const PORTFOLIO_BANNER_PRODUCT_LINE =
+  'Contrats d’assurance — valeur marchande ≠ garanties · les rendements passés ne préjugent pas des rendements futurs.';
+
 
 export const PORTFOLIO_INCOMPLETE_HISTORY_NOTE =
   'Un astérisque (*) indique une période pour laquelle l’historique d’un ou plusieurs fonds est incomplet, ou où des fonds ont été exclus du calcul pondéré.';

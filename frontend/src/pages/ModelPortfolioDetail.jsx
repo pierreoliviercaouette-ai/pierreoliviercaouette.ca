@@ -15,11 +15,7 @@ import {
 } from 'recharts';
 import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
 import { DEFAULT_MODEL_PORTFOLIOS, DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../data/modelPortfolios';
-import {
-  getDefaultFundPerformance,
-  getPortfolioProfile,
-  getProfileHoldingsResolved,
-} from '../data/portfolioProfiles';
+import { getPortfolioProfile, getProfileHoldingsResolved } from '../data/portfolioProfiles';
 import {
   PORTFOLIO_GENERAL_DISCLAIMER,
   PORTFOLIO_GUARANTEE_DISCLAIMER,
@@ -32,10 +28,7 @@ import {
   formatReturnWithIncomplete,
 } from '../lib/portfolioCompliance';
 import { computeWeightedPeriodReturns } from '../lib/portfolioCsvImport';
-import {
-  buildDefaultFundPerfByCode,
-  mergeFundRowsIntoPerfMap,
-} from '../lib/portfolioFundPerf';
+import { mergeFundRowsIntoPerfMap } from '../lib/portfolioFundPerf';
 import { getFundFicheUrl } from '../lib/portfolioFiches';
 import { useSeoMeta } from '../lib/seo';
 import { supabase } from '../lib/supabaseClient';
@@ -124,7 +117,7 @@ export const ModelPortfolioDetail = () => {
 
       const { data: legacyRow } = await supabase
         .from('model_portfolios')
-        .select('key,name,href,as_of_date')
+        .select('key,name,href,as_of_date,ytd_2026,year_2025,annualized_3y,annualized_5y')
         .eq('key', slug)
         .maybeSingle();
 
@@ -147,7 +140,7 @@ export const ModelPortfolioDetail = () => {
       }
 
       const codes = staticHoldings.map((h) => h.fuCode).filter(Boolean);
-      let perfByCode = buildDefaultFundPerfByCode(codes);
+      let perfByCode = {};
 
       if (codes.length) {
         const { data: fundRows } = await supabase
@@ -156,24 +149,33 @@ export const ModelPortfolioDetail = () => {
             'external_code, ytd_pct, prev_year_pct, one_year_pct, three_year_pct, five_year_pct, ten_year_pct, perf_as_of, metadata'
           )
           .in('external_code', codes);
-        perfByCode = mergeFundRowsIntoPerfMap(perfByCode, fundRows);
+        perfByCode = mergeFundRowsIntoPerfMap({}, fundRows);
       }
 
       const {
         periodReturns: weighted,
         incompleteByPeriod: incomplete,
       } = computeWeightedPeriodReturns(staticHoldings, perfByCode);
-      const defaults = profile?.defaults;
 
       setPortfolio({
         key: slug,
         name: legacyRow?.name || profile?.name || fallbackPortfolio?.name || slug,
-        ytd2026: weighted.ytd ?? defaults?.ytd ?? fallbackPortfolio?.ytd2026 ?? null,
-        year2025: weighted.prevYear ?? defaults?.prevYear ?? fallbackPortfolio?.year2025 ?? null,
+        ytd2026:
+          weighted.ytd ??
+          (legacyRow?.ytd_2026 != null ? Number(legacyRow.ytd_2026) : null) ??
+          null,
+        year2025:
+          weighted.prevYear ??
+          (legacyRow?.year_2025 != null ? Number(legacyRow.year_2025) : null) ??
+          null,
         annualized3y:
-          weighted.threeYear ?? defaults?.annualized3y ?? fallbackPortfolio?.annualized3y ?? null,
+          weighted.threeYear ??
+          (legacyRow?.annualized_3y != null ? Number(legacyRow.annualized_3y) : null) ??
+          null,
         annualized5y:
-          weighted.fiveYear ?? defaults?.annualized5y ?? fallbackPortfolio?.annualized5y ?? null,
+          weighted.fiveYear ??
+          (legacyRow?.annualized_5y != null ? Number(legacyRow.annualized_5y) : null) ??
+          null,
         href: legacyRow?.href || profile?.href || `/portefeuilles/${slug}`,
         periodReturns: weighted,
       });
@@ -282,9 +284,9 @@ export const ModelPortfolioDetail = () => {
     <main className="min-h-screen bg-light" data-testid={`portfolio-detail-${slug}`}>
       <section className="section-padding">
         <div className="container-max max-w-5xl space-y-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
+          <Link to="/portefeuilles" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
             <ArrowLeft className="w-4 h-4" />
-            Retour à l&apos;accueil
+            Tous les portefeuilles
           </Link>
 
           <div className="bg-white border border-prestige-beige rounded-2xl p-6 md:p-8 shadow-ia overflow-hidden relative">
@@ -293,7 +295,7 @@ export const ModelPortfolioDetail = () => {
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
               <div>
                 <p className="text-xs uppercase tracking-widest text-prestige-taupe mb-1">
-                  Portefeuille modèle · outil interne
+                  Portefeuille modèle
                 </p>
                 <h1 className="font-heading text-3xl md:text-4xl font-bold text-dark">
                   {portfolio.name}
@@ -536,8 +538,7 @@ export const ModelPortfolioDetail = () => {
                     </thead>
                     <tbody>
                       {staticHoldings.map((h) => {
-                        const perf =
-                          fundPerfByCode[h.fuCode] || getDefaultFundPerformance(h.fuCode) || {};
+                        const perf = fundPerfByCode[h.fuCode] || {};
                         const incomplete = new Set(perf.incompleteFields || []);
                         return (
                           <tr

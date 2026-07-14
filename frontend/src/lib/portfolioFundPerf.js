@@ -1,9 +1,4 @@
-import {
-  DEFAULT_FUND_PERFORMANCE,
-  PORTFOLIO_PROFILE_LIST,
-  getDefaultFundPerformance,
-  getProfileHoldingsResolved,
-} from '../data/portfolioProfiles';
+import { PORTFOLIO_PROFILE_LIST, getProfileHoldingsResolved } from '../data/portfolioProfiles';
 import { computeWeightedPeriodReturns } from './portfolioCsvImport';
 
 function pickPerfField(row, meta, column, metaKey) {
@@ -22,24 +17,17 @@ export function getAllPortfolioFundCodes() {
   return [...codes];
 }
 
-/** Seed perf map from packaged defaults (admin offline fallback). */
-export function buildDefaultFundPerfByCode(codes = getAllPortfolioFundCodes()) {
-  const perfByCode = {};
-  for (const code of codes) {
-    const defaults = getDefaultFundPerformance(code) || DEFAULT_FUND_PERFORMANCE[code];
-    if (defaults) perfByCode[code] = { ...defaults };
-  }
-  return perfByCode;
-}
-
 /**
- * Merge Supabase fund rows into a perf map (defaults already applied).
+ * Merge Supabase fund rows into a perf map.
+ * @param {Record<string, object>} perfByCode
+ * @param {Array} fundRows
+ * @param {object} [packagedDefaults] - admin-only optional defaults map
  */
-export function mergeFundRowsIntoPerfMap(perfByCode, fundRows) {
+export function mergeFundRowsIntoPerfMap(perfByCode, fundRows, packagedDefaults = {}) {
   const next = { ...perfByCode };
   for (const row of fundRows || []) {
     const meta = row.metadata || {};
-    const defaults = getDefaultFundPerformance(row.external_code) || {};
+    const defaults = packagedDefaults[row.external_code] || {};
     const incompleteFields = Array.isArray(meta.incomplete_fields)
       ? meta.incomplete_fields
       : defaults.incompleteFields || [];
@@ -65,23 +53,29 @@ export function mergeFundRowsIntoPerfMap(perfByCode, fundRows) {
 }
 
 /**
- * Load fund performances for all model portfolios (admin session + RLS).
+ * Load fund performances for model portfolios from Supabase (public or admin).
+ * No packaged CSV defaults on the public path — missing data shows as em-dash.
  */
 export async function loadPortfolioFundPerfMap(supabase) {
   const codes = getAllPortfolioFundCodes();
-  let perfByCode = buildDefaultFundPerfByCode(codes);
+  let perfByCode = {};
   let asOfIso = null;
+  let loadError = null;
 
   if (!codes.length || !supabase) {
-    return { perfByCode, asOfIso, codes };
+    return { perfByCode, asOfIso, codes, loadError: 'no_codes' };
   }
 
-  const { data: fundRows } = await supabase
+  const { data: fundRows, error: fundError } = await supabase
     .from('funds')
     .select(
       'external_code, ytd_pct, prev_year_pct, one_year_pct, three_year_pct, five_year_pct, ten_year_pct, perf_as_of, metadata'
     )
     .in('external_code', codes);
+
+  if (fundError) {
+    loadError = fundError.message;
+  }
 
   if (fundRows?.length) {
     perfByCode = mergeFundRowsIntoPerfMap(perfByCode, fundRows);
@@ -95,33 +89,65 @@ export async function loadPortfolioFundPerfMap(supabase) {
 
   const { data: mpRows } = await supabase
     .from('model_portfolios')
-    .select('as_of_date')
-    .order('display_order', { ascending: true })
-    .limit(1);
+    .select('key, name, ytd_2026, year_2025, annualized_3y, annualized_5y, href, as_of_date')
+    .order('display_order', { ascending: true });
+
   if (!asOfIso && mpRows?.[0]?.as_of_date) {
     asOfIso = mpRows[0].as_of_date;
   }
 
-  return { perfByCode, asOfIso, codes };
+  return { perfByCode, asOfIso, codes, modelPortfolioRows: mpRows || [], loadError };
 }
 
-/** Build display cards for all profiles from a fund perf map (source unique). */
-export function buildWeightedPortfolioCards(perfByCode) {
+/** Build display cards from fund perf map; optional model_portfolios rows as KPI fallback. */
+export function buildWeightedPortfolioCards(perfByCode, modelPortfolioRows = []) {
+  const byKey = Object.fromEntries((modelPortfolioRows || []).map((r) => [r.key, r]));
+
   return PORTFOLIO_PROFILE_LIST.map((p) => {
     const holdings = getProfileHoldingsResolved(p.key);
     const { periodReturns, incompleteByPeriod } = computeWeightedPeriodReturns(holdings, perfByCode);
+    const legacy = byKey[p.key];
     return {
       key: p.key,
-      name: p.name,
-      href: p.href,
-      ytd2026: periodReturns.ytd ?? p.defaults?.ytd ?? null,
-      yearPrev: periodReturns.prevYear ?? p.defaults?.prevYear ?? null,
-      annualized3y: periodReturns.threeYear ?? p.defaults?.annualized3y ?? null,
-      annualized5y: periodReturns.fiveYear ?? p.defaults?.annualized5y ?? null,
+      name: legacy?.name || p.name,
+      href: legacy?.href || p.href,
+      ytd2026:
+        periodReturns.ytd ??
+        (legacy?.ytd_2026 != null ? Number(legacy.ytd_2026) : null) ??
+        null,
+      yearPrev:
+        periodReturns.prevYear ??
+        (legacy?.year_2025 != null ? Number(legacy.year_2025) : null) ??
+        null,
+      annualized3y:
+        periodReturns.threeYear ??
+        (legacy?.annualized_3y != null ? Number(legacy.annualized_3y) : null) ??
+        null,
+      annualized5y:
+        periodReturns.fiveYear ??
+        (legacy?.annualized_5y != null ? Number(legacy.annualized_5y) : null) ??
+        null,
       periodReturns,
       incompleteByPeriod,
       ytdIncomplete: Boolean(incompleteByPeriod?.ytd),
       prevIncomplete: Boolean(incompleteByPeriod?.prevYear),
     };
   });
+}
+
+/** Empty placeholder cards while loading (no packaged returns). */
+export function buildEmptyPortfolioCards() {
+  return PORTFOLIO_PROFILE_LIST.map((p) => ({
+    key: p.key,
+    name: p.name,
+    href: p.href,
+    ytd2026: null,
+    yearPrev: null,
+    annualized3y: null,
+    annualized5y: null,
+    periodReturns: {},
+    incompleteByPeriod: {},
+    ytdIncomplete: false,
+    prevIncomplete: false,
+  }));
 }

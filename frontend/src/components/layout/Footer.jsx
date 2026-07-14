@@ -18,6 +18,7 @@ export const Footer = () => {
     { name: 'Épargne et retraite', path: '/services/epargne' },
     { name: 'Planification financière', path: '/services/planification' },
     { name: 'Solutions entrepreneur', path: '/services/entreprise' },
+    { name: 'Portefeuilles modèles', path: '/portefeuilles' },
   ];
 
   const seoGuides = [

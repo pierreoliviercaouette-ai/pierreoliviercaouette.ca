@@ -110,7 +110,7 @@ export const Terms = () => {
             </h1>
             
             <p className="text-slate-600 mb-6">
-              Dernière mise à jour : 2026-05-06
+              Dernière mise à jour : 2026-07-14
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
@@ -191,7 +191,7 @@ export const Terms = () => {
               comportent des risques et ne conviennent pas à tous les profils.
             </p>
 
-            <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
+            <h2 id="fonds-distincts" className="font-heading text-2xl font-semibold text-dark mt-8 mb-4 scroll-mt-28">
               5.1 Fonds distincts et illustrations de portefeuilles
             </h2>
             <p className="text-slate-600 mb-4">
