@@ -83,7 +83,7 @@ export const Privacy = () => {
               vos droits, veuillez nous contacter à:
             </p>
             <p className="text-slate-600 mb-6">
-              <strong>Courriel:</strong> po@pierreoliviercaouette.ca<br/>
+              <strong>Courriel:</strong> p-o.caouette@agc.ia.ca<br/>
               <strong>Téléphone:</strong> 819 806-1164
             </p>
 

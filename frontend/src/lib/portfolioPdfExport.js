@@ -688,7 +688,7 @@ export async function exportPortfolioToPdf({
   doc.setFontSize(7);
   doc.setTextColor(...TAUPE);
   doc.text(
-    pdfText('Pierre-Olivier Caouette  |  po@pierreoliviercaouette.ca  |  pierreoliviercaouette.ca'),
+    pdfText('Pierre-Olivier Caouette  |  p-o.caouette@agc.ia.ca  |  pierreoliviercaouette.ca'),
     MARGIN,
     Math.min(y + 4, PAGE_BOTTOM)
   );
