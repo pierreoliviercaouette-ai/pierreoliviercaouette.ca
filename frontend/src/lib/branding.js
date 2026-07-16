@@ -2,8 +2,11 @@
 export const AMF_REGISTRE_URL =
   'https://lautorite.qc.ca/grand-public/registres/registre-des-entreprises-et-des-individus-autorises-a-exercer';
 
-/** Logo officiel iA Groupe financier (fichier local dans `public/branding/`). */
-export const IA_GROUPE_FINANCIER_LOGO = `${process.env.PUBLIC_URL || ''}/branding/ia-groupe-financier.png`;
+/** Logo officiel iA Groupe financier (SVG — fichier local dans `public/branding/`). */
+export const IA_GROUPE_FINANCIER_LOGO = `${process.env.PUBLIC_URL || ''}/branding/ia-groupe-financier.svg`;
+
+/** Version PNG du logo iA (favicon, export PDF, fallback raster). */
+export const IA_GROUPE_FINANCIER_LOGO_PNG = `${process.env.PUBLIC_URL || ''}/branding/ia-groupe-financier.png`;
 
 /** Site corporatif iA Groupe financier. */
 export const IA_GROUPE_FINANCIER_URL = 'https://www.ia.ca/fr';

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg enable-background="new 0 0 210 50" version="1.1" viewBox="0 0 210 50" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="iA Groupe financier">
+  <!-- iA wordmark -->
+  <g fill="#064dd9">
+    <polygon points="4.2 17.2 12.2 17.2 8 44.8 0 44.8"/>
+    <path d="m4.4 9.9c0-2.7 2.2-4.9 4.9-4.9s4.9 2.2 4.9 4.9-2.2 4.9-4.9 4.9-4.9-2.2-4.9-4.9z"/>
+    <path d="m41.3 44.8h8.2l-10.3-37.4h-7.3l-21.5 37.4h8.3l5.7-9.9h14.2l2.7 9.9zm-12.8-16.9 5.5-9.6 2.6 9.6h-8.1z"/>
+  </g>
+  <!-- Elephant -->
+  <path d="m80.3 7.4h-10.4c-7.3 0-13.4 5.7-14.3 13l-3.6 24.4h6.3l2.7-9.9h20.4v9.9h6l2.8-17.8h-1.2-1.1c-4.5-0.5-8.2-4.1-8.8-8.6-0.1-1-0.1-1.9 0-2.8l1.2-8.2" fill="#8c8c87"/>
+  <polygon points="60.7 44.8 67 44.8 70.1 37.4 62.8 37.4" fill="#8c8c87"/>
+  <path d="m97.3 5c4 0 7.3 3.3 7.3 7.3 0 0.5 0 1-0.1 1.4l-3.4 22.3v0.2c0 0.7 0.5 1.2 1.2 1.2h1.2v4.9h-3.4c-2.7 0-4.9-2.2-4.9-4.9v-13h-6.2-0.8c-3.4-0.4-6.2-3.1-6.6-6.5-0.1-0.8-0.1-1.6 0-2.3l1.6-10.6h14.1z" fill="#8c8c87"/>
+  <!-- Groupe financier -->
+  <g fill="#064dd9" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="114" y="23" font-size="13.5" letter-spacing="0.2">Groupe</text>
+    <text x="114" y="41" font-size="13.5" letter-spacing="0.2">financier</text>
+  </g>
+</svg>

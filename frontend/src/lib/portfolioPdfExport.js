@@ -6,6 +6,7 @@ import {
   PORTFOLIO_PRODUCT_NOTICE,
   formatReturnWithIncomplete,
 } from './portfolioCompliance';
+import { IA_GROUPE_FINANCIER_LOGO_PNG } from './branding';
 
 const IA_BLUE = [6, 77, 217];
 const DARK = [1, 35, 63];
@@ -452,9 +453,7 @@ export async function exportPortfolioToPdf({
 
   const accentRgb = hexToRgb(profile?.accent || '#064dd9');
   const displayName = name || profile?.name || slug;
-  const logoDataUrl = await loadImageDataUrl(
-    `${process.env.PUBLIC_URL || ''}/branding/ia-groupe-financier.png`
-  );
+  const logoDataUrl = await loadImageDataUrl(IA_GROUPE_FINANCIER_LOGO_PNG);
 
   const ctx = { displayName, asOfLabel, profile, accentRgb, logoDataUrl };
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
