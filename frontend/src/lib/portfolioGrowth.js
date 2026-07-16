@@ -10,7 +10,8 @@
 import { PORTFOLIO_CALENDAR_RETURNS_DEFAULTS } from '../data/portfolioCalendarReturnsDefaults';
 
 const PRINCIPAL_CAD = 100000;
-const MIN_COVERAGE = 0.95;
+/** Couverture minimale du poids pour une année civile (fonds récents exclus + renormalisation). */
+const MIN_COVERAGE = 0.7;
 
 function parseAsOfParts(asOfIso) {
   if (asOfIso && /^\d{4}-\d{2}-\d{2}$/.test(asOfIso)) {

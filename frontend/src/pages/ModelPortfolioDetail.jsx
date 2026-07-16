@@ -109,7 +109,15 @@ export const ModelPortfolioDetail = () => {
   const profile = publicProfile || adminProfile;
   const isAdminOnly = isAdminPortfolioSlug(slug) && !publicProfile;
   const fallbackPortfolio = DEFAULT_MODEL_PORTFOLIOS.find((item) => item.key === slug);
-  const [portfolio, setPortfolio] = useState(fallbackPortfolio || null);
+  const adminSeed = isAdminOnly && adminProfile
+    ? {
+        key: adminProfile.key,
+        name: adminProfile.name,
+        href: adminProfile.href,
+        periodReturns: {},
+      }
+    : null;
+  const [portfolio, setPortfolio] = useState(fallbackPortfolio || adminSeed || null);
   const [asOfLabel, setAsOfLabel] = useState(DEFAULT_MODEL_PORTFOLIOS_AS_OF);
   const [asOfIso, setAsOfIso] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
@@ -165,6 +173,16 @@ export const ModelPortfolioDetail = () => {
         perfByCode = mergeFundRowsIntoPerfMap({}, fundRows);
       }
 
+      // Secours packaged pour fonds absents de Supabase (ex. FU361, FU310)
+      if (isAdminOnly) {
+        for (const h of staticHoldings) {
+          if (!h.fuCode || perfByCode[h.fuCode]) continue;
+          perfByCode = mergeFundRowsIntoPerfMap(perfByCode, [
+            { external_code: h.fuCode, metadata: {} },
+          ]);
+        }
+      }
+
       const {
         periodReturns: weighted,
         incompleteByPeriod: incomplete,
@@ -208,7 +226,7 @@ export const ModelPortfolioDetail = () => {
       setLoading(false);
     };
     loadPortfolio();
-  }, [slug, profile, fallbackPortfolio, staticHoldings]);
+  }, [slug, profile, fallbackPortfolio, staticHoldings, isAdminOnly]);
 
   const liveGrowth = useMemo(() => {
     if (!staticHoldings.length) {
@@ -300,7 +318,23 @@ export const ModelPortfolioDetail = () => {
   });
 
   if (!authLoading && isAdminOnly && !user?.is_admin) {
-    return <Navigate to="/" replace />;
+    return (
+      <main className="min-h-screen bg-light flex items-center justify-center section-padding">
+        <div className="max-w-md text-center space-y-4 p-8 bg-white rounded-2xl border border-prestige-beige shadow-ia">
+          <h1 className="font-heading text-xl font-bold text-dark">Accès réservé</h1>
+          <p className="text-sm text-prestige-taupe">
+            La fiche <span className="font-medium text-dark">Équilibré #2</span> est réservée aux
+            administrateurs connectés.
+          </p>
+          <Link
+            to="/connexion"
+            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+          >
+            Se connecter
+          </Link>
+        </div>
+      </main>
+    );
   }
 
   if (!loading && !profile && !portfolio) {
@@ -316,6 +350,7 @@ export const ModelPortfolioDetail = () => {
   }
 
   const accent = profile?.accent || '#064dd9';
+  const displayName = portfolio?.name || profile?.name || slug;
 
   return (
     <main className="min-h-screen bg-light" data-testid={`portfolio-detail-${slug}`}>
@@ -348,7 +383,7 @@ export const ModelPortfolioDetail = () => {
                   Portefeuille modèle
                 </p>
                 <h1 className="font-heading text-3xl md:text-4xl font-bold text-dark">
-                  {portfolio.name}
+                  {displayName}
                 </h1>
                 <p className="text-sm text-prestige-taupe mt-2">
                   Données de rendement au {asOfLabel}
@@ -377,22 +412,22 @@ export const ModelPortfolioDetail = () => {
               {[
                 {
                   label: `${currentYear} (AAJ)`,
-                  value: portfolio.ytd2026,
+                  value: portfolio?.ytd2026,
                   incomplete: incompleteByPeriod.ytd,
                 },
                 {
                   label: `${prevYear} (année civile)`,
-                  value: portfolio.year2025,
+                  value: portfolio?.year2025,
                   incomplete: incompleteByPeriod.prevYear,
                 },
                 {
                   label: '3 ans (annualisé)',
-                  value: portfolio.annualized3y,
+                  value: portfolio?.annualized3y,
                   incomplete: incompleteByPeriod.threeYear,
                 },
                 {
                   label: '5 ans (annualisé)',
-                  value: portfolio.annualized5y,
+                  value: portfolio?.annualized5y,
                   incomplete: incompleteByPeriod.fiveYear,
                 },
               ].map((kpi) => (

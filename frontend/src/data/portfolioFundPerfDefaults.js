@@ -13,6 +13,8 @@ export const DEFAULT_FUND_PERFORMANCE = {
   FU705: { ytdPct: 14.97, prevYearPct: 4.96, oneMonthPct: 4.12, threeMonthPct: 20.43, sixMonthPct: 16.45, oneYearPct: 23.47, threeYearPct: 19.26, fiveYearPct: 12.24, tenYearPct: 10.85, incompleteFields: [] },
   FU607: { ytdPct: 38.87, prevYearPct: 18.73, oneMonthPct: 2.28, threeMonthPct: 43.34, sixMonthPct: 43.27, oneYearPct: 65.12, threeYearPct: 43.99, fiveYearPct: 21.81, tenYearPct: null, incompleteFields: ['fiveYearPct', 'tenYearPct'] },
   FU505: { ytdPct: 21.31, prevYearPct: 21.02, oneMonthPct: 1.73, threeMonthPct: 20.87, sixMonthPct: 26.69, oneYearPct: 43.88, threeYearPct: 24.44, fiveYearPct: 5.62, tenYearPct: 10.79, incompleteFields: [] },
+  FU310: { ytdPct: 22.49, prevYearPct: 18.4, oneMonthPct: null, threeMonthPct: 22.49, sixMonthPct: 28.81, oneYearPct: 22.49, threeYearPct: 35.32, fiveYearPct: 25.78, tenYearPct: 16.25, incompleteFields: [] },
+  FU361: { ytdPct: 3.42, prevYearPct: 5.16, oneMonthPct: null, threeMonthPct: 3.42, sixMonthPct: 6.63, oneYearPct: 3.42, threeYearPct: 7.82, fiveYearPct: 8.29, tenYearPct: null, incompleteFields: ['fiveYearPct', 'tenYearPct'] },
 };
 
 /** Périodes marquées * dans le CSV iA (historique incomplet / rendement simulé). */
@@ -20,6 +22,7 @@ export const KNOWN_INCOMPLETE_FUND_FIELDS = {
   FU870: ['threeYearPct', 'fiveYearPct', 'tenYearPct'],
   FU920: ['tenYearPct'],
   FU607: ['fiveYearPct', 'tenYearPct'],
+  FU361: ['fiveYearPct', 'tenYearPct'],
 };
 
 export function getDefaultFundPerformance(fuCode) {
