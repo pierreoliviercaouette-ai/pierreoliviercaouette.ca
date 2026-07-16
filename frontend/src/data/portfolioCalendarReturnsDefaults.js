@@ -126,6 +126,16 @@ export const PORTFOLIO_CALENDAR_RETURNS_DEFAULTS = {
       "incomplete": false
     }
   },
+  "FU361": {
+    "2024": {
+      "value": 13.13,
+      "incomplete": true
+    },
+    "2025": {
+      "value": 5.16,
+      "incomplete": false
+    }
+  },
   "FU505": {
     "2016": {
       "value": -6.18,

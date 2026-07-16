@@ -71,7 +71,7 @@ export const FUND_CATALOG = {
   FU361: {
     name: 'Croissance et revenu mondiaux (iA)',
     category: 'Fonds diversifiés',
-    hasFiche: false,
+    hasFiche: true,
   },
 };
 
