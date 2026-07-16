@@ -375,6 +375,7 @@ export const ModelPortfolioDetail = () => {
         growthPrincipal: GROWTH_PRINCIPAL,
         currentYear,
         prevYear,
+        ficheHoldings,
       });
     } catch (err) {
       console.error('Export PDF portefeuille:', err);
