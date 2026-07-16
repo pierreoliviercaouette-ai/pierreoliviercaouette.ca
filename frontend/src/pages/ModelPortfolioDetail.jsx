@@ -13,7 +13,8 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
-import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Download, ExternalLink, FileDown } from 'lucide-react';
+import { Button } from '../components/ui/button';
 import { DEFAULT_MODEL_PORTFOLIOS, DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../data/modelPortfolios';
 import { getPortfolioProfile, getProfileHoldingsResolved } from '../data/portfolioProfiles';
 import {
@@ -37,6 +38,7 @@ import { computeWeightedPeriodReturns } from '../lib/portfolioCsvImport';
 import { mergeFundRowsIntoPerfMap } from '../lib/portfolioFundPerf';
 import { buildGrowthSeriesFromFundReturns } from '../lib/portfolioGrowth';
 import { getFundFicheUrl } from '../lib/portfolioFiches';
+import { exportPortfolioToPdf } from '../lib/portfolioPdfExport';
 import { useSeoMeta } from '../lib/seo';
 import { supabase } from '../lib/supabaseClient';
 
@@ -124,6 +126,7 @@ export const ModelPortfolioDetail = () => {
   const [fundPerfByCode, setFundPerfByCode] = useState({});
   const [incompleteByPeriod, setIncompleteByPeriod] = useState({});
   const [loading, setLoading] = useState(true);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   const staticHoldings = useMemo(() => {
     if (!slug) return [];
@@ -352,6 +355,34 @@ export const ModelPortfolioDetail = () => {
   const accent = profile?.accent || '#064dd9';
   const displayName = portfolio?.name || profile?.name || slug;
 
+  const handleExportPdf = async () => {
+    setExportingPdf(true);
+    try {
+      await exportPortfolioToPdf({
+        slug,
+        name: displayName,
+        asOfLabel,
+        profile,
+        portfolio,
+        periodReturns,
+        incompleteByPeriod,
+        staticHoldings,
+        fundPerfByCode,
+        allocationData,
+        chartData,
+        chartGrowthMeta,
+        hasIncompleteHistory,
+        growthPrincipal: GROWTH_PRINCIPAL,
+        currentYear,
+        prevYear,
+      });
+    } catch (err) {
+      console.error('Export PDF portefeuille:', err);
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-light" data-testid={`portfolio-detail-${slug}`}>
       <section className="section-padding">
@@ -395,7 +426,20 @@ export const ModelPortfolioDetail = () => {
                   </p>
                 )}
               </div>
-              {profile && <RiskBars level={profile.riskLevel} accent={accent} />}
+              <div className="flex flex-col items-start sm:items-end gap-3 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportPdf}
+                  disabled={exportingPdf}
+                  className="border-prestige-beige"
+                >
+                  <FileDown className="w-4 h-4" />
+                  {exportingPdf ? 'Export en cours…' : 'Exporter PDF'}
+                </Button>
+                {profile && <RiskBars level={profile.riskLevel} accent={accent} />}
+              </div>
             </div>
 
             <p className="text-xs text-prestige-taupe leading-relaxed mb-2">{PORTFOLIO_RISK_SCALE_NOTE}</p>
