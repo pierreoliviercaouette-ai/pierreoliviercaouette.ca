@@ -88,6 +88,14 @@ function App() {
                 </Suspense>
               }
             />
+            <Route
+              path="/admin/portefeuilles/:slug"
+              element={
+                <Suspense fallback={null}>
+                  <ModelPortfolioDetail />
+                </Suspense>
+              }
+            />
             <Route path="/referencement/consentement" element={<Navigate to="/recommandations/consentement" replace />} />
             <Route path="/referencement" element={<Navigate to="/recommandations" replace />} />
             <Route path="/conseiller-financier-victoriaville" element={<ConseillerFinancierVictoriaville />} />

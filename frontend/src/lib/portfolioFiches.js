@@ -4,6 +4,7 @@
  */
 import FU021 from '../assets/fiches-fonds/FU021.pdf';
 import FU280 from '../assets/fiches-fonds/FU280.pdf';
+import FU310 from '../assets/fiches-fonds/FU310.pdf';
 import FU505 from '../assets/fiches-fonds/FU505.pdf';
 import FU530 from '../assets/fiches-fonds/FU530.pdf';
 import FU607 from '../assets/fiches-fonds/FU607.pdf';
@@ -16,6 +17,7 @@ import FU920 from '../assets/fiches-fonds/FU920.pdf';
 const FUND_FICHE_URLS = {
   FU021,
   FU280,
+  FU310,
   FU505,
   FU530,
   FU607,

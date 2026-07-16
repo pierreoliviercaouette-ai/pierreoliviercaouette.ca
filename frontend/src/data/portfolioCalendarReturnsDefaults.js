@@ -84,6 +84,48 @@ export const PORTFOLIO_CALENDAR_RETURNS_DEFAULTS = {
       "incomplete": false
     }
   },
+  "FU310": {
+    "2016": {
+      "value": 1.09,
+      "incomplete": false
+    },
+    "2017": {
+      "value": 20.31,
+      "incomplete": false
+    },
+    "2018": {
+      "value": 5.86,
+      "incomplete": false
+    },
+    "2019": {
+      "value": 28.17,
+      "incomplete": false
+    },
+    "2020": {
+      "value": 41.51,
+      "incomplete": false
+    },
+    "2021": {
+      "value": 22.47,
+      "incomplete": false
+    },
+    "2022": {
+      "value": -29.47,
+      "incomplete": false
+    },
+    "2023": {
+      "value": 46.19,
+      "incomplete": false
+    },
+    "2024": {
+      "value": 33.06,
+      "incomplete": false
+    },
+    "2025": {
+      "value": 11.82,
+      "incomplete": false
+    }
+  },
   "FU505": {
     "2016": {
       "value": -6.18,

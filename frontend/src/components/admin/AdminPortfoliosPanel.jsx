@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -181,6 +182,19 @@ export function AdminPortfoliosPanel({ onRefresh }) {
   return (
     <div className="space-y-4">
       <h3 className="font-heading text-xl font-semibold text-dark">Portefeuilles modeles</h3>
+
+      <div className="p-4 bg-amber-50/80 rounded-xl border border-amber-200/80">
+        <p className="font-semibold text-dark text-sm">Pages internes (admin)</p>
+        <p className="text-xs text-prestige-taupe mt-1 mb-2">
+          Non listées sur le site public. Connexion admin requise.
+        </p>
+        <Link
+          to="/admin/portefeuilles/equilibre-2"
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          Équilibré #2 — composition alternative
+        </Link>
+      </div>
 
       <div className="p-4 bg-white rounded-xl border border-primary/20 space-y-3">
         <div>

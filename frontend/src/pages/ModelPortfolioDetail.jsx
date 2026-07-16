@@ -17,6 +17,12 @@ import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
 import { DEFAULT_MODEL_PORTFOLIOS, DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../data/modelPortfolios';
 import { getPortfolioProfile, getProfileHoldingsResolved } from '../data/portfolioProfiles';
 import {
+  getAdminPortfolioProfile,
+  getAdminProfileHoldingsResolved,
+  isAdminPortfolioSlug,
+} from '../data/portfolioAdminProfiles';
+import { useAuth } from '../context/AuthContext';
+import {
   PORTFOLIO_GENERAL_DISCLAIMER,
   PORTFOLIO_GUARANTEE_DISCLAIMER,
   PORTFOLIO_INCOMPLETE_HISTORY_NOTE,
@@ -97,7 +103,11 @@ function RiskBars({ level, accent }) {
 
 export const ModelPortfolioDetail = () => {
   const { slug } = useParams();
-  const profile = getPortfolioProfile(slug);
+  const { user, loading: authLoading } = useAuth();
+  const publicProfile = getPortfolioProfile(slug);
+  const adminProfile = getAdminPortfolioProfile(slug);
+  const profile = publicProfile || adminProfile;
+  const isAdminOnly = isAdminPortfolioSlug(slug) && !publicProfile;
   const fallbackPortfolio = DEFAULT_MODEL_PORTFOLIOS.find((item) => item.key === slug);
   const [portfolio, setPortfolio] = useState(fallbackPortfolio || null);
   const [asOfLabel, setAsOfLabel] = useState(DEFAULT_MODEL_PORTFOLIOS_AS_OF);
@@ -107,10 +117,11 @@ export const ModelPortfolioDetail = () => {
   const [incompleteByPeriod, setIncompleteByPeriod] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const staticHoldings = useMemo(
-    () => (slug ? getProfileHoldingsResolved(slug) : []),
-    [slug]
-  );
+  const staticHoldings = useMemo(() => {
+    if (!slug) return [];
+    if (isAdminOnly) return getAdminProfileHoldingsResolved(slug);
+    return getProfileHoldingsResolved(slug);
+  }, [slug, isAdminOnly]);
 
   useEffect(() => {
     const loadPortfolio = async () => {
@@ -178,7 +189,7 @@ export const ModelPortfolioDetail = () => {
           weighted.fiveYear ??
           (legacyRow?.annualized_5y != null ? Number(legacyRow.annualized_5y) : null) ??
           null,
-        href: legacyRow?.href || profile?.href || `/portefeuilles/${slug}`,
+        href: legacyRow?.href || profile?.href || (isAdminOnly ? `/admin/portefeuilles/${slug}` : `/portefeuilles/${slug}`),
         periodReturns: weighted,
       });
       setIncompleteByPeriod(incomplete || {});
@@ -288,6 +299,10 @@ export const ModelPortfolioDetail = () => {
     noindex: true,
   });
 
+  if (!authLoading && isAdminOnly && !user?.is_admin) {
+    return <Navigate to="/" replace />;
+  }
+
   if (!loading && !profile && !portfolio) {
     return <Navigate to="/" replace />;
   }
@@ -306,10 +321,23 @@ export const ModelPortfolioDetail = () => {
     <main className="min-h-screen bg-light" data-testid={`portfolio-detail-${slug}`}>
       <section className="section-padding">
         <div className="container-max max-w-5xl space-y-6">
-          <Link to="/portefeuilles" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
-            <ArrowLeft className="w-4 h-4" />
-            Tous les portefeuilles
-          </Link>
+          {isAdminOnly ? (
+            <Link to="/admin" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
+              <ArrowLeft className="w-4 h-4" />
+              Retour admin
+            </Link>
+          ) : (
+            <Link to="/portefeuilles" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
+              <ArrowLeft className="w-4 h-4" />
+              Tous les portefeuilles
+            </Link>
+          )}
+
+          {isAdminOnly && (
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              Page interne admin — non indexée et non listée publiquement.
+            </p>
+          )}
 
           <div className="bg-white border border-prestige-beige rounded-2xl p-6 md:p-8 shadow-ia overflow-hidden relative">
             <div className="absolute top-0 left-0 right-0 h-1.5" style={{ backgroundColor: accent }} />

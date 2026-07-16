@@ -63,6 +63,16 @@ export const FUND_CATALOG = {
     category: 'Fonds diversifiés',
     hasFiche: true,
   },
+  FU310: {
+    name: 'Indiciel américain DAQ (iA)',
+    category: 'Fonds spécialisés',
+    hasFiche: true,
+  },
+  FU361: {
+    name: 'Croissance et revenu mondiaux (iA)',
+    category: 'Fonds diversifiés',
+    hasFiche: false,
+  },
 };
 
 const RISK_ACCENTS = {
