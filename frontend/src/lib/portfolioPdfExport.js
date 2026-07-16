@@ -151,7 +151,7 @@ function drawHero(doc, ctx) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...TAUPE);
-  doc.text(pdfText('Pierre-Olivier Caouette  |  Conseiller en assurance'), MARGIN, y);
+  doc.text(pdfText('Pierre-Olivier Caouette  |  Conseiller en sécurité financière'), MARGIN, y);
   y += 4;
   doc.text(pdfText('iA Groupe financier  |  Fonds distincts - serie Classique 75/75'), MARGIN, y);
   y += 10;
