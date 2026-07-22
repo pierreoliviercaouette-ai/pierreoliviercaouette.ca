@@ -40,7 +40,7 @@ export const Tools = () => {
         <PageHero
           badge="Espace membre"
           title="Outils financiers"
-          description="Accedez a une bibliotheque d outils pour simuler, calculer et planifier vos decisions financieres."
+          description="Accédez à une bibliothèque d'outils pour simuler, calculer et planifier vos décisions financières."
         >
           <Link
             to="/connexion"
@@ -61,9 +61,9 @@ export const Tools = () => {
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                { name: 'Calculateur d\'assurance vie', description: 'Estimez vos besoins en couverture' },
-                { name: 'Simulateur REER vs CELI', description: 'Comparez les options d\'épargne' },
-                { name: 'Calculateur de retraite', description: 'Projetez vos revenus de retraite' },
+                { name: "Calculateur d'assurance vie", description: 'Estimez vos besoins en couverture' },
+                { name: 'Comparateur REER vs CELI', description: "Comparez les options d'épargne" },
+                { name: 'Calculateur hypothécaire', description: 'Estimez paiements et prime SCHL' },
               ].map((tool, index) => (
                 <div 
                   key={index}

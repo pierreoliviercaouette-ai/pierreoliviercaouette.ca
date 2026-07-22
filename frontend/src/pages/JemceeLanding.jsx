@@ -104,9 +104,9 @@ function BookingCta({ itemId, className, children }) {
 
 export const JemceeLanding = () => {
   useSeoMeta({
-    title: 'Performance financiere | Pierre-Olivier Caouette',
+    title: 'Performance financière | Pierre-Olivier Caouette',
     description:
-      'Sur la piste comme en finances, la performance se prepare. Conseiller en securite financiere a Victoriaville — mini-diagnostic de 15-20 minutes, sans engagement.',
+      'Sur la piste comme en finances, la performance se prépare. Conseiller en sécurité financière à Victoriaville — mini-diagnostic de 15-20 minutes, sans engagement.',
     canonicalPath: '/jemcee',
   });
 

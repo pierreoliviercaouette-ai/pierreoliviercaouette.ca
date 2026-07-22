@@ -7,6 +7,7 @@ Disallow: /connexion
 Disallow: /inscription
 Disallow: /profil
 Disallow: /admin
+# /outils (page teaser publique) reste indexable ; les calculateurs membres sont exclus
 Disallow: /outils/
 Disallow: /portefeuilles/
 # Ancien chemin public des fiches (fichiers déplacés hors /public)

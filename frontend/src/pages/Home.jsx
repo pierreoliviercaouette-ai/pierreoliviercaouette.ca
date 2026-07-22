@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink } from 'lucide-react';
+import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink, Target, Handshake, Search, ClipboardList, LineChart } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
 import { trackEvent } from '../lib/analytics';
@@ -406,12 +406,12 @@ const AboutPreview = () => (
           {/* Quick benefits instead of fake stats */}
           <div className="flex flex-wrap gap-3 py-4">
             {[
-              { icon: '🎯', label: 'Conseils personnalisés', href: null },
-              { icon: '🛡️', label: 'Inscrit AMF', href: AMF_REGISTRE_URL },
-              { icon: '🤝', label: 'Accompagnement humain', href: null }
+              { Icon: Target, label: 'Conseils personnalisés', href: null },
+              { Icon: Shield, label: 'Inscrit AMF', href: AMF_REGISTRE_URL },
+              { Icon: Handshake, label: 'Accompagnement humain', href: null }
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 px-4 py-2 bg-light rounded-full">
-                <span>{item.icon}</span>
+                <item.Icon className="w-4 h-4 text-primary shrink-0" aria-hidden />
                 {item.href ? (
                   <a
                     href={item.href}
@@ -511,10 +511,10 @@ const DifferentiatorSection = () => {
 
 const ProcessSection = () => {
   const steps = [
-    { number: '01', title: 'Analyse financière', description: 'Évaluation approfondie de vos finances', icon: '🔍' },
-    { number: '02', title: 'Planification', description: 'Stratégies pour une retraite sereine', icon: '📋' },
-    { number: '03', title: 'Investissement', description: 'Solutions adaptées à vos objectifs', icon: '📈' },
-    { number: '04', title: 'Sécurité', description: 'Protection de votre patrimoine', icon: '🛡️' }
+    { number: '01', title: 'Analyse financière', description: 'Évaluation approfondie de vos finances', Icon: Search },
+    { number: '02', title: 'Planification', description: 'Stratégies pour une retraite sereine', Icon: ClipboardList },
+    { number: '03', title: 'Investissement', description: 'Solutions adaptées à vos objectifs', Icon: LineChart },
+    { number: '04', title: 'Sécurité', description: 'Protection de votre patrimoine', Icon: Shield }
   ];
 
   return (
@@ -541,7 +541,7 @@ const ProcessSection = () => {
               <div key={step.number} className="relative text-center group" data-testid={`process-step-${index}`}>
                 <div className="relative z-10 mb-6">
                   <div className="w-24 h-24 mx-auto rounded-full bg-white shadow-xl border-4 border-primary/20 flex items-center justify-center group-hover:border-primary group-hover:scale-110 transition-all duration-300">
-                    <span className="text-4xl">{step.icon}</span>
+                    <step.Icon className="w-10 h-10 text-primary" aria-hidden />
                   </div>
                   <span className="absolute -top-2 -right-2 w-8 h-8 bg-primary text-white text-sm font-bold rounded-full flex items-center justify-center">
                     {step.number}
@@ -773,7 +773,7 @@ export const Home = () => {
   const [searchParams] = useSearchParams();
   const refFromQuery = searchParams.get('ref');
   useSeoMeta({
-    title: 'Conseiller financier au Québec | Assurance vie, retraite et placements',
+    title: 'Conseiller en sécurité financière au Québec | Assurance vie, retraite et placements',
     description:
       'Conseiller en sécurité financière à Victoriaville : assurance vie, invalidité, REER, CELI et planification financière personnalisée.',
     canonicalPath: '/',

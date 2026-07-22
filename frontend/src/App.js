@@ -7,8 +7,9 @@ import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
 import { BackToTop } from "./components/layout/BackToTop";
 import { ScrollToTop } from "./components/layout/ScrollToTop";
-import { Analytics } from "@vercel/analytics/react";
 import { AnalyticsTracker } from "./components/layout/AnalyticsTracker";
+import { ConsentAwareAnalytics } from "./components/layout/ConsentAwareAnalytics";
+import { CookieConsentBanner } from "./components/layout/CookieConsentBanner";
 
 // Pages
 import { Home } from "./pages/Home";
@@ -50,7 +51,7 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AnalyticsTracker />
-      <Analytics />
+      <ConsentAwareAnalytics />
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <Suspense fallback={null}>
@@ -110,6 +111,7 @@ function App() {
         </main>
         <Footer />
         <BackToTop />
+        <CookieConsentBanner />
       </div>
       <Toaster position="top-right" richColors />
     </BrowserRouter>

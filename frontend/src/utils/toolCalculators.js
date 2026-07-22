@@ -3,7 +3,7 @@
 import { INCOME_TAX_2026, REEE_2026, REER_2026 } from './fiscalConfig2026';
 
 // =============================================================================
-// TAX RATE TABLES - QUEBEC 2024
+// Tax rate tables — Quebec + Federal 2026 (see fiscalConfig2026.js)
 // =============================================================================
 
 const FEDERAL_BRACKETS = INCOME_TAX_2026.federalBrackets;

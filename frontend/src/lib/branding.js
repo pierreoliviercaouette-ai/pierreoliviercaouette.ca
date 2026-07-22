@@ -2,6 +2,9 @@
 export const AMF_REGISTRE_URL =
   'https://lautorite.qc.ca/grand-public/registres/registre-des-entreprises-et-des-individus-autorises-a-exercer';
 
+/** Numéro de certificat AMF (afficher lorsqu’il est fourni). */
+export const AMF_CERTIFICATE_NUMBER = null;
+
 /** Logo officiel iA Groupe financier (SVG — fichier local dans `public/branding/`). */
 export const IA_GROUPE_FINANCIER_LOGO = `${process.env.PUBLIC_URL || ''}/branding/ia-groupe-financier.svg`;
 

@@ -33,9 +33,9 @@ export const services = [
       'Je vise une couverture proportionnée : assez pour protéger, sans surpayer.',
       'Je révise avec vous quand votre situation change (naissance, achat, nouvelle dettes).',
     ],
-    seoTitle: 'Assurance vie | Proteger sa famille',
+    seoTitle: 'Assurance vie | Protéger sa famille',
     seoDescription:
-      'Assurance vie adaptee a votre situation: protection du conjoint, hypotheque et avenir des enfants. Analyse claire avec Pierre-Olivier Caouette.',
+      'Assurance vie adaptée à votre situation : protection du conjoint, hypothèque et avenir des enfants. Analyse claire avec Pierre-Olivier Caouette.',
     color: 'from-blue-500 to-blue-600',
   },
   {
@@ -70,9 +70,9 @@ export const services = [
       'Je reste concret : échéanciers, montants cibles et ajustements quand la vie change.',
       'Le suivi régulier permet de garder le cap sans stresser à chaque fluctuation.',
     ],
-    seoTitle: 'Epargne et retraite | REER, CELI',
+    seoTitle: 'Épargne et retraite | REER, CELI',
     seoDescription:
-      'Strategies REER, CELI et retraite adaptees a votre fiscalite et vos objectifs. Accompagnement personnalise avec Pierre-Olivier Caouette.',
+      'Stratégies REER, CELI et retraite adaptées à votre fiscalité et vos objectifs. Accompagnement personnalisé avec Pierre-Olivier Caouette.',
     color: 'from-green-500 to-green-600',
   },
   {
@@ -106,9 +106,9 @@ export const services = [
       'Le plan reste lisible — des étapes claires que vous pouvez suivre.',
       'On le révise quand vos objectifs évoluent, pour que le plan reste utile.',
     ],
-    seoTitle: 'Planification financiere | Vision globale',
+    seoTitle: 'Planification financière | Vision globale',
     seoDescription:
-      'Plan financier personnalise qui integre protection, epargne et objectifs de vie. Accompagnement clair avec Pierre-Olivier Caouette.',
+      'Plan financier personnalisé qui intègre protection, épargne et objectifs de vie. Accompagnement clair avec Pierre-Olivier Caouette.',
     color: 'from-purple-500 to-purple-600',
   },
   {
@@ -142,9 +142,9 @@ export const services = [
       'Je vous explique délais, exclusions et montant de façon claire avant de recommander.',
       'L’objectif : protéger votre budget et vos obligations, simplement et concrètement.',
     ],
-    seoTitle: 'Assurance invalidite | Proteger son revenu',
+    seoTitle: 'Assurance invalidité | Protéger son revenu',
     seoDescription:
-      "Assurance invalidite pour proteger votre revenu en cas de maladie ou d'accident. Analyse adaptee avec Pierre-Olivier Caouette.",
+      "Assurance invalidité pour protéger votre revenu en cas de maladie ou d'accident. Analyse adaptée avec Pierre-Olivier Caouette.",
     color: 'from-cyan-500 to-cyan-600',
   },
   {
@@ -180,7 +180,7 @@ export const services = [
     ],
     seoTitle: 'Assurance maladie grave | Capital forfaitaire',
     seoDescription:
-      'Assurance maladie grave : capital a diagnostic pour vous concentrer sur votre guerison. Accompagnement clair avec Pierre-Olivier Caouette.',
+      'Assurance maladie grave : capital à diagnostic pour vous concentrer sur votre guérison. Accompagnement clair avec Pierre-Olivier Caouette.',
     color: 'from-red-500 to-red-600',
   },
   {
@@ -214,9 +214,9 @@ export const services = [
       'Je reste transparent sur les options et les coûts, pour que la décision soit rentable pour l’entreprise.',
       'Approche concrète, adaptée à la taille et à la réalité de votre organisation.',
     ],
-    seoTitle: 'Solutions entrepreneur | Protection d\'entreprise',
+    seoTitle: "Solutions entrepreneur | Protection d'entreprise",
     seoDescription:
-      'Personne cle, convention entre actionnaires et protection du patrimoine d\'entreprise. Solutions adaptees avec Pierre-Olivier Caouette.',
+      "Personne clé, convention entre actionnaires et protection du patrimoine d'entreprise. Solutions adaptées avec Pierre-Olivier Caouette.",
     color: 'from-amber-500 to-amber-600',
   },
 ];

@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, ExternalLink, Facebook, Instagram, Linkedin } from 'lucide-react';
-import { IA_AUTO_HABITATION_LOGO, IA_AUTO_HABITATION_URL, TUGO_ASSURANCE_VOYAGE_URL } from '../../lib/branding';
+import {
+  IA_AUTO_HABITATION_URL,
+  IA_GROUPE_FINANCIER_LOGO,
+  IA_GROUPE_FINANCIER_URL,
+  TUGO_ASSURANCE_VOYAGE_URL,
+} from '../../lib/branding';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -24,8 +29,8 @@ export const Footer = () => {
   const seoGuides = [
     { name: 'Conseiller financier Victoriaville', path: '/conseiller-financier-victoriaville' },
     { name: 'Assurance vie Victoriaville', path: '/assurance-vie-victoriaville' },
-    { name: 'Assurance invalidite Quebec', path: '/assurance-invalidite-quebec' },
-    { name: 'Planification financiere Quebec', path: '/planification-financiere-quebec' },
+    { name: 'Assurance invalidité Québec', path: '/assurance-invalidite-quebec' },
+    { name: 'Planification financière Québec', path: '/planification-financiere-quebec' },
     { name: 'Recommander un conseiller financier', path: '/recommander-conseiller-financier' },
   ];
 
@@ -44,16 +49,16 @@ export const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <a
-                href={IA_AUTO_HABITATION_URL}
+                href={IA_GROUPE_FINANCIER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded"
-                aria-label="iA Auto et Habitation — ouvrir le site"
+                aria-label="iA Groupe financier — ouvrir le site"
               >
                 <img
-                  src={IA_AUTO_HABITATION_LOGO}
-                  alt="iA Auto et Habitation"
-                  className="h-12 w-auto object-contain object-center"
+                  src={IA_GROUPE_FINANCIER_LOGO}
+                  alt="iA Groupe financier"
+                  className="h-12 w-auto object-contain object-center brightness-0 invert"
                 />
               </a>
             </div>

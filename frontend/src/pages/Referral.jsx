@@ -377,7 +377,7 @@ function DrawSection({ user, referralStats, loading }) {
                 <p className="font-semibold text-sky-950">Aucun achat requis</p>
               </div>
               <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/90 px-3 py-2.5 text-xs text-emerald-950 shadow-sm">
-                <p className="font-semibold text-emerald-950">Admissible des 5 points</p>
+                <p className="font-semibold text-emerald-950">Admissible dès 5 points</p>
               </div>
               <div className="rounded-xl border border-violet-200/80 bg-violet-50/90 px-3 py-2.5 text-xs text-violet-950 shadow-sm">
                 <p className="font-semibold text-violet-950">1 point = 1 chance</p>

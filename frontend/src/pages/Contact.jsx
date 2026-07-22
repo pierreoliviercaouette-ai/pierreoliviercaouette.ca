@@ -22,8 +22,9 @@ const CONTACT_INFO = {
 
 export const Contact = () => {
   useSeoMeta({
-    title: 'Contact conseiller financier | Victoriaville et Quebec',
-    description: 'Contactez un conseiller en securite financiere pour vos besoins en assurance, epargne, retraite et planification.',
+    title: 'Contact conseiller en sécurité financière | Victoriaville et Québec',
+    description:
+      'Contactez un conseiller en sécurité financière pour vos besoins en assurance, épargne, retraite et planification.',
     canonicalPath: '/contact',
   });
 
@@ -280,8 +281,9 @@ export const Contact = () => {
 
 export const Appointment = () => {
   useSeoMeta({
-    title: 'Prendre rendez-vous | Conseiller financier',
-    description: 'Prenez rendez-vous pour une consultation en assurance vie, retraite, REER, CELI et planification financiere.',
+    title: 'Prendre rendez-vous | Conseiller en sécurité financière',
+    description:
+      'Prenez rendez-vous pour une consultation en assurance vie, retraite, REER, CELI et planification financière.',
     canonicalPath: '/rendez-vous',
   });
 

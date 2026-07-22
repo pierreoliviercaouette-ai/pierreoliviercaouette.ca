@@ -58,9 +58,9 @@ const ServiceCard = ({ service }) => {
 
 export const Services = () => {
   useSeoMeta({
-    title: 'Services financiers | Assurance vie, retraite, invalidite',
+    title: 'Services financiers | Assurance vie, retraite, invalidité',
     description:
-      'Decouvrez les services: assurance vie, epargne retraite, planification financiere, invalidite et strategies de protection au Quebec.',
+      'Découvrez les services : assurance vie, épargne retraite, planification financière, invalidité et stratégies de protection au Québec.',
     canonicalPath: '/services',
   });
 
@@ -69,7 +69,7 @@ export const Services = () => {
       <PageHero
         badge="Mes services"
         title="Comment puis-je vous aider?"
-        description="Chaque situation est unique. Explorez un service pour voir comment il peut repondre a vos besoins — et pourquoi faire affaire avec moi."
+        description="Chaque situation est unique. Explorez un service pour voir comment il peut répondre à vos besoins — et pourquoi faire affaire avec moi."
       />
 
       <section className="section-padding bg-white">
