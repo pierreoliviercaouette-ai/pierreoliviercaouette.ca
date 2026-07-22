@@ -1,134 +1,149 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.pierreoliviercaouette.ca/</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1</priority>
+    <image:image>
+      <image:loc>https://www.pierreoliviercaouette.ca/seo/og-default.jpg</image:loc>
+      <image:title>Pierre-Olivier Caouette — Conseiller en sécurité financière</image:title>
+      <image:caption>Conseiller en sécurité financière à Victoriaville, Québec</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.pierreoliviercaouette.ca/seo/portrait.jpg</image:loc>
+      <image:title>Portrait de Pierre-Olivier Caouette</image:title>
+      <image:caption>Pierre-Olivier Caouette, conseiller en sécurité financière à Victoriaville</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/a-propos</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://www.pierreoliviercaouette.ca/seo/portrait.jpg</image:loc>
+      <image:title>À propos — Pierre-Olivier Caouette</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/services</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/services/assurance-vie</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.88</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/services/epargne</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.88</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/services/planification</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.88</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/services/invalidite</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.88</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/services/maladie-grave</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.88</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/services/entreprise</loc>
-    <lastmod>2026-07-14</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.86</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/outils</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/contact</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/rendez-vous</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/recommandations</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/confidentialite</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/conditions</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/recommandations/consentement</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/conseiller-financier-victoriaville</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.92</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/assurance-vie-victoriaville</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/assurance-invalidite-quebec</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.88</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/planification-financiere-quebec</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.88</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/recommander-conseiller-financier</loc>
-    <lastmod>2026-04-06</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.86</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/jemcee</loc>
-    <lastmod>2026-07-13</lastmod>
+    <lastmod>2026-07-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
   </url>

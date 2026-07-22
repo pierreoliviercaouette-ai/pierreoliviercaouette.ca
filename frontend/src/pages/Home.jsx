@@ -4,7 +4,7 @@ import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, Chec
 import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
 import { trackEvent } from '../lib/analytics';
-import { useSeoMeta } from '../lib/seo';
+import { DEFAULT_OG_IMAGE, useSeoMeta } from '../lib/seo';
 import {
   AMF_REGISTRE_URL,
   IA_GROUPE_FINANCIER_LOGO,
@@ -123,7 +123,10 @@ const Hero = () => (
               <div className="bg-gradient-to-br from-primary/80 to-dark/90 rounded-[2rem] p-4">
                 <img
                   src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/677952146419fdc38392dfcd.png"
-                  alt="Pierre-Olivier Caouette - Conseiller en sécurité financière"
+                  alt="Pierre-Olivier Caouette, conseiller en sécurité financière à Victoriaville, Québec"
+                  width={480}
+                  height={600}
+                  fetchPriority="high"
                   className="w-full h-[480px] object-cover object-top rounded-[1.5rem]"
                 />
               </div>
@@ -338,8 +341,11 @@ const AboutPreview = () => (
               <div className="absolute inset-0 bg-gradient-to-t from-dark/40 via-transparent to-transparent z-10" />
               <img
                 src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/677aa86c6e3c74bb201c6cde.png"
-                alt="Pierre-Olivier Caouette"
+                alt="Pierre-Olivier Caouette, conseiller en sécurité financière à Victoriaville"
                 className="w-full h-[500px] object-cover object-top"
+                width={800}
+                height={500}
+                loading="lazy"
               />
               
               {/* Name overlay */}
@@ -767,9 +773,13 @@ export const Home = () => {
   const [searchParams] = useSearchParams();
   const refFromQuery = searchParams.get('ref');
   useSeoMeta({
-    title: 'Conseiller financier au Quebec | Assurance vie, retraite et placements',
-    description: 'Conseiller en securite financiere a Victoriaville: assurance vie, invalidite, REER, CELI et planification financiere personnalisee.',
+    title: 'Conseiller financier au Québec | Assurance vie, retraite et placements',
+    description:
+      'Conseiller en sécurité financière à Victoriaville : assurance vie, invalidité, REER, CELI et planification financière personnalisée.',
     canonicalPath: '/',
+    image: DEFAULT_OG_IMAGE,
+    imageAlt:
+      'Pierre-Olivier Caouette — Conseiller en sécurité financière à Victoriaville, Québec',
   });
 
   useEffect(() => {

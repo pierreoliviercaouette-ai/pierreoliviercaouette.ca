@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Award, Heart, Target, Star, Quote, ExternalLink, Shield, TrendingUp, Users } from 'lucide-react';
-import { useSeoMeta } from '../lib/seo';
+import { PERSON_IMAGE, useSeoMeta } from '../lib/seo';
 import { PartnersTrustSection } from '../components/partners/PartnersTrustSection';
 import { AMF_REGISTRE_URL } from '../lib/branding';
 
 export const About = () => {
   useSeoMeta({
-    title: 'A propos | Conseiller en securite financiere au Quebec',
-    description: 'Decouvrez le parcours, les valeurs et l approche de Pierre-Olivier Caouette, conseiller en securite financiere a Victoriaville.',
+    title: 'À propos | Conseiller en sécurité financière au Québec',
+    description:
+      'Découvrez le parcours, les valeurs et l’approche de Pierre-Olivier Caouette, conseiller en sécurité financière à Victoriaville.',
     canonicalPath: '/a-propos',
+    image: PERSON_IMAGE,
+    imageAlt: 'Portrait de Pierre-Olivier Caouette, conseiller en sécurité financière',
   });
 
   const values = [
