@@ -40,31 +40,30 @@ function PortfolioCard({ portfolio, currentYear, prevYearLabel }) {
   );
 }
 
-/** Carte mobile lisible : une carte dominante + aperçu de la suivante */
 function PortfolioScrollCard({ portfolio, currentYear, prevYearLabel }) {
   return (
     <Link
       to={portfolio.href}
-      className="snap-start shrink-0 w-[min(78vw,18rem)] rounded-xl border border-prestige-beige bg-white px-4 py-3.5 shadow-sm hover:border-primary/40 active:bg-light/50 transition-colors"
+      className="block h-full rounded-xl border border-prestige-beige bg-white px-4 py-3.5 shadow-sm active:bg-light/50"
       data-testid={`portfolio-scroll-card-${portfolio.key}`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="font-heading font-semibold text-dark text-base leading-tight">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <p className="font-heading font-semibold text-dark text-lg leading-tight truncate">
           {portfolio.name}
         </p>
-        <ChevronRight className="w-4 h-4 text-prestige-taupe shrink-0 mt-0.5" aria-hidden />
+        <ChevronRight className="w-5 h-5 text-primary shrink-0" aria-hidden />
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <div>
-          <p className="text-xs text-prestige-taupe">AAJ {currentYear}</p>
-          <p className="mt-0.5 text-lg font-semibold tabular-nums text-dark leading-none">
+      <div className="flex gap-6">
+        <div className="min-w-0">
+          <p className="text-xs text-prestige-taupe whitespace-nowrap">AAJ {currentYear}</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums text-dark">
             {formatReturnWithIncomplete(portfolio.ytd2026, portfolio.ytdIncomplete)}
           </p>
         </div>
-        <div>
-          <p className="text-xs text-prestige-taupe">{prevYearLabel}</p>
-          <p className="mt-0.5 text-lg font-medium tabular-nums text-dark leading-none">
+        <div className="min-w-0">
+          <p className="text-xs text-prestige-taupe whitespace-nowrap">{prevYearLabel}</p>
+          <p className="mt-1 text-xl font-medium tabular-nums text-dark">
             {formatReturnWithIncomplete(portfolio.yearPrev, portfolio.prevIncomplete)}
           </p>
         </div>
@@ -122,15 +121,21 @@ export const ModelPortfoliosBanner = () => {
           </p>
         ) : (
           <>
-            {/* Mobile : carrousel lisible (une carte dominante) */}
-            <div className="sm:hidden -mx-4">
+            {/* Mobile: scroll horizontal — largeur fixe obligatoire pour éviter le shrink flex */}
+            <div className="sm:hidden">
               <div
-                className="flex gap-3 overflow-x-auto px-4 pb-1 snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="flex gap-3 overflow-x-auto overscroll-x-contain pb-1 -mx-4 px-4 snap-x snap-mandatory"
+                style={{ WebkitOverflowScrolling: 'touch' }}
                 role="list"
                 aria-label="Portefeuilles modèles"
               >
                 {portfolios.map((portfolio) => (
-                  <div key={portfolio.key} role="listitem">
+                  <div
+                    key={portfolio.key}
+                    role="listitem"
+                    className="snap-center"
+                    style={{ flex: '0 0 280px', width: 280, maxWidth: 280 }}
+                  >
                     <PortfolioScrollCard
                       portfolio={portfolio}
                       currentYear={currentYear}
@@ -138,19 +143,21 @@ export const ModelPortfoliosBanner = () => {
                     />
                   </div>
                 ))}
-                <Link
-                  to="/portefeuilles"
-                  className="snap-start shrink-0 w-[9rem] rounded-xl border border-dashed border-primary/35 bg-white px-4 py-3.5 flex flex-col justify-center items-center text-center gap-1 hover:border-primary active:bg-light/50 transition-colors"
+                <div
+                  role="listitem"
+                  className="snap-center"
+                  style={{ flex: '0 0 140px', width: 140, maxWidth: 140 }}
                 >
-                  <span className="text-sm font-semibold text-primary leading-snug">
-                    Voir tous
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-primary" aria-hidden />
-                </Link>
+                  <Link
+                    to="/portefeuilles"
+                    className="flex h-full min-h-[5.5rem] flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-primary/40 bg-white px-3 text-center"
+                  >
+                    <span className="text-sm font-semibold text-primary">Voir tous</span>
+                    <ChevronRight className="w-4 h-4 text-primary" aria-hidden />
+                  </Link>
+                </div>
               </div>
-              <p className="px-4 pt-2 text-[11px] text-prestige-taupe">
-                Glissez pour voir les autres profils
-              </p>
+              <p className="pt-2 text-xs text-prestige-taupe">Glissez pour les autres profils →</p>
             </div>
 
             {/* Tablette / desktop : grille */}
@@ -170,14 +177,11 @@ export const ModelPortfoliosBanner = () => {
         <p className="hidden sm:block text-xs text-prestige-taupe mt-3 leading-relaxed">
           {PORTFOLIO_BANNER_DISCLAIMER}
         </p>
-        <div className="mt-2 sm:mt-1 flex items-center justify-between gap-3">
-          <Link
-            to="/portefeuilles"
-            className="text-sm sm:text-xs text-primary hover:underline font-medium"
-          >
+        <p className="mt-2 sm:mt-1">
+          <Link to="/portefeuilles" className="text-sm sm:text-xs text-primary hover:underline font-medium">
             Voir tous les portefeuilles
           </Link>
-        </div>
+        </p>
       </div>
     </section>
   );
