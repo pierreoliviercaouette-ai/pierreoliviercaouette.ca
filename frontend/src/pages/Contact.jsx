@@ -299,67 +299,65 @@ export const Appointment = () => {
         description="Reservez une consultation gratuite et sans engagement. Choisissez le moment qui vous convient."
       />
 
-      {/* Outlook Bookings — largeur pleine du conteneur pour calendrier + formulaire côte à côte */}
-      <section className="section-padding pt-10 md:pt-14">
-        <div className="container-max">
-          <div className="bg-white rounded-2xl shadow-ia overflow-hidden">
-            <div className="text-center px-6 pt-8 pb-6 md:px-10">
-              <h2 className="font-heading text-2xl font-bold text-dark mb-2">
-                Calendrier de réservation
-              </h2>
-              <p className="text-prestige-taupe">
-                Sélectionnez une date et une heure qui vous conviennent
-              </p>
-              <a
-                href={CONTACT_INFO.bookingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'outlook_booking_external' })}
-                className="inline-flex items-center gap-2 mt-4 text-primary font-medium hover:underline"
-              >
-                Ouvrir dans un nouvel onglet
-                <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
+      {/* Outlook Bookings — pleine largeur d'écran */}
+      <section className="pt-10 md:pt-14 pb-20 md:pb-28">
+        <div className="container-max px-4 md:px-8 text-center mb-8">
+          <h2 className="font-heading text-2xl font-bold text-dark mb-2">
+            Calendrier de réservation
+          </h2>
+          <p className="text-prestige-taupe">
+            Sélectionnez une date et une heure qui vous conviennent
+          </p>
+          <a
+            href={CONTACT_INFO.bookingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'outlook_booking_external' })}
+            className="inline-flex items-center gap-2 mt-4 text-primary font-medium hover:underline"
+          >
+            Ouvrir dans un nouvel onglet
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
 
-            <div
-              className="w-full h-[85vh] min-h-[800px] max-h-[1200px] border-y border-prestige-beige/60 bg-white"
-              data-testid="booking-calendar"
-            >
-              <iframe
-                src={CONTACT_INFO.bookingUrl}
-                className="block w-full h-full"
-                style={{ border: 0 }}
-                title="Calendrier de rendez-vous"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allow="fullscreen"
-              />
-            </div>
+        <div
+          className="w-full h-[85vh] min-h-[800px] bg-white border-y border-prestige-beige/60"
+          data-testid="booking-calendar"
+        >
+          <iframe
+            src={CONTACT_INFO.bookingUrl}
+            className="block w-full h-full"
+            style={{ border: 0 }}
+            title="Calendrier de rendez-vous"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allow="fullscreen"
+          />
+        </div>
 
-            {/* Info Steps */}
-            <div className="grid md:grid-cols-3 gap-6 px-6 py-8 md:px-10">
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
-                  <span className="text-xl font-bold text-primary">1</span>
-                </div>
-                <h4 className="font-semibold text-dark">Choisissez</h4>
-                <p className="text-sm text-prestige-taupe">Sélectionnez une date et heure</p>
+        <div className="container-max px-4 md:px-8">
+          {/* Info Steps */}
+          <div className="grid md:grid-cols-3 gap-6 mt-10">
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto rounded-full bg-white shadow-ia flex items-center justify-center mb-3">
+                <span className="text-xl font-bold text-primary">1</span>
               </div>
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
-                  <span className="text-xl font-bold text-primary">2</span>
-                </div>
-                <h4 className="font-semibold text-dark">Confirmez</h4>
-                <p className="text-sm text-prestige-taupe">Entrez vos informations</p>
+              <h4 className="font-semibold text-dark">Choisissez</h4>
+              <p className="text-sm text-prestige-taupe">Sélectionnez une date et heure</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto rounded-full bg-white shadow-ia flex items-center justify-center mb-3">
+                <span className="text-xl font-bold text-primary">2</span>
               </div>
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
-                  <span className="text-xl font-bold text-primary">3</span>
-                </div>
-                <h4 className="font-semibold text-dark">Recevez</h4>
-                <p className="text-sm text-prestige-taupe">Confirmation par courriel</p>
+              <h4 className="font-semibold text-dark">Confirmez</h4>
+              <p className="text-sm text-prestige-taupe">Entrez vos informations</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto rounded-full bg-white shadow-ia flex items-center justify-center mb-3">
+                <span className="text-xl font-bold text-primary">3</span>
               </div>
+              <h4 className="font-semibold text-dark">Recevez</h4>
+              <p className="text-sm text-prestige-taupe">Confirmation par courriel</p>
             </div>
           </div>
 
