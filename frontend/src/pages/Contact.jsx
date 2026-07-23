@@ -299,122 +299,121 @@ export const Appointment = () => {
         description="Reservez une consultation gratuite et sans engagement. Choisissez le moment qui vous convient."
       />
 
-      {/* Outlook Bookings */}
-      <section className="section-padding">
+      {/* Outlook Bookings — largeur pleine du conteneur pour calendrier + formulaire côte à côte */}
+      <section className="section-padding pt-10 md:pt-14">
         <div className="container-max">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-ia p-8">
-              <div className="text-center mb-8">
-                <h2 className="font-heading text-2xl font-bold text-dark mb-2">
-                  Calendrier de réservation
-                </h2>
-                <p className="text-prestige-taupe">
-                  Sélectionnez une date et une heure qui vous conviennent
-                </p>
-                <a
-                  href={CONTACT_INFO.bookingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'outlook_booking_external' })}
-                  className="inline-flex items-center gap-2 mt-4 text-primary font-medium hover:underline"
-                >
-                  Planifier en ligne
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-              
-              <div 
-                className="min-h-[600px] h-[700px] rounded-xl overflow-hidden"
-                data-testid="booking-calendar"
-              >
-                <iframe
-                  src={CONTACT_INFO.bookingUrl}
-                  width="100%"
-                  height="100%"
-                  scrolling="yes"
-                  style={{ border: 0 }}
-                  title="Calendrier de rendez-vous"
-                />
-              </div>
-
-              {/* Info Steps */}
-              <div className="mt-8 grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
-                    <span className="text-xl font-bold text-primary">1</span>
-                  </div>
-                  <h4 className="font-semibold text-dark">Choisissez</h4>
-                  <p className="text-sm text-prestige-taupe">Sélectionnez une date et heure</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
-                    <span className="text-xl font-bold text-primary">2</span>
-                  </div>
-                  <h4 className="font-semibold text-dark">Confirmez</h4>
-                  <p className="text-sm text-prestige-taupe">Entrez vos informations</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
-                    <span className="text-xl font-bold text-primary">3</span>
-                  </div>
-                  <h4 className="font-semibold text-dark">Recevez</h4>
-                  <p className="text-sm text-prestige-taupe">Confirmation par courriel</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Info Cards */}
-            <div className="mt-8 grid md:grid-cols-3 gap-4">
-              <a 
-                href={CONTACT_INFO.phoneLink}
-                onClick={() => trackEvent('contact_click', { channel: 'phone', source: 'appointment_page' })}
-                className="bg-white rounded-xl p-4 shadow-ia hover:shadow-ia-hover transition-shadow flex items-center gap-4"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Phone className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-prestige-taupe">Téléphone</p>
-                  <p className="font-medium text-dark">{CONTACT_INFO.phone}</p>
-                </div>
-              </a>
-              <a 
-                href={`mailto:${CONTACT_INFO.email}`}
-                onClick={() => trackEvent('contact_click', { channel: 'email', source: 'appointment_page' })}
-                className="bg-white rounded-xl p-4 shadow-ia hover:shadow-ia-hover transition-shadow flex items-center gap-4"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Mail className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-prestige-taupe">Courriel</p>
-                  <p className="font-medium text-dark text-sm">{CONTACT_INFO.email}</p>
-                </div>
-              </a>
-              <div className="bg-white rounded-xl p-4 shadow-ia flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-prestige-taupe">Région</p>
-                  <p className="font-medium text-dark">{CONTACT_INFO.region}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Alternative */}
-            <div className="mt-8 text-center">
-              <p className="text-prestige-taupe mb-4">
-                Vous préférez envoyer un message? 
+          <div className="bg-white rounded-2xl shadow-ia overflow-hidden">
+            <div className="text-center px-6 pt-8 pb-6 md:px-10">
+              <h2 className="font-heading text-2xl font-bold text-dark mb-2">
+                Calendrier de réservation
+              </h2>
+              <p className="text-prestige-taupe">
+                Sélectionnez une date et une heure qui vous conviennent
               </p>
-              <Link 
-                to="/contact"
-                className="btn-secondary inline-flex items-center gap-2"
+              <a
+                href={CONTACT_INFO.bookingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'outlook_booking_external' })}
+                className="inline-flex items-center gap-2 mt-4 text-primary font-medium hover:underline"
               >
-                Me contacter
+                Ouvrir dans un nouvel onglet
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </a>
             </div>
+
+            <div
+              className="w-full h-[85vh] min-h-[800px] max-h-[1200px] border-y border-prestige-beige/60 bg-white"
+              data-testid="booking-calendar"
+            >
+              <iframe
+                src={CONTACT_INFO.bookingUrl}
+                className="block w-full h-full"
+                style={{ border: 0 }}
+                title="Calendrier de rendez-vous"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allow="fullscreen"
+              />
+            </div>
+
+            {/* Info Steps */}
+            <div className="grid md:grid-cols-3 gap-6 px-6 py-8 md:px-10">
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
+                  <span className="text-xl font-bold text-primary">1</span>
+                </div>
+                <h4 className="font-semibold text-dark">Choisissez</h4>
+                <p className="text-sm text-prestige-taupe">Sélectionnez une date et heure</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
+                  <span className="text-xl font-bold text-primary">2</span>
+                </div>
+                <h4 className="font-semibold text-dark">Confirmez</h4>
+                <p className="text-sm text-prestige-taupe">Entrez vos informations</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto rounded-full bg-light flex items-center justify-center mb-3">
+                  <span className="text-xl font-bold text-primary">3</span>
+                </div>
+                <h4 className="font-semibold text-dark">Recevez</h4>
+                <p className="text-sm text-prestige-taupe">Confirmation par courriel</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Info Cards */}
+          <div className="mt-8 grid md:grid-cols-3 gap-4">
+            <a
+              href={CONTACT_INFO.phoneLink}
+              onClick={() => trackEvent('contact_click', { channel: 'phone', source: 'appointment_page' })}
+              className="bg-white rounded-xl p-4 shadow-ia hover:shadow-ia-hover transition-shadow flex items-center gap-4"
+            >
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Phone className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-prestige-taupe">Téléphone</p>
+                <p className="font-medium text-dark">{CONTACT_INFO.phone}</p>
+              </div>
+            </a>
+            <a
+              href={`mailto:${CONTACT_INFO.email}`}
+              onClick={() => trackEvent('contact_click', { channel: 'email', source: 'appointment_page' })}
+              className="bg-white rounded-xl p-4 shadow-ia hover:shadow-ia-hover transition-shadow flex items-center gap-4"
+            >
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mail className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-prestige-taupe">Courriel</p>
+                <p className="font-medium text-dark text-sm">{CONTACT_INFO.email}</p>
+              </div>
+            </a>
+            <div className="bg-white rounded-xl p-4 shadow-ia flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <MapPin className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-prestige-taupe">Région</p>
+                <p className="font-medium text-dark">{CONTACT_INFO.region}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Alternative */}
+          <div className="mt-8 text-center">
+            <p className="text-prestige-taupe mb-4">
+              Vous préférez envoyer un message?
+            </p>
+            <Link
+              to="/contact"
+              className="btn-secondary inline-flex items-center gap-2"
+            >
+              Me contacter
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
