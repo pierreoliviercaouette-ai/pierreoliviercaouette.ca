@@ -40,7 +40,12 @@ export function StackedLineChart({
       <ResponsiveContainer>
         <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-          <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: '#64748b' }} />
+          <XAxis
+            dataKey={xKey}
+            tick={{ fontSize: 12, fill: '#64748b' }}
+            interval={data.length > 12 ? 'preserveStartEnd' : 0}
+            minTickGap={24}
+          />
           <YAxis
             tick={{ fontSize: 11, fill: '#64748b' }}
             tickFormatter={(v) => {
@@ -66,8 +71,8 @@ export function StackedLineChart({
                 stroke={color}
                 strokeWidth={2}
                 fill={color}
-                fillOpacity={stacked && lines.length > 1 ? 0.35 : 0.18}
-                dot={{ r: 3, strokeWidth: 1 }}
+                fillOpacity={stacked && lines.length > 1 ? 0.35 : 0.12}
+                dot={data.length <= 12 ? { r: 3, strokeWidth: 1 } : false}
                 activeDot={{ r: 5 }}
               />
             );

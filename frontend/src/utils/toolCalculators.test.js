@@ -304,4 +304,19 @@ describe('comparateur rendements par profil', () => {
     expect(prudent.banque_avg).not.toBe(equilibre.banque_avg);
     expect(prudent.utilise_pct).toBe(prudent.banque_avg);
   });
+
+  test('projection annuelle a un point par année plus le départ', () => {
+    const result = calculateComparateurRendements({
+      profil: 'equilibre',
+      rendement_perso: '6.3',
+      capital: '50000',
+      horizon: '10',
+      versement: '0',
+    });
+    expect(result.serie_annuelle).toHaveLength(11);
+    expect(result.serie_annuelle[0]).toMatchObject({ name: 'An 0', banque: 50000, ia: 50000 });
+    expect(result.serie_annuelle[10].banque).toBe(Math.round(result.valeur_banque));
+    expect(result.serie_annuelle[10].ia).toBe(Math.round(result.valeur_ia));
+    expect(result.serie_annuelle[5].ia).toBeGreaterThan(result.serie_annuelle[5].banque);
+  });
 });

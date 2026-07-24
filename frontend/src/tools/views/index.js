@@ -719,20 +719,9 @@ export const toolViews = {
       ],
       chart: {
         type: 'stacked-line',
-        title: 'Projection comparative',
+        title: 'Projection comparative (par année)',
         stacked: false,
-        data: [
-          {
-            name: 'Départ',
-            banque: r.capital || 0,
-            ia: r.capital || 0,
-          },
-          {
-            name: `${r.horizon || 5} ans`,
-            banque: r.valeur_banque || 0,
-            ia: r.valeur_ia || 0,
-          },
-        ],
+        data: r.serie_annuelle || [],
         series: [
           { dataKey: 'banque', name: 'Banque / vous' },
           { dataKey: 'ia', name: 'Modèle iA' },

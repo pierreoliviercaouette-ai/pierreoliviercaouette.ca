@@ -1071,6 +1071,23 @@ const futureValueAnnuities = (capital, annualRate, years, annualContribution = 0
   return value;
 };
 
+/** Série annuelle (année 0 → horizon) pour courbe composée. */
+const buildYearlySeries = (capital, banqueRate, iaRate, years, annualContribution = 0) => {
+  const points = [{ name: 'An 0', banque: Math.round(capital), ia: Math.round(capital) }];
+  let banque = capital;
+  let ia = capital;
+  for (let year = 1; year <= years; year += 1) {
+    banque = banque * (1 + banqueRate) + annualContribution;
+    ia = ia * (1 + iaRate) + annualContribution;
+    points.push({
+      name: `An ${year}`,
+      banque: Math.round(banque),
+      ia: Math.round(ia),
+    });
+  }
+  return points;
+};
+
 export const calculateComparateurRendements = (values) => {
   const profil = values.profil || 'equilibre';
   const banqueAvg = getBanqueAvgForProfil(profil);
@@ -1082,10 +1099,13 @@ export const calculateComparateurRendements = (values) => {
   const versement = parseFloat(values.versement) || 0;
   const horizon = parseInt(values.horizon, 10) || 5;
 
-  const valeurBanque = futureValueAnnuities(capital, utilisePct / 100, horizon, versement);
-  const valeurIa = futureValueAnnuities(capital, iaPct / 100, horizon, versement);
+  const banqueRate = utilisePct / 100;
+  const iaRate = iaPct / 100;
+  const valeurBanque = futureValueAnnuities(capital, banqueRate, horizon, versement);
+  const valeurIa = futureValueAnnuities(capital, iaRate, horizon, versement);
   const ecartDollars = valeurIa - valeurBanque;
   const ecartPts = iaPct - utilisePct;
+  const serieAnnuelle = buildYearlySeries(capital, banqueRate, iaRate, horizon, versement);
 
   let resume = '';
   if (capital > 0) {
@@ -1121,6 +1141,7 @@ export const calculateComparateurRendements = (values) => {
     ecart_dollars: ecartDollars,
     capital,
     horizon,
+    serie_annuelle: serieAnnuelle,
   };
 };
 
