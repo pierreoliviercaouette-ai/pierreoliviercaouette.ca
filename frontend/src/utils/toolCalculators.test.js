@@ -284,14 +284,14 @@ describe('comparateur rendements par profil', () => {
   test('moyenne banques et iA suivent le profil de risque', () => {
     const prudent = calculateComparateurRendements({
       profil: 'prudent',
-      source_banque: 'moyenne',
+      rendement_perso: String(getBanqueAvgForProfil('prudent')),
       capital: '50000',
       horizon: '5',
       versement: '0',
     });
     const equilibre = calculateComparateurRendements({
       profil: 'equilibre',
-      source_banque: 'moyenne',
+      rendement_perso: String(getBanqueAvgForProfil('equilibre')),
       capital: '50000',
       horizon: '5',
       versement: '0',

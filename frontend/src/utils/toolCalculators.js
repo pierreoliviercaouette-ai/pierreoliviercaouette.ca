@@ -1075,9 +1075,9 @@ export const calculateComparateurRendements = (values) => {
   const profil = values.profil || 'equilibre';
   const banqueAvg = getBanqueAvgForProfil(profil);
   const iaPct = getIaPctForProfil(profil);
-  const usePerso = values.source_banque === 'perso';
   const perso = parseFloat(values.rendement_perso);
-  const utilisePct = usePerso && !Number.isNaN(perso) ? perso : banqueAvg;
+  const utilisePct = !Number.isNaN(perso) ? perso : banqueAvg;
+  const isMoyenneIllustrative = Math.abs(utilisePct - banqueAvg) < 0.05;
   const capital = parseFloat(values.capital) || 0;
   const versement = parseFloat(values.versement) || 0;
   const horizon = parseInt(values.horizon, 10) || 5;
@@ -1094,7 +1094,7 @@ export const calculateComparateurRendements = (values) => {
       `Sur ${horizon} an${horizon > 1 ? 's' : ''}, avec un capital de départ de ${fmtCad(capital)}` +
       (versement > 0 ? ` et ${fmtCad(versement)}/an` : '') +
       `, la projection au taux modèle iA est ${signe} d'environ ${fmtCad(Math.abs(ecartDollars))} ` +
-      `par rapport au scénario ${usePerso ? 'de votre rendement' : 'moyenne bancaire'}.`;
+      `par rapport au scénario ${isMoyenneIllustrative ? 'moyenne bancaire' : 'de votre rendement'}.`;
   } else {
     resume =
       `Écart de rendement : ${fmtPct(ecartPts)} points de pourcentage ` +

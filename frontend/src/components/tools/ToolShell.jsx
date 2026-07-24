@@ -13,6 +13,9 @@ function resolveOptions(options, values) {
   return options || [];
 }
 
+const fieldControlClass =
+  'mt-1 flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
+
 function FieldControl({ field, value, values, onChange }) {
   const id = field.id;
   const hint = resolveHint(field.hint, values);
@@ -20,17 +23,13 @@ function FieldControl({ field, value, values, onChange }) {
     id,
     value: value ?? '',
     onChange: (e) => onChange(id, e.target.value),
-    className: 'mt-1',
   };
 
   if (field.type === 'select') {
     return (
       <div>
         <Label htmlFor={id}>{field.label}</Label>
-        <select
-          {...common}
-          className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
+        <select {...common} className={fieldControlClass}>
           {resolveOptions(field.options, values).map((opt) => (
             <option key={String(opt.value)} value={opt.value}>
               {opt.label}
@@ -51,6 +50,7 @@ function FieldControl({ field, value, values, onChange }) {
         min={field.min}
         max={field.max}
         placeholder={field.placeholder}
+        className="mt-1 bg-white"
         {...common}
       />
       {hint ? <p className="mt-1 text-xs text-prestige-taupe">{hint}</p> : null}

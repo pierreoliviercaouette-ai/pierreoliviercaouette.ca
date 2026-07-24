@@ -1,6 +1,5 @@
 import { formatCad, formatPct, stripEmoji } from '../../components/tools/format';
 import {
-  BANQUE_5Y_BY_PROFIL,
   formatPctFr,
   getBanqueAvgForProfil,
   getIaPctForProfil,
@@ -650,23 +649,16 @@ export const toolViews = {
   'comparateur-rendements': {
     defaults: {
       profil: 'equilibre',
-      source_banque: 'moyenne',
       rendement_perso: String(getBanqueAvgForProfil('equilibre')),
       capital: '50000',
       horizon: '5',
       versement: '0',
     },
-    /** Garde la moyenne bancaire affichée alignée sur le profil choisi. */
+    /** Le champ rendement suit toujours le profil (moyenne banques), sauf saisie manuelle après. */
     syncValues: (values, id, value) => {
       const next = { ...values, [id]: value };
       if (id === 'profil') {
-        const banque = getBanqueAvgForProfil(value);
-        if (next.source_banque !== 'perso') {
-          next.rendement_perso = String(banque);
-        }
-      }
-      if (id === 'source_banque' && value === 'moyenne') {
-        next.rendement_perso = String(getBanqueAvgForProfil(next.profil || 'equilibre'));
+        next.rendement_perso = String(getBanqueAvgForProfil(value));
       }
       return next;
     },
@@ -679,40 +671,25 @@ export const toolViews = {
         fullWidth: true,
         options: Object.keys(PROFIL_RISQUE_LABELS).map((key) => ({
           value: key,
-          label: `${PROFIL_RISQUE_LABELS[key]} — banques ~${formatPctFr(BANQUE_5Y_BY_PROFIL[key])} % · iA ${formatPctFr(getIaPctForProfil(key))} %`,
+          label: `${PROFIL_RISQUE_LABELS[key]} — iA ${formatPctFr(getIaPctForProfil(key))} %`,
         })),
         hint: (values) => {
           const profil = values.profil || 'equilibre';
-          return `À profil égal : moyenne banques ~${formatPctFr(getBanqueAvgForProfil(profil))} % vs portefeuille modèle iA ${formatPctFr(getIaPctForProfil(profil))} % (5 ans net).`;
+          return `Portefeuille modèle iA : ${formatPctFr(getIaPctForProfil(profil))} % net sur 5 ans. La moyenne banques se met à jour dans le champ ci-dessous.`;
         },
-      },
-      {
-        id: 'source_banque',
-        label: 'Rendement bancaire',
-        type: 'select',
-        section: 'Comparaison',
-        options: (values) => {
-          const banque = formatPctFr(getBanqueAvgForProfil(values.profil || 'equilibre'));
-          return [
-            {
-              value: 'moyenne',
-              label: `Moyenne illustrative des banques (${banque} %)`,
-            },
-            { value: 'perso', label: 'Mon rendement personnel' },
-          ];
-        },
-        hint: (values) =>
-          values.source_banque === 'moyenne'
-            ? 'Cette moyenne change automatiquement selon le profil de risque sélectionné.'
-            : 'Entrez le rendement annualisé 5 ans de votre relevé bancaire.',
       },
       {
         id: 'rendement_perso',
-        label: 'Mon rendement 5 ans (%)',
+        label: 'Rendement 5 ans — banques / vous (%)',
         type: 'number',
         section: 'Comparaison',
         step: '0.1',
-        showWhen: (values) => values.source_banque === 'perso',
+        fullWidth: true,
+        hint: (values) => {
+          const profil = values.profil || 'equilibre';
+          const banque = formatPctFr(getBanqueAvgForProfil(profil));
+          return `Prérempli avec la moyenne illustrative des banques pour ce profil (~${banque} %). Modifiez-le pour utiliser votre rendement personnel.`;
+        },
       },
       { id: 'capital', label: 'Capital investi ($)', type: 'number', section: 'Projection' },
       {
@@ -732,7 +709,7 @@ export const toolViews = {
     buildPresentation: (r) => ({
       rows: [
         { label: 'Profil', value: r.r_profil },
-        { label: 'Moyenne banques (5 ans)', value: pct(r.banque_avg) },
+        { label: 'Moyenne banques (profil)', value: pct(r.banque_avg) },
         { label: 'Rendement utilisé', value: pct(r.utilise_pct) },
         { label: 'Modèle iA (5 ans net)', value: pct(r.ia_pct), emphasize: true },
         { label: 'Écart de rendement', value: `${Number(r.ecart_pts).toFixed(1).replace('.', ',')} pts` },
