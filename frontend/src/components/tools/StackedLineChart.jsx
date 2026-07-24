@@ -61,6 +61,7 @@ export function StackedLineChart({
           {lines.length > 1 ? <Legend /> : null}
           {lines.map((line, i) => {
             const color = line.color || PALETTE[i % PALETTE.length];
+            const isPrimary = line.primary === true || (line.primary !== false && lines.length === 1);
             return (
               <Area
                 key={line.dataKey}
@@ -69,10 +70,18 @@ export function StackedLineChart({
                 name={line.name}
                 stackId={stackId}
                 stroke={color}
-                strokeWidth={2}
+                strokeWidth={isPrimary ? 2.75 : 2}
                 fill={color}
-                fillOpacity={stacked && lines.length > 1 ? 0.35 : 0.12}
-                dot={data.length <= 12 ? { r: 3, strokeWidth: 1 } : false}
+                fillOpacity={
+                  stacked && lines.length > 1
+                    ? isPrimary
+                      ? 0.4
+                      : 0.28
+                    : isPrimary
+                      ? 0.2
+                      : 0.08
+                }
+                dot={data.length <= 12 ? { r: isPrimary ? 3.5 : 2.5, strokeWidth: 1 } : false}
                 activeDot={{ r: 5 }}
               />
             );

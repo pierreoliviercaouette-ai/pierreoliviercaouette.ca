@@ -1,4 +1,4 @@
-import { formatCad, formatPct, stripEmoji } from '../../components/tools/format';
+import { BRAND_BLUE, BRAND_MUTED, formatCad, formatPct, stripEmoji } from '../../components/tools/format';
 import {
   formatPctFr,
   getBanqueAvgForProfil,
@@ -706,28 +706,47 @@ export const toolViews = {
       },
       { id: 'versement', label: 'Versement annuel ($)', type: 'number', section: 'Projection' },
     ],
-    buildPresentation: (r) => ({
-      rows: [
-        { label: 'Profil', value: r.r_profil },
-        { label: 'Moyenne banques (profil)', value: pct(r.banque_avg) },
-        { label: 'Rendement utilisé', value: pct(r.utilise_pct) },
-        { label: 'Modèle iA (5 ans net)', value: pct(r.ia_pct), emphasize: true },
-        { label: 'Écart de rendement', value: `${Number(r.ecart_pts).toFixed(1).replace('.', ',')} pts` },
-        { label: 'Valeur scénario banque / vous', value: money(r.valeur_banque) },
-        { label: 'Valeur scénario iA', value: money(r.valeur_ia), emphasize: true },
-        { label: 'Écart estimé', value: money(r.ecart_dollars) },
-      ],
-      chart: {
-        type: 'stacked-line',
-        title: 'Projection comparative (par année)',
-        stacked: false,
-        data: r.serie_annuelle || [],
-        series: [
-          { dataKey: 'banque', name: 'Banque / vous' },
-          { dataKey: 'ia', name: 'Modèle iA' },
+    buildPresentation: (r) => {
+      const ecartPositif = (r.ecart_dollars || 0) >= 0;
+      const pts = Number(r.ecart_pts || 0).toFixed(1).replace('.', ',');
+      return {
+        highlight: {
+          label: ecartPositif
+            ? 'Avantage estimé — Portefeuille modèle iA'
+            : 'Écart estimé — scénario banques / vous',
+          value: `${ecartPositif ? '+' : '−'}${money(Math.abs(r.ecart_dollars || 0))}`,
+          detail: `${ecartPositif ? '+' : ''}${pts} pts de rendement · projection sur ${r.horizon || 5} ans`,
+          positive: ecartPositif,
+        },
+        rows: [
+          { label: 'Profil', value: r.r_profil },
+          { label: 'Rendement utilisé (banques / vous)', value: pct(r.utilise_pct) },
+          { label: 'Modèle iA (5 ans net)', value: pct(r.ia_pct), emphasize: true },
+          {
+            label: 'Écart de rendement',
+            value: `${ecartPositif ? '+' : ''}${pts} pts`,
+            emphasize: true,
+          },
+          { label: 'Valeur scénario banque / vous', value: money(r.valeur_banque) },
+          { label: 'Valeur scénario iA', value: money(r.valeur_ia), emphasize: true },
+          {
+            label: 'Écart estimé',
+            value: `${ecartPositif ? '+' : '−'}${money(Math.abs(r.ecart_dollars || 0))}`,
+            impact: true,
+          },
         ],
-      },
-      note: stripEmoji(r.r_resume),
-    }),
+        chart: {
+          type: 'stacked-line',
+          title: 'Projection comparative (par année)',
+          stacked: false,
+          data: r.serie_annuelle || [],
+          series: [
+            { dataKey: 'banque', name: 'Banque / vous', color: BRAND_MUTED },
+            { dataKey: 'ia', name: 'Modèle iA', color: BRAND_BLUE, primary: true },
+          ],
+        },
+        note: stripEmoji(r.r_resume),
+      };
+    },
   },
 };

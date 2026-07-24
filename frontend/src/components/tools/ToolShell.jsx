@@ -83,7 +83,7 @@ export function ToolShell({
     section.fields.push(field);
   });
 
-  const { rows = [], chart, note } = presentation;
+  const { rows = [], chart, note, highlight } = presentation;
 
   return (
     <div className="grid gap-8 lg:grid-cols-2" data-testid="tool-shell">
@@ -113,6 +113,37 @@ export function ToolShell({
       </div>
 
       <div className="space-y-6 rounded-xl border border-prestige-beige bg-white p-5 md:p-6">
+        {highlight ? (
+          <div
+            className={`rounded-xl px-5 py-4 ${
+              highlight.positive === false
+                ? 'bg-slate-100 text-dark'
+                : 'bg-primary text-white'
+            }`}
+            data-testid="tool-highlight"
+          >
+            <p
+              className={`text-xs font-semibold uppercase tracking-wide ${
+                highlight.positive === false ? 'text-prestige-taupe' : 'text-white/80'
+              }`}
+            >
+              {highlight.label}
+            </p>
+            <p className="mt-1 font-heading text-3xl font-bold tabular-nums md:text-4xl">
+              {highlight.value}
+            </p>
+            {highlight.detail ? (
+              <p
+                className={`mt-2 text-sm leading-snug ${
+                  highlight.positive === false ? 'text-prestige-taupe' : 'text-white/90'
+                }`}
+              >
+                {highlight.detail}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         <div>
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-prestige-taupe">
             Résultats
