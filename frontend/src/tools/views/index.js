@@ -1,4 +1,11 @@
 import { formatCad, formatPct, stripEmoji } from '../../components/tools/format';
+import {
+  BANQUE_5Y_BY_PROFIL,
+  formatPctFr,
+  getBanqueAvgForProfil,
+  getIaPctForProfil,
+  PROFIL_RISQUE_LABELS,
+} from '../../data/comparateurRendementsRates';
 
 const money = (v) => formatCad(v);
 const pct = (v, d = 1) => formatPct(v, d);
@@ -644,10 +651,24 @@ export const toolViews = {
     defaults: {
       profil: 'equilibre',
       source_banque: 'moyenne',
-      rendement_perso: '6.3',
+      rendement_perso: String(getBanqueAvgForProfil('equilibre')),
       capital: '50000',
       horizon: '5',
       versement: '0',
+    },
+    /** Garde la moyenne bancaire affichée alignée sur le profil choisi. */
+    syncValues: (values, id, value) => {
+      const next = { ...values, [id]: value };
+      if (id === 'profil') {
+        const banque = getBanqueAvgForProfil(value);
+        if (next.source_banque !== 'perso') {
+          next.rendement_perso = String(banque);
+        }
+      }
+      if (id === 'source_banque' && value === 'moyenne') {
+        next.rendement_perso = String(getBanqueAvgForProfil(next.profil || 'equilibre'));
+      }
+      return next;
     },
     fields: [
       {
@@ -655,23 +676,35 @@ export const toolViews = {
         label: 'Profil de risque',
         type: 'select',
         section: 'Comparaison',
-        options: [
-          { value: 'prudent', label: 'Prudent' },
-          { value: 'modere', label: 'Modéré' },
-          { value: 'equilibre', label: 'Équilibré' },
-          { value: 'croissance', label: 'Croissance' },
-          { value: 'audacieux', label: 'Audacieux' },
-        ],
+        fullWidth: true,
+        options: Object.keys(PROFIL_RISQUE_LABELS).map((key) => ({
+          value: key,
+          label: `${PROFIL_RISQUE_LABELS[key]} — banques ~${formatPctFr(BANQUE_5Y_BY_PROFIL[key])} % · iA ${formatPctFr(getIaPctForProfil(key))} %`,
+        })),
+        hint: (values) => {
+          const profil = values.profil || 'equilibre';
+          return `À profil égal : moyenne banques ~${formatPctFr(getBanqueAvgForProfil(profil))} % vs portefeuille modèle iA ${formatPctFr(getIaPctForProfil(profil))} % (5 ans net).`;
+        },
       },
       {
         id: 'source_banque',
         label: 'Rendement bancaire',
         type: 'select',
         section: 'Comparaison',
-        options: [
-          { value: 'moyenne', label: 'Moyenne illustrative des banques' },
-          { value: 'perso', label: 'Mon rendement personnel' },
-        ],
+        options: (values) => {
+          const banque = formatPctFr(getBanqueAvgForProfil(values.profil || 'equilibre'));
+          return [
+            {
+              value: 'moyenne',
+              label: `Moyenne illustrative des banques (${banque} %)`,
+            },
+            { value: 'perso', label: 'Mon rendement personnel' },
+          ];
+        },
+        hint: (values) =>
+          values.source_banque === 'moyenne'
+            ? 'Cette moyenne change automatiquement selon le profil de risque sélectionné.'
+            : 'Entrez le rendement annualisé 5 ans de votre relevé bancaire.',
       },
       {
         id: 'rendement_perso',
@@ -679,6 +712,7 @@ export const toolViews = {
         type: 'number',
         section: 'Comparaison',
         step: '0.1',
+        showWhen: (values) => values.source_banque === 'perso',
       },
       { id: 'capital', label: 'Capital investi ($)', type: 'number', section: 'Projection' },
       {

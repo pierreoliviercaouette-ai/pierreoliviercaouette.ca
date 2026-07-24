@@ -83,7 +83,12 @@ export const ToolDetail = () => {
   }, [slug, formValues]);
 
   const handleChange = (id, value) => {
-    setFormValues((prev) => ({ ...prev, [id]: value }));
+    setFormValues((prev) => {
+      if (typeof view?.syncValues === 'function') {
+        return view.syncValues(prev, id, value);
+      }
+      return { ...prev, [id]: value };
+    });
   };
 
   const handleSaveResult = async () => {

@@ -1,6 +1,11 @@
 // Comprehensive Financial Tool Calculators for Quebec
 // Fiscal constants are centralized in fiscalConfig2026.js
 import { INCOME_TAX_2026, REEE_2026, REER_2026 } from './fiscalConfig2026';
+import {
+  getBanqueAvgForProfil,
+  getIaPctForProfil,
+  PROFIL_RISQUE_LABELS,
+} from '../data/comparateurRendementsRates';
 
 // =============================================================================
 // Tax rate tables — Quebec + Federal 2026 (see fiscalConfig2026.js)
@@ -1053,29 +1058,7 @@ export const calculateValeurNette = (values) => {
 // =============================================================================
 
 /** Comparateur banques vs Portefeuilles Modèles iA (5 ans net, Classique 75/75). */
-const BANQUE_5Y = {
-  prudent: 4.0,
-  modere: 5.2,
-  equilibre: 6.3,
-  croissance: 8.6,
-  audacieux: 11.4,
-};
-
-const IA_5Y = {
-  prudent: 5.0,
-  modere: 7.5,
-  equilibre: 9.7,
-  croissance: 12.3,
-  audacieux: 15.0,
-};
-
-const PROFIL_LABELS = {
-  prudent: 'Prudent',
-  modere: 'Modéré',
-  equilibre: 'Équilibré',
-  croissance: 'Croissance',
-  audacieux: 'Audacieux',
-};
+const PROFIL_LABELS = PROFIL_RISQUE_LABELS;
 
 const fmtCad = (n) => `${Math.round(n).toLocaleString('fr-CA')} $`;
 const fmtPct = (n) => n.toFixed(1).replace('.', ',');
@@ -1090,8 +1073,8 @@ const futureValueAnnuities = (capital, annualRate, years, annualContribution = 0
 
 export const calculateComparateurRendements = (values) => {
   const profil = values.profil || 'equilibre';
-  const banqueAvg = BANQUE_5Y[profil] ?? BANQUE_5Y.equilibre;
-  const iaPct = IA_5Y[profil] ?? IA_5Y.equilibre;
+  const banqueAvg = getBanqueAvgForProfil(profil);
+  const iaPct = getIaPctForProfil(profil);
   const usePerso = values.source_banque === 'perso';
   const perso = parseFloat(values.rendement_perso);
   const utilisePct = usePerso && !Number.isNaN(perso) ? perso : banqueAvg;

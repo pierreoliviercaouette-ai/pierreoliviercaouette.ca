@@ -2,12 +2,14 @@ import {
   calculateAssuranceVie,
   calculateBudget,
   calculateComparateurREERCELI,
+  calculateComparateurRendements,
   calculateFondsUrgence,
   calculateHypotheque,
   calculateREER,
   calculateREEE,
   calculateValeurNette,
 } from './toolCalculators';
+import { getBanqueAvgForProfil, getIaPctForProfil } from '../data/comparateurRendementsRates';
 
 describe('toolCalculators fiscal 2026', () => {
   test('REER applies 2026 deduction cap', () => {
@@ -275,5 +277,31 @@ describe('toolCalculators complete audit by tool', () => {
     expect(result.total_passifs).toBe(280000);
     expect(result.valeur_nette).toBe(290000);
     expect(Number(result.r_ratio)).toBeCloseTo(49.1, 1);
+  });
+});
+
+describe('comparateur rendements par profil', () => {
+  test('moyenne banques et iA suivent le profil de risque', () => {
+    const prudent = calculateComparateurRendements({
+      profil: 'prudent',
+      source_banque: 'moyenne',
+      capital: '50000',
+      horizon: '5',
+      versement: '0',
+    });
+    const equilibre = calculateComparateurRendements({
+      profil: 'equilibre',
+      source_banque: 'moyenne',
+      capital: '50000',
+      horizon: '5',
+      versement: '0',
+    });
+
+    expect(prudent.banque_avg).toBe(getBanqueAvgForProfil('prudent'));
+    expect(prudent.ia_pct).toBe(getIaPctForProfil('prudent'));
+    expect(equilibre.banque_avg).toBe(getBanqueAvgForProfil('equilibre'));
+    expect(equilibre.ia_pct).toBe(getIaPctForProfil('equilibre'));
+    expect(prudent.banque_avg).not.toBe(equilibre.banque_avg);
+    expect(prudent.utilise_pct).toBe(prudent.banque_avg);
   });
 });

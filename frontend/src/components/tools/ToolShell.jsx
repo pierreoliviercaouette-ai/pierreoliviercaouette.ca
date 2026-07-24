@@ -3,8 +3,19 @@ import { Label } from '../ui/label';
 import { ResultsTable } from './ResultsTable';
 import { StackedLineChart } from './StackedLineChart';
 
-function FieldControl({ field, value, onChange }) {
+function resolveHint(hint, values) {
+  if (typeof hint === 'function') return hint(values);
+  return hint || null;
+}
+
+function resolveOptions(options, values) {
+  if (typeof options === 'function') return options(values) || [];
+  return options || [];
+}
+
+function FieldControl({ field, value, values, onChange }) {
   const id = field.id;
+  const hint = resolveHint(field.hint, values);
   const common = {
     id,
     value: value ?? '',
@@ -20,13 +31,13 @@ function FieldControl({ field, value, onChange }) {
           {...common}
           className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
-          {(field.options || []).map((opt) => (
+          {resolveOptions(field.options, values).map((opt) => (
             <option key={String(opt.value)} value={opt.value}>
               {opt.label}
             </option>
           ))}
         </select>
-        {field.hint ? <p className="mt-1 text-xs text-prestige-taupe">{field.hint}</p> : null}
+        {hint ? <p className="mt-1 text-xs text-prestige-taupe">{hint}</p> : null}
       </div>
     );
   }
@@ -42,7 +53,7 @@ function FieldControl({ field, value, onChange }) {
         placeholder={field.placeholder}
         {...common}
       />
-      {field.hint ? <p className="mt-1 text-xs text-prestige-taupe">{field.hint}</p> : null}
+      {hint ? <p className="mt-1 text-xs text-prestige-taupe">{hint}</p> : null}
     </div>
   );
 }
@@ -56,8 +67,13 @@ export function ToolShell({
   onChange,
   presentation = {},
 }) {
+  const visibleFields = fields.filter((field) => {
+    if (typeof field.showWhen === 'function') return field.showWhen(values);
+    return true;
+  });
+
   const sections = [];
-  fields.forEach((field) => {
+  visibleFields.forEach((field) => {
     const key = field.section || 'Paramètres';
     let section = sections.find((s) => s.title === key);
     if (!section) {
@@ -86,6 +102,7 @@ export function ToolShell({
                   <FieldControl
                     field={field}
                     value={values[field.id]}
+                    values={values}
                     onChange={onChange}
                   />
                 </div>
