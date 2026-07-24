@@ -1052,6 +1052,85 @@ export const calculateValeurNette = (values) => {
 // EXPORT
 // =============================================================================
 
+/** Comparateur banques vs Portefeuilles Modèles iA (5 ans net, Classique 75/75). */
+const BANQUE_5Y = {
+  prudent: 4.0,
+  modere: 5.2,
+  equilibre: 6.3,
+  croissance: 8.6,
+  audacieux: 11.4,
+};
+
+const IA_5Y = {
+  prudent: 5.0,
+  modere: 7.5,
+  equilibre: 9.7,
+  croissance: 12.3,
+  audacieux: 15.0,
+};
+
+const PROFIL_LABELS = {
+  prudent: 'Prudent',
+  modere: 'Modéré',
+  equilibre: 'Équilibré',
+  croissance: 'Croissance',
+  audacieux: 'Audacieux',
+};
+
+const fmtCad = (n) => `${Math.round(n).toLocaleString('fr-CA')} $`;
+const fmtPct = (n) => n.toFixed(1).replace('.', ',');
+
+const futureValueAnnuities = (capital, annualRate, years, annualContribution = 0) => {
+  let value = capital;
+  for (let i = 0; i < years; i += 1) {
+    value = value * (1 + annualRate) + annualContribution;
+  }
+  return value;
+};
+
+export const calculateComparateurRendements = (values) => {
+  const profil = values.profil || 'equilibre';
+  const banqueAvg = BANQUE_5Y[profil] ?? BANQUE_5Y.equilibre;
+  const iaPct = IA_5Y[profil] ?? IA_5Y.equilibre;
+  const usePerso = values.source_banque === 'perso';
+  const perso = parseFloat(values.rendement_perso);
+  const utilisePct = usePerso && !Number.isNaN(perso) ? perso : banqueAvg;
+  const capital = parseFloat(values.capital) || 0;
+  const versement = parseFloat(values.versement) || 0;
+  const horizon = parseInt(values.horizon, 10) || 5;
+
+  const valeurBanque = futureValueAnnuities(capital, utilisePct / 100, horizon, versement);
+  const valeurIa = futureValueAnnuities(capital, iaPct / 100, horizon, versement);
+  const ecartDollars = valeurIa - valeurBanque;
+  const ecartPts = iaPct - utilisePct;
+
+  let resume = '';
+  if (capital > 0) {
+    const signe = ecartDollars >= 0 ? 'supérieure' : 'inférieure';
+    resume =
+      `Sur ${horizon} an${horizon > 1 ? 's' : ''}, avec un capital de départ de ${fmtCad(capital)}` +
+      (versement > 0 ? ` et ${fmtCad(versement)}/an` : '') +
+      `, la projection au taux modèle iA est ${signe} d'environ ${fmtCad(Math.abs(ecartDollars))} ` +
+      `par rapport au scénario ${usePerso ? 'de votre rendement' : 'moyenne bancaire'}.`;
+  } else {
+    resume =
+      `Écart de rendement : ${fmtPct(ecartPts)} points de pourcentage ` +
+      `(${PROFIL_LABELS[profil] || profil}). Entrez un capital pour voir l'impact en dollars.`;
+  }
+
+  return {
+    r_profil: PROFIL_LABELS[profil] || profil,
+    r_banque_pct: fmtPct(banqueAvg),
+    r_utilise_pct: fmtPct(utilisePct),
+    r_ia_pct: fmtPct(iaPct),
+    r_ecart_pct: fmtPct(ecartPts),
+    r_valeur_banque: fmtCad(valeurBanque),
+    r_valeur_ia: fmtCad(valeurIa),
+    r_ecart_dollars: fmtCad(ecartDollars),
+    r_resume: resume,
+  };
+};
+
 export const calculators = {
   'budget-mensuel': calculateBudget,
   'simulateur-reer': calculateREER,
@@ -1060,7 +1139,8 @@ export const calculators = {
   'fonds-urgence': calculateFondsUrgence,
   'comparateur-reer-celi': calculateComparateurREERCELI,
   'calculateur-hypothecaire': calculateHypotheque,
-  'valeur-nette': calculateValeurNette
+  'valeur-nette': calculateValeurNette,
+  'comparateur-rendements': calculateComparateurRendements,
 };
 
 export const getCalculator = (slug) => calculators[slug] || null;

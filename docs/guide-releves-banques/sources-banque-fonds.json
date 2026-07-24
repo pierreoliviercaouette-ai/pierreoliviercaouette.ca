@@ -1,0 +1,43 @@
+[
+  {
+    "bank": "desjardins",
+    "title": "Comprendre votre taux de rendement personnel",
+    "url": "https://www.fondsdesjardins.com/information/comprendre-taux-rendement.pdf",
+    "file": "desjardins_comprendre_taux_rendement.pdf",
+    "ok": true,
+    "bytes": 1311427
+  },
+  {
+    "bank": "desjardins",
+    "title": "Comprendre vos rendements",
+    "url": "https://www.fondsdesjardins.com/information/Comprendre_vos_rendements.pdf",
+    "file": "desjardins_comprendre_vos_rendements.pdf",
+    "ok": true,
+    "bytes": 1900524
+  },
+  {
+    "bank": "scotia",
+    "title": "Personal Portfolio Statement Guide",
+    "url": "https://www.scotiabank.com/ca/en/files/16/09/Personal-Portfolio-Statement-Guide-ENG.pdf",
+    "file": "scotia_pps_guide.pdf",
+    "ok": true,
+    "bytes": 735246
+  },
+  {
+    "bank": "rbc",
+    "title": "CRM2 Additional details Annual Performance Report",
+    "url": "https://ca.rbcwealthmanagement.com/documents/214796/0/Additional+Details+CRM2+Guide.pdf/0c218143-60c3-494a-bec5-7e19130886cc",
+    "file": "rbc_crm2_performance_guide.pdf",
+    "ok": false,
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "bank": "bmo",
+    "title": "How to read your BMO InvestorLine Account Statement",
+    "url": "https://www.bmoinvestorline.com/selfDirected/pdfs/Statement_Insert_SD_E.pdf",
+    "file": "bmo_statement_guide_sd.pdf",
+    "note": "Courtage — a telecharger pour reference seulement, pas pour le guide principal",
+    "ok": true,
+    "bytes": 3158138
+  }
+]

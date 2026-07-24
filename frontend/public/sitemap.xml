@@ -71,9 +71,21 @@
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/outils</loc>
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.pierreoliviercaouette.ca/outils/comparateur-rendements</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.pierreoliviercaouette.ca/guides/guide-releves-rendements-banques.pdf</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/contact</loc>

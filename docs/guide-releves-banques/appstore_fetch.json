@@ -1,0 +1,74 @@
+[
+  {
+    "bank": "td",
+    "app_id": 358790776,
+    "label": "TD Canada",
+    "trackViewUrl": "https://apps.apple.com/ca/app/td-canada/id358790776?uo=4",
+    "images": []
+  },
+  {
+    "bank": "td",
+    "app_id": 1505371720,
+    "label": "TD Easy Trade",
+    "trackViewUrl": "https://apps.apple.com/ca/app/td-easy-trade/id1505371720?uo=4",
+    "images": []
+  },
+  {
+    "bank": "scotia",
+    "app_id": 341151570,
+    "label": "Scotiabank",
+    "trackViewUrl": "https://apps.apple.com/ca/app/scotiabank/id341151570?uo=4",
+    "images": [
+      "scotia_itunes_341151570_0.jpg",
+      "scotia_itunes_341151570_1.jpg",
+      "scotia_itunes_341151570_2.jpg",
+      "scotia_itunes_341151570_3.jpg",
+      "scotia_itunes_341151570_4.jpg",
+      "scotia_itunes_341151570_5.jpg",
+      "scotia_itunes_341151570_6.jpg",
+      "scotia_itunes_341151570_7.jpg"
+    ]
+  },
+  {
+    "bank": "scotia",
+    "app_id": 1571172499,
+    "label": "Scotia iTRADE",
+    "trackViewUrl": "https://apps.apple.com/ca/app/scotia-itrade-mobile/id1571172499?uo=4",
+    "images": [
+      "scotia_itunes_1571172499_0.png",
+      "scotia_itunes_1571172499_1.png",
+      "scotia_itunes_1571172499_2.png",
+      "scotia_itunes_1571172499_3.png",
+      "scotia_itunes_1571172499_4.png"
+    ]
+  },
+  {
+    "bank": "cibc",
+    "app_id": 351448953,
+    "label": "CIBC Mobile Banking",
+    "trackViewUrl": "https://apps.apple.com/ca/app/cibc-mobile-banking/id351448953?uo=4",
+    "images": []
+  },
+  {
+    "bank": "cibc",
+    "app_id": 441129412,
+    "label": "CIBC Mobile Wealth",
+    "trackViewUrl": "https://apps.apple.com/ca/app/cibc-mobile-wealth/id441129412?uo=4",
+    "images": []
+  },
+  {
+    "bank": "bmo",
+    "app_id": 1600976936,
+    "label": "BMO Invest",
+    "trackViewUrl": "https://apps.apple.com/ca/app/bmo-invest/id1600976936?uo=4",
+    "images": [
+      "bmo_itunes_1600976936_0.png",
+      "bmo_itunes_1600976936_1.png",
+      "bmo_itunes_1600976936_2.png",
+      "bmo_itunes_1600976936_3.png",
+      "bmo_itunes_1600976936_4.png",
+      "bmo_itunes_1600976936_5.png",
+      "bmo_itunes_1600976936_6.png"
+    ]
+  }
+]

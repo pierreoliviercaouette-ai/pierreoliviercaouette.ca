@@ -12,21 +12,20 @@ export const Tools = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      setTools([]);
-      setLoading(false);
-      return;
-    }
     const fetchTools = async () => {
       try {
         const { data, error } = await supabase
           .from('tools')
           .select('*')
+          .eq('is_active', true)
           .order('created_at', { ascending: false });
         if (error) throw error;
-        setTools(data || []);
+        const rows = data || [];
+        // Anon RLS already filters to requires_auth=false; keep client filter for safety
+        setTools(user ? rows : rows.filter((t) => t.requires_auth === false));
       } catch (error) {
         console.error('Failed to fetch tools:', error);
+        setTools([]);
       } finally {
         setLoading(false);
       }
@@ -34,30 +33,72 @@ export const Tools = () => {
     fetchTools();
   }, [user]);
 
+  const publicTools = tools.filter((t) => t.requires_auth === false);
+
   if (!user) {
     return (
-      <main className="min-h-screen bg-light" data-testid="tools-page-locked">
+      <main className="min-h-screen bg-light" data-testid="tools-page-public">
         <PageHero
-          badge="Espace membre"
+          badge="Outils"
           title="Outils financiers"
-          description="Accédez à une bibliothèque d'outils pour simuler, calculer et planifier vos décisions financières."
+          description="Certains outils sont libres d'accès. Connectez-vous pour débloquer toute la bibliothèque."
         >
-          <Link
-            to="/connexion"
-            className="group bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-secondary hover:text-white transition-all duration-300 inline-flex items-center justify-center gap-2 shadow-lg shadow-white/20"
-            data-testid="tools-login-cta"
-          >
-            <Lock className="w-5 h-5" />
-            Se connecter
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <div className="flex flex-wrap gap-3 justify-center">
+            {publicTools[0] && (
+              <Link
+                to={`/outils/${publicTools[0].slug}`}
+                className="group bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-secondary hover:text-white transition-all duration-300 inline-flex items-center justify-center gap-2 shadow-lg shadow-white/20"
+              >
+                Essayer le comparateur
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            )}
+            <Link
+              to="/connexion"
+              className="group border-2 border-white/30 text-white rounded-full px-8 py-4 font-semibold hover:bg-white/10 hover:border-white/50 transition-all duration-300 inline-flex items-center justify-center gap-2 backdrop-blur-sm"
+              data-testid="tools-login-cta"
+            >
+              <Lock className="w-5 h-5" />
+              Se connecter
+            </Link>
+          </div>
         </PageHero>
 
-        {/* Preview Section */}
         <section className="section-padding bg-white">
           <div className="container-max">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold text-dark text-center mb-4">
+              Outils accessibles sans compte
+            </h2>
+            {loading ? (
+              <p className="text-center text-prestige-taupe">Chargement…</p>
+            ) : publicTools.length === 0 ? (
+              <p className="text-center text-prestige-taupe mb-12">
+                Aucun outil public pour le moment. Connectez-vous pour voir la bibliothèque membre.
+              </p>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                {publicTools.map((tool) => (
+                  <div
+                    key={tool.id}
+                    className="card-service cursor-pointer"
+                    onClick={() => navigate(`/outils/${tool.slug}`)}
+                    data-testid={`tool-card-${tool.slug}`}
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-light flex items-center justify-center mb-6">
+                      <Wrench className="w-7 h-7 text-primary" />
+                    </div>
+                    <h3 className="font-heading text-xl font-semibold text-dark mb-3">{tool.name}</h3>
+                    <p className="text-prestige-taupe mb-4">{tool.description}</p>
+                    <span className="inline-flex items-center gap-1 text-primary font-medium text-sm">
+                      Utiliser l&apos;outil <ChevronRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <h2 className="font-heading text-2xl md:text-3xl font-bold text-dark text-center mb-12">
-              Aperçu des outils disponibles
+              Réservés aux membres
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               {[
@@ -65,10 +106,7 @@ export const Tools = () => {
                 { name: 'Comparateur REER vs CELI', description: "Comparez les options d'épargne" },
                 { name: 'Calculateur hypothécaire', description: 'Estimez paiements et prime SCHL' },
               ].map((tool, index) => (
-                <div 
-                  key={index}
-                  className="card-service opacity-60"
-                >
+                <div key={index} className="card-service opacity-60">
                   <div className="w-14 h-14 rounded-2xl bg-light flex items-center justify-center mb-6">
                     <Wrench className="w-7 h-7 text-primary" />
                   </div>
@@ -105,7 +143,6 @@ export const Tools = () => {
         </Link>
       </PageHero>
 
-      {/* Tools Grid */}
       <section className="section-padding">
         <div className="container-max">
           {loading ? (
@@ -145,9 +182,11 @@ export const Tools = () => {
                     {tool.name}
                   </h3>
                   <p className="text-prestige-taupe mb-4">{tool.description}</p>
-                  
+                  {tool.requires_auth === false && (
+                    <p className="text-xs text-blue-700 mb-2">Accessible sans connexion</p>
+                  )}
                   <span className="inline-flex items-center gap-1 text-primary font-medium text-sm group-hover:gap-2 transition-all">
-                    Utiliser l'outil <ChevronRight className="w-4 h-4" />
+                    Utiliser l&apos;outil <ChevronRight className="w-4 h-4" />
                   </span>
                 </div>
               ))}

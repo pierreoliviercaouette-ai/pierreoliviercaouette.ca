@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { 
   Settings, Wrench, Users, Mail, Plus, Trash2, 
   ToggleLeft, ToggleRight, CheckCircle2, XCircle, Clock,
-  ChevronDown, Search,   LineChart
+  ChevronDown, Search, LineChart, Lock, Unlock
 } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -15,6 +15,10 @@ import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import { AdminPortfoliosPanel } from '../components/admin/AdminPortfoliosPanel';
+import {
+  COMPARATEUR_RENDEMENTS_META,
+  COMPARATEUR_RENDEMENTS_HTML,
+} from '../data/comparateurRendementsTool';
 
 export const Admin = () => {
   const { user, loading: authLoading } = useAuth();
@@ -31,7 +35,8 @@ export const Admin = () => {
     description: '',
     html_content: '',
     tags: '',
-    is_active: true
+    is_active: true,
+    requires_auth: true,
   });
 
   // Referrals state
@@ -113,7 +118,8 @@ export const Admin = () => {
         description: toolForm.description,
         html_content: toolForm.html_content,
         tags: toolForm.tags.split(',').map((t) => t.trim()).filter(Boolean),
-        is_active: toolForm.is_active
+        is_active: toolForm.is_active,
+        requires_auth: toolForm.requires_auth,
       };
 
       if (editingTool) {
@@ -128,7 +134,15 @@ export const Admin = () => {
 
       setShowToolForm(false);
       setEditingTool(null);
-      setToolForm({ name: '', slug: '', description: '', html_content: '', tags: '', is_active: true });
+      setToolForm({
+        name: '',
+        slug: '',
+        description: '',
+        html_content: '',
+        tags: '',
+        is_active: true,
+        requires_auth: true,
+      });
       fetchAllData();
     } catch (error) {
       toast.error(error.message || 'Erreur');
@@ -147,6 +161,57 @@ export const Admin = () => {
       fetchAllData();
     } catch (error) {
       toast.error(error.message || 'Erreur');
+    }
+  };
+
+  const toggleToolAuth = async (toolId) => {
+    try {
+      const tool = tools.find((t) => t.id === toolId);
+      if (!tool) return;
+      const nextRequiresAuth = !(tool.requires_auth !== false);
+      const { error } = await supabase
+        .from('tools')
+        .update({ requires_auth: nextRequiresAuth })
+        .eq('id', toolId);
+      if (error) throw error;
+      toast.success(
+        nextRequiresAuth
+          ? 'Outil réservé aux membres connectés'
+          : 'Outil accessible sans connexion'
+      );
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.message || 'Erreur');
+    }
+  };
+
+  const ensureComparateurRendements = async () => {
+    try {
+      const payload = {
+        ...COMPARATEUR_RENDEMENTS_META,
+        html_content: COMPARATEUR_RENDEMENTS_HTML,
+      };
+      const { data: existing, error: findErr } = await supabase
+        .from('tools')
+        .select('id')
+        .eq('slug', payload.slug)
+        .maybeSingle();
+      if (findErr) throw findErr;
+      if (existing?.id) {
+        const { error } = await supabase.from('tools').update(payload).eq('id', existing.id);
+        if (error) throw error;
+        toast.success('Comparateur de rendements mis à jour (public)');
+      } else {
+        const { error } = await supabase.from('tools').insert(payload);
+        if (error) throw error;
+        toast.success('Comparateur de rendements créé (public)');
+      }
+      fetchAllData();
+    } catch (error) {
+      toast.error(
+        error.message ||
+          'Erreur — appliquez d’abord la migration requires_auth (014) sur Supabase'
+      );
     }
   };
 
@@ -169,8 +234,9 @@ export const Admin = () => {
       slug: tool.slug,
       description: tool.description,
       html_content: tool.html_content,
-      tags: tool.tags.join(', '),
-      is_active: tool.is_active
+      tags: (tool.tags || []).join(', '),
+      is_active: tool.is_active,
+      requires_auth: tool.requires_auth !== false,
     });
     setShowToolForm(true);
   };
@@ -291,18 +357,40 @@ export const Admin = () => {
             {/* Tools Tab */}
             <TabsContent value="tools">
               <div className="bg-white rounded-2xl p-6 shadow-ia">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
                   <h3 className="font-heading text-xl font-semibold text-dark">
                     Gestion des outils ({tools.length})
                   </h3>
-                  <Button 
-                    onClick={() => { setShowToolForm(true); setEditingTool(null); }}
-                    className="btn-primary"
-                    data-testid="add-tool-btn"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Ajouter un outil
-                  </Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={ensureComparateurRendements}
+                      data-testid="seed-comparateur-btn"
+                    >
+                      Installer / màj comparateur public
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setEditingTool(null);
+                        setToolForm({
+                          name: '',
+                          slug: '',
+                          description: '',
+                          html_content: '',
+                          tags: '',
+                          is_active: true,
+                          requires_auth: true,
+                        });
+                        setShowToolForm(true);
+                      }}
+                      className="btn-primary"
+                      data-testid="add-tool-btn"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Ajouter un outil
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Tool Form */}
@@ -370,7 +458,7 @@ export const Admin = () => {
                           data-testid="tool-html-input"
                         />
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-wrap items-center gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
@@ -380,6 +468,21 @@ export const Admin = () => {
                           />
                           <span>Outil actif</span>
                         </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={toolForm.requires_auth}
+                            onChange={(e) =>
+                              setToolForm((prev) => ({ ...prev, requires_auth: e.target.checked }))
+                            }
+                            className="w-4 h-4"
+                            data-testid="tool-requires-auth-input"
+                          />
+                          <span>Connexion requise</span>
+                        </label>
+                        <span className="text-xs text-prestige-taupe">
+                          Décoché = visible sans compte sur /outils
+                        </span>
                       </div>
                       <div className="flex gap-3">
                         <Button 
@@ -409,10 +512,15 @@ export const Admin = () => {
                         data-testid={`admin-tool-${tool.id}`}
                       >
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <h4 className="font-semibold text-dark">{tool.name}</h4>
                             {!tool.is_active && (
                               <Badge variant="secondary">Inactif</Badge>
+                            )}
+                            {tool.requires_auth === false ? (
+                              <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Public</Badge>
+                            ) : (
+                              <Badge variant="outline">Membres</Badge>
                             )}
                           </div>
                           <p className="text-sm text-prestige-taupe">{tool.description}</p>
@@ -422,8 +530,26 @@ export const Admin = () => {
                           <Button
                             variant="ghost"
                             size="sm"
+                            title={
+                              tool.requires_auth !== false
+                                ? 'Rendre public (sans connexion)'
+                                : 'Réserver aux membres'
+                            }
+                            onClick={() => toggleToolAuth(tool.id)}
+                            data-testid={`toggle-tool-auth-${tool.id}`}
+                          >
+                            {tool.requires_auth !== false ? (
+                              <Lock className="w-4 h-4 text-amber-600" />
+                            ) : (
+                              <Unlock className="w-4 h-4 text-blue-600" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => toggleToolStatus(tool.id)}
                             data-testid={`toggle-tool-${tool.id}`}
+                            title={tool.is_active ? 'Désactiver' : 'Activer'}
                           >
                             {tool.is_active ? (
                               <ToggleRight className="w-5 h-5 text-green-600" />

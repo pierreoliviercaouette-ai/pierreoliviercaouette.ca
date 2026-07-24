@@ -1,0 +1,35 @@
+Objet : Une question rapide sur vos placements
+
+Bonjour {{first_name}},
+
+Comme vous êtes déjà client, je voulais simplement vous partager quelque chose.
+
+Beaucoup de gens laissent leurs placements dans les portefeuilles « standards » de leur banque, en présumant que les rendements se ressemblent partout. Voici une comparaison à profil égal — rendement net annualisé sur 5 ans* :
+
+Profil          Moyenne banques**     Mes modèles iA
+Prudent         ~4,0 %                5,0 %
+Modéré          ~5,2 %                7,5 %
+Équilibré       ~6,3 %                9,7 %
+Croissance      ~8,6 %                12,3 %
+Audacieux       ~11,4 %               15,0 %
+
+L’idée n’est pas de viser le profil le plus agressif, mais de comparer à profil égal : votre portefeuille actuel versus une option du même niveau de risque.
+
+Pour retrouver votre rendement sur votre relevé bancaire (AccèsD, EasyWeb, etc.) :
+https://www.pierreoliviercaouette.ca/guides/guide-releves-rendements-banques.pdf
+
+Comparer rapidement (sans créer de compte) :
+https://www.pierreoliviercaouette.ca/outils/comparateur-rendements
+
+Si vous voulez, envoyez-moi un relevé (ou le nom de votre fonds) et on regarde ça ensemble en 15 minutes — sans frais et sans pression. Répondez à ce courriel, ou réservez un moment ici : https://www.pierreoliviercaouette.ca/rendez-vous
+
+Au plaisir,
+
+Pierre-Olivier Caouette
+Conseiller en sécurité financière
+819 806-1164
+p-o.caouette@agc.ia.ca
+
+—
+* Portefeuilles Modèles iA : rendements nets annualisés sur 5 ans au 30 juin 2026, série Classique 75/75.
+** Moyenne illustrative de portefeuilles de succursale / solutions clés en main (séries grand public) chez Desjardins, BNC/BNI, TD, BMO et RBC — voir emails/sources-rendements-institutions.md. Les dates de publication varient légèrement selon l’institution. Les rendements passés ne garantissent pas les rendements futurs. Le bon profil dépend de votre tolérance au risque et de vos objectifs.

@@ -110,10 +110,6 @@ export const ToolDetail = () => {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) {
-      navigate('/connexion');
-      return;
-    }
 
     const fetchTool = async () => {
       try {
@@ -125,16 +121,38 @@ export const ToolDetail = () => {
           .maybeSingle();
         if (error) throw error;
         if (!data) {
+          if (!user) {
+            navigate('/connexion');
+            return;
+          }
           toast.error('Outil non trouvé');
           navigate('/outils');
           return;
         }
+        if (!user && data.requires_auth !== false) {
+          navigate('/connexion');
+          return;
+        }
         setTool(data);
         setCurrentStep(0);
-        setFormValues({});
+        if (data.slug === 'comparateur-rendements') {
+          setFormValues({
+            profil: 'equilibre',
+            source_banque: 'moyenne',
+            capital: '50000',
+            horizon: '5',
+            versement: '0',
+          });
+        } else {
+          setFormValues({});
+        }
         setCalculatedResults({});
       } catch (error) {
         console.error('Failed to fetch tool:', error);
+        if (!user) {
+          navigate('/connexion');
+          return;
+        }
         toast.error('Outil non trouvé');
         navigate('/outils');
       } finally {
@@ -414,21 +432,33 @@ export const ToolDetail = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Link 
-                to="/profil" 
-                className="btn-secondary inline-flex items-center gap-2 text-sm"
-              >
-                <Clock className="w-4 h-4" />
-                Historique
-              </Link>
-              <Button 
-                onClick={() => setShowSaveModal(true)}
-                className="btn-primary text-sm"
-                data-testid="save-result-btn"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                Sauvegarder
-              </Button>
+              {user && (
+                <>
+                  <Link
+                    to="/profil"
+                    className="btn-secondary inline-flex items-center gap-2 text-sm"
+                  >
+                    <Clock className="w-4 h-4" />
+                    Historique
+                  </Link>
+                  <Button
+                    onClick={() => setShowSaveModal(true)}
+                    className="btn-primary text-sm"
+                    data-testid="save-result-btn"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Sauvegarder
+                  </Button>
+                </>
+              )}
+              {!user && (
+                <Link
+                  to="/connexion"
+                  className="btn-secondary inline-flex items-center gap-2 text-sm"
+                >
+                  Se connecter pour sauvegarder
+                </Link>
+              )}
             </div>
           </div>
         </div>

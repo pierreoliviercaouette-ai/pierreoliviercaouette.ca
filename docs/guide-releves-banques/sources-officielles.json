@@ -1,0 +1,600 @@
+[
+  {
+    "bank": "desjardins",
+    "title": "Documents et releves - Desjardins",
+    "url": "https://www.desjardins.com/fr/comptes-services/documents-releves.html",
+    "images": [
+      {
+        "file": "desjardins_0_0.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logos/commun/logo-desjardins-fr.svg"
+      },
+      {
+        "file": "desjardins_0_1.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/particuliers/accesd.svg"
+      },
+      {
+        "file": "desjardins_0_2.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/entreprises/accesd-affaires.svg"
+      },
+      {
+        "file": "desjardins_0_3.jpg",
+        "url": "https://www.desjardins.com/etc.clientlibs/dcom/clientlibs/clientlib-site/resources/images/appstore_fr.svg"
+      },
+      {
+        "file": "desjardins_0_4.jpg",
+        "url": "https://www.desjardins.com/etc.clientlibs/dcom/clientlibs/clientlib-site/resources/images/googleplay_fr.svg"
+      },
+      {
+        "file": "desjardins_0_5.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/assurances/logo-assurance-f.svg"
+      },
+      {
+        "file": "desjardins_0_6.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/particuliers/courtage-en-ligne-fr.svg"
+      },
+      {
+        "file": "desjardins_0_7.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/particuliers/gestion-patrimoine-fr.svg"
+      },
+      {
+        "file": "desjardins_0_8.png",
+        "url": "https://www.desjardins.com/fr/comptes-services/documents-releves/_jcr_content/root/container/container/container/container_copy_copy_/container/container_1785876760/image.coreimg.png/1750255459629/lire-specimen-cheque-n.png"
+      },
+      {
+        "file": "desjardins_0_12.jpeg",
+        "url": "https://www.desjardins.com/fr/comptes-services/documents-releves/_jcr_content/root/container/container/container_copy_copy_/container_1785876760/image.coreimg.jpeg/1697034407475/comprendre-releve-compte.jpeg"
+      },
+      {
+        "file": "desjardins_0_18.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logos/commun/logo-app-store-fr.svg"
+      },
+      {
+        "file": "desjardins_0_19.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logos/commun/logo-app-google-fr.svg"
+      }
+    ],
+    "html_len": 159774
+  },
+  {
+    "bank": "desjardins",
+    "title": "PGLM - suivi rendement AccesD",
+    "url": "https://www.desjardins.com/fr/epargne-placements/placements-garantis-lies-marches.html",
+    "images": [
+      {
+        "file": "desjardins_1_0.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logos/commun/logo-desjardins-fr.svg"
+      },
+      {
+        "file": "desjardins_1_1.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/particuliers/accesd.svg"
+      },
+      {
+        "file": "desjardins_1_2.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/entreprises/accesd-affaires.svg"
+      },
+      {
+        "file": "desjardins_1_3.jpg",
+        "url": "https://www.desjardins.com/etc.clientlibs/dcom/clientlibs/clientlib-site/resources/images/appstore_fr.svg"
+      },
+      {
+        "file": "desjardins_1_4.jpg",
+        "url": "https://www.desjardins.com/etc.clientlibs/dcom/clientlibs/clientlib-site/resources/images/googleplay_fr.svg"
+      },
+      {
+        "file": "desjardins_1_5.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/assurances/logo-assurance-f.svg"
+      },
+      {
+        "file": "desjardins_1_6.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/particuliers/courtage-en-ligne-fr.svg"
+      },
+      {
+        "file": "desjardins_1_7.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logo/particuliers/gestion-patrimoine-fr.svg"
+      },
+      {
+        "file": "desjardins_1_8.png",
+        "url": "https://www.desjardins.com/fr/epargne-placements/placements-garantis-lies-marches/_jcr_content/root/container/container/container/container/container/container_1354690631/image.coreimg.png/1769629084391/illust-placement-garanti-marche-ecanadien.png"
+      },
+      {
+        "file": "desjardins_1_9.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logos/commun/logo-app-store-fr.svg"
+      },
+      {
+        "file": "desjardins_1_10.jpg",
+        "url": "https://www.desjardins.com/content/dam/images/logos/commun/logo-app-google-fr.svg"
+      }
+    ],
+    "html_len": 127526
+  },
+  {
+    "bank": "bnc",
+    "title": "Services numeriques FBNGP",
+    "url": "https://www.fbngp.ca/services-numeriques.html",
+    "images": [
+      {
+        "file": "bnc_2_0.png",
+        "url": "https://www.fbngp.ca/content/dam/fbngp/logos/logo-fbngp-245x70.png"
+      },
+      {
+        "file": "bnc_2_1.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy_/responsivegrid_copy_/responsivegrid_copy__1908121914/responsivegrid/image.coreimg.svg/1729107797857/icon-creditimpot.svg"
+      },
+      {
+        "file": "bnc_2_2.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy_/responsivegrid_copy_/responsivegrid_copy__1149140853/responsivegrid/image.coreimg.svg/1729107860165/graph-chart-upwards.svg"
+      },
+      {
+        "file": "bnc_2_3.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy_/responsivegrid_copy_/responsivegrid_copy/responsivegrid/image.coreimg.svg/1729107908000/picto-doc-folder-secure.svg"
+      },
+      {
+        "file": "bnc_2_4.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_453578414/responsivegrid_15252/responsivegrid/image_225159912.coreimg.svg/1729108190725/people-nbc-logo.svg"
+      },
+      {
+        "file": "bnc_2_5.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy__238477177/responsivegrid_copy_/responsivegrid_copy/responsivegrid/image.coreimg.svg/1729521851360/picto-mobile-nbc.svg"
+      },
+      {
+        "file": "bnc_2_6.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy__238477177/responsivegrid_copy_/responsivegrid_copy_1024505625/responsivegrid/image.coreimg.svg/1729521862679/picto-password.svg"
+      },
+      {
+        "file": "bnc_2_7.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_21187_1417257713/responsivegrid_20408/responsivegrid_1732777907/responsivegrid_2022845372/responsivegrid_copy/image.coreimg.svg/1729112728081/picto-app-store-vf.svg"
+      },
+      {
+        "file": "bnc_2_8.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_21187_1417257713/responsivegrid_20408/responsivegrid_1732777907/responsivegrid_2022845372/responsivegrid/image.coreimg.svg/1729112713140/picto-google-play-vf.svg"
+      },
+      {
+        "file": "bnc_2_9.png",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_21187_1417257713/responsivegrid_85259/image.coreimg.png/1729181329457/img-app-mobile-fbngp-570x404.png"
+      },
+      {
+        "file": "bnc_2_10.png",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_21187/responsivegrid_85259/image.coreimg.png/1729175029514/img-app-desk-fbngp-580x506.png"
+      },
+      {
+        "file": "bnc_2_11.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy__118756307/responsivegrid_13724_22358613/responsivegrid_copy__49099910/responsivegrid/image.coreimg.svg/1729277513104/picto-advisors-color.svg"
+      },
+      {
+        "file": "bnc_2_12.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy__118756307/responsivegrid_13724_1534436699/responsivegrid_copy__49099910/responsivegrid/image.coreimg.svg/1729277525685/phone-color.svg"
+      },
+      {
+        "file": "bnc_2_13.jpg",
+        "url": "https://www.fbngp.ca/services-numeriques/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy__118756307/responsivegrid_13724/responsivegrid_copy__49099910/responsivegrid/image.coreimg.svg/1729277538472/picto-courriel-electronique.svg"
+      },
+      {
+        "file": "bnc_2_16.jpg",
+        "url": "https://www.fbngp.ca/content/dam/bnc/particuliers/picto/picto-social-linkedin.svg"
+      },
+      {
+        "file": "bnc_2_17.jpg",
+        "url": "https://www.fbngp.ca/content/dam/fbngp/logos/logo-ocri.svg"
+      },
+      {
+        "file": "bnc_2_19.jpg",
+        "url": "https://www.fbngp.ca/content/dam/fbngp/logos/logo-fcpi.svg"
+      },
+      {
+        "file": "bnc_2_20.jpg",
+        "url": "https://www.fbngp.ca/content/dam/fbngp/ban/ban-fbngp-services-numeriques-XS.jpg"
+      }
+    ],
+    "html_len": 129089
+  },
+  {
+    "bank": "bnc",
+    "title": "Rapport sur le rendement des placements",
+    "url": "https://www.fbngp.ca/documentation/releves/rendement-placements.html",
+    "images": [
+      {
+        "file": "bnc_3_0.png",
+        "url": "https://www.fbngp.ca/content/dam/fbngp/logos/logo-fbngp-245x70.png"
+      },
+      {
+        "file": "bnc_3_1.png",
+        "url": "https://www.fbngp.ca/documentation/releves/rendement-placements/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy/responsivegrid_86457/image.coreimg.png/1582345656647/img-rapports-placements-583x446.png"
+      },
+      {
+        "file": "bnc_3_2.png",
+        "url": "https://www.fbngp.ca/documentation/releves/rendement-placements/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy/responsivegrid_86457_1725869506/responsivegrid_copy_/responsivegrid_1709595654/image.coreimg.png/1582344235224/picto-01-48x48.png"
+      },
+      {
+        "file": "bnc_3_3.png",
+        "url": "https://www.fbngp.ca/documentation/releves/rendement-placements/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy/responsivegrid_86457_1725869506/responsivegrid_copy/responsivegrid_1709595654/image.coreimg.png/1582344327672/picto-02-48x48.png"
+      },
+      {
+        "file": "bnc_3_4.png",
+        "url": "https://www.fbngp.ca/documentation/releves/rendement-placements/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy/responsivegrid_86457_1725869506/responsivegrid_copy_2093937623/responsivegrid_1709595654/image.coreimg.png/1582344237567/picto-03-48x48.png"
+      },
+      {
+        "file": "bnc_3_5.png",
+        "url": "https://www.fbngp.ca/documentation/releves/rendement-placements/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy/responsivegrid_86457_1725869506/responsivegrid_copy_1762167585/responsivegrid_1709595654/image.coreimg.png/1582344331927/picto-04-48x48.png"
+      },
+      {
+        "file": "bnc_3_6.png",
+        "url": "https://www.fbngp.ca/documentation/releves/rendement-placements/_jcr_content/root/landmarks/responsivegrid/responsivegrid/responsivegrid_copy/responsivegrid_86457_1725869506/responsivegrid_copy_471644362/responsivegrid_1709595654/image.coreimg.png/1582344323559/picto-05-48x48.png"
+      },
+      {
+        "file": "bnc_3_7.png",
+        "url": "https://www.fbngp.ca/content/dam/bnc/commun/picto/picto-telephone-rouge-80x80-5.png"
+      },
+      {
+        "file": "bnc_3_8.png",
+        "url": "https://www.fbngp.ca/content/dam/bnc/particuliers/picto/picto-courriel-rouge-80x80.png"
+      },
+      {
+        "file": "bnc_3_11.jpg",
+        "url": "https://www.fbngp.ca/content/dam/bnc/particuliers/picto/picto-social-linkedin.svg"
+      },
+      {
+        "file": "bnc_3_12.jpg",
+        "url": "https://www.fbngp.ca/content/dam/fbngp/logos/logo-ocri.svg"
+      },
+      {
+        "file": "bnc_3_14.jpg",
+        "url": "https://www.fbngp.ca/content/dam/fbngp/logos/logo-fcpi.svg"
+      }
+    ],
+    "html_len": 125190
+  },
+  {
+    "bank": "bnc",
+    "title": "Releve de portefeuille BNC",
+    "url": "https://www.bnc.ca/particuliers/centre-aide/epargne-placements/bases/releves-portefeuille.html",
+    "images": [
+      {
+        "file": "bnc_4_0.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/commun/logo/logo-bnc-155x50.svg"
+      },
+      {
+        "file": "bnc_4_1.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/illu/img-releve-pg1-418x540.jpg"
+      },
+      {
+        "file": "bnc_4_2.png",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/img-01-48x48.png"
+      },
+      {
+        "file": "bnc_4_3.png",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/img-02-48x48.png"
+      },
+      {
+        "file": "bnc_4_4.png",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/img-03-48x48.png"
+      },
+      {
+        "file": "bnc_4_5.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/illu/img-releve-pg2-418x540.jpg"
+      },
+      {
+        "file": "bnc_4_6.png",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/img-04-48x48.png"
+      },
+      {
+        "file": "bnc_4_7.png",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/img-05-48x48.png"
+      },
+      {
+        "file": "bnc_4_8.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/illu/img-releve-pg3-418x540.jpg"
+      },
+      {
+        "file": "bnc_4_9.png",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/img/375x150/img-blogue-portefeuille-autrement-375x150.png"
+      },
+      {
+        "file": "bnc_4_10.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/img/375x150/img-bon-ou-mauvais-placement-375x150.jpg"
+      },
+      {
+        "file": "bnc_4_11.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/img/375x150/img-hausse-taux-375x150.jpg"
+      },
+      {
+        "file": "bnc_4_12.png",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/picto-telephone-80x80.png"
+      },
+      {
+        "file": "bnc_4_13.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/icons-products-and-services-two-tone-question-80x80.svg"
+      },
+      {
+        "file": "bnc_4_16.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/picto-social-youtube.svg"
+      },
+      {
+        "file": "bnc_4_17.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/picto-social-linkedin.svg"
+      },
+      {
+        "file": "bnc_4_18.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/picto-social-instagram.svg"
+      },
+      {
+        "file": "bnc_4_19.jpg",
+        "url": "https://www.bnc.ca/content/dam/bnc/particuliers/picto/picto-social-tiktok-footer.svg"
+      }
+    ],
+    "html_len": 492344
+  },
+  {
+    "bank": "td",
+    "title": "View investments in EasyWeb",
+    "url": "http://td.intelliresponse.com/cbaw/index.jsp?id=435&question=Can+I+view+my+investments+in+EasyWeb&requestType=NormalRequest",
+    "images": [
+      {
+        "file": "td_5_0.png",
+        "url": "http://td.intelliresponse.com/assets/img/header-nav/td-logo.png"
+      },
+      {
+        "file": "td_5_1.png",
+        "url": "http://td.intelliresponse.com/cbaw/assets/img/header-nav/td-logo.png"
+      }
+    ],
+    "html_len": 36656
+  },
+  {
+    "bank": "scotia",
+    "title": "Where will I find the performance of my accounts",
+    "url": "https://help.scotiabank.com/article/where-will-i-find-the-performance-of-my-accounts?origin=neo",
+    "images": [],
+    "html_len": 159018
+  },
+  {
+    "bank": "scotia",
+    "title": "Where do I find out how my investments are performing",
+    "url": "https://help.scotiabank.com/article/where-do-i-find-out-how-my-investments-are-performing?origin=neo",
+    "images": [],
+    "html_len": 161285
+  },
+  {
+    "bank": "rbc",
+    "title": "RBC Mobile App",
+    "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/index.html",
+    "images": [
+      {
+        "file": "rbc_8_0.jpg",
+        "url": "https://www.rbcroyalbank.com/dvl/v1.0/assets/images/logos/rbc-logo-shield.svg"
+      },
+      {
+        "file": "rbc_8_3.jpg",
+        "url": "https://www.rbcroyalbank.com/dvl/v1.0/assets/images/logos/rbc-logo-shield-blue.svg"
+      },
+      {
+        "file": "rbc_8_8.png",
+        "url": "https://www.rbcroyalbank.com/mobile/wallet-app/_assets-custom/images/google-play.png"
+      },
+      {
+        "file": "rbc_8_9.png",
+        "url": "https://www.rbcroyalbank.com/mobile/wallet-app/_assets-custom/images/apple-store.png"
+      },
+      {
+        "file": "rbc_8_11.jpg",
+        "url": "https://www.rbcroyalbank.com/dvl/v1.0/assets/images/icons/icon-loans.svg"
+      },
+      {
+        "file": "rbc_8_12.webp",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/async-chat-mob-en.webp"
+      },
+      {
+        "file": "rbc_8_13.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/move-money.png"
+      },
+      {
+        "file": "rbc_8_14.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/Card_Lock_EN.png"
+      },
+      {
+        "file": "rbc_8_15.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/Summary_EN.png?11"
+      },
+      {
+        "file": "rbc_8_16.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/04_RequestMoney_EN.png"
+      },
+      {
+        "file": "rbc_8_17.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/CashFlow.png"
+      },
+      {
+        "file": "rbc_8_18.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/02_NOMIt_EN.png"
+      },
+      {
+        "file": "rbc_8_19.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/Financial_Picture_EN.png"
+      },
+      {
+        "file": "rbc_8_20.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/rbc-mobile-app-1.png"
+      },
+      {
+        "file": "rbc_8_21.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/rbc-mobile-app-2.png"
+      },
+      {
+        "file": "rbc_8_22.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/rbc-mobile-app-3.png"
+      },
+      {
+        "file": "rbc_8_23.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/rbc-mobile-app-4.png"
+      },
+      {
+        "file": "rbc_8_24.png",
+        "url": "https://www.rbcroyalbank.com/ways-to-bank/mobile/rbc-mobile-app/_assets-custom/images/wealth-management-app-1.png"
+      }
+    ],
+    "html_len": 226344
+  },
+  {
+    "bank": "rbc",
+    "title": "RBC DI mobile tutorials",
+    "url": "https://www.rbcdirectinvesting.com/manage/trading-platform-tutorials.html",
+    "images": [
+      {
+        "file": "rbc_9_0.jpg",
+        "url": "https://www.rbcdirectinvesting.com/_assets-custom/includes/smart-banners/rbc-app-icon.svg"
+      },
+      {
+        "file": "rbc_9_2.jpg",
+        "url": "https://www.rbcdirectinvesting.com/dvl/v1.0/assets/images/logos/rbc-logo-shield.svg"
+      },
+      {
+        "file": "rbc_9_3.jpg",
+        "url": "https://www.rbcdirectinvesting.com/mega-navigation/_assets-custom/images/icon-search.svg"
+      },
+      {
+        "file": "rbc_9_4.jpg",
+        "url": "https://www.rbcdirectinvesting.com/dvl/v1.0/assets/images/logos/rbc-logo-shield-blue.svg"
+      },
+      {
+        "file": "rbc_9_6.jpg",
+        "url": "https://www.rbcdirectinvesting.com/mega-navigation/_assets-custom/images/icon-tool.svg"
+      },
+      {
+        "file": "rbc_9_11.jpg",
+        "url": "https://www.rbcdirectinvesting.com/mega-navigation/_assets-custom/images/icon-investments.svg"
+      },
+      {
+        "file": "rbc_9_12.jpg",
+        "url": "https://www.rbcdirectinvesting.com/mega-navigation/_assets-custom/images/icon-scale.svg"
+      },
+      {
+        "file": "rbc_9_13.jpg",
+        "url": "https://www.rbcdirectinvesting.com/mega-navigation/_assets-custom/images/icon-loans.svg"
+      },
+      {
+        "file": "rbc_9_14.jpg",
+        "url": "https://www.rbcdirectinvesting.com/mega-navigation/_assets-custom/images/icon-faqs.svg"
+      },
+      {
+        "file": "rbc_9_15.jpg",
+        "url": "https://www.rbcdirectinvesting.com/mega-navigation/_assets-custom/images/icon-customer-support.svg"
+      },
+      {
+        "file": "rbc_9_18.jpg",
+        "url": "https://www.rbcdirectinvesting.com/dvl/v1.0/assets/images/icons/icon-advisor.svg"
+      },
+      {
+        "file": "rbc_9_19.jpg",
+        "url": "https://www.rbcdirectinvesting.com/_assets-custom/images/ciro-logo-en.svg"
+      },
+      {
+        "file": "rbc_9_20.png",
+        "url": "https://www.rbcdirectinvesting.com/_assets-custom/images/cipf-logo-en.png"
+      }
+    ],
+    "html_len": 156550
+  },
+  {
+    "bank": "bmo",
+    "title": "BMO Invest App Store",
+    "url": "https://apps.apple.com/ca/app/bmo-invest/id1600976936",
+    "images": [
+      {
+        "file": "bmo_10_1.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/5b/ea/d5/5bead5a2-a5ec-b9af-18d0-3595dd00aa0c/Placeholder.mill/200x200bb-75.webp"
+      },
+      {
+        "file": "bmo_10_2.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/5b/ea/d5/5bead5a2-a5ec-b9af-18d0-3595dd00aa0c/Placeholder.mill/200x200bb-75.jpg"
+      },
+      {
+        "file": "bmo_10_3.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple112/v4/f7/5b/48/f75b48e0-a2f9-2f11-ebfa-d028487545b8/4c374f5c-55e1-4594-9a53-b33af6a732e6_Oct_iOS_1_EN.png/300x650bb.webp"
+      },
+      {
+        "file": "bmo_10_4.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple112/v4/f7/5b/48/f75b48e0-a2f9-2f11-ebfa-d028487545b8/4c374f5c-55e1-4594-9a53-b33af6a732e6_Oct_iOS_1_EN.png/300x650bb-60.jpg"
+      },
+      {
+        "file": "bmo_10_5.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple112/v4/ac/78/b7/ac78b7d9-c9b5-31c8-a802-1e5a4e0b7875/a95581da-893b-45f2-807b-842f2cb5f774_Oct_iOS_2_EN.png/300x650bb.webp"
+      },
+      {
+        "file": "bmo_10_6.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple112/v4/ac/78/b7/ac78b7d9-c9b5-31c8-a802-1e5a4e0b7875/a95581da-893b-45f2-807b-842f2cb5f774_Oct_iOS_2_EN.png/300x650bb-60.jpg"
+      },
+      {
+        "file": "bmo_10_7.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/ba/6a/16/ba6a1610-e31c-7ad4-7872-48ead0091ba8/bcb6fc21-c59d-41d2-b128-f8e6b5b1cf7a_Oct_iOS_3_EN.png/300x650bb.webp"
+      },
+      {
+        "file": "bmo_10_8.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/ba/6a/16/ba6a1610-e31c-7ad4-7872-48ead0091ba8/bcb6fc21-c59d-41d2-b128-f8e6b5b1cf7a_Oct_iOS_3_EN.png/300x650bb-60.jpg"
+      },
+      {
+        "file": "bmo_10_9.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/a2/33/2f/a2332fab-daf1-70f6-b8c5-04e6d297cd61/c6b7beb1-12c1-454d-9dc4-a17cde769506_Oct_iOS_4_EN.png/300x650bb.webp"
+      },
+      {
+        "file": "bmo_10_10.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/a2/33/2f/a2332fab-daf1-70f6-b8c5-04e6d297cd61/c6b7beb1-12c1-454d-9dc4-a17cde769506_Oct_iOS_4_EN.png/300x650bb-60.jpg"
+      },
+      {
+        "file": "bmo_10_11.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/9f/3b/da/9f3bda4d-a3a3-efc9-3cfd-baf5a456c9ed/23390441-8c50-4f9a-b200-0aa2a1eb4a92_Oct_iOS_5_EN.png/300x650bb.webp"
+      },
+      {
+        "file": "bmo_10_12.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/9f/3b/da/9f3bda4d-a3a3-efc9-3cfd-baf5a456c9ed/23390441-8c50-4f9a-b200-0aa2a1eb4a92_Oct_iOS_5_EN.png/300x650bb-60.jpg"
+      },
+      {
+        "file": "bmo_10_13.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource112/v4/e0/58/00/e0580046-1a84-9dce-a8eb-cfd2c8567e0f/795075d5-6d5b-457e-8d7a-eadb27fc972c_Oct_iOS_6_EN.png/300x650bb.webp"
+      },
+      {
+        "file": "bmo_10_14.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource112/v4/e0/58/00/e0580046-1a84-9dce-a8eb-cfd2c8567e0f/795075d5-6d5b-457e-8d7a-eadb27fc972c_Oct_iOS_6_EN.png/300x650bb-60.jpg"
+      },
+      {
+        "file": "bmo_10_15.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/1a/1d/8a/1a1d8a70-1d83-1fe9-1dcf-dceb8a8cecef/Placeholder.mill/64x64bb-75.webp"
+      },
+      {
+        "file": "bmo_10_16.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/1a/1d/8a/1a1d8a70-1d83-1fe9-1dcf-dceb8a8cecef/Placeholder.mill/64x64bb-75.jpg"
+      },
+      {
+        "file": "bmo_10_17.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/b4/24/83/b4248352-3511-14a6-3d8d-91c1851c5089/Placeholder.mill/64x64bb-75.webp"
+      },
+      {
+        "file": "bmo_10_18.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/b4/24/83/b4248352-3511-14a6-3d8d-91c1851c5089/Placeholder.mill/64x64bb-75.jpg"
+      },
+      {
+        "file": "bmo_10_19.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/3a/a4/33/3aa433e8-5f9b-b11a-2e6d-78615d7ec011/Placeholder.mill/64x64bb-75.webp"
+      },
+      {
+        "file": "bmo_10_20.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/3a/a4/33/3aa433e8-5f9b-b11a-2e6d-78615d7ec011/Placeholder.mill/64x64bb-75.jpg"
+      },
+      {
+        "file": "bmo_10_21.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/cd/cb/1f/cdcb1f61-f1a5-8a01-46fb-e95e1b5640fd/Placeholder.mill/64x64bb-75.webp"
+      },
+      {
+        "file": "bmo_10_22.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/cd/cb/1f/cdcb1f61-f1a5-8a01-46fb-e95e1b5640fd/Placeholder.mill/64x64bb-75.jpg"
+      },
+      {
+        "file": "bmo_10_23.webp",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/1c/55/75/1c557578-fa3c-31e6-8194-0c899fe3b98f/Placeholder.mill/64x64bb-75.webp"
+      },
+      {
+        "file": "bmo_10_24.jpg",
+        "url": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/1c/55/75/1c557578-fa3c-31e6-8194-0c899fe3b98f/Placeholder.mill/64x64bb-75.jpg"
+      }
+    ],
+    "html_len": 600298
+  }
+]
