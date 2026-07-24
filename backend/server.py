@@ -79,7 +79,7 @@ class ToolBase(BaseModel):
     html_content: str
     tags: List[str] = []
     is_active: bool = True
-    requires_auth: bool = True
+    requires_auth: bool = False
 
 class ToolCreate(ToolBase):
     pass
@@ -97,7 +97,7 @@ class ToolResponse(BaseModel):
     html_content: str
     tags: List[str]
     is_active: bool
-    requires_auth: bool = True
+    requires_auth: bool = False
     created_at: str
 
 # Tool Result Models
@@ -413,12 +413,7 @@ async def update_profile(
 
 @api_router.get("/tools", response_model=List[ToolResponse])
 async def get_tools(user: Optional[dict] = Depends(get_current_user)):
-    if user and user.get("is_admin"):
-        query = {}
-    elif user:
-        query = {"is_active": True}
-    else:
-        query = {"is_active": True, "requires_auth": False}
+    query = {} if user and user.get("is_admin") else {"is_active": True}
     tools = await db.tools.find(query, {"_id": 0}).to_list(100)
     return [
         ToolResponse(
@@ -429,7 +424,7 @@ async def get_tools(user: Optional[dict] = Depends(get_current_user)):
             html_content=t["html_content"],
             tags=t.get("tags", []),
             is_active=t.get("is_active", True),
-            requires_auth=t.get("requires_auth", True),
+            requires_auth=t.get("requires_auth", False),
             created_at=t["created_at"]
         )
         for t in tools
@@ -440,8 +435,6 @@ async def get_tool(slug: str, user: Optional[dict] = Depends(get_current_user)):
     tool = await db.tools.find_one({"slug": slug, "is_active": True}, {"_id": 0})
     if not tool:
         raise HTTPException(status_code=404, detail="Outil non trouvé")
-    if tool.get("requires_auth", True) and not user:
-        raise HTTPException(status_code=401, detail="Connexion requise")
     return ToolResponse(
         id=tool["id"],
         name=tool["name"],
@@ -450,7 +443,7 @@ async def get_tool(slug: str, user: Optional[dict] = Depends(get_current_user)):
         html_content=tool["html_content"],
         tags=tool.get("tags", []),
         is_active=tool.get("is_active", True),
-        requires_auth=tool.get("requires_auth", True),
+        requires_auth=tool.get("requires_auth", False),
         created_at=tool["created_at"]
     )
 
@@ -497,7 +490,7 @@ async def update_tool(tool_id: str, tool_data: ToolCreate, user: dict = Depends(
         html_content=updated["html_content"],
         tags=updated.get("tags", []),
         is_active=updated.get("is_active", True),
-        requires_auth=updated.get("requires_auth", True),
+        requires_auth=updated.get("requires_auth", False),
         created_at=updated["created_at"]
     )
 

@@ -121,16 +121,8 @@ export const ToolDetail = () => {
           .maybeSingle();
         if (error) throw error;
         if (!data) {
-          if (!user) {
-            navigate('/connexion');
-            return;
-          }
           toast.error('Outil non trouvé');
           navigate('/outils');
-          return;
-        }
-        if (!user && data.requires_auth !== false) {
-          navigate('/connexion');
           return;
         }
         setTool(data);
@@ -149,10 +141,6 @@ export const ToolDetail = () => {
         setCalculatedResults({});
       } catch (error) {
         console.error('Failed to fetch tool:', error);
-        if (!user) {
-          navigate('/connexion');
-          return;
-        }
         toast.error('Outil non trouvé');
         navigate('/outils');
       } finally {
@@ -160,7 +148,7 @@ export const ToolDetail = () => {
       }
     };
     fetchTool();
-  }, [slug, user, authLoading, navigate]);
+  }, [slug, authLoading, navigate]);
 
   const steps = useMemo(() => {
     if (!tool?.html_content) return [];

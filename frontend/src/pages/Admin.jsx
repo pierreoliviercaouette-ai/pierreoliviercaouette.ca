@@ -36,7 +36,7 @@ export const Admin = () => {
     html_content: '',
     tags: '',
     is_active: true,
-    requires_auth: true,
+    requires_auth: false,
   });
 
   // Referrals state
@@ -141,7 +141,7 @@ export const Admin = () => {
         html_content: '',
         tags: '',
         is_active: true,
-        requires_auth: true,
+        requires_auth: false,
       });
       fetchAllData();
     } catch (error) {
@@ -168,7 +168,7 @@ export const Admin = () => {
     try {
       const tool = tools.find((t) => t.id === toolId);
       if (!tool) return;
-      const nextRequiresAuth = !(tool.requires_auth !== false);
+      const nextRequiresAuth = tool.requires_auth !== true;
       const { error } = await supabase
         .from('tools')
         .update({ requires_auth: nextRequiresAuth })
@@ -236,7 +236,7 @@ export const Admin = () => {
       html_content: tool.html_content,
       tags: (tool.tags || []).join(', '),
       is_active: tool.is_active,
-      requires_auth: tool.requires_auth !== false,
+      requires_auth: tool.requires_auth === true,
     });
     setShowToolForm(true);
   };
@@ -380,7 +380,7 @@ export const Admin = () => {
                           html_content: '',
                           tags: '',
                           is_active: true,
-                          requires_auth: true,
+                          requires_auth: false,
                         });
                         setShowToolForm(true);
                       }}
@@ -517,10 +517,10 @@ export const Admin = () => {
                             {!tool.is_active && (
                               <Badge variant="secondary">Inactif</Badge>
                             )}
-                            {tool.requires_auth === false ? (
-                              <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Public</Badge>
-                            ) : (
+                            {tool.requires_auth === true ? (
                               <Badge variant="outline">Membres</Badge>
+                            ) : (
+                              <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Public</Badge>
                             )}
                           </div>
                           <p className="text-sm text-prestige-taupe">{tool.description}</p>
@@ -531,14 +531,14 @@ export const Admin = () => {
                             variant="ghost"
                             size="sm"
                             title={
-                              tool.requires_auth !== false
+                              tool.requires_auth === true
                                 ? 'Rendre public (sans connexion)'
                                 : 'Réserver aux membres'
                             }
                             onClick={() => toggleToolAuth(tool.id)}
                             data-testid={`toggle-tool-auth-${tool.id}`}
                           >
-                            {tool.requires_auth !== false ? (
+                            {tool.requires_auth === true ? (
                               <Lock className="w-4 h-4 text-amber-600" />
                             ) : (
                               <Unlock className="w-4 h-4 text-blue-600" />
