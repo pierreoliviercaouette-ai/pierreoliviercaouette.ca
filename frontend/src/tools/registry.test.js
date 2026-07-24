@@ -16,7 +16,7 @@ describe('tools registry UI mapping', () => {
     presentation.rows.forEach((row) => {
       expect(String(row.value)).not.toMatch(/NaN/);
     });
-    expect(presentation.chart.type).toMatch(/bar|line/);
+    expect(presentation.chart.type).toMatch(/stacked-line|bar|line/);
     expect(presentation.chart.data.length).toBeGreaterThan(0);
   });
 });

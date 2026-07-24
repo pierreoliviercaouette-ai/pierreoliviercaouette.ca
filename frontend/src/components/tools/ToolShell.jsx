@@ -1,8 +1,7 @@
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { ResultsTable } from './ResultsTable';
-import { SimpleBarChart } from './SimpleBarChart';
-import { SimpleLineChart } from './SimpleLineChart';
+import { StackedLineChart } from './StackedLineChart';
 
 function FieldControl({ field, value, onChange }) {
   const id = field.id;
@@ -104,25 +103,18 @@ export function ToolShell({
           <ResultsTable rows={rows} />
         </div>
 
-        {chart?.type === 'bar' && chart.data?.length ? (
+        {chart?.data?.length && chart?.series?.length ? (
           <div>
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-prestige-taupe">
               {chart.title || 'Illustration'}
             </h3>
-            <SimpleBarChart
+            <StackedLineChart
               data={chart.data}
-              bars={chart.series}
+              lines={chart.series}
+              xKey={chart.xKey || 'name'}
+              stacked={chart.stacked !== false}
               valueFormatter={chart.valueFormatter}
             />
-          </div>
-        ) : null}
-
-        {chart?.type === 'line' && chart.data?.length ? (
-          <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-prestige-taupe">
-              {chart.title || 'Projection'}
-            </h3>
-            <SimpleLineChart data={chart.data} lines={chart.series} xKey={chart.xKey || 'name'} />
           </div>
         ) : null}
 
