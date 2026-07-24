@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Wrench, Clock, ChevronRight } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
+import { hasToolView } from '../tools/registry';
 
 export const Tools = () => {
   const { user } = useAuth();
@@ -31,10 +32,17 @@ export const Tools = () => {
     fetchTools();
   }, []);
 
+  const visibleTools = useMemo(
+    () => tools.filter((tool) => hasToolView(tool.slug)),
+    [tools]
+  );
+
   const toolsLabel =
     loading && tools.length === 0
       ? 'Chargement des outils...'
-      : `${tools.length} outil${tools.length > 1 ? 's' : ''} disponible${tools.length > 1 ? 's' : ''}`;
+      : `${visibleTools.length} outil${visibleTools.length > 1 ? 's' : ''} disponible${
+          visibleTools.length > 1 ? 's' : ''
+        }`;
 
   return (
     <main className="min-h-screen bg-light" data-testid="tools-page">
@@ -54,46 +62,42 @@ export const Tools = () => {
       <section className="section-padding">
         <div className="container-max">
           {loading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-2xl p-8 animate-pulse">
-                  <div className="w-14 h-14 rounded-2xl bg-gray-200 mb-6" />
-                  <div className="h-6 bg-gray-200 rounded mb-3 w-3/4" />
-                  <div className="h-4 bg-gray-200 rounded w-full" />
+                <div key={i} className="animate-pulse rounded-xl border border-prestige-beige bg-white p-6">
+                  <div className="mb-4 h-5 w-2/3 rounded bg-gray-200" />
+                  <div className="h-4 w-full rounded bg-gray-200" />
                 </div>
               ))}
             </div>
-          ) : tools.length === 0 ? (
-            <div className="text-center py-16">
-              <Wrench className="w-16 h-16 mx-auto text-prestige-beige mb-4" />
-              <h3 className="font-heading text-xl font-semibold text-dark mb-2">
+          ) : visibleTools.length === 0 ? (
+            <div className="py-16 text-center">
+              <Wrench className="mx-auto mb-4 h-12 w-12 text-prestige-beige" />
+              <h3 className="font-heading mb-2 text-xl font-semibold text-dark">
                 Aucun outil disponible
               </h3>
-              <p className="text-prestige-taupe">
-                Les outils seront bientôt disponibles.
-              </p>
+              <p className="text-prestige-taupe">Les outils seront bientôt disponibles.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tools.map((tool) => (
-                <div
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {visibleTools.map((tool) => (
+                <button
                   key={tool.id}
-                  className="card-service cursor-pointer"
+                  type="button"
+                  className="group rounded-xl border border-prestige-beige bg-white p-6 text-left transition-colors hover:border-primary/40 hover:bg-white"
                   onClick={() => navigate(`/outils/${tool.slug}`)}
                   data-testid={`tool-card-${tool.slug}`}
                 >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-                  <div className="w-14 h-14 rounded-2xl bg-light flex items-center justify-center mb-6 group-hover:bg-primary transition-colors duration-300">
-                    <Wrench className="w-7 h-7 text-primary group-hover:text-white transition-colors duration-300" />
-                  </div>
-                  <h3 className="font-heading text-xl font-semibold text-dark mb-3">
+                  <h3 className="font-heading mb-2 text-lg font-semibold text-dark">
                     {tool.name}
                   </h3>
-                  <p className="text-prestige-taupe mb-4">{tool.description}</p>
-                  <span className="inline-flex items-center gap-1 text-primary font-medium text-sm group-hover:gap-2 transition-all">
-                    Utiliser l&apos;outil <ChevronRight className="w-4 h-4" />
+                  <p className="mb-4 text-sm leading-relaxed text-prestige-taupe">
+                    {tool.description}
+                  </p>
+                  <span className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-all group-hover:gap-2">
+                    Utiliser l&apos;outil <ChevronRight className="h-4 w-4" />
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           )}

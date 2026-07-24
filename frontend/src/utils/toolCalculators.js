@@ -1128,6 +1128,16 @@ export const calculateComparateurRendements = (values) => {
     r_valeur_ia: fmtCad(valeurIa),
     r_ecart_dollars: fmtCad(ecartDollars),
     r_resume: resume,
+    // Numeriques pour graphiques / tableaux React
+    banque_avg: banqueAvg,
+    utilise_pct: utilisePct,
+    ia_pct: iaPct,
+    ecart_pts: ecartPts,
+    valeur_banque: valeurBanque,
+    valeur_ia: valeurIa,
+    ecart_dollars: ecartDollars,
+    capital,
+    horizon,
   };
 };
 

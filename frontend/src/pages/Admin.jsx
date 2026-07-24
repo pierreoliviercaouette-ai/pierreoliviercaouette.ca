@@ -116,7 +116,7 @@ export const Admin = () => {
         name: toolForm.name,
         slug: toolForm.slug,
         description: toolForm.description,
-        html_content: toolForm.html_content,
+        html_content: toolForm.html_content || '',
         tags: toolForm.tags.split(',').map((t) => t.trim()).filter(Boolean),
         is_active: toolForm.is_active,
         requires_auth: toolForm.requires_auth,
@@ -446,17 +446,20 @@ export const Admin = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="html_content">Contenu HTML *</Label>
+                        <Label htmlFor="html_content">Contenu HTML (optionnel)</Label>
                         <Textarea
                           id="html_content"
                           value={toolForm.html_content}
                           onChange={(e) => setToolForm(prev => ({ ...prev, html_content: e.target.value }))}
-                          placeholder="<h2>Mon outil</h2><input type='number' placeholder='Montant'/>..."
-                          rows={10}
+                          placeholder="Legacy — les outils React n’utilisent plus ce champ. Peut rester vide."
+                          rows={6}
                           className="font-mono text-sm"
-                          required
                           data-testid="tool-html-input"
                         />
+                        <p className="mt-1 text-xs text-prestige-taupe">
+                          L’interface publique est gérée dans le code (registry React). Le HTML n’est plus
+                          injecté.
+                        </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
