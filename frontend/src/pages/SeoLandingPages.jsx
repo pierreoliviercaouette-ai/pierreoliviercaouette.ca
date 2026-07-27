@@ -13,7 +13,7 @@ function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqIt
         badge="Guide"
         title={h1}
         description={intro}
-        minHeightClass="min-h-[50vh] md:min-h-[58vh]"
+        minHeightClass="min-h-[38vh] md:min-h-[44vh]"
       />
 
       <section className="section-padding bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">

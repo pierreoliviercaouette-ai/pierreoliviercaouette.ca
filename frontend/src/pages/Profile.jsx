@@ -79,7 +79,7 @@ export const Profile = () => {
         badge="Espace membre"
         title={`Bonjour, ${user.first_name}`}
         description="Vos outils, vos notifications, et l’accès à votre programme de recommandations."
-        minHeightClass="min-h-[42vh] md:min-h-[48vh]"
+        minHeightClass="min-h-[32vh] md:min-h-[36vh]"
       />
 
       <div className="relative z-20 container-max -mt-14 px-4 pb-2 md:-mt-[4.25rem] md:px-8">

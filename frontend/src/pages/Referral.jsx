@@ -110,7 +110,7 @@ function HeroBlock({ user }) {
         badge="Recommandations"
         title="Recommandez en toute simplicité et multipliez vos chances"
         description="Accumulez vos points vérifiés, devenez admissible dès 5 points et participez au tirage trimestriel d’une valeur d’environ 750 $."
-        minHeightClass="min-h-[48vh] md:min-h-[52vh]"
+        minHeightClass="min-h-[36vh] md:min-h-[40vh]"
       >
         <Link
           to="/inscription"
@@ -144,7 +144,7 @@ function HeroBlock({ user }) {
       badge="Espace membre"
       title={first ? `Bonjour, ${first}` : 'Votre programme'}
       description="Votre lien de consentement et vos points vérifiés sont réunis ici pour maximiser vos chances au tirage trimestriel."
-      minHeightClass="min-h-[48vh] md:min-h-[52vh]"
+      minHeightClass="min-h-[36vh] md:min-h-[40vh]"
     >
       <Link to="/profil" className="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
         Mon profil

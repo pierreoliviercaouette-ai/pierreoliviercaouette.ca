@@ -152,7 +152,7 @@ export const JemceeLanding = () => {
 
       {/* Hero */}
       <section
-        className="relative min-h-[72vh] md:min-h-[82vh] overflow-hidden"
+        className="relative min-h-[52vh] md:min-h-[60vh] overflow-hidden"
         aria-labelledby="jemcee-hero-title"
       >
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#01233f_0%,#043a8c_48%,#064dd9_100%)]" />
@@ -196,7 +196,7 @@ export const JemceeLanding = () => {
           aria-hidden
         />
 
-        <div className="container-max relative z-10 flex flex-col justify-center px-4 md:px-8 py-20 md:py-24 min-h-[72vh] md:min-h-[82vh]">
+        <div className="container-max relative z-10 flex flex-col justify-center px-4 md:px-8 py-12 md:py-16 min-h-[52vh] md:min-h-[60vh]">
           <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 items-center w-full">
             <div className="text-center lg:text-left space-y-6">
               <p className="jemcee-fade-up font-mono text-secondary text-xs md:text-sm tracking-[0.22em] uppercase">

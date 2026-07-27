@@ -30,7 +30,7 @@ export const ServiceDetail = () => {
         badge={service.subtitle}
         title={service.title}
         description={service.shortDescription}
-        minHeightClass="min-h-[50vh] md:min-h-[58vh]"
+        minHeightClass="min-h-[38vh] md:min-h-[44vh]"
       >
         <Link
           to="/rendez-vous"

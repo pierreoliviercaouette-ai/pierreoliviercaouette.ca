@@ -11,8 +11,8 @@ export function PageHero({
   description,
   children,
   showWave = true,
-  /** ex. min-h-[50vh] pour des pages plus compactes */
-  minHeightClass = 'min-h-[60vh] md:min-h-[70vh]',
+  /** ex. min-h-[38vh] pour des pages plus compactes */
+  minHeightClass = 'min-h-[42vh] md:min-h-[48vh]',
 }) {
   return (
     <section className={`relative ${minHeightClass} overflow-hidden`} aria-labelledby="page-hero-title">
@@ -29,20 +29,20 @@ export function PageHero({
         style={{ backgroundImage: HERO_GRID_PATTERN }}
       />
 
-      <div className="container-max relative z-10 flex flex-col justify-center px-4 md:px-8 py-16 md:py-20 min-h-[inherit] text-center">
+      <div className="container-max relative z-10 flex flex-col justify-center px-4 md:px-8 py-10 md:py-12 min-h-[inherit] text-center">
         {badge ? (
-          <span className="inline-flex items-center gap-2 px-4 py-2 mb-5 mx-auto bg-white/10 backdrop-blur-sm rounded-full border border-white/20 text-white/90 text-sm font-medium">
+          <span className="inline-flex items-center gap-2 px-4 py-2 mb-3 mx-auto bg-white/10 backdrop-blur-sm rounded-full border border-white/20 text-white/90 text-sm font-medium">
             <span className="w-2 h-2 bg-secondary rounded-full" />
             {badge}
           </span>
         ) : null}
-        <h1 id="page-hero-title" className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        <h1 id="page-hero-title" className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
           {title}
         </h1>
         {description ? (
           <p className="text-white/80 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">{description}</p>
         ) : null}
-        {children ? <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">{children}</div> : null}
+        {children ? <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">{children}</div> : null}
       </div>
 
       {showWave ? (
