@@ -300,7 +300,7 @@ export const Appointment = () => {
       />
 
       {/* Outlook Bookings — pleine largeur d'écran */}
-      <section className="pt-10 md:pt-14 pb-20 md:pb-28">
+      <section className="pt-8 md:pt-10 pb-12 md:pb-16">
         <div className="container-max px-4 md:px-8 text-center mb-8">
           <h2 className="font-heading text-2xl font-bold text-dark mb-2">
             Calendrier de réservation

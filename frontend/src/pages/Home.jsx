@@ -804,7 +804,7 @@ export const Home = () => {
       <DifferentiatorSection />
       <ProcessSection />
       <TestimonialSection />
-      <PartnersTrustSection sectionClassName="border-t border-prestige-beige bg-white py-16 px-5 sm:px-6 md:px-10 lg:px-14" />
+      <PartnersTrustSection sectionClassName="border-t border-prestige-beige bg-white py-12 md:py-16 px-5 sm:px-6 md:px-10 lg:px-14" />
       <CTASection />
     </main>
   );
