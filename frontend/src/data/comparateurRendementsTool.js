@@ -16,7 +16,6 @@ export const COMPARATEUR_RENDEMENTS_HTML = `
 <div class="intro-box">
   <h2>Comparateur de rendements</h2>
   <p>Entrez le rendement de votre portefeuille (ou utilisez la moyenne bancaire illustrative) et comparez-le, <strong>à profil égal</strong>, aux Portefeuilles Modèles iA (série Classique 75/75, 5&nbsp;ans net).</p>
-  <p style="margin-top:0.75rem;font-size:0.9rem;"><a href="/guides/guide-releves-rendements-banques.pdf" target="_blank" rel="noopener">Guide : trouver votre rendement sur votre relevé bancaire (PDF)</a></p>
 </div>
 
 <div class="form-section">
