@@ -321,15 +321,16 @@ export const Appointment = () => {
         </div>
 
         <div
-          className="w-full h-[85vh] min-h-[800px] bg-white border-y border-prestige-beige/60"
+          className="w-full h-[2400px] bg-white border-y border-prestige-beige/60 overflow-hidden"
           data-testid="booking-calendar"
         >
           <iframe
             src={CONTACT_INFO.bookingUrl}
             className="block w-full h-full"
-            style={{ border: 0 }}
+            style={{ border: 0, overflow: 'hidden' }}
             title="Calendrier de rendez-vous"
             loading="lazy"
+            scrolling="no"
             referrerPolicy="no-referrer-when-downgrade"
             allow="fullscreen"
           />
