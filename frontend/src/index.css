@@ -45,7 +45,8 @@
     }
     
     html {
-        scroll-behavior: smooth;
+        /* Native scroll — smooth global ralentit la molette et les navigations */
+        scroll-behavior: auto;
     }
     
     body {
@@ -133,6 +134,19 @@
     .gradient-hero {
         background: linear-gradient(135deg, #01233f 0%, #064dd9 100%);
     }
+
+    /* Halo décoratif sans filter:blur (beaucoup plus léger au scroll) */
+    .glow-orb {
+        border-radius: 9999px;
+        pointer-events: none;
+        background: radial-gradient(circle, var(--glow, rgba(115, 196, 239, 0.35)) 0%, transparent 68%);
+    }
+
+    .glow-orb-soft {
+        border-radius: 9999px;
+        pointer-events: none;
+        background: radial-gradient(circle, var(--glow, rgba(6, 77, 217, 0.08)) 0%, transparent 70%);
+    }
     
     .gradient-prestige {
         background: linear-gradient(to bottom right, #fdfbf7, #e2dcd0);
@@ -169,7 +183,6 @@
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
-            scroll-behavior: auto !important;
         }
     }
     

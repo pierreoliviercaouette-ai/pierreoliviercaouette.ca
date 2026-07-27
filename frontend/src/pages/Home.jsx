@@ -17,11 +17,11 @@ const Hero = () => (
     {/* Background with gradient */}
     <div className="absolute inset-0 gradient-hero" />
     
-    {/* Animated background shapes */}
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-secondary/20 rounded-full blur-[100px] animate-pulse" />
-      <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-white/10 rounded-full blur-[80px]" />
-      <div className="absolute top-1/2 right-0 w-[300px] h-[300px] bg-primary/30 rounded-full blur-[60px]" />
+    {/* Decorative shapes — radial gradients (pas de filter:blur) */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.35)' }} />
+      <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] glow-orb" style={{ '--glow': 'rgba(255, 255, 255, 0.14)' }} />
+      <div className="absolute top-1/2 right-0 w-[300px] h-[300px] glow-orb" style={{ '--glow': 'rgba(6, 77, 217, 0.4)' }} />
     </div>
     
     {/* Grid pattern overlay */}
@@ -114,7 +114,7 @@ const Hero = () => (
           <div className="absolute -bottom-10 -left-10 w-24 h-24 border-2 border-white/20 rounded-2xl -rotate-12" />
           
           {/* Glowing orb behind photo */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-gradient-to-br from-secondary/40 to-primary/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.4)' }} />
           
           {/* Main photo container */}
           <div className="relative">
@@ -215,7 +215,7 @@ const ServicesSection = () => {
   return (
     <section className="section-padding bg-white relative overflow-hidden" data-testid="services-section">
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-96 h-96 glow-orb-soft -translate-y-1/2 translate-x-1/2" style={{ '--glow': 'rgba(6, 77, 217, 0.08)' }} />
       
       <div className="container-max relative">
         <div className="text-center max-w-3xl mx-auto mb-16">
@@ -729,8 +729,8 @@ const CTASection = () => (
     
     {/* Animated shapes */}
     <div className="absolute inset-0">
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-secondary/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.28)' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-48 h-48 glow-orb" style={{ '--glow': 'rgba(255, 255, 255, 0.14)' }} />
     </div>
     
     <div className="container-max relative text-center">

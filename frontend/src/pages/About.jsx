@@ -50,9 +50,9 @@ export const About = () => {
         <div className="absolute inset-0 gradient-hero" />
         
         {/* Decorative elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[100px]" />
-          <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-white/10 rounded-full blur-[60px]" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.35)' }} />
+          <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] glow-orb" style={{ '--glow': 'rgba(255, 255, 255, 0.14)' }} />
         </div>
         
         {/* Grid pattern */}
@@ -95,7 +95,7 @@ export const About = () => {
             {/* Photo - Enhanced circular design */}
             <div className="relative flex justify-center">
               {/* Animated rings */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] border-2 border-white/10 rounded-full animate-pulse" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] border-2 border-white/10 rounded-full" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] border-2 border-secondary/30 rounded-full" />
               
               {/* Photo container */}
@@ -142,8 +142,8 @@ export const About = () => {
       {/* Story Section - Enhanced */}
       <section className="section-padding bg-white relative overflow-hidden">
         {/* Decorative elements */}
-        <div className="absolute top-20 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-48 h-48 bg-secondary/10 rounded-full blur-2xl" />
+        <div className="absolute top-20 right-20 w-64 h-64 glow-orb-soft" style={{ '--glow': 'rgba(6, 77, 217, 0.08)' }} />
+        <div className="absolute bottom-20 left-20 w-48 h-48 glow-orb-soft" style={{ '--glow': 'rgba(115, 196, 239, 0.12)' }} />
         
         <div className="container-max relative">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -346,8 +346,8 @@ export const About = () => {
         <div className="container-max">
           <div className="relative bg-gradient-to-br from-dark via-primary to-dark rounded-3xl p-8 md:p-16 text-center overflow-hidden">
             {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/20 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute top-0 right-0 w-64 h-64 glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.28)' }} />
+            <div className="absolute bottom-0 left-0 w-48 h-48 glow-orb" style={{ '--glow': 'rgba(255, 255, 255, 0.14)' }} />
             
             <div className="relative">
               <h2 className="font-heading text-3xl md:text-4xl font-bold text-white mb-4">

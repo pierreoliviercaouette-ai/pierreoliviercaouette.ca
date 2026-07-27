@@ -17,8 +17,8 @@ function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqIt
       />
 
       <section className="section-padding bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
-        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-10 w-48 h-48 bg-secondary/10 rounded-full blur-2xl" />
+        <div className="absolute top-20 right-10 w-72 h-72 glow-orb-soft" style={{ '--glow': 'rgba(6, 77, 217, 0.08)' }} />
+        <div className="absolute bottom-20 left-10 w-48 h-48 glow-orb-soft" style={{ '--glow': 'rgba(115, 196, 239, 0.12)' }} />
 
         <article className="container-max max-w-4xl relative space-y-8">
           {sections.map((s) => (
@@ -36,7 +36,7 @@ function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqIt
 
           <div className="relative overflow-hidden rounded-3xl">
             <div className="absolute inset-0 gradient-hero" />
-            <div className="absolute top-0 right-0 w-48 h-48 bg-secondary/20 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-0 w-48 h-48 glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.28)' }} />
             <div className="relative px-6 py-10 md:px-10 md:py-12 text-center">
               <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-3">
                 Prochaine étape

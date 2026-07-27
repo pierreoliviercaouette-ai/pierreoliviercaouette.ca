@@ -28,7 +28,7 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-prestige-beige/80 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/72">
+    <nav className="sticky top-0 z-50 border-b border-prestige-beige/80 bg-white">
       <div className="container-max">
         <div className="flex w-full min-w-0 items-center gap-3 h-20 px-4 md:px-8">
           {/* Logo — colonne de gauche fixe */}

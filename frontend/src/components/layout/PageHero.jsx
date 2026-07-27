@@ -19,9 +19,9 @@ export function PageHero({
       <div className="absolute inset-0 gradient-hero" />
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] md:w-[600px] md:h-[600px] bg-secondary/20 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] md:w-[400px] md:h-[400px] bg-white/10 rounded-full blur-[60px] md:blur-[80px]" />
-        <div className="absolute top-1/2 right-0 w-[280px] h-[300px] bg-primary/30 rounded-full blur-[60px] hidden sm:block" />
+        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] md:w-[600px] md:h-[600px] glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.35)' }} />
+        <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] md:w-[400px] md:h-[400px] glow-orb" style={{ '--glow': 'rgba(255, 255, 255, 0.14)' }} />
+        <div className="absolute top-1/2 right-0 w-[280px] h-[300px] glow-orb hidden sm:block" style={{ '--glow': 'rgba(6, 77, 217, 0.4)' }} />
       </div>
 
       <div

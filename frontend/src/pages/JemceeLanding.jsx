@@ -253,7 +253,7 @@ export const JemceeLanding = () => {
             </div>
 
             <div className="hidden lg:block relative jemcee-fade-up-delay">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-secondary/25 rounded-full blur-3xl" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.32)' }} />
               <div className="relative mx-auto w-72 h-72 xl:w-80 xl:h-80 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl">
                 <img
                   src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/DPncC0gpI0OUcDSaMWVp/media/677952146419fdc38392dfcd.png"

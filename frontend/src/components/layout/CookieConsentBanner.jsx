@@ -30,7 +30,7 @@ export const CookieConsentBanner = () => {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[100] border-t border-prestige-beige bg-white/95 p-4 backdrop-blur-md md:p-5"
+      className="fixed inset-x-0 bottom-0 z-[100] border-t border-prestige-beige bg-white p-4 md:p-5"
       role="dialog"
       aria-labelledby="cookie-consent-title"
       aria-describedby="cookie-consent-desc"
