@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, User, Bell, ChevronDown, LogOut, Settings, Briefcase, Gift } from 'lucide-react';
+import { Menu, X, User, Bell, ChevronDown, LogOut, Settings, Briefcase, Gift, Calendar } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,7 +56,7 @@ export const Navbar = () => {
 
           {/*
             Liens : centrés dans l'espace *entre* le logo et les actions (évite le chevauchement
-            avec le pill Recommandations qu'un position:absolute pleine largeur provoquait).
+            avec le CTA rendez-vous qu'un position:absolute pleine largeur provoquait).
           */}
           <nav
             className="hidden min-w-max flex-1 items-center justify-center gap-4 overflow-x-auto px-2 lg:flex xl:gap-5"
@@ -78,16 +78,14 @@ export const Navbar = () => {
           </nav>
 
           <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
-            {/* Referral CTA */}
             <Link
-              to="/recommandations"
-              onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/recommandations' })}
-              className="relative group flex min-h-[44px] shrink-0 items-center gap-2 rounded-full bg-gradient-to-r from-secondary/20 to-primary/20 px-3 py-2 text-sm hover:from-secondary/30 hover:to-primary/30 xl:px-4"
-              data-testid="nav-referral-cta"
+              to="/rendez-vous"
+              onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/rendez-vous' })}
+              className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-full bg-dark px-4 py-2.5 text-sm font-semibold text-white shadow-md ring-2 ring-dark/10 transition-all hover:bg-dark/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 xl:px-5"
+              data-testid="cta-rdv"
             >
-              <Gift className="h-4 w-4 shrink-0 text-primary" />
-              <span className="whitespace-nowrap font-medium text-primary">Recommandations</span>
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 shrink-0 animate-pulse rounded-full bg-secondary" />
+              <Calendar className="h-4 w-4 shrink-0" />
+              <span className="whitespace-nowrap">Prendre rendez-vous</span>
             </Link>
 
             {user ? (
@@ -212,14 +210,6 @@ export const Navbar = () => {
                 >
                   Faire une demande
                 </Link>
-                <Link 
-                  to="/rendez-vous" 
-                  onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/rendez-vous' })}
-                  className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full bg-dark px-5 py-2.5 text-sm font-semibold text-white shadow-md ring-2 ring-dark/10 transition-all hover:bg-dark/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                  data-testid="cta-rdv"
-                >
-                  Prendre rendez-vous
-                </Link>
               </>
             )}
           </div>
@@ -256,17 +246,17 @@ export const Navbar = () => {
                 </Link>
               ))}
               
-              {/* Mobile Referral CTA */}
               <Link
-                to="/recommandations"
+                to="/rendez-vous"
                 onClick={() => {
-                  trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/recommandations' });
+                  trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/rendez-vous' });
                   setIsOpen(false);
                 }}
                 className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-primary"
+                data-testid="cta-rdv-mobile"
               >
-                <Gift className="w-5 h-5" />
-                Recommandations
+                <Calendar className="w-5 h-5" />
+                Prendre rendez-vous
               </Link>
               
               <div className="pt-4 border-t border-prestige-beige space-y-3">
@@ -324,17 +314,6 @@ export const Navbar = () => {
                       data-testid="cta-demande-mobile"
                     >
                       Faire une demande
-                    </Link>
-                    <Link
-                      to="/rendez-vous"
-                      onClick={() => {
-                        trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/rendez-vous' });
-                        setIsOpen(false);
-                      }}
-                      className="inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-dark px-5 py-3 text-center text-sm font-semibold text-white shadow-md hover:bg-dark/90"
-                      data-testid="cta-rdv-mobile"
-                    >
-                      Prendre rendez-vous
                     </Link>
                   </>
                 )}
