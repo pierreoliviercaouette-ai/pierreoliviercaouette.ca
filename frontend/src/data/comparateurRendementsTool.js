@@ -6,7 +6,7 @@ export const COMPARATEUR_RENDEMENTS_META = {
   slug: 'comparateur-rendements',
   name: 'Comparateur de rendements',
   description:
-    'Comparez le rendement de votre portefeuille bancaire à profil égal avec les Portefeuilles Modèles iA (5 ans net).',
+    'Comparez votre portefeuille à profil égal avec les Portefeuilles Modèles iA — mode simple (5 ans net) ou avancé (rendements année civile, 10 ans).',
   tags: ['Rendement', 'Banque', 'Portefeuilles', 'Comparaison'],
   is_active: true,
   requires_auth: false,

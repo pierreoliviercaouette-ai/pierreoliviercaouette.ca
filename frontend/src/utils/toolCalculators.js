@@ -6,6 +6,12 @@ import {
   getIaPctForProfil,
   PROFIL_RISQUE_LABELS,
 } from '../data/comparateurRendementsRates';
+import {
+  COMPARATEUR_CALENDAR_YEARS,
+  calendarFieldId,
+  geometricAnnualizedPct,
+  getIaCalendarReturnsForProfil,
+} from '../lib/comparateurCalendarReturns';
 
 // =============================================================================
 // Tax rate tables — Quebec + Federal 2026 (see fiscalConfig2026.js)
@@ -1088,16 +1094,116 @@ const buildYearlySeries = (capital, banqueRate, iaRate, years, annualContributio
   return points;
 };
 
+const buildCalendarWealthSeries = (capital, yearRows, versement = 0) => {
+  if (!yearRows.length) return [];
+  const firstYear = yearRows[0].year;
+  const points = [
+    { name: String(firstYear - 1), banque: Math.round(capital), ia: Math.round(capital) },
+  ];
+  let banque = capital;
+  let ia = capital;
+  for (const row of yearRows) {
+    banque = banque * (1 + row.userPct / 100) + versement;
+    ia = ia * (1 + row.iaPct / 100) + versement;
+    points.push({
+      name: String(row.year),
+      banque: Math.round(banque),
+      ia: Math.round(ia),
+      user_pct: row.userPct,
+      ia_pct: row.iaPct,
+    });
+  }
+  return points;
+};
+
 export const calculateComparateurRendements = (values) => {
+  const mode = values.mode === 'avance' ? 'avance' : 'simple';
   const profil = values.profil || 'equilibre';
   const banqueAvg = getBanqueAvgForProfil(profil);
-  const iaPct = getIaPctForProfil(profil);
-  const perso = parseFloat(values.rendement_perso);
-  const utilisePct = !Number.isNaN(perso) ? perso : banqueAvg;
-  const isMoyenneIllustrative = Math.abs(utilisePct - banqueAvg) < 0.05;
+  const iaPct5y = getIaPctForProfil(profil);
   const capital = parseFloat(values.capital) || 0;
   const versement = parseFloat(values.versement) || 0;
   const horizon = parseInt(values.horizon, 10) || 5;
+
+  if (mode === 'avance') {
+    const iaByYear = getIaCalendarReturnsForProfil(profil);
+    const yearRows = [];
+    for (const year of COMPARATEUR_CALENDAR_YEARS) {
+      const raw = parseFloat(values[calendarFieldId(year)]);
+      if (Number.isNaN(raw)) continue;
+      const iaEntry = iaByYear[year];
+      if (!iaEntry) continue;
+      yearRows.push({ year, userPct: raw, iaPct: iaEntry.value });
+    }
+
+    const utilisePct = geometricAnnualizedPct(yearRows.map((r) => r.userPct));
+    const iaPct =
+      geometricAnnualizedPct(yearRows.map((r) => r.iaPct)) ?? iaPct5y;
+    const effectiveUtilise = utilisePct ?? banqueAvg;
+    const serieHistorique = buildCalendarWealthSeries(capital, yearRows, versement);
+    const valeurBanque = serieHistorique.length
+      ? serieHistorique[serieHistorique.length - 1].banque
+      : capital;
+    const valeurIa = serieHistorique.length
+      ? serieHistorique[serieHistorique.length - 1].ia
+      : capital;
+    const ecartDollars = valeurIa - valeurBanque;
+    const ecartPts = iaPct - effectiveUtilise;
+
+    let resume = '';
+    if (!yearRows.length) {
+      resume =
+        'Mode avancé : saisissez au moins un rendement année civile (sur les 10 dernières années) pour comparer à votre portefeuille modèle iA.';
+    } else if (capital > 0) {
+      const signe = ecartDollars >= 0 ? 'supérieure' : 'inférieure';
+      resume =
+        `Sur ${yearRows.length} année${yearRows.length > 1 ? 's' : ''} civile${yearRows.length > 1 ? 's' : ''} renseignée${yearRows.length > 1 ? 's' : ''}, ` +
+        `avec un capital de départ de ${fmtCad(capital)}` +
+        (versement > 0 ? ` et ${fmtCad(versement)}/an` : '') +
+        `, la trajectoire modèle iA est ${signe} d'environ ${fmtCad(Math.abs(ecartDollars))} ` +
+        `par rapport à vos rendements saisis (annualisé géométrique illustratif).`;
+    } else {
+      resume =
+        `Écart annualisé (années saisies) : ${fmtPct(ecartPts)} pts ` +
+        `(${PROFIL_LABELS[profil] || profil}). Entrez un capital pour voir l'impact en dollars.`;
+    }
+
+    return {
+      mode,
+      r_profil: PROFIL_LABELS[profil] || profil,
+      r_banque_pct: fmtPct(banqueAvg),
+      r_utilise_pct: fmtPct(effectiveUtilise),
+      r_ia_pct: fmtPct(iaPct),
+      r_ecart_pct: fmtPct(ecartPts),
+      r_valeur_banque: fmtCad(valeurBanque),
+      r_valeur_ia: fmtCad(valeurIa),
+      r_ecart_dollars: fmtCad(ecartDollars),
+      r_resume: resume,
+      r_annees_saisies: String(yearRows.length),
+      banque_avg: banqueAvg,
+      utilise_pct: effectiveUtilise,
+      ia_pct: iaPct,
+      ia_pct_5y: iaPct5y,
+      ecart_pts: ecartPts,
+      valeur_banque: valeurBanque,
+      valeur_ia: valeurIa,
+      ecart_dollars: ecartDollars,
+      capital,
+      horizon,
+      annees_saisies: yearRows.length,
+      serie_annuelle: serieHistorique,
+      serie_rendements: yearRows.map((r) => ({
+        name: String(r.year),
+        banque: r.userPct,
+        ia: r.iaPct,
+      })),
+    };
+  }
+
+  const perso = parseFloat(values.rendement_perso);
+  const utilisePct = !Number.isNaN(perso) ? perso : banqueAvg;
+  const isMoyenneIllustrative = Math.abs(utilisePct - banqueAvg) < 0.05;
+  const iaPct = iaPct5y;
 
   const banqueRate = utilisePct / 100;
   const iaRate = iaPct / 100;
@@ -1122,6 +1228,7 @@ export const calculateComparateurRendements = (values) => {
   }
 
   return {
+    mode,
     r_profil: PROFIL_LABELS[profil] || profil,
     r_banque_pct: fmtPct(banqueAvg),
     r_utilise_pct: fmtPct(utilisePct),
@@ -1131,7 +1238,6 @@ export const calculateComparateurRendements = (values) => {
     r_valeur_ia: fmtCad(valeurIa),
     r_ecart_dollars: fmtCad(ecartDollars),
     r_resume: resume,
-    // Numeriques pour graphiques / tableaux React
     banque_avg: banqueAvg,
     utilise_pct: utilisePct,
     ia_pct: iaPct,

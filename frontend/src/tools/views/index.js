@@ -5,6 +5,11 @@ import {
   getIaPctForProfil,
   PROFIL_RISQUE_LABELS,
 } from '../../data/comparateurRendementsRates';
+import {
+  COMPARATEUR_CALENDAR_YEARS,
+  calendarFieldId,
+  getIaCalendarReturnsForProfil,
+} from '../../lib/comparateurCalendarReturns';
 
 const money = (v) => formatCad(v);
 const pct = (v, d = 1) => formatPct(v, d);
@@ -648,11 +653,13 @@ export const toolViews = {
 
   'comparateur-rendements': {
     defaults: {
+      mode: 'simple',
       profil: 'equilibre',
       rendement_perso: String(getBanqueAvgForProfil('equilibre')),
       capital: '50000',
       horizon: '5',
       versement: '0',
+      ...Object.fromEntries(COMPARATEUR_CALENDAR_YEARS.map((y) => [calendarFieldId(y), ''])),
     },
     /** Le champ rendement suit toujours le profil (moyenne banques), sauf saisie manuelle après. */
     syncValues: (values, id, value) => {
@@ -663,6 +670,18 @@ export const toolViews = {
       return next;
     },
     fields: [
+      {
+        id: 'mode',
+        label: 'Mode de saisie',
+        type: 'select',
+        section: 'Comparaison',
+        fullWidth: true,
+        options: [
+          { value: 'simple', label: 'Simple — rendement annualisé 5 ans' },
+          { value: 'avance', label: 'Avancé — rendements année civile (10 ans)' },
+        ],
+        hint: 'Simple : un seul rendement annualisé. Avancé : saisissez vos rendements civils pour les comparer année par année au portefeuille modèle.',
+      },
       {
         id: 'profil',
         label: 'Profil de risque',
@@ -675,6 +694,9 @@ export const toolViews = {
         })),
         hint: (values) => {
           const profil = values.profil || 'equilibre';
+          if (values.mode === 'avance') {
+            return `Portefeuille modèle iA : comparaison sur les rendements année civile (série Classique 75/75). Référence 5 ans net : ${formatPctFr(getIaPctForProfil(profil))} %.`;
+          }
           return `Portefeuille modèle iA : ${formatPctFr(getIaPctForProfil(profil))} % net sur 5 ans. La moyenne banques se met à jour dans le champ ci-dessous.`;
         },
       },
@@ -685,18 +707,40 @@ export const toolViews = {
         section: 'Comparaison',
         step: '0.1',
         fullWidth: true,
+        showWhen: (values) => values.mode !== 'avance',
         hint: (values) => {
           const profil = values.profil || 'equilibre';
           const banque = formatPctFr(getBanqueAvgForProfil(profil));
           return `Prérempli avec la moyenne illustrative des banques pour ce profil (~${banque} %). Modifiez-le pour utiliser votre rendement personnel.`;
         },
       },
-      { id: 'capital', label: 'Capital investi ($)', type: 'number', section: 'Projection' },
+      ...COMPARATEUR_CALENDAR_YEARS.map((year) => ({
+        id: calendarFieldId(year),
+        label: `${year} (%)`,
+        type: 'number',
+        section: 'Rendements année civile',
+        step: '0.1',
+        showWhen: (values) => values.mode === 'avance',
+        hint: (values) => {
+          const profil = values.profil || 'equilibre';
+          const ia = getIaCalendarReturnsForProfil(profil)[year];
+          if (!ia) return 'Donnée modèle iA indisponible pour cette année.';
+          const star = ia.incomplete ? '*' : '';
+          return `Modèle iA : ${formatPctFr(ia.value)}${star} %`;
+        },
+      })),
+      {
+        id: 'capital',
+        label: 'Capital investi ($)',
+        type: 'number',
+        section: 'Projection',
+      },
       {
         id: 'horizon',
         label: 'Horizon',
         type: 'select',
         section: 'Projection',
+        showWhen: (values) => values.mode !== 'avance',
         options: [
           { value: '5', label: '5 ans' },
           { value: '10', label: '10 ans' },
@@ -704,44 +748,79 @@ export const toolViews = {
           { value: '20', label: '20 ans' },
         ],
       },
-      { id: 'versement', label: 'Versement annuel ($)', type: 'number', section: 'Projection' },
+      {
+        id: 'versement',
+        label: 'Versement annuel ($)',
+        type: 'number',
+        section: 'Projection',
+      },
     ],
     buildPresentation: (r) => {
       const ecartPositif = (r.ecart_dollars || 0) >= 0;
       const pts = Number(r.ecart_pts || 0).toFixed(1).replace('.', ',');
+      const isAvance = r.mode === 'avance';
+      const rows = [
+        { label: 'Profil', value: r.r_profil },
+        {
+          label: isAvance
+            ? 'Votre annualisé (années saisies)'
+            : 'Rendement utilisé (banques / vous)',
+          value: pct(r.utilise_pct),
+        },
+        {
+          label: isAvance ? 'Modèle iA (annualisé, mêmes années)' : 'Modèle iA (5 ans net)',
+          value: pct(r.ia_pct),
+          emphasize: true,
+        },
+        {
+          label: 'Écart de rendement',
+          value: `${ecartPositif ? '+' : ''}${pts} pts`,
+          emphasize: true,
+        },
+      ];
+      if (isAvance) {
+        rows.push({
+          label: 'Années civiles saisies',
+          value: String(r.annees_saisies || 0),
+        });
+      }
+      rows.push(
+        {
+          label: isAvance ? 'Valeur scénario — vos rendements' : 'Valeur scénario banque / vous',
+          value: money(r.valeur_banque),
+        },
+        { label: 'Valeur scénario iA', value: money(r.valeur_ia), emphasize: true },
+        {
+          label: 'Écart estimé',
+          value: `${ecartPositif ? '+' : '−'}${money(Math.abs(r.ecart_dollars || 0))}`,
+          impact: true,
+        }
+      );
       return {
         highlight: {
           label: ecartPositif
             ? 'Avantage estimé — Portefeuille modèle iA'
             : 'Écart estimé — scénario banques / vous',
           value: `${ecartPositif ? '+' : '−'}${money(Math.abs(r.ecart_dollars || 0))}`,
-          detail: `${ecartPositif ? '+' : ''}${pts} pts de rendement · projection sur ${r.horizon || 5} ans`,
+          detail: isAvance
+            ? `${ecartPositif ? '+' : ''}${pts} pts annualisés · ${r.annees_saisies || 0} année(s) civile(s)`
+            : `${ecartPositif ? '+' : ''}${pts} pts de rendement · projection sur ${r.horizon || 5} ans`,
           positive: ecartPositif,
         },
-        rows: [
-          { label: 'Profil', value: r.r_profil },
-          { label: 'Rendement utilisé (banques / vous)', value: pct(r.utilise_pct) },
-          { label: 'Modèle iA (5 ans net)', value: pct(r.ia_pct), emphasize: true },
-          {
-            label: 'Écart de rendement',
-            value: `${ecartPositif ? '+' : ''}${pts} pts`,
-            emphasize: true,
-          },
-          { label: 'Valeur scénario banque / vous', value: money(r.valeur_banque) },
-          { label: 'Valeur scénario iA', value: money(r.valeur_ia), emphasize: true },
-          {
-            label: 'Écart estimé',
-            value: `${ecartPositif ? '+' : '−'}${money(Math.abs(r.ecart_dollars || 0))}`,
-            impact: true,
-          },
-        ],
+        rows,
         chart: {
           type: 'stacked-line',
-          title: 'Projection comparative (par année)',
+          title: isAvance
+            ? 'Trajectoire comparative (années civiles saisies)'
+            : 'Projection comparative (par année)',
           stacked: false,
           data: r.serie_annuelle || [],
           series: [
-            { dataKey: 'banque', name: 'Banque / vous', color: BRAND_MUTED },
+            {
+              dataKey: 'banque',
+              name: isAvance ? 'Vos rendements' : 'Banque / vous',
+              color: BRAND_MUTED,
+            },
             { dataKey: 'ia', name: 'Modèle iA', color: BRAND_BLUE, primary: true },
           ],
         },

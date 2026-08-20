@@ -66,6 +66,7 @@ export function ToolShell({
   values = {},
   onChange,
   presentation = {},
+  hideResults = false,
 }) {
   const visibleFields = fields.filter((field) => {
     if (typeof field.showWhen === 'function') return field.showWhen(values);
@@ -85,32 +86,40 @@ export function ToolShell({
 
   const { rows = [], chart, note, highlight } = presentation;
 
+  const formColumn = (
+    <div className="space-y-6">
+      {sections.map((section) => (
+        <div key={section.title} className="space-y-3">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-prestige-taupe">
+            {section.title}
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {section.fields.map((field) => (
+              <div
+                key={field.id}
+                className={field.fullWidth ? 'sm:col-span-2' : undefined}
+              >
+                <FieldControl
+                  field={field}
+                  value={values[field.id]}
+                  values={values}
+                  onChange={onChange}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (hideResults) {
+    return <div data-testid="tool-shell">{formColumn}</div>;
+  }
+
   return (
     <div className="grid gap-8 lg:grid-cols-2" data-testid="tool-shell">
-      <div className="space-y-6">
-        {sections.map((section) => (
-          <div key={section.title} className="space-y-3">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-prestige-taupe">
-              {section.title}
-            </h3>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {section.fields.map((field) => (
-                <div
-                  key={field.id}
-                  className={field.fullWidth ? 'sm:col-span-2' : undefined}
-                >
-                  <FieldControl
-                    field={field}
-                    value={values[field.id]}
-                    values={values}
-                    onChange={onChange}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      {formColumn}
 
       <div className="space-y-6 rounded-xl border border-prestige-beige bg-white p-5 md:p-6">
         {highlight ? (

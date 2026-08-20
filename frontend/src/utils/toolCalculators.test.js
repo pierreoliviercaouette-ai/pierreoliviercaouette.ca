@@ -319,4 +319,31 @@ describe('comparateur rendements par profil', () => {
     expect(result.serie_annuelle[10].ia).toBe(Math.round(result.valeur_ia));
     expect(result.serie_annuelle[5].ia).toBeGreaterThan(result.serie_annuelle[5].banque);
   });
+
+  test('mode avancé compose les années civiles saisies', () => {
+    const result = calculateComparateurRendements({
+      mode: 'avance',
+      profil: 'equilibre',
+      capital: '100000',
+      versement: '0',
+      cal_2023: '10',
+      cal_2024: '5',
+    });
+    expect(result.mode).toBe('avance');
+    expect(result.annees_saisies).toBe(2);
+    expect(result.serie_annuelle[0]).toMatchObject({ name: '2022', banque: 100000, ia: 100000 });
+    expect(result.serie_annuelle).toHaveLength(3);
+    expect(result.valeur_banque).toBe(Math.round(100000 * 1.1 * 1.05));
+    expect(result.utilise_pct).toBeCloseTo(7.5, 0);
+  });
+
+  test('mode avancé sans années saisie invite à compléter', () => {
+    const result = calculateComparateurRendements({
+      mode: 'avance',
+      profil: 'prudent',
+      capital: '50000',
+    });
+    expect(result.annees_saisies).toBe(0);
+    expect(result.r_resume).toMatch(/au moins un rendement/i);
+  });
 });
