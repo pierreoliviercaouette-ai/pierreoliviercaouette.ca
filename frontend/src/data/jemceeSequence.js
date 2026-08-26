@@ -1,15 +1,15 @@
-/** Métadonnées de la séquence scroll 24 fps (fichiers dans /public/jemcee/sequence/). */
+/** Métadonnées vidéo scrub GP3R (fichier dans /public/jemcee/). */
 export const JEMCEE_SEQUENCE = {
   fps: 24,
-  frameCount: 96,
+  durationSec: 4,
   width: 1280,
   height: 720,
-  prefix: '/jemcee/sequence/frame-',
-  ext: 'jpg',
-  digits: 4,
+  videoSrc: '/jemcee/pillars-sequence.mp4',
+  posterSrc: '/jemcee/engine-bay.jpg',
+  /** Chapitres en fraction de la durée vidéo (0–1) */
   chapters: [
-    { id: 'performance', start: 0, end: 39 },
-    { id: 'securite', start: 40, end: 71 },
-    { id: 'accompagnement', start: 72, end: 95 },
+    { id: 'performance', start: 0, end: 0.4 },
+    { id: 'securite', start: 0.4, end: 0.72 },
+    { id: 'accompagnement', start: 0.72, end: 1 },
   ],
 };

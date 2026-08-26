@@ -14,7 +14,7 @@ import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 import { AMF_REGISTRE_URL } from '../lib/branding';
 import { useInView } from '../hooks/useInView';
-import { ScrollImageSequence } from '../components/jemcee/ScrollImageSequence';
+import { ScrollVideoScrub } from '../components/jemcee/ScrollVideoScrub';
 import { JEMCEE_SEQUENCE } from '../data/jemceeSequence';
 
 export const JEMCEE_BOOKING_URL =
@@ -133,11 +133,12 @@ function Reveal({ children, className = '', delayClass = '' }) {
   );
 }
 
-function chapterForFrame(frameIndex) {
+function chapterForProgress(progress) {
   const chapters = JEMCEE_SEQUENCE.chapters || [];
+  const p = Math.min(Math.max(progress, 0), 1);
   return (
-    chapters.find((c) => frameIndex >= c.start && frameIndex <= c.end)?.id ||
-    chapters[0]?.id ||
+    chapters.find((c) => p >= c.start && p < c.end)?.id ||
+    chapters[chapters.length - 1]?.id ||
     'performance'
   );
 }
@@ -152,22 +153,23 @@ export const JemceeLanding = () => {
   );
   const ActiveIcon = activePillar.icon;
 
-  const framePrefix = `${process.env.PUBLIC_URL || ''}/jemcee/sequence/frame-`;
+  const videoSrc = `${process.env.PUBLIC_URL || ''}${JEMCEE_SEQUENCE.videoSrc}`;
+  const posterSrc = `${process.env.PUBLIC_URL || ''}${JEMCEE_SEQUENCE.posterSrc}`;
 
-  const handleProgress = useCallback((progress, frameIndex) => {
+  const handleProgress = useCallback((progress) => {
     setShowIntro(progress < 0.06);
-    setActiveChapter(chapterForFrame(frameIndex));
+    setActiveChapter(chapterForProgress(progress));
   }, []);
 
   useSeoMeta({
     title: 'GP3R · Performance, sécurité, accompagnement | Pierre-Olivier Caouette',
     description:
-      'Landing GP3R cinématique : séquence 24 fps pilotée par le scroll — performance, sécurité du capital et accompagnement financier.',
+      'Landing GP3R cinématique : vidéo pilotée par le scroll — performance, sécurité du capital et accompagnement financier.',
     canonicalPath: '/jemcee',
   });
 
   return (
-    <main className="min-h-screen bg-white jemcee-landing" data-testid="jemcee-landing-page">
+    <div className="bg-white jemcee-landing" data-testid="jemcee-landing-page">
       <style>{`
         .jemcee-landing .jemcee-reveal {
           opacity: 0;
@@ -196,24 +198,22 @@ export const JemceeLanding = () => {
         }
       `}</style>
 
-      {/* Séquence cinématique 24 fps — scrub scroll */}
-      <ScrollImageSequence
-        frameCount={JEMCEE_SEQUENCE.frameCount}
-        framePathPrefix={framePrefix}
-        frameExt={JEMCEE_SEQUENCE.ext}
-        frameDigits={JEMCEE_SEQUENCE.digits}
-        scrollHeightVh={360}
+      {/* Vidéo cinématique — scrub scroll (pointer-events libres) */}
+      <ScrollVideoScrub
+        src={videoSrc}
+        poster={posterSrc}
+        scrollHeightVh={320}
         onProgress={handleProgress}
       >
         {/* Intro (début de séquence) */}
         <div
-          className={`pointer-events-none absolute inset-0 flex flex-col justify-end md:justify-center px-5 md:px-12 pb-24 md:pb-0 transition-opacity duration-500 ${
+          className={`absolute inset-0 flex flex-col justify-end md:justify-center px-5 md:px-12 pb-24 md:pb-0 transition-opacity duration-500 ${
             showIntro ? 'opacity-100' : 'opacity-0'
           }`}
         >
           <div className="container-max pointer-events-auto max-w-3xl space-y-5">
             <p className="font-mono text-secondary text-xs md:text-sm tracking-[0.24em] uppercase">
-              GP3R · {JEMCEE_SEQUENCE.fps} fps · scroll
+              GP3R · vidéo · scroll
             </p>
             <h1
               id="jemcee-hero-title"
@@ -260,7 +260,7 @@ export const JemceeLanding = () => {
 
         {/* Overlay chapitre actif */}
         <div
-          className={`pointer-events-none absolute inset-x-0 bottom-0 md:inset-y-0 md:left-auto md:right-0 md:w-[min(28rem,42vw)] flex items-end md:items-center p-5 md:p-10 transition-opacity duration-500 ${
+          className={`absolute inset-x-0 bottom-0 md:inset-y-0 md:left-auto md:right-0 md:w-[min(28rem,42vw)] flex items-end md:items-center p-5 md:p-10 transition-opacity duration-500 ${
             showIntro ? 'opacity-0' : 'opacity-100'
           }`}
         >
@@ -301,7 +301,7 @@ export const JemceeLanding = () => {
             </div>
           </div>
         </div>
-      </ScrollImageSequence>
+      </ScrollVideoScrub>
 
       {/* Ancre 3 piliers (après la séquence) */}
       <section id="piliers" className="border-b border-prestige-beige bg-light/80 scroll-mt-24">
@@ -455,6 +455,6 @@ export const JemceeLanding = () => {
           </Reveal>
         </div>
       </section>
-    </main>
+    </div>
   );
 };

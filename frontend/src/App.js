@@ -1,6 +1,6 @@
 import "@/index.css";
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { SupabaseAuthProvider as AuthProvider } from "./context/SupabaseAuthContext";
 import { Navbar } from "./components/layout/Navbar";
@@ -46,17 +46,22 @@ const ModelPortfoliosIndex = lazy(() =>
   import("./pages/ModelPortfoliosIndex").then((m) => ({ default: m.ModelPortfoliosIndex }))
 );
 
-function App() {
+function AppShell() {
+  const location = useLocation();
+  const hidePortfolioBanner = location.pathname.startsWith('/jemcee');
+
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
       <AnalyticsTracker />
       <ConsentAwareAnalytics />
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <Suspense fallback={null}>
-          <ModelPortfoliosBanner />
-        </Suspense>
+        {!hidePortfolioBanner && (
+          <Suspense fallback={null}>
+            <ModelPortfoliosBanner />
+          </Suspense>
+        )}
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -114,6 +119,14 @@ function App() {
         <CookieConsentBanner />
       </div>
       <Toaster position="top-right" richColors />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppShell />
     </BrowserRouter>
   );
 }
