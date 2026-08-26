@@ -1,6 +1,7 @@
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
-import { CinematicScene } from '../components/jemcee/CinematicScene';
+import { AppleCinematicScroll } from '../components/jemcee/AppleCinematicScroll';
+import { JEMCEE_SEQUENCE } from '../data/jemceeSequence';
 
 export const JEMCEE_BOOKING_URL =
   'https://outlook.office.com/book/PierreOlivierCaouetteiAGroupefinancier@ia.ca/s/_4G_IKTvnEeGazDkP6WOUQ2?ismsaljsauthenabled';
@@ -11,7 +12,7 @@ const EMAIL = 'p-o.caouette@agc.ia.ca';
 
 const asset = (path) => `${process.env.PUBLIC_URL || ''}${path}`;
 
-const SCENES = [
+const CHAPTERS = [
   {
     id: 'performance',
     chapterLabel: 'CHAPITRE 01 — LE MOTEUR',
@@ -19,8 +20,11 @@ const SCENES = [
     description:
       'Le capot s’ouvre : voici ce qui propulse votre stratégie. Chaque composant est choisi, réglé et mesuré.',
     align: 'left',
-    videoSrc: asset('/jemcee/scene-performance.mp4'),
-    posterSrc: asset('/jemcee/engine-bay.jpg'),
+    anchor: 0.14,
+    start: 0.12,
+    peakIn: 0.18,
+    peakOut: 0.34,
+    end: 0.4,
     bullets: [
       {
         num: '01',
@@ -46,8 +50,11 @@ const SCENES = [
     description:
       'Baquet, harnais six points, arceau et casque. On n’accélère jamais sans que la structure tienne le choc.',
     align: 'right',
-    videoSrc: asset('/jemcee/scene-securite.mp4'),
-    posterSrc: asset('/jemcee/safety-cage.jpg'),
+    anchor: 0.42,
+    start: 0.38,
+    peakIn: 0.44,
+    peakOut: 0.6,
+    end: 0.66,
     bullets: [
       {
         num: '04',
@@ -73,8 +80,11 @@ const SCENES = [
     description:
       'La caméra se tourne vers le siège de droite. C’est là que je m’assois : notes de route en main, virage après virage.',
     align: 'left',
-    videoSrc: asset('/jemcee/scene-copilote.mp4'),
-    posterSrc: asset('/jemcee/copilot.jpg'),
+    anchor: 0.68,
+    start: 0.64,
+    peakIn: 0.7,
+    peakOut: 0.88,
+    end: 0.96,
     bullets: [
       {
         num: '07',
@@ -107,8 +117,8 @@ export const JemceeLanding = () => {
     canonicalPath: '/jemcee',
   });
 
-  const heroVideo = asset('/jemcee/scene-performance.mp4');
-  const heroPoster = asset('/jemcee/engine-bay.jpg');
+  const videoSrc = asset(JEMCEE_SEQUENCE.videoSrc);
+  const posterSrc = asset(JEMCEE_SEQUENCE.posterSrc);
 
   return (
     <div className="jemcee-landing bg-dark text-white" data-testid="jemcee-landing-page">
@@ -116,104 +126,57 @@ export const JemceeLanding = () => {
         .jemcee-landing {
           --jemcee-ember: linear-gradient(135deg, #064dd9 0%, #053a9e 55%, #73c4ef 100%);
           --jemcee-ember-shadow: 0 12px 40px rgba(6, 77, 217, 0.35);
-          --jemcee-cinematic: linear-gradient(135deg, rgba(1,35,63,0.88) 0%, rgba(1,35,63,0.45) 50%, rgba(6,77,217,0.25) 100%);
-          --jemcee-scrim: linear-gradient(90deg, rgba(1,35,63,0.75) 0%, transparent 55%);
         }
         .jemcee-landing .jemcee-cta-primary {
           background-image: var(--jemcee-ember);
           box-shadow: var(--jemcee-ember-shadow);
         }
-        .jemcee-landing .jemcee-hero-kicker,
-        .jemcee-landing .jemcee-hero-title,
-        .jemcee-landing .jemcee-hero-lead,
-        .jemcee-landing .jemcee-hero-actions {
-          animation: jemcee-rise 0.9s cubic-bezier(0.16, 1, 0.32, 1) both;
-        }
-        .jemcee-landing .jemcee-hero-title { animation-delay: 0.12s; }
-        .jemcee-landing .jemcee-hero-lead { animation-delay: 0.24s; }
-        .jemcee-landing .jemcee-hero-actions { animation-delay: 0.36s; }
-        @keyframes jemcee-rise {
-          from { opacity: 0; transform: translateY(28px); filter: blur(8px); }
-          to { opacity: 1; transform: translateY(0); filter: blur(0); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .jemcee-landing .jemcee-hero-kicker,
-          .jemcee-landing .jemcee-hero-title,
-          .jemcee-landing .jemcee-hero-lead,
-          .jemcee-landing .jemcee-hero-actions {
-            animation: none !important;
-            opacity: 1 !important;
-            transform: none !important;
-            filter: none !important;
-          }
-        }
       `}</style>
 
-      {/* Hero plein écran */}
-      <section className="relative h-[100svh] overflow-hidden">
-        <div className="absolute inset-0">
-          <video
-            className="h-full w-full object-cover"
-            src={heroVideo}
-            poster={heroPoster}
-            autoPlay
-            muted
-            loop
-            playsInline
-            aria-hidden
-          />
-        </div>
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{ backgroundImage: 'var(--jemcee-cinematic)' }}
-        />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{ backgroundImage: 'var(--jemcee-scrim)' }}
-        />
+      <AppleCinematicScroll
+        videoSrc={videoSrc}
+        posterSrc={posterSrc}
+        scrollHeightVh={560}
+        chapters={CHAPTERS}
+        intro={() => (
+          <>
+            <p className="font-heading text-sm tracking-[0.45em] text-secondary">
+              CONSEILLER EN SÉCURITÉ FINANCIÈRE
+            </p>
+            <h1 className="mt-4 max-w-4xl font-heading text-5xl leading-[0.92] text-white md:text-7xl lg:text-8xl">
+              Votre patrimoine mérite{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: 'var(--jemcee-ember)' }}
+              >
+                une préparation de rallye
+              </span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg text-white/70">
+              Un moteur performant, une cage de sécurité et un copilote qui lit la route. Trois
+              piliers pour franchir chaque étape de votre parcours financier.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-4">
+              <a
+                href="#contact"
+                onClick={() => trackCta('jemcee_hero_depart')}
+                className="jemcee-cta-primary pointer-events-auto inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest text-white"
+              >
+                PRENDRE LE DÉPART
+              </a>
+              <a
+                href="#performance"
+                onClick={() => trackCta('jemcee_hero_capot')}
+                className="pointer-events-auto inline-flex items-center border border-white/25 px-8 py-4 font-heading text-lg tracking-widest text-white transition-colors hover:border-secondary hover:text-secondary"
+              >
+                VOIR SOUS LE CAPOT
+              </a>
+            </div>
+          </>
+        )}
+      />
 
-        <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pb-16 pt-24">
-          <p className="jemcee-hero-kicker font-heading text-sm tracking-[0.45em] text-secondary">
-            CONSEILLER EN SÉCURITÉ FINANCIÈRE
-          </p>
-          <h1 className="jemcee-hero-title mt-4 max-w-4xl font-heading text-5xl leading-[0.92] text-white md:text-7xl lg:text-8xl">
-            Votre patrimoine mérite{' '}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: 'var(--jemcee-ember)' }}
-            >
-              une préparation de rallye
-            </span>
-          </h1>
-          <p className="jemcee-hero-lead mt-6 max-w-xl text-lg text-white/70">
-            Un moteur performant, une cage de sécurité et un copilote qui lit la route. Trois piliers
-            pour franchir chaque étape de votre parcours financier.
-          </p>
-          <div className="jemcee-hero-actions mt-9 flex flex-wrap items-center gap-4">
-            <a
-              href="#contact"
-              onClick={() => trackCta('jemcee_hero_depart')}
-              className="jemcee-cta-primary pointer-events-auto inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest text-white"
-            >
-              PRENDRE LE DÉPART
-            </a>
-            <a
-              href="#performance"
-              onClick={() => trackCta('jemcee_hero_capot')}
-              className="pointer-events-auto inline-flex items-center border border-white/25 px-8 py-4 font-heading text-lg tracking-widest text-white transition-colors hover:border-secondary hover:text-secondary"
-            >
-              VOIR SOUS LE CAPOT
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {SCENES.map((scene) => (
-        <CinematicScene key={scene.id} {...scene} />
-      ))}
-
-      {/* Contact */}
-      <section id="contact" className="relative scroll-mt-0 border-t border-white/10 px-6 py-28">
+      <section id="contact" className="relative scroll-mt-24 border-t border-white/10 px-6 py-28">
         <div className="mx-auto max-w-4xl text-center">
           <p className="font-heading text-sm tracking-[0.4em] text-secondary">LIGNE DE DÉPART</p>
           <h2 className="mt-4 font-heading text-5xl leading-[0.95] text-white md:text-7xl">
