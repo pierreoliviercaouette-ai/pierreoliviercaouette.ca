@@ -1,27 +1,29 @@
 {
   "fps": 24,
-  "frameCount": 240,
+  "frameCount": 300,
   "width": 1280,
   "height": 720,
+  "durationSec": 12.5,
+  "source": "user-reference + copilot-ending",
   "chapters": [
     {
       "id": "orbit",
       "start": 0,
-      "end": 0.18
+      "end": 0.22
     },
     {
       "id": "performance",
-      "start": 0.18,
-      "end": 0.42
+      "start": 0.22,
+      "end": 0.45
     },
     {
       "id": "securite",
-      "start": 0.42,
-      "end": 0.7
+      "start": 0.45,
+      "end": 0.72
     },
     {
       "id": "accompagnement",
-      "start": 0.7,
+      "start": 0.72,
       "end": 1
     }
   ]
