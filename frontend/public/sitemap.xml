@@ -149,8 +149,20 @@
   </url>
   <url>
     <loc>https://www.pierreoliviercaouette.ca/jemcee</loc>
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.pierreoliviercaouette.ca/jemcee/engine-bay.jpg</image:loc>
+      <image:title>Performance — compartiment moteur GP3R</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.pierreoliviercaouette.ca/jemcee/safety-cage.jpg</image:loc>
+      <image:title>Sécurité — cage et casque</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.pierreoliviercaouette.ca/jemcee/copilot.jpg</image:loc>
+      <image:title>Accompagnement — co-pilote</image:title>
+    </image:image>
   </url>
 </urlset>
