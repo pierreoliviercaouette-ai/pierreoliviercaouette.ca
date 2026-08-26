@@ -1,460 +1,281 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  ArrowRight,
-  CheckCircle2,
-  Flag,
-  Gauge,
-  Headphones,
-  Shield,
-  Timer,
-  Users,
-} from 'lucide-react';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
-import { AMF_REGISTRE_URL } from '../lib/branding';
-import { useInView } from '../hooks/useInView';
-import { ScrollVideoScrub } from '../components/jemcee/ScrollVideoScrub';
-import { JEMCEE_SEQUENCE } from '../data/jemceeSequence';
+import { CinematicScene } from '../components/jemcee/CinematicScene';
 
 export const JEMCEE_BOOKING_URL =
   'https://outlook.office.com/book/PierreOlivierCaouetteiAGroupefinancier@ia.ca/s/_4G_IKTvnEeGazDkP6WOUQ2?ismsaljsauthenabled';
 
-const pillars = [
+const PHONE = '819 806-1164';
+const PHONE_LINK = 'tel:+18198061164';
+const EMAIL = 'p-o.caouette@agc.ia.ca';
+
+const asset = (path) => `${process.env.PUBLIC_URL || ''}${path}`;
+
+const SCENES = [
   {
     id: 'performance',
-    lap: '01',
-    title: 'Performance',
-    metaphorLabel: 'Le compartiment moteur',
-    trackLine:
-      'Comme un moteur préparé pour la piste : puissance utile, réglages précis, rien de superflu.',
-    icon: Gauge,
+    chapterLabel: 'CHAPITRE 01 — LE MOTEUR',
+    title: 'La performance sous le capot',
+    description:
+      'Le capot s’ouvre : voici ce qui propulse votre stratégie. Chaque composant est choisi, réglé et mesuré.',
+    align: 'left',
+    videoSrc: asset('/jemcee/scene-performance.mp4'),
+    posterSrc: asset('/jemcee/engine-bay.jpg'),
     bullets: [
       {
-        title: 'Rendements des portefeuilles',
-        text: 'Des compositions modèles et des repères concrets pour faire travailler votre capital avec intention.',
+        num: '01',
+        title: 'Rendements',
+        text: 'Des portefeuilles diversifiés et calibrés selon votre horizon, pour convertir la puissance en distance parcourue.',
       },
       {
+        num: '02',
         title: 'Optimisation fiscale',
-        text: 'REER, CELI et leviers fiscaux utilisés au bon moment — pour garder plus de ce que vous gagnez.',
+        text: 'REER, CELI, CELIAPP, REEE et société de gestion : chaque dollar placé au bon endroit, au bon moment.',
       },
       {
-        title: 'Avantage d’un conseiller',
-        text: 'Un regard externe, discipliné, qui ajuste la stratégie quand la piste change.',
+        num: '03',
+        title: 'Avantage du conseiller',
+        text: 'Discipline, rééquilibrage et décisions prises à froid — l’écart qui se creuse sur la durée d’une course.',
       },
     ],
   },
   {
     id: 'securite',
-    lap: '02',
-    title: 'Sécurité',
-    metaphorLabel: 'La cage et le casque',
-    trackLine:
-      'Harnais multi-points, cage et casque : on pousse fort seulement quand la protection est en place.',
-    icon: Shield,
+    chapterLabel: 'CHAPITRE 02 — L’HABITACLE',
+    title: 'La sécurité avant la vitesse',
+    description:
+      'Baquet, harnais six points, arceau et casque. On n’accélère jamais sans que la structure tienne le choc.',
+    align: 'right',
+    videoSrc: asset('/jemcee/scene-securite.mp4'),
+    posterSrc: asset('/jemcee/safety-cage.jpg'),
     bullets: [
       {
+        num: '04',
         title: 'Protection du capital',
-        text: 'Assurance vie, invalidité et filets d’urgence pour que un imprévu ne fasse pas déraper le plan.',
+        text: 'Assurance vie, invalidité et maladies graves : le harnais qui garde votre famille en place à l’impact.',
       },
       {
+        num: '05',
         title: 'Gestion du risque',
-        text: 'Profil, horizons et marges de sécurité : avancer sans exposer inutilement ce qui compte.',
+        text: 'Répartition d’actifs, fonds d’urgence et scénarios de marché testés avant le départ, pas pendant la spéciale.',
+      },
+      {
+        num: '06',
+        title: 'Structure éprouvée',
+        text: 'Testament, mandat de protection et liquidités : l’arceau qui protège tout ce que vous avez bâti.',
       },
     ],
   },
   {
     id: 'accompagnement',
-    lap: '03',
-    title: 'Accompagnement',
-    metaphorLabel: 'Le co-pilote',
-    trackLine:
-      'Sur la piste, le co-pilote lit la route. En finances, on avance mieux à deux — avec des notes claires.',
-    icon: Headphones,
+    chapterLabel: 'CHAPITRE 03 — LE COPILOTE',
+    title: 'Personne ne gagne seul',
+    description:
+      'La caméra se tourne vers le siège de droite. C’est là que je m’assois : notes de route en main, virage après virage.',
+    align: 'left',
+    videoSrc: asset('/jemcee/scene-copilote.mp4'),
+    posterSrc: asset('/jemcee/copilot.jpg'),
     bullets: [
       {
+        num: '07',
         title: 'Éducation financière',
-        text: 'Comprendre vos choix, sans jargon : vous gardez le volant, avec une carte lisible.',
+        text: 'Vous comprenez chaque décision avant de la prendre. Aucun jargon, seulement des notes de route claires.',
       },
       {
-        title: 'Ajustements fiscaux',
-        text: 'Revoir cotisations, retraits et structures selon votre année et vos objectifs.',
+        num: '08',
+        title: 'Ajustement fiscal',
+        text: 'Révision annuelle des stratégies selon vos revenus, votre situation familiale et les changements législatifs.',
       },
       {
+        num: '09',
         title: 'Planification de retraite',
-        text: 'Tracer l’horizon, estimer les besoins et aligner épargne et protections sur la durée.',
+        text: 'Décaissement optimisé, RRQ, PSV et rentes : un plan chronométré pour franchir l’arrivée sans panne sèche.',
       },
     ],
   },
 ];
 
-const diagnosticSteps = [
-  {
-    step: '1',
-    title: 'On clarifie votre point de départ',
-    description: 'Revenus, objectifs, protections actuelles et ce qui vous préoccupe vraiment.',
-  },
-  {
-    step: '2',
-    title: 'On repère les priorités utiles',
-    description: 'Ce qui mérite d’être renforcé maintenant… et ce qui peut attendre.',
-  },
-  {
-    step: '3',
-    title: 'Vous repartez avec une suite claire',
-    description: 'Des prochaines étapes concrètes, sans pression et sans engagement.',
-  },
-];
-
-function BookingCta({ itemId, className, children }) {
-  return (
-    <a
-      href={JEMCEE_BOOKING_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: itemId })}
-      className={className}
-      data-testid={itemId}
-    >
-      {children}
-    </a>
-  );
-}
-
-function Reveal({ children, className = '', delayClass = '' }) {
-  const { ref, inView } = useInView();
-  return (
-    <div
-      ref={ref}
-      className={`jemcee-reveal ${delayClass} ${inView ? 'is-visible' : ''} ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-function chapterForProgress(progress) {
-  const chapters = JEMCEE_SEQUENCE.chapters || [];
-  const p = Math.min(Math.max(progress, 0), 1);
-  return (
-    chapters.find((c) => p >= c.start && p < c.end)?.id ||
-    chapters[chapters.length - 1]?.id ||
-    'performance'
-  );
+function trackCta(itemId) {
+  trackEvent('select_content', { content_type: 'cta', item_id: itemId });
 }
 
 export const JemceeLanding = () => {
-  const [activeChapter, setActiveChapter] = useState('performance');
-  const [showIntro, setShowIntro] = useState(true);
-
-  const activePillar = useMemo(
-    () => pillars.find((p) => p.id === activeChapter) || pillars[0],
-    [activeChapter]
-  );
-  const ActiveIcon = activePillar.icon;
-
-  const videoSrc = `${process.env.PUBLIC_URL || ''}${JEMCEE_SEQUENCE.videoSrc}`;
-  const posterSrc = `${process.env.PUBLIC_URL || ''}${JEMCEE_SEQUENCE.posterSrc}`;
-
-  const handleProgress = useCallback((progress) => {
-    setShowIntro(progress < 0.06);
-    setActiveChapter(chapterForProgress(progress));
-  }, []);
-
   useSeoMeta({
-    title: 'GP3R · Performance, sécurité, accompagnement | Pierre-Olivier Caouette',
+    title: 'Pilotez votre patrimoine | Pierre-Olivier Caouette',
     description:
-      'Landing GP3R cinématique : vidéo pilotée par le scroll — performance, sécurité du capital et accompagnement financier.',
+      'Performance, protection et accompagnement : une approche rallye de la sécurité financière. Rendements, optimisation fiscale, gestion du risque et planification de retraite.',
     canonicalPath: '/jemcee',
   });
 
+  const heroVideo = asset('/jemcee/scene-performance.mp4');
+  const heroPoster = asset('/jemcee/engine-bay.jpg');
+
   return (
-    <div className="bg-white jemcee-landing" data-testid="jemcee-landing-page">
+    <div className="jemcee-landing bg-dark text-white" data-testid="jemcee-landing-page">
       <style>{`
-        .jemcee-landing .jemcee-reveal {
-          opacity: 0;
-          transform: translateY(24px);
-          transition: opacity 0.65s ease-out, transform 0.65s ease-out;
+        .jemcee-landing {
+          --jemcee-ember: linear-gradient(135deg, #064dd9 0%, #053a9e 55%, #73c4ef 100%);
+          --jemcee-ember-shadow: 0 12px 40px rgba(6, 77, 217, 0.35);
+          --jemcee-cinematic: linear-gradient(135deg, rgba(1,35,63,0.88) 0%, rgba(1,35,63,0.45) 50%, rgba(6,77,217,0.25) 100%);
+          --jemcee-scrim: linear-gradient(90deg, rgba(1,35,63,0.75) 0%, transparent 55%);
         }
-        .jemcee-landing .jemcee-reveal.is-visible {
-          opacity: 1;
-          transform: translateY(0);
+        .jemcee-landing .jemcee-cta-primary {
+          background-image: var(--jemcee-ember);
+          box-shadow: var(--jemcee-ember-shadow);
         }
-        .jemcee-landing .jemcee-delay-1 { transition-delay: 0.08s; }
-        .jemcee-landing .jemcee-delay-2 { transition-delay: 0.16s; }
-        .jemcee-landing .jemcee-delay-3 { transition-delay: 0.24s; }
-        .jemcee-landing .jemcee-overlay-card {
-          transition: opacity 0.45s ease, transform 0.45s ease;
+        .jemcee-landing .jemcee-hero-kicker,
+        .jemcee-landing .jemcee-hero-title,
+        .jemcee-landing .jemcee-hero-lead,
+        .jemcee-landing .jemcee-hero-actions {
+          animation: jemcee-rise 0.9s cubic-bezier(0.16, 1, 0.32, 1) both;
         }
-        .jemcee-landing .jemcee-chapter-dot {
-          transition: background-color 0.3s ease, transform 0.3s ease, width 0.3s ease;
+        .jemcee-landing .jemcee-hero-title { animation-delay: 0.12s; }
+        .jemcee-landing .jemcee-hero-lead { animation-delay: 0.24s; }
+        .jemcee-landing .jemcee-hero-actions { animation-delay: 0.36s; }
+        @keyframes jemcee-rise {
+          from { opacity: 0; transform: translateY(28px); filter: blur(8px); }
+          to { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
         @media (prefers-reduced-motion: reduce) {
-          .jemcee-landing .jemcee-reveal {
+          .jemcee-landing .jemcee-hero-kicker,
+          .jemcee-landing .jemcee-hero-title,
+          .jemcee-landing .jemcee-hero-lead,
+          .jemcee-landing .jemcee-hero-actions {
+            animation: none !important;
             opacity: 1 !important;
             transform: none !important;
-            transition: none !important;
+            filter: none !important;
           }
         }
       `}</style>
 
-      {/* Vidéo cinématique — scrub scroll (pointer-events libres) */}
-      <ScrollVideoScrub
-        src={videoSrc}
-        poster={posterSrc}
-        scrollHeightVh={320}
-        onProgress={handleProgress}
-      >
-        {/* Intro (début de séquence) */}
+      {/* Hero plein écran */}
+      <section className="relative h-[100svh] overflow-hidden">
+        <div className="absolute inset-0">
+          <video
+            className="h-full w-full object-cover"
+            src={heroVideo}
+            poster={heroPoster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden
+          />
+        </div>
         <div
-          className={`absolute inset-0 flex flex-col justify-end md:justify-center px-5 md:px-12 pb-24 md:pb-0 transition-opacity duration-500 ${
-            showIntro ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <div className="container-max pointer-events-auto max-w-3xl space-y-5">
-            <p className="font-mono text-secondary text-xs md:text-sm tracking-[0.24em] uppercase">
-              GP3R · vidéo · scroll
-            </p>
-            <h1
-              id="jemcee-hero-title"
-              className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.05]"
-            >
-              Pierre-Olivier Caouette
-            </h1>
-            <p className="text-white/88 text-lg md:text-xl max-w-2xl leading-relaxed">
-              Sur la piste comme en finances — faites défiler pour explorer performance, sécurité et
-              accompagnement.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 pt-1">
-              <BookingCta
-                itemId="jemcee_hero_diagnostic"
-                className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-dark shadow-xl shadow-black/25 transition-all duration-300 hover:bg-secondary hover:text-white"
-              >
-                Mini-diagnostic (15–20 min)
-                <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
-              </BookingCta>
-            </div>
-            <div className="flex flex-wrap items-center gap-5 pt-1 text-white/70 text-sm">
-              <a
-                href={AMF_REGISTRE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  trackEvent('select_content', { content_type: 'external_link', item_id: 'jemcee_amf' })
-                }
-                className="inline-flex items-center gap-2 hover:text-white transition-colors"
-              >
-                <CheckCircle2 className="w-4 h-4 text-secondary" />
-                Inscrit AMF
-              </a>
-              <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-secondary" />
-                Fier de soutenir Jacob Moreau
-              </span>
-            </div>
-            <p className="font-mono text-[11px] tracking-widest uppercase text-white/50 pt-4 md:pt-8">
-              ↓ Défilez pour lancer la séquence
-            </p>
-          </div>
-        </div>
-
-        {/* Overlay chapitre actif */}
+          className="pointer-events-none absolute inset-0"
+          style={{ backgroundImage: 'var(--jemcee-cinematic)' }}
+        />
         <div
-          className={`absolute inset-x-0 bottom-0 md:inset-y-0 md:left-auto md:right-0 md:w-[min(28rem,42vw)] flex items-end md:items-center p-5 md:p-10 transition-opacity duration-500 ${
-            showIntro ? 'opacity-0' : 'opacity-100'
-          }`}
-        >
-          <div className="jemcee-overlay-card pointer-events-auto w-full rounded-2xl border border-white/15 bg-[#01233f]/78 backdrop-blur-md p-5 md:p-7 shadow-2xl">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="font-mono text-[11px] tracking-widest text-secondary">
-                TOUR {activePillar.lap}
-              </span>
-              <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-secondary">
-                <ActiveIcon className="h-4 w-4" aria-hidden />
-              </div>
-            </div>
-            <h2 className="font-heading text-2xl md:text-3xl font-bold text-white">
-              {activePillar.title}
-            </h2>
-            <p className="text-secondary/90 text-sm mt-1">{activePillar.metaphorLabel}</p>
-            <p className="text-white/75 text-sm md:text-base leading-relaxed mt-3">
-              {activePillar.trackLine}
-            </p>
-            <ul className="mt-4 space-y-2.5">
-              {activePillar.bullets.map((b) => (
-                <li key={b.title} className="border-l border-secondary/40 pl-3">
-                  <p className="text-white font-semibold text-sm">{b.title}</p>
-                  <p className="text-white/65 text-xs md:text-sm leading-snug mt-0.5">{b.text}</p>
-                </li>
-              ))}
-            </ul>
+          className="pointer-events-none absolute inset-0"
+          style={{ backgroundImage: 'var(--jemcee-scrim)' }}
+        />
 
-            <div className="mt-5 flex items-center gap-2" aria-hidden>
-              {pillars.map((p) => (
-                <span
-                  key={p.id}
-                  className={`jemcee-chapter-dot h-1.5 rounded-full ${
-                    p.id === activeChapter ? 'w-8 bg-secondary' : 'w-1.5 bg-white/30'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </ScrollVideoScrub>
-
-      {/* Ancre 3 piliers (après la séquence) */}
-      <section id="piliers" className="border-b border-prestige-beige bg-light/80 scroll-mt-24">
-        <div className="container-max px-4 md:px-8 py-12 md:py-16">
-          <Reveal className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark">
-              Trois sujets. Une même logique.
-            </h2>
-            <p className="text-prestige-taupe text-lg leading-relaxed">
-              La séquence ci-dessus relie la piste à vos finances — voici le détail de chaque pilier.
-            </p>
-          </Reveal>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {pillars.map((pillar, index) => {
-              const Icon = pillar.icon;
-              return (
-                <Reveal key={pillar.id} delayClass={`jemcee-delay-${index + 1}`}>
-                  <div className="h-full rounded-2xl border border-prestige-beige bg-white px-5 py-6 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-[11px] tracking-widest text-primary/70">
-                        {pillar.lap}
-                      </span>
-                      <div className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-xl bg-dark text-secondary">
-                        <Icon className="h-5 w-5" aria-hidden />
-                      </div>
-                    </div>
-                    <h3 className="font-heading text-2xl font-bold text-dark">{pillar.title}</h3>
-                    <p className="text-sm text-primary font-medium">{pillar.metaphorLabel}</p>
-                    <p className="text-sm text-prestige-taupe leading-relaxed">{pillar.trackLine}</p>
-                    <ul className="pt-2 space-y-2">
-                      {pillar.bullets.map((b) => (
-                        <li key={b.title} className="text-sm text-prestige-taupe">
-                          <span className="font-semibold text-dark">{b.title}</span>
-                          {' — '}
-                          {b.text}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Bio courte + Jacob */}
-      <section className="section-padding bg-white relative overflow-hidden">
-        <div className="container-max relative max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            <Reveal className="space-y-5">
-              <div className="inline-flex items-center gap-2 text-primary font-mono text-xs tracking-widest uppercase">
-                <Users className="w-4 h-4" aria-hidden />
-                Le conseiller
-              </div>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark">Qui je suis</h2>
-              <p className="text-prestige-taupe leading-relaxed">
-                Conseiller en sécurité financière à Victoriaville (AMF). J’aide particuliers et
-                familles à protéger et faire croître leur patrimoine — avec des conseils adaptés à
-                leur réalité, pas un plan générique.
-              </p>
-              <Link
-                to="/a-propos"
-                onClick={() =>
-                  trackEvent('select_content', { content_type: 'cta', item_id: 'jemcee_to_about' })
-                }
-                className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
-              >
-                Mon parcours
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Reveal>
-
-            <Reveal
-              delayClass="jemcee-delay-1"
-              className="relative space-y-5 rounded-2xl bg-dark text-white p-7 md:p-9 overflow-hidden"
+        <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pb-16 pt-24">
+          <p className="jemcee-hero-kicker font-heading text-sm tracking-[0.45em] text-secondary">
+            CONSEILLER EN SÉCURITÉ FINANCIÈRE
+          </p>
+          <h1 className="jemcee-hero-title mt-4 max-w-4xl font-heading text-5xl leading-[0.92] text-white md:text-7xl lg:text-8xl">
+            Votre patrimoine mérite{' '}
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: 'var(--jemcee-ember)' }}
             >
-              <div
-                className="absolute -right-8 -top-8 w-40 h-40 rounded-full border-[10px] border-white/10 pointer-events-none"
-                aria-hidden
-              />
-              <div className="relative inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-secondary border border-white/15">
-                <Flag className="h-6 w-6" aria-hidden />
-              </div>
-              <h3 className="relative font-heading text-2xl md:text-3xl font-bold">
-                Pourquoi je soutiens Jacob Moreau
-              </h3>
-              <p className="relative text-white/80 leading-relaxed">
-                Préparation, ambition locale et performance mesurable — le même esprit que j’apporte
-                à mes clients : viser juste, ajuster, et ne rien laisser au hasard quand ça compte.
-              </p>
-            </Reveal>
+              une préparation de rallye
+            </span>
+          </h1>
+          <p className="jemcee-hero-lead mt-6 max-w-xl text-lg text-white/70">
+            Un moteur performant, une cage de sécurité et un copilote qui lit la route. Trois piliers
+            pour franchir chaque étape de votre parcours financier.
+          </p>
+          <div className="jemcee-hero-actions mt-9 flex flex-wrap items-center gap-4">
+            <a
+              href="#contact"
+              onClick={() => trackCta('jemcee_hero_depart')}
+              className="jemcee-cta-primary pointer-events-auto inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest text-white"
+            >
+              PRENDRE LE DÉPART
+            </a>
+            <a
+              href="#performance"
+              onClick={() => trackCta('jemcee_hero_capot')}
+              className="pointer-events-auto inline-flex items-center border border-white/25 px-8 py-4 font-heading text-lg tracking-widest text-white transition-colors hover:border-secondary hover:text-secondary"
+            >
+              VOIR SOUS LE CAPOT
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Diagnostic */}
-      <section className="section-padding bg-light/60 relative overflow-hidden">
-        <div className="container-max relative max-w-4xl mx-auto">
-          <Reveal className="text-center space-y-4 mb-14">
-            <div className="inline-flex items-center gap-2 text-primary font-mono text-xs tracking-widest uppercase">
-              <Timer className="w-4 h-4" aria-hidden />
-              15 à 20 minutes
-            </div>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark">
-              Le mini-diagnostic, concrètement
-            </h2>
-            <p className="text-prestige-taupe text-lg leading-relaxed max-w-2xl mx-auto">
-              Un premier échange court pour y voir plus clair — sans pression, sans engagement.
-            </p>
-          </Reveal>
+      {SCENES.map((scene) => (
+        <CinematicScene key={scene.id} {...scene} />
+      ))}
 
-          <div className="space-y-6 max-w-2xl mx-auto">
-            {diagnosticSteps.map(({ step, title, description }, index) => (
-              <Reveal key={step} delayClass={`jemcee-delay-${index + 1}`}>
-                <div className="flex gap-5 items-start">
-                  <div className="shrink-0 h-11 w-11 rounded-full bg-dark text-secondary font-mono font-bold flex items-center justify-center">
-                    {step}
-                  </div>
-                  <div className="pt-1">
-                    <h3 className="font-heading text-lg font-bold text-dark mb-1">{title}</h3>
-                    <p className="text-prestige-taupe leading-relaxed">{description}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
+      {/* Contact */}
+      <section id="contact" className="relative scroll-mt-0 border-t border-white/10 px-6 py-28">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="font-heading text-sm tracking-[0.4em] text-secondary">LIGNE DE DÉPART</p>
+          <h2 className="mt-4 font-heading text-5xl leading-[0.95] text-white md:text-7xl">
+            Prêt pour la première spéciale ?
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-white/65">
+            Une rencontre découverte de 30 minutes, sans frais et sans engagement. On regarde votre
+            véhicule financier ensemble et on identifie les réglages prioritaires.
+          </p>
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <a
+              href={JEMCEE_BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackCta('jemcee_contact_booking')}
+              className="jemcee-cta-primary inline-flex items-center px-9 py-4 font-heading text-lg tracking-widest text-white"
+              data-testid="jemcee_contact_booking"
+            >
+              RÉSERVER MA RENCONTRE
+            </a>
+            <a
+              href={PHONE_LINK}
+              onClick={() => trackCta('jemcee_contact_phone')}
+              className="inline-flex items-center border border-white/25 px-9 py-4 font-heading text-lg tracking-widest text-white transition-colors hover:border-secondary hover:text-secondary"
+            >
+              PARLER MAINTENANT
+            </a>
           </div>
+
+          <div className="mt-16 grid gap-8 border-t border-white/10 pt-10 text-left sm:grid-cols-3">
+            <div>
+              <p className="font-heading text-4xl text-secondary">0-100</p>
+              <p className="mt-2 text-sm text-white/60">Un plan structuré dès la première rencontre</p>
+            </div>
+            <div>
+              <p className="font-heading text-4xl text-secondary">360°</p>
+              <p className="mt-2 text-sm text-white/60">
+                Placements, assurance, fiscalité et succession
+              </p>
+            </div>
+            <div>
+              <p className="font-heading text-4xl text-secondary">1 copilote</p>
+              <p className="mt-2 text-sm text-white/60">Un suivi humain, année après année</p>
+            </div>
+          </div>
+
+          <p className="mt-12 text-sm text-white/45">
+            <a href={`mailto:${EMAIL}`} className="hover:text-secondary transition-colors">
+              {EMAIL}
+            </a>
+            {' · '}
+            <a href={PHONE_LINK} className="hover:text-secondary transition-colors">
+              {PHONE}
+            </a>
+          </p>
         </div>
       </section>
 
-      {/* CTA final */}
-      <section className="section-padding pt-0">
-        <div className="container-max">
-          <Reveal>
-            <div className="relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#01233f_0%,#053a9e_55%,#064dd9_100%)] px-6 py-14 md:px-12 md:py-16 text-center space-y-6">
-              <h2 className="font-heading text-2xl md:text-4xl font-bold text-white">
-                Prêt à clarifier votre situation ?
-              </h2>
-              <p className="text-white/85 text-lg max-w-2xl mx-auto leading-relaxed">
-                Réservez un mini-diagnostic de 15 à 20 minutes. On regarde ensemble vos priorités et
-                les prochaines étapes utiles pour vous.
-              </p>
-              <BookingCta
-                itemId="jemcee_bottom_diagnostic"
-                className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-primary shadow-lg transition-all duration-300 hover:bg-secondary hover:text-white"
-              >
-                Réserver mon mini-diagnostic
-                <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
-              </BookingCta>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      <footer className="border-t border-white/10 px-6 py-8 text-center text-xs text-white/40">
+        © {new Date().getFullYear()} — Pierre-Olivier Caouette, conseiller en sécurité financière.
+        Les rendements passés ne garantissent pas les rendements futurs.
+      </footer>
     </div>
   );
 };
