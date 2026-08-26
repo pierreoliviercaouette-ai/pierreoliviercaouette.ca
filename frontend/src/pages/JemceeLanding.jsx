@@ -122,7 +122,7 @@ export const JemceeLanding = () => {
 
   return (
     <div
-      className="jemcee-landing relative isolate bg-dark text-white overflow-visible"
+      className="jemcee-landing relative bg-dark text-white overflow-visible"
       data-testid="jemcee-landing-page"
     >
       <style>{`

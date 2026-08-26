@@ -51,19 +51,36 @@ function AppShell() {
   const isJemcee = location.pathname.startsWith('/jemcee');
   const hidePortfolioBanner = isJemcee;
 
+  // Landing jemcee : hors du flex shell pour ne pas casser le scroll/pin
+  if (isJemcee) {
+    return (
+      <>
+        <ScrollToTop />
+        <AnalyticsTracker />
+        <ConsentAwareAnalytics />
+        <Navbar />
+        <JemceeLanding />
+        <Footer />
+        <BackToTop />
+        <CookieConsentBanner />
+        <Toaster position="top-right" richColors />
+      </>
+    );
+  }
+
   return (
     <>
       <ScrollToTop />
       <AnalyticsTracker />
       <ConsentAwareAnalytics />
-      <div className={`min-h-screen flex flex-col ${isJemcee ? 'overflow-visible' : ''}`}>
+      <div className="min-h-screen flex flex-col">
         <Navbar />
         {!hidePortfolioBanner && (
           <Suspense fallback={null}>
             <ModelPortfoliosBanner />
           </Suspense>
         )}
-        <main className={`flex-1 ${isJemcee ? 'overflow-visible' : ''}`}>
+        <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/a-propos" element={<About />} />
@@ -110,7 +127,6 @@ function AppShell() {
             <Route path="/assurance-invalidite-quebec" element={<AssuranceInvaliditeQuebec />} />
             <Route path="/planification-financiere-quebec" element={<PlanificationFinanciereQuebec />} />
             <Route path="/recommander-conseiller-financier" element={<RecommanderConseillerFinancier />} />
-            <Route path="/jemcee" element={<JemceeLanding />} />
             <Route path="/confidentialite" element={<Privacy />} />
             <Route path="/conditions" element={<Terms />} />
           </Routes>
