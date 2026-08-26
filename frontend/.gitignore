@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Frames intermédiaires jemcee (régénérables via scripts/generate-jemcee-sequence.js)
+/public/jemcee/sequence/frame-*.jpg

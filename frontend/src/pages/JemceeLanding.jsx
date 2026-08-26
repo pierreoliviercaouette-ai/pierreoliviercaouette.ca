@@ -20,11 +20,11 @@ const CHAPTERS = [
     description:
       'Le capot s’ouvre : voici ce qui propulse votre stratégie. Chaque composant est choisi, réglé et mesuré.',
     align: 'left',
-    anchor: 0.14,
-    start: 0.12,
-    peakIn: 0.18,
-    peakOut: 0.34,
-    end: 0.4,
+    anchor: 0.24,
+    start: 0.2,
+    peakIn: 0.26,
+    peakOut: 0.38,
+    end: 0.44,
     bullets: [
       {
         num: '01',
@@ -50,9 +50,9 @@ const CHAPTERS = [
     description:
       'Baquet, harnais six points, arceau et casque. On n’accélère jamais sans que la structure tienne le choc.',
     align: 'right',
-    anchor: 0.42,
-    start: 0.38,
-    peakIn: 0.44,
+    anchor: 0.48,
+    start: 0.42,
+    peakIn: 0.48,
     peakOut: 0.6,
     end: 0.66,
     bullets: [
@@ -80,11 +80,11 @@ const CHAPTERS = [
     description:
       'La caméra se tourne vers le siège de droite. C’est là que je m’assois : notes de route en main, virage après virage.',
     align: 'left',
-    anchor: 0.68,
+    anchor: 0.7,
     start: 0.64,
     peakIn: 0.7,
-    peakOut: 0.88,
-    end: 0.96,
+    peakOut: 0.9,
+    end: 0.98,
     bullets: [
       {
         num: '07',
@@ -121,7 +121,10 @@ export const JemceeLanding = () => {
   const posterSrc = asset(JEMCEE_SEQUENCE.posterSrc);
 
   return (
-    <div className="jemcee-landing bg-dark text-white" data-testid="jemcee-landing-page">
+    <div
+      className="jemcee-landing relative isolate bg-dark text-white overflow-visible"
+      data-testid="jemcee-landing-page"
+    >
       <style>{`
         .jemcee-landing {
           --jemcee-ember: linear-gradient(135deg, #064dd9 0%, #053a9e 55%, #73c4ef 100%);
@@ -136,7 +139,7 @@ export const JemceeLanding = () => {
       <AppleCinematicScroll
         videoSrc={videoSrc}
         posterSrc={posterSrc}
-        scrollHeightVh={560}
+        scrollHeightVh={720}
         chapters={CHAPTERS}
         intro={() => (
           <>

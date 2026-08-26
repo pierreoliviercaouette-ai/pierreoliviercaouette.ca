@@ -48,21 +48,22 @@ const ModelPortfoliosIndex = lazy(() =>
 
 function AppShell() {
   const location = useLocation();
-  const hidePortfolioBanner = location.pathname.startsWith('/jemcee');
+  const isJemcee = location.pathname.startsWith('/jemcee');
+  const hidePortfolioBanner = isJemcee;
 
   return (
     <>
       <ScrollToTop />
       <AnalyticsTracker />
       <ConsentAwareAnalytics />
-      <div className="min-h-screen flex flex-col">
+      <div className={`min-h-screen flex flex-col ${isJemcee ? 'overflow-visible' : ''}`}>
         <Navbar />
         {!hidePortfolioBanner && (
           <Suspense fallback={null}>
             <ModelPortfoliosBanner />
           </Suspense>
         )}
-        <main className="flex-1">
+        <main className={`flex-1 ${isJemcee ? 'overflow-visible' : ''}`}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/a-propos" element={<About />} />

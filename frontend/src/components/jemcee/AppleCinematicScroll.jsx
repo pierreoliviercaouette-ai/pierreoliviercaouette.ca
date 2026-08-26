@@ -24,8 +24,9 @@ function beatY(opacity) {
 }
 
 /**
- * Défilement cinématique type product page Apple :
- * une piste sticky longue, scrub vidéo amorti (lerp), beats de texte synchronisés.
+ * Défilement cinématique type product page Apple.
+ * Pin fixed (pas sticky) — fiable dans un layout flex + navbar sticky.
+ * Scrub vidéo amorti synchronisé au scroll de la piste.
  */
 export function AppleCinematicScroll({
   videoSrc,
@@ -36,6 +37,7 @@ export function AppleCinematicScroll({
   children,
 }) {
   const sectionRef = useRef(null);
+  const pinRef = useRef(null);
   const videoRef = useRef(null);
   const targetRef = useRef(0);
   const smoothRef = useRef(0);
@@ -43,6 +45,7 @@ export function AppleCinematicScroll({
   const pendingTimeRef = useRef(null);
   const rafRef = useRef(0);
   const lastUiRef = useRef(-1);
+  const activeRef = useRef(false);
 
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
@@ -72,7 +75,7 @@ export function AppleCinematicScroll({
       if (
         pending != null &&
         Number.isFinite(video.duration) &&
-        Math.abs(pending - video.currentTime) > 0.03
+        Math.abs(pending - video.currentTime) > 0.04
       ) {
         seekingRef.current = true;
         try {
@@ -99,20 +102,13 @@ export function AppleCinematicScroll({
       return undefined;
     }
 
-    const readTarget = () => {
-      const el = sectionRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const total = Math.max(el.offsetHeight - window.innerHeight, 1);
-      targetRef.current = clamp01(-rect.top / total);
-    };
-
     const applyVideo = (p) => {
       const video = videoRef.current;
       if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
-      const t = p * Math.max(video.duration - 0.05, 0);
+      const t = p * Math.max(video.duration - 0.04, 0);
       pendingTimeRef.current = t;
       if (seekingRef.current) return;
+      if (Math.abs(video.currentTime - t) < 0.03) return;
       seekingRef.current = true;
       try {
         video.currentTime = t;
@@ -121,16 +117,69 @@ export function AppleCinematicScroll({
       }
     };
 
+    /**
+     * Pin fixed tant que la piste est active.
+     * Avant / après : absolute pour ne pas coller hors section.
+     */
+    const syncPinAndProgress = () => {
+      const section = sectionRef.current;
+      const pin = pinRef.current;
+      if (!section || !pin) return;
+
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const total = Math.max(section.offsetHeight - vh, 1);
+
+      let p = 0;
+      let mode = 'before';
+
+      if (rect.top <= 0 && rect.bottom > vh) {
+        mode = 'active';
+        p = clamp01(-rect.top / total);
+      } else if (rect.bottom <= vh) {
+        mode = 'after';
+        p = 1;
+      } else {
+        mode = 'before';
+        p = 0;
+      }
+
+      targetRef.current = p;
+      activeRef.current = mode === 'active';
+
+      if (mode === 'active') {
+        pin.style.position = 'fixed';
+        pin.style.top = '0';
+        pin.style.left = '0';
+        pin.style.right = '0';
+        pin.style.width = '100%';
+        pin.style.transform = '';
+      } else if (mode === 'after') {
+        pin.style.position = 'absolute';
+        pin.style.top = `${section.offsetHeight - vh}px`;
+        pin.style.left = '0';
+        pin.style.right = '0';
+        pin.style.width = '100%';
+      } else {
+        pin.style.position = 'absolute';
+        pin.style.top = '0';
+        pin.style.left = '0';
+        pin.style.right = '0';
+        pin.style.width = '100%';
+      }
+    };
+
     const tick = () => {
-      readTarget();
+      syncPinAndProgress();
       const target = targetRef.current;
       const prev = smoothRef.current;
-      // Amortissement type Apple — suit le scroll sans saccades
-      const next = prev + (target - prev) * 0.14;
-      smoothRef.current = Math.abs(target - next) < 0.0004 ? target : next;
+      // Plus réactif pendant le pin actif
+      const lerp = activeRef.current ? 0.22 : 0.35;
+      const next = prev + (target - prev) * lerp;
+      smoothRef.current = Math.abs(target - next) < 0.0005 ? target : next;
       applyVideo(smoothRef.current);
 
-      if (Math.abs(smoothRef.current - lastUiRef.current) > 0.002) {
+      if (Math.abs(smoothRef.current - lastUiRef.current) > 0.0025) {
         lastUiRef.current = smoothRef.current;
         setProgress(smoothRef.current);
       }
@@ -138,15 +187,19 @@ export function AppleCinematicScroll({
       rafRef.current = requestAnimationFrame(tick);
     };
 
-    readTarget();
+    syncPinAndProgress();
     rafRef.current = requestAnimationFrame(tick);
-    window.addEventListener('scroll', readTarget, { passive: true });
-    window.addEventListener('resize', readTarget);
 
+    const onScrollOrResize = () => {
+      syncPinAndProgress();
+    };
+
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
     return () => {
       cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('scroll', readTarget);
-      window.removeEventListener('resize', readTarget);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
     };
   }, [reducedMotion, ready]);
 
@@ -162,20 +215,21 @@ export function AppleCinematicScroll({
   }, [ready, reducedMotion]);
 
   const p = reducedMotion ? 0.22 : progress;
-  const introOpacity = reducedMotion
-    ? 1
-    : beatOpacity(p, 0, 0.02, 0.08, 0.14);
-  const mediaScale = reducedMotion ? 1 : 1.08 - p * 0.08;
-  const mediaBrightness = reducedMotion ? 0.55 : 0.35 + p * 0.45;
+  const introOpacity = reducedMotion ? 1 : beatOpacity(p, 0, 0.02, 0.1, 0.18);
+  const mediaScale = reducedMotion ? 1 : 1.06 - p * 0.06;
+  const mediaBrightness = reducedMotion ? 0.55 : 0.4 + p * 0.4;
 
   return (
     <section
       ref={sectionRef}
-      className="relative"
-      style={{ height: reducedMotion ? '100vh' : `${scrollHeightVh}vh` }}
+      className="relative w-full"
+      style={{
+        height: reducedMotion ? '100svh' : `${scrollHeightVh}vh`,
+        // Évite que des ancêtres flex/overflow cassent le calcul de hauteur
+        contain: 'none',
+      }}
       data-testid="apple-cinematic-scroll"
     >
-      {/* Ancres pour #performance / #securite / #accompagnement */}
       {!reducedMotion &&
         chapters.map((ch) => (
           <div
@@ -187,9 +241,13 @@ export function AppleCinematicScroll({
           />
         ))}
 
-      <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-dark">
+      <div
+        ref={pinRef}
+        className="pointer-events-none z-20 h-[100svh] w-full overflow-hidden bg-dark"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0 }}
+      >
         <div
-          className="absolute inset-0 will-change-transform"
+          className="pointer-events-none absolute inset-0 will-change-transform"
           style={{
             transform: `scale(${mediaScale})`,
             filter: `brightness(${mediaBrightness})`,
@@ -197,7 +255,7 @@ export function AppleCinematicScroll({
         >
           <video
             ref={videoRef}
-            className="h-full w-full object-cover"
+            className="pointer-events-none h-full w-full object-cover"
             src={videoSrc}
             poster={posterSrc}
             muted
@@ -223,7 +281,6 @@ export function AppleCinematicScroll({
           </div>
         )}
 
-        {/* Intro hero */}
         {intro && (
           <div
             className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-center px-6 pt-20"
@@ -237,7 +294,6 @@ export function AppleCinematicScroll({
           </div>
         )}
 
-        {/* Chapitres */}
         {chapters.map((ch) => {
           const opacity = reducedMotion
             ? ch.id === chapters[0]?.id
@@ -316,7 +372,6 @@ export function AppleCinematicScroll({
           );
         })}
 
-        {/* Barre de progression + hint */}
         <div className="pointer-events-none absolute bottom-0 left-0 z-30 h-[3px] w-full bg-white/10">
           <div
             className="h-full origin-left bg-secondary"

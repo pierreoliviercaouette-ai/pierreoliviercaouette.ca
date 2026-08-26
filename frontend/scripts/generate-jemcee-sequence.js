@@ -1,7 +1,7 @@
 /**
- * Génère une séquence 24 fps puis encode pillars-sequence.mp4.
+ * Séquence cinématique showroom Forza → moteur → habitacle → copilote.
  * Usage: node scripts/generate-jemcee-sequence.js
- * Requiert: sharp + ffmpeg-static (dev)
+ * Requiert: sharp + ffmpeg-static
  */
 const path = require('path');
 const fs = require('fs');
@@ -10,11 +10,30 @@ const sharp = require('sharp');
 
 const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'public', 'jemcee');
+const STORY = path.join(SRC, 'storyboard');
 const OUT = path.join(SRC, 'sequence');
 const WIDTH = 1280;
 const HEIGHT = 720;
 const FPS = 24;
-const FRAME_COUNT = FPS * 4;
+/** ~10 s — scrub Apple plus long et fluide */
+const FRAME_COUNT = FPS * 10;
+
+const KEYFRAMES = [
+  // Orbit showroom — Subaru WRX 2010
+  { file: 'kf-01-showroom-wide.png', zoom: [1.0, 1.08], panX: [0.45, 0.55], panY: [0.42, 0.4] },
+  { file: 'kf-02-orbit-side.png', zoom: [1.05, 1.12], panX: [0.5, 0.48], panY: [0.45, 0.42] },
+  { file: 'kf-03-approach-front.png', zoom: [1.08, 1.2], panX: [0.5, 0.52], panY: [0.48, 0.55] },
+  // Engine bay / performance
+  { file: 'kf-04-hood-open.png', zoom: [1.05, 1.18], panX: [0.5, 0.5], panY: [0.45, 0.55] },
+  { file: 'kf-05-engine-detail.png', zoom: [1.1, 1.28], panX: [0.48, 0.52], panY: [0.45, 0.5] },
+  // Habitacle / sécurité
+  { file: 'kf-06-enter-cabin.png', zoom: [1.05, 1.15], panX: [0.52, 0.55], panY: [0.45, 0.48] },
+  { file: 'kf-07-seat-harness.png', zoom: [1.08, 1.2], panX: [0.45, 0.48], panY: [0.4, 0.45] },
+  // Copilote / accompagnement
+  { file: 'kf-08-copilot.png', zoom: [1.05, 1.14], panX: [0.52, 0.55], panY: [0.4, 0.42] },
+  { file: 'kf-09-copilot-detail.png', zoom: [1.08, 1.18], panX: [0.5, 0.48], panY: [0.42, 0.45] },
+  { file: 'kf-10-crew.png', zoom: [1.05, 1.12], panX: [0.55, 0.58], panY: [0.42, 0.45] },
+];
 
 function lerp(a, b, t) {
   return a + (b - a) * t;
@@ -24,8 +43,13 @@ function easeInOut(t) {
   return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
 
-async function loadKey(name) {
-  return sharp(path.join(SRC, name))
+function smoothstep(t) {
+  const x = Math.min(1, Math.max(0, t));
+  return x * x * (3 - 2 * x);
+}
+
+async function loadKey(file) {
+  return sharp(path.join(STORY, file))
     .resize(WIDTH, HEIGHT, { fit: 'cover', position: 'centre' })
     .ensureAlpha()
     .raw()
@@ -34,17 +58,15 @@ async function loadKey(name) {
 
 function blendRaw(a, b, t) {
   const out = Buffer.alloc(a.length);
+  const u = smoothstep(t);
   for (let i = 0; i < a.length; i += 1) {
-    out[i] = Math.round(lerp(a[i], b[i], t));
+    out[i] = Math.round(lerp(a[i], b[i], u));
   }
   return out;
 }
 
 async function framedKey(rawMeta, zoom, panX, panY) {
   const { data, info } = rawMeta;
-  const img = sharp(data, {
-    raw: { width: info.width, height: info.height, channels: info.channels },
-  });
   const z = Math.max(1, zoom);
   const cropW = Math.round(info.width / z);
   const cropH = Math.round(info.height / z);
@@ -52,7 +74,9 @@ async function framedKey(rawMeta, zoom, panX, panY) {
   const maxTop = info.height - cropH;
   const left = Math.round(Math.min(maxLeft, Math.max(0, maxLeft * panX)));
   const top = Math.round(Math.min(maxTop, Math.max(0, maxTop * panY)));
-  return img
+  return sharp(data, {
+    raw: { width: info.width, height: info.height, channels: info.channels },
+  })
     .extract({ left, top, width: cropW, height: cropH })
     .resize(WIDTH, HEIGHT, { fit: 'fill' })
     .ensureAlpha()
@@ -61,13 +85,7 @@ async function framedKey(rawMeta, zoom, panX, panY) {
 }
 
 async function encodeMp4() {
-  let ffmpeg;
-  try {
-    ffmpeg = require('ffmpeg-static');
-  } catch {
-    console.warn('ffmpeg-static absent — MP4 non généré.');
-    return;
-  }
+  const ffmpeg = require('ffmpeg-static');
   const out = path.join(SRC, 'pillars-sequence.mp4');
   const r = spawnSync(
     ffmpeg,
@@ -82,7 +100,15 @@ async function encodeMp4() {
       '-pix_fmt',
       'yuv420p',
       '-crf',
-      '22',
+      '20',
+      '-g',
+      '1',
+      '-keyint_min',
+      '1',
+      '-sc_threshold',
+      '0',
+      '-bf',
+      '0',
       '-movflags',
       '+faststart',
       '-an',
@@ -90,76 +116,98 @@ async function encodeMp4() {
     ],
     { stdio: 'inherit' }
   );
-  if (r.status === 0) console.log('MP4 →', out);
-  else console.error('ffmpeg exit', r.status);
+  if (r.status === 0) {
+    const mb = (fs.statSync(out).size / 1e6).toFixed(2);
+    console.log(`MP4 → ${out} (${mb} MB)`);
+  } else {
+    throw new Error(`ffmpeg exit ${r.status}`);
+  }
+}
+
+async function updatePosters() {
+  const map = [
+    ['kf-05-engine-detail.png', 'engine-bay.jpg'],
+    ['kf-07-seat-harness.png', 'safety-cage.jpg'],
+    ['kf-09-copilot-detail.png', 'copilot.jpg'],
+  ];
+  for (const [from, to] of map) {
+    await sharp(path.join(STORY, from))
+      .resize(1920, 1080, { fit: 'cover' })
+      .jpeg({ quality: 88 })
+      .toFile(path.join(SRC, to));
+  }
+  console.log('Posters mis à jour');
 }
 
 async function main() {
   fs.mkdirSync(OUT, { recursive: true });
-  console.log('Loading keyframes…');
-  const engine = await loadKey('engine-bay.jpg');
-  const cage = await loadKey('safety-cage.jpg');
-  const copilot = await loadKey('copilot.jpg');
+  console.log('Chargement keyframes…');
+  const loaded = [];
+  for (const kf of KEYFRAMES) {
+    loaded.push({ ...kf, raw: await loadKey(kf.file) });
+    console.log('  ', kf.file);
+  }
 
+  const n = loaded.length;
+  // Segments égaux ; chevauchement de morph ~18 % pour fluidité 3D
+  const segmentLen = 1 / (n - 1);
+
+  console.log(`Rendu ${FRAME_COUNT} frames @ ${FPS} fps…`);
   for (let i = 0; i < FRAME_COUNT; i += 1) {
-    let buffer;
-    let info = { width: WIDTH, height: HEIGHT, channels: 4 };
+    const t = i / (FRAME_COUNT - 1);
+    const pos = t / segmentLen;
+    const idx = Math.min(n - 2, Math.floor(pos));
+    const local = easeInOut(pos - idx);
 
-    if (i < 32) {
-      const local = i / 31;
-      const framed = await framedKey(
-        engine,
-        lerp(1.0, 1.18, easeInOut(local)),
-        lerp(0.35, 0.55, local),
-        lerp(0.4, 0.3, local)
-      );
-      buffer = framed.data;
-      info = framed.info;
-    } else if (i < 40) {
-      const local = easeInOut((i - 32) / 7);
-      const a = await framedKey(engine, 1.18, 0.55, 0.3);
-      const b = await framedKey(cage, 1.05, 0.45, 0.4);
-      buffer = blendRaw(a.data, b.data, local);
-      info = a.info;
-    } else if (i < 64) {
-      const local = (i - 40) / 23;
-      const framed = await framedKey(
-        cage,
-        lerp(1.05, 1.2, easeInOut(local)),
-        lerp(0.45, 0.35, local),
-        lerp(0.4, 0.5, local)
-      );
-      buffer = framed.data;
-      info = framed.info;
-    } else if (i < 72) {
-      const local = easeInOut((i - 64) / 7);
-      const a = await framedKey(cage, 1.2, 0.35, 0.5);
-      const b = await framedKey(copilot, 1.08, 0.5, 0.45);
-      buffer = blendRaw(a.data, b.data, local);
-      info = a.info;
-    } else {
-      const local = (i - 72) / Math.max(FRAME_COUNT - 73, 1);
-      const framed = await framedKey(
-        copilot,
-        lerp(1.08, 1.22, easeInOut(local)),
-        lerp(0.5, 0.42, local),
-        lerp(0.45, 0.38, local)
-      );
-      buffer = framed.data;
-      info = framed.info;
-    }
+    const a = loaded[idx];
+    const b = loaded[idx + 1];
 
-    await sharp(buffer, {
-      raw: { width: info.width, height: info.height, channels: info.channels },
+    const zoomA = lerp(a.zoom[0], a.zoom[1], local);
+    const zoomB = lerp(b.zoom[0], b.zoom[1], local);
+    const panXA = lerp(a.panX[0], a.panX[1], local);
+    const panXB = lerp(b.panX[0], b.panX[1], local);
+    const panYA = lerp(a.panY[0], a.panY[1], local);
+    const panYB = lerp(b.panY[0], b.panY[1], local);
+
+    const frameA = await framedKey(a.raw, zoomA, panXA, panYA);
+    const frameB = await framedKey(b.raw, zoomB, panXB, panYB);
+    const blended = blendRaw(frameA.data, frameB.data, local);
+
+    const outPath = path.join(OUT, `frame-${String(i + 1).padStart(4, '0')}.jpg`);
+    await sharp(blended, {
+      raw: { width: WIDTH, height: HEIGHT, channels: 4 },
     })
-      .jpeg({ quality: 72, mozjpeg: true })
-      .toFile(path.join(OUT, `frame-${String(i + 1).padStart(4, '0')}.jpg`));
+      .jpeg({ quality: 85, mozjpeg: true })
+      .toFile(outPath);
 
-    if (i % 12 === 0 || i === FRAME_COUNT - 1) console.log(`frame ${i + 1}/${FRAME_COUNT}`);
+    if (i % 24 === 0 || i === FRAME_COUNT - 1) {
+      console.log(`  frame ${i + 1}/${FRAME_COUNT}`);
+    }
   }
 
   await encodeMp4();
-  console.log('Done.');
+  await updatePosters();
+
+  fs.writeFileSync(
+    path.join(OUT, 'manifest.json'),
+    JSON.stringify(
+      {
+        fps: FPS,
+        frameCount: FRAME_COUNT,
+        width: WIDTH,
+        height: HEIGHT,
+        chapters: [
+          { id: 'orbit', start: 0, end: 0.18 },
+          { id: 'performance', start: 0.18, end: 0.42 },
+          { id: 'securite', start: 0.42, end: 0.7 },
+          { id: 'accompagnement', start: 0.7, end: 1 },
+        ],
+      },
+      null,
+      2
+    )
+  );
+  console.log('Terminé.');
 }
 
 main().catch((err) => {
