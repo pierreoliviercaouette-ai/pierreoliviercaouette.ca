@@ -20,11 +20,11 @@ const CHAPTERS = [
     description:
       'Le capot s’ouvre : voici ce qui propulse votre stratégie. Chaque composant est choisi, réglé et mesuré.',
     align: 'left',
-    anchor: 0.22,
-    start: 0.18,
-    peakIn: 0.24,
-    peakOut: 0.38,
-    end: 0.45,
+    anchor: 0.24,
+    start: 0.2,
+    peakIn: 0.26,
+    peakOut: 0.4,
+    end: 0.48,
     bullets: [
       {
         num: '01',
@@ -50,11 +50,11 @@ const CHAPTERS = [
     description:
       'Baquet, harnais six points, arceau et casque. On n’accélère jamais sans que la structure tienne le choc.',
     align: 'right',
-    anchor: 0.5,
-    start: 0.44,
-    peakIn: 0.5,
-    peakOut: 0.7,
-    end: 0.78,
+    anchor: 0.52,
+    start: 0.46,
+    peakIn: 0.52,
+    peakOut: 0.66,
+    end: 0.72,
     bullets: [
       {
         num: '04',
@@ -80,10 +80,10 @@ const CHAPTERS = [
     description:
       'La caméra se tourne vers le siège de droite. C’est là que je m’assois : notes de route en main, virage après virage.',
     align: 'left',
-    anchor: 0.82,
-    start: 0.78,
-    peakIn: 0.84,
-    peakOut: 0.96,
+    anchor: 0.78,
+    start: 0.72,
+    peakIn: 0.78,
+    peakOut: 0.94,
     end: 1,
     bullets: [
       {
