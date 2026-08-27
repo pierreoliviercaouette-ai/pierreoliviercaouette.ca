@@ -66,7 +66,7 @@ export function AppleCinematicScroll({
     touchRef.current = touch;
     setReducedMotion(prefersReducedMotion());
     setPortalReady(true);
-    setTrackVh(touch ? Math.min(scrollHeightVh, 520) : scrollHeightVh);
+    setTrackVh(touch ? Math.min(scrollHeightVh, 780) : scrollHeightVh);
   }, [scrollHeightVh]);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export function AppleCinematicScroll({
       seekingRef.current = false;
       window.clearTimeout(seekWatchdogRef.current);
       const pending = pendingTimeRef.current;
-      const threshold = touchRef.current ? 0.12 : 0.05;
+      const threshold = touchRef.current ? 0.06 : 0.025;
       if (
         pending != null &&
         Number.isFinite(video.duration) &&
@@ -120,7 +120,7 @@ export function AppleCinematicScroll({
       const t = p * Math.max(video.duration - 0.04, 0);
       pendingTimeRef.current = t;
       if (seekingRef.current) return;
-      const minDelta = touchRef.current ? 0.1 : 0.04;
+      const minDelta = touchRef.current ? 0.05 : 0.02;
       if (Math.abs(video.currentTime - t) < minDelta) return;
       seekingRef.current = true;
       try {
@@ -180,12 +180,12 @@ export function AppleCinematicScroll({
       syncPin();
       const target = targetRef.current;
       const prev = smoothRef.current;
-      const factor = reducedMotion ? 1 : touchRef.current ? 0.5 : 0.28;
+      const factor = reducedMotion ? 1 : touchRef.current ? 0.45 : 0.38;
       const next = prev + (target - prev) * factor;
       smoothRef.current = Math.abs(target - next) < 0.0008 ? target : next;
       applyVideo(smoothRef.current);
 
-      const uiStep = touchRef.current ? 0.01 : 0.003;
+      const uiStep = touchRef.current ? 0.008 : 0.002;
       if (Math.abs(smoothRef.current - lastUiRef.current) > uiStep) {
         lastUiRef.current = smoothRef.current;
         setProgress(smoothRef.current);

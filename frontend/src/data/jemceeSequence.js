@@ -1,7 +1,7 @@
-/** Métadonnées scrub : vidéo utilisateur continue (9,2 s, fin sur notes + chronomètre). */
+/** Métadonnées scrub : vidéo utilisateur continue (9,2 s @ 48 fps, fin notes + chronomètre). */
 export const JEMCEE_SEQUENCE = {
-  fps: 24,
-  durationSec: 9.2,
+  fps: 48,
+  durationSec: 9.15,
   width: 1280,
   height: 720,
   videoSrc: '/jemcee/pillars-sequence.mp4',
