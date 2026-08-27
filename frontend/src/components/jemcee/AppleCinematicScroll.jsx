@@ -60,10 +60,12 @@ export function AppleCinematicScroll({
   const [reducedMotion, setReducedMotion] = useState(false);
   const [portalReady, setPortalReady] = useState(false);
   const [trackVh, setTrackVh] = useState(scrollHeightVh);
+  const [isTouch, setIsTouch] = useState(false);
 
   useEffect(() => {
     const touch = isTouchPrimary();
     touchRef.current = touch;
+    setIsTouch(touch);
     setReducedMotion(prefersReducedMotion());
     setPortalReady(true);
     setTrackVh(touch ? Math.min(scrollHeightVh, 780) : scrollHeightVh);
@@ -218,7 +220,11 @@ export function AppleCinematicScroll({
     : beatOpacity(p, 0.86, 0.9, 1, 1.05);
   // Exclusivité dure : dès que l'outro monte, les chapitres sont coupés
   const chapterGate = 1 - clamp01(outroOpacity * 1.35);
-  const mediaScale = reducedMotion ? 1 : 1.05 - p * 0.04 + outroOpacity * 0.03;
+  const mediaScale = reducedMotion
+    ? 1
+    : isTouch
+      ? 1
+      : 1.05 - p * 0.04 + outroOpacity * 0.03;
   const mediaBrightness = reducedMotion ? 0.7 : 0.42 + p * 0.28 - outroOpacity * 0.18;
 
   const stage = (
@@ -249,7 +255,9 @@ export function AppleCinematicScroll({
       >
         <video
           ref={videoRef}
-          className="pointer-events-none h-full w-full object-cover"
+          className={`pointer-events-none h-full w-full ${
+            isTouch ? 'object-contain object-center' : 'object-cover'
+          }`}
           src={videoSrc}
           poster={posterSrc}
           muted
