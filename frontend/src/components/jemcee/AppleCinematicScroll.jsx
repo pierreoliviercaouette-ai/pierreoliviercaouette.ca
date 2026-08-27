@@ -207,17 +207,17 @@ export function AppleCinematicScroll({
 
   const p = progress;
   const introOpacity = reducedMotion
-    ? p < 0.14
+    ? p < 0.12
       ? 1
       : 0
     : beatOpacity(p, 0, 0.02, 0.08, 0.15);
   const outroOpacity = reducedMotion
-    ? p >= 0.9
+    ? p >= 0.88
       ? 1
       : 0
     : beatOpacity(p, 0.88, 0.93, 1, 1.05);
   const mediaScale = reducedMotion ? 1 : 1.05 - p * 0.04 + outroOpacity * 0.03;
-  const mediaBrightness = reducedMotion ? 0.55 : 0.42 + p * 0.28 - outroOpacity * 0.18;
+  const mediaBrightness = reducedMotion ? 0.7 : 0.42 + p * 0.28 - outroOpacity * 0.18;
 
   const stage = (
     <div
@@ -399,7 +399,9 @@ export function AppleCinematicScroll({
     </div>
   );
 
-  const heightVh = reducedMotion ? 100 : trackVh;
+  // Ne jamais raccourcir la piste pour reduced-motion :
+  // sinon 1 écran = 2 crans de molette et tous les chapitres disparaissent.
+  const heightVh = trackVh;
 
   return (
     <>
