@@ -8,9 +8,9 @@ export const JEMCEE_SEQUENCE = {
   posterSrc: '/jemcee/engine-bay.jpg',
   /** Fractions 0–1 alignées sur le parcours caméra de la vidéo source. */
   chapters: [
-    { id: 'orbit', start: 0, end: 0.15 },
-    { id: 'performance', start: 0.15, end: 0.4 },
-    { id: 'securite', start: 0.4, end: 0.72 },
-    { id: 'accompagnement', start: 0.72, end: 1 },
+    { id: 'orbit', start: 0, end: 0.12 },
+    { id: 'performance', start: 0.12, end: 0.38 },
+    { id: 'securite', start: 0.4, end: 0.64 },
+    { id: 'accompagnement', start: 0.68, end: 1 },
   ],
 };

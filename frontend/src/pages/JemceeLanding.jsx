@@ -15,91 +15,91 @@ const asset = (path) => `${process.env.PUBLIC_URL || ''}${path}`;
 const CHAPTERS = [
   {
     id: 'performance',
-    chapterLabel: 'CHAPITRE 01 — PLACEMENTS',
-    title: 'Faire croître votre épargne',
+    chapterLabel: 'CHAPITRE 01 — PERFORMANCE',
+    title: 'Hauts rendements. Haute performance.',
     description:
-      'Que vous commenciez ou que vous approchiez de la retraite, vos placements doivent travailler selon votre horizon et votre tolérance au risque.',
+      'Votre argent mérite mieux qu’un compte dormant. Une stratégie calibrée pour accélérer — sans perdre le contrôle.',
     align: 'left',
-    anchor: 0.28,
-    start: 0.14,
-    peakIn: 0.2,
-    peakOut: 0.36,
-    end: 0.42,
+    anchor: 0.26,
+    start: 0.12,
+    peakIn: 0.18,
+    peakOut: 0.32,
+    end: 0.38,
     bullets: [
       {
         num: '01',
-        title: 'REER et CELI',
-        text: 'Maximisez vos avantages fiscaux et choisissez le bon véhicule pour chaque objectif — retraite, fonds d’urgence ou études des enfants.',
+        title: 'Puissance de placement',
+        text: 'Portefeuilles construits pour performer selon votre horizon — chaque dollar au travail.',
       },
       {
         num: '02',
-        title: 'Portefeuilles diversifiés',
-        text: 'Des placements calibrés à votre profil, avec rééquilibrage régulier pour rester sur la trajectoire.',
+        title: 'Optimisation fiscale maximale',
+        text: 'REER, CELI, CELIAPP, REEE : chaque avantage fiscal capturé, chaque dollar mieux placé.',
       },
       {
         num: '03',
-        title: 'Suivi personnalisé',
-        text: 'Des ajustements quand votre vie change : nouveau job, achat immobilier, naissance ou retraite.',
+        title: 'L’avantage du pro',
+        text: 'Discipline, rééquilibrage et décisions prises à froid — l’écart qui se creuse avec le temps.',
       },
     ],
   },
   {
     id: 'securite',
     chapterLabel: 'CHAPITRE 02 — PROTECTION',
-    title: 'Protéger ce qui compte',
+    title: 'Vos proches. Votre filet.',
     description:
-      'Avant de viser la performance, on s’assure que votre famille et vos revenus tiennent le coup face aux imprévus.',
+      'La vraie performance, c’est d’avancer sans peur. On verrouille la protection avant d’appuyer sur l’accélérateur.',
     align: 'right',
-    anchor: 0.56,
-    start: 0.38,
+    anchor: 0.52,
+    start: 0.4,
     peakIn: 0.46,
-    peakOut: 0.66,
-    end: 0.72,
+    peakOut: 0.58,
+    end: 0.64,
     bullets: [
       {
         num: '04',
-        title: 'Assurance vie',
-        text: 'Une couverture adaptée à vos obligations réelles — hypothèque, enfants, conjoint survivant.',
+        title: 'Protection de vos proches',
+        text: 'Assurance vie taillée pour votre famille, votre hypothèque et votre héritage.',
       },
       {
         num: '05',
-        title: 'Invalidité et maladies graves',
-        text: 'Votre revenu protégé et un capital à diagnostic si la santé vous ralentit.',
+        title: 'Revenu blindé',
+        text: 'Invalidité et maladies graves : votre salaire protégé quand la vie dérape.',
       },
       {
         num: '06',
-        title: 'Structure et liquidités',
-        text: 'Fonds d’urgence, testament et mandat de protection : la base qui sécurise tout le reste.',
+        title: 'Zéro faille',
+        text: 'Fonds d’urgence, testament, mandat : la structure qui tient quand tout change.',
       },
     ],
   },
   {
     id: 'accompagnement',
-    chapterLabel: 'CHAPITRE 03 — ACCOMPAGNEMENT',
-    title: 'Un conseiller à vos côtés',
+    chapterLabel: 'CHAPITRE 03 — COPILOTE',
+    title: 'Réservez. On démarre.',
     description:
-      'Je vous guide avec clarté — sans jargon, avec un plan que vous comprenez et que l’on révise ensemble, année après année.',
+      '30 minutes gratuites. Un plan clair. Un conseiller qui lit la route avec vous — et qui reste dans le siège à droite.',
     align: 'left',
-    anchor: 0.9,
+    anchor: 0.88,
     start: 0.68,
-    peakIn: 0.78,
-    peakOut: 0.95,
+    peakIn: 0.76,
+    peakOut: 0.94,
     end: 1,
     bullets: [
       {
         num: '07',
-        title: 'Rencontre découverte',
-        text: '30 minutes gratuites pour faire le point sur votre situation et identifier vos priorités.',
+        title: 'Rencontre découverte offerte',
+        text: 'Sans frais, sans engagement. On ouvre le capot de votre situation en 30 minutes.',
       },
       {
         num: '08',
-        title: 'Plan financier global',
-        text: 'Protection, épargne, fiscalité et succession intégrés dans une vision d’ensemble cohérente.',
+        title: 'Plan 360° sur mesure',
+        text: 'Placements, assurance, fiscalité, retraite — une feuille de route qui fait du sens.',
       },
       {
         num: '09',
-        title: 'Suivi annuel',
-        text: 'Révisions régulières selon vos revenus, votre famille et les changements législatifs.',
+        title: 'Suivi qui tient la distance',
+        text: 'Vous n’êtes plus seul. Ajustements, rappels, décisions — année après année.',
       },
     ],
   },
@@ -156,8 +156,8 @@ export const JemceeLanding = () => {
               </span>
             </h1>
             <p className="mt-6 max-w-xl text-lg text-white/70">
-              Placements, protection et accompagnement personnalisé : trois piliers pour bâtir et
-              sécuriser votre patrimoine, avec un conseiller qui vous parle clairement.
+              Hauts rendements, protection sans faille, copilote à vos côtés. La stratégie
+              financière qui donne envie de prendre le départ maintenant.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <a
@@ -183,11 +183,11 @@ export const JemceeLanding = () => {
         <div className="mx-auto max-w-4xl text-center">
           <p className="font-heading text-sm tracking-[0.4em] text-secondary">LIGNE DE DÉPART</p>
           <h2 className="mt-4 font-heading text-5xl leading-[0.95] text-white md:text-7xl">
-            Prêt pour la première spéciale ?
+            Prêt à accélérer ?
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-white/65">
-            Une rencontre découverte de 30 minutes, sans frais et sans engagement. On regarde votre
-            véhicule financier ensemble et on identifie les réglages prioritaires.
+            30 minutes gratuites. On ouvre le capot de votre patrimoine, on trouve les leviers, et
+            vous repartez avec un plan concret — ou rien. Aucun engagement.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-4">
             <a
