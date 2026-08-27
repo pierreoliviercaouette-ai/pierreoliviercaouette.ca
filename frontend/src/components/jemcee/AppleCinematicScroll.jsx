@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { mapScrollToMedia } from '../../data/jemceeSequence';
+import { mapScrollToMedia, mediaToFrameIndex } from '../../data/jemceeSequence';
 
 function prefersReducedMotion() {
   return (
@@ -160,15 +160,15 @@ export function AppleCinematicScroll({
   }, [videoSrc, portalReady, framesPath, frameCount]);
 
   useEffect(() => {
-    const drawFrame = (p) => {
+    const drawFrame = (mediaP) => {
       const canvas = canvasRef.current;
       if (!canvas || !useFramesRef.current || frameCount < 2) return;
-      const idx = Math.min(frameCount - 1, Math.max(0, Math.round(p * (frameCount - 1))));
+      const idx = mediaToFrameIndex(mediaP, { frameCount });
       if (idx === lastFrameRef.current) return;
       let img = framesRef.current[idx];
       if (!img || !img.complete) {
         // Frame pas encore chargée : plus proche disponible
-        for (let d = 1; d < 12; d += 1) {
+        for (let d = 1; d < 16; d += 1) {
           const a = framesRef.current[idx - d];
           const b = framesRef.current[idx + d];
           if (a?.complete) {

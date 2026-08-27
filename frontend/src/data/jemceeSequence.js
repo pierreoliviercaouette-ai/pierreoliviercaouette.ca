@@ -4,7 +4,10 @@ export const JEMCEE_SEQUENCE = {
   durationSec: 9.15,
   width: 1280,
   height: 720,
-  frameCount: 274,
+  /** 236 @30fps (0–7.87s) + 112 @90fps (7.87s–fin) pour densifier le ch.03 */
+  frameCount: 348,
+  baseFrameCount: 236,
+  denseSplit: 0.86,
   framesPath: '/jemcee/sequence/frames/frame-{}.jpg',
   videoSrc: '/jemcee/pillars-sequence.mp4',
   posterSrc: '/jemcee/engine-bay.jpg',
@@ -21,21 +24,24 @@ export const JEMCEE_SEQUENCE = {
   /**
    * Remap scroll → média : temps de lecture égal par chapitre,
    * tout en gardant le sync visuel (notes/chrono au ch.03).
-   * Points : [scrollProgress, mediaProgress]
    */
   scrollToMedia: [
     [0, 0],
-    [0.1, 0.12], // fin intro → début moteur
-    [0.36, 0.4], // fin ch.01 → début habitacle
-    [0.62, 0.86], // fin ch.02 → début carnet/chrono
-    [0.88, 0.94], // fin ch.03 → début outro
+    [0.1, 0.12],
+    [0.36, 0.4],
+    [0.62, 0.86],
+    [0.88, 0.94],
     [1, 1],
   ],
 };
 
+function clamp01(v) {
+  return Math.min(1, Math.max(0, v));
+}
+
 /** Interpol linear par morceaux scroll → média. */
 export function mapScrollToMedia(scrollProgress, keypoints = JEMCEE_SEQUENCE.scrollToMedia) {
-  const p = Math.min(1, Math.max(0, scrollProgress));
+  const p = clamp01(scrollProgress);
   const pts = keypoints;
   for (let i = 0; i < pts.length - 1; i += 1) {
     const [s0, v0] = pts[i];
@@ -46,6 +52,26 @@ export function mapScrollToMedia(scrollProgress, keypoints = JEMCEE_SEQUENCE.scr
     }
   }
   return p;
+}
+
+/**
+ * Média → index de frame (densité plus élevée après denseSplit pour le ch.03).
+ */
+export function mediaToFrameIndex(
+  mediaProgress,
+  {
+    frameCount = JEMCEE_SEQUENCE.frameCount,
+    baseFrameCount = JEMCEE_SEQUENCE.baseFrameCount,
+    denseSplit = JEMCEE_SEQUENCE.denseSplit,
+  } = {}
+) {
+  const m = clamp01(mediaProgress);
+  const denseCount = Math.max(1, frameCount - baseFrameCount);
+  if (m <= denseSplit) {
+    return Math.round((m / Math.max(denseSplit, 0.0001)) * (baseFrameCount - 1));
+  }
+  const t = (m - denseSplit) / Math.max(1 - denseSplit, 0.0001);
+  return Math.min(frameCount - 1, baseFrameCount + Math.round(t * (denseCount - 1)));
 }
 
 /** Résout le chemin d’une frame 1-indexée. */

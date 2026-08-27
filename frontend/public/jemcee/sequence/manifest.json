@@ -1,10 +1,13 @@
 ﻿{
   "fps": 30,
-  "frameCount": 274,
+  "frameCount": 348,
+  "baseFrameCount": 236,
+  "denseSplit": 0.86,
+  "denseFps": 90,
   "width": 1280,
   "height": 720,
   "durationSec": 9.15,
-  "source": "pillars-sequence.mp4 → sequence/frames (canvas scrub)",
+  "source": "base 0–7.87s@30fps + dense 7.87s–fin@90fps",
   "framesPath": "/jemcee/sequence/frames/frame-{}.jpg",
   "chapters": [
     { "id": "orbit", "start": 0, "end": 0.1 },
