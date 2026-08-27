@@ -15,10 +15,10 @@ const asset = (path) => `${process.env.PUBLIC_URL || ''}${path}`;
 const CHAPTERS = [
   {
     id: 'performance',
-    chapterLabel: 'CHAPITRE 01 — LE MOTEUR',
-    title: 'La performance sous le capot',
+    chapterLabel: 'CHAPITRE 01 — PLACEMENTS',
+    title: 'Faire croître votre épargne',
     description:
-      'Le capot s’ouvre : voici ce qui propulse votre stratégie. Chaque composant est choisi, réglé et mesuré.',
+      'Que vous commenciez ou que vous approchiez de la retraite, vos placements doivent travailler selon votre horizon et votre tolérance au risque.',
     align: 'left',
     anchor: 0.28,
     start: 0.14,
@@ -28,78 +28,78 @@ const CHAPTERS = [
     bullets: [
       {
         num: '01',
-        title: 'Rendements',
-        text: 'Des portefeuilles diversifiés et calibrés selon votre horizon, pour convertir la puissance en distance parcourue.',
+        title: 'REER et CELI',
+        text: 'Maximisez vos avantages fiscaux et choisissez le bon véhicule pour chaque objectif — retraite, fonds d’urgence ou études des enfants.',
       },
       {
         num: '02',
-        title: 'Optimisation fiscale',
-        text: 'REER, CELI, CELIAPP, REEE et société de gestion : chaque dollar placé au bon endroit, au bon moment.',
+        title: 'Portefeuilles diversifiés',
+        text: 'Des placements calibrés à votre profil, avec rééquilibrage régulier pour rester sur la trajectoire.',
       },
       {
         num: '03',
-        title: 'Avantage du conseiller',
-        text: 'Discipline, rééquilibrage et décisions prises à froid — l’écart qui se creuse sur la durée d’une course.',
+        title: 'Suivi personnalisé',
+        text: 'Des ajustements quand votre vie change : nouveau job, achat immobilier, naissance ou retraite.',
       },
     ],
   },
   {
     id: 'securite',
-    chapterLabel: 'CHAPITRE 02 — L’HABITACLE',
-    title: 'La sécurité avant la vitesse',
+    chapterLabel: 'CHAPITRE 02 — PROTECTION',
+    title: 'Protéger ce qui compte',
     description:
-      'Baquet, harnais six points, arceau et casque. On n’accélère jamais sans que la structure tienne le choc.',
+      'Avant de viser la performance, on s’assure que votre famille et vos revenus tiennent le coup face aux imprévus.',
     align: 'right',
-    anchor: 0.58,
-    start: 0.4,
-    peakIn: 0.48,
-    peakOut: 0.7,
-    end: 0.76,
+    anchor: 0.56,
+    start: 0.38,
+    peakIn: 0.46,
+    peakOut: 0.66,
+    end: 0.72,
     bullets: [
       {
         num: '04',
-        title: 'Protection du capital',
-        text: 'Assurance vie, invalidité et maladies graves : le harnais qui garde votre famille en place à l’impact.',
+        title: 'Assurance vie',
+        text: 'Une couverture adaptée à vos obligations réelles — hypothèque, enfants, conjoint survivant.',
       },
       {
         num: '05',
-        title: 'Gestion du risque',
-        text: 'Répartition d’actifs, fonds d’urgence et scénarios de marché testés avant le départ, pas pendant la spéciale.',
+        title: 'Invalidité et maladies graves',
+        text: 'Votre revenu protégé et un capital à diagnostic si la santé vous ralentit.',
       },
       {
         num: '06',
-        title: 'Structure éprouvée',
-        text: 'Testament, mandat de protection et liquidités : l’arceau qui protège tout ce que vous avez bâti.',
+        title: 'Structure et liquidités',
+        text: 'Fonds d’urgence, testament et mandat de protection : la base qui sécurise tout le reste.',
       },
     ],
   },
   {
     id: 'accompagnement',
-    chapterLabel: 'CHAPITRE 03 — LE COPILOTE',
-    title: 'Personne ne gagne seul',
+    chapterLabel: 'CHAPITRE 03 — ACCOMPAGNEMENT',
+    title: 'Un conseiller à vos côtés',
     description:
-      'La caméra se tourne vers le siège de droite : carnet des virages, chronomètre, outils du copilote. C’est là que je m’assois.',
+      'Je vous guide avec clarté — sans jargon, avec un plan que vous comprenez et que l’on révise ensemble, année après année.',
     align: 'left',
-    anchor: 0.88,
-    start: 0.74,
-    peakIn: 0.8,
-    peakOut: 0.94,
+    anchor: 0.9,
+    start: 0.68,
+    peakIn: 0.78,
+    peakOut: 0.95,
     end: 1,
     bullets: [
       {
         num: '07',
-        title: 'Éducation financière',
-        text: 'Vous comprenez chaque décision avant de la prendre. Aucun jargon, seulement des notes de route claires.',
+        title: 'Rencontre découverte',
+        text: '30 minutes gratuites pour faire le point sur votre situation et identifier vos priorités.',
       },
       {
         num: '08',
-        title: 'Ajustement fiscal',
-        text: 'Révision annuelle des stratégies selon vos revenus, votre situation familiale et les changements législatifs.',
+        title: 'Plan financier global',
+        text: 'Protection, épargne, fiscalité et succession intégrés dans une vision d’ensemble cohérente.',
       },
       {
         num: '09',
-        title: 'Planification de retraite',
-        text: 'Décaissement optimisé, RRQ, PSV et rentes : un plan chronométré pour franchir l’arrivée sans panne sèche.',
+        title: 'Suivi annuel',
+        text: 'Révisions régulières selon vos revenus, votre famille et les changements législatifs.',
       },
     ],
   },
@@ -156,8 +156,8 @@ export const JemceeLanding = () => {
               </span>
             </h1>
             <p className="mt-6 max-w-xl text-lg text-white/70">
-              Un moteur performant, une cage de sécurité et un copilote qui lit la route. Trois
-              piliers pour franchir chaque étape de votre parcours financier.
+              Placements, protection et accompagnement personnalisé : trois piliers pour bâtir et
+              sécuriser votre patrimoine, avec un conseiller qui vous parle clairement.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <a

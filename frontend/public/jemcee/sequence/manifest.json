@@ -1,14 +1,14 @@
 ﻿{
   "fps": 24,
-  "frameCount": 240,
+  "frameCount": 221,
   "width": 1280,
   "height": 720,
-  "durationSec": 10,
-  "source": "user Downloads/Regénère_une_nouvelle_vidéo_j.mp4",
+  "durationSec": 9.2,
+  "source": "user Downloads/Regénère_une_nouvelle_vidéo_j.mp4 (trim 9.2s)",
   "chapters": [
     { "id": "orbit", "start": 0, "end": 0.15 },
     { "id": "performance", "start": 0.15, "end": 0.4 },
-    { "id": "securite", "start": 0.4, "end": 0.75 },
-    { "id": "accompagnement", "start": 0.75, "end": 1 }
+    { "id": "securite", "start": 0.4, "end": 0.72 },
+    { "id": "accompagnement", "start": 0.72, "end": 1 }
   ]
 }
