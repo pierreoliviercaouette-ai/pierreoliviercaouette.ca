@@ -20,11 +20,11 @@ const CHAPTERS = [
     description:
       'Le capot s’ouvre : voici ce qui propulse votre stratégie. Chaque composant est choisi, réglé et mesuré.',
     align: 'left',
-    anchor: 0.24,
-    start: 0.2,
-    peakIn: 0.26,
-    peakOut: 0.4,
-    end: 0.48,
+    anchor: 0.28,
+    start: 0.14,
+    peakIn: 0.2,
+    peakOut: 0.36,
+    end: 0.42,
     bullets: [
       {
         num: '01',
@@ -50,11 +50,11 @@ const CHAPTERS = [
     description:
       'Baquet, harnais six points, arceau et casque. On n’accélère jamais sans que la structure tienne le choc.',
     align: 'right',
-    anchor: 0.52,
-    start: 0.46,
-    peakIn: 0.52,
-    peakOut: 0.66,
-    end: 0.72,
+    anchor: 0.58,
+    start: 0.4,
+    peakIn: 0.48,
+    peakOut: 0.7,
+    end: 0.76,
     bullets: [
       {
         num: '04',
@@ -78,11 +78,11 @@ const CHAPTERS = [
     chapterLabel: 'CHAPITRE 03 — LE COPILOTE',
     title: 'Personne ne gagne seul',
     description:
-      'La caméra se tourne vers le siège de droite. C’est là que je m’assois : notes de route en main, virage après virage.',
+      'La caméra se tourne vers le siège de droite : carnet des virages, chronomètre, outils du copilote. C’est là que je m’assois.',
     align: 'left',
-    anchor: 0.78,
-    start: 0.72,
-    peakIn: 0.78,
+    anchor: 0.88,
+    start: 0.74,
+    peakIn: 0.8,
     peakOut: 0.94,
     end: 1,
     bullets: [

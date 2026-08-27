@@ -1,7 +1,7 @@
 /**
- * Séquence cinématique showroom Forza → moteur → habitacle → copilote.
+ * Séquence continue WRX 2010 TEST Racing :
+ * avant → capot/engine → côté conducteur/habitacle → outils copilote.
  * Usage: node scripts/generate-jemcee-sequence.js
- * Requiert: sharp + ffmpeg-static
  */
 const path = require('path');
 const fs = require('fs');
@@ -15,24 +15,22 @@ const OUT = path.join(SRC, 'sequence');
 const WIDTH = 1280;
 const HEIGHT = 720;
 const FPS = 24;
-/** ~10 s — scrub Apple plus long et fluide */
+/** 10 s — scrub Apple */
 const FRAME_COUNT = FPS * 10;
 
 const KEYFRAMES = [
-  // Orbit showroom — Subaru WRX 2010
-  { file: 'kf-01-showroom-wide.png', zoom: [1.0, 1.08], panX: [0.45, 0.55], panY: [0.42, 0.4] },
-  { file: 'kf-02-orbit-side.png', zoom: [1.05, 1.12], panX: [0.5, 0.48], panY: [0.45, 0.42] },
-  { file: 'kf-03-approach-front.png', zoom: [1.08, 1.2], panX: [0.5, 0.52], panY: [0.48, 0.55] },
-  // Engine bay / performance
-  { file: 'kf-04-hood-open.png', zoom: [1.05, 1.18], panX: [0.5, 0.5], panY: [0.45, 0.55] },
-  { file: 'kf-05-engine-detail.png', zoom: [1.1, 1.28], panX: [0.48, 0.52], panY: [0.45, 0.5] },
-  // Habitacle / sécurité
-  { file: 'kf-06-enter-cabin.png', zoom: [1.05, 1.15], panX: [0.52, 0.55], panY: [0.45, 0.48] },
-  { file: 'kf-07-seat-harness.png', zoom: [1.08, 1.2], panX: [0.45, 0.48], panY: [0.4, 0.45] },
-  // Copilote / accompagnement
-  { file: 'kf-08-copilot.png', zoom: [1.05, 1.14], panX: [0.52, 0.55], panY: [0.4, 0.42] },
-  { file: 'kf-09-copilot-detail.png', zoom: [1.08, 1.18], panX: [0.5, 0.48], panY: [0.42, 0.45] },
-  { file: 'kf-10-crew.png', zoom: [1.05, 1.12], panX: [0.55, 0.58], panY: [0.42, 0.45] },
+  // Partie 1 — avant + ouverture capot
+  { file: 'kf-01-showroom-wide.png', zoom: [1.0, 1.1], panX: [0.5, 0.5], panY: [0.48, 0.52] },
+  { file: 'kf-02-orbit-side.png', zoom: [1.05, 1.18], panX: [0.5, 0.5], panY: [0.5, 0.55] },
+  { file: 'kf-03-approach-front.png', zoom: [1.02, 1.14], panX: [0.5, 0.5], panY: [0.42, 0.48] },
+  { file: 'kf-04-hood-open.png', zoom: [1.08, 1.22], panX: [0.5, 0.5], panY: [0.45, 0.5] },
+  // Partie 2 — côté conducteur → habitacle
+  { file: 'kf-05-engine-detail.png', zoom: [1.02, 1.12], panX: [0.48, 0.52], panY: [0.45, 0.48] },
+  { file: 'kf-06-enter-cabin.png', zoom: [1.04, 1.14], panX: [0.48, 0.5], panY: [0.45, 0.48] },
+  { file: 'kf-07-seat-harness.png', zoom: [1.06, 1.16], panX: [0.48, 0.52], panY: [0.42, 0.45] },
+  // Partie 3 — outils copilote passager
+  { file: 'kf-08-copilot.png', zoom: [1.04, 1.14], panX: [0.5, 0.55], panY: [0.45, 0.48] },
+  { file: 'kf-09-copilot-detail.png', zoom: [1.08, 1.2], panX: [0.5, 0.48], panY: [0.45, 0.5] },
 ];
 
 function lerp(a, b, t) {
@@ -126,7 +124,7 @@ async function encodeMp4() {
 
 async function updatePosters() {
   const map = [
-    ['kf-05-engine-detail.png', 'engine-bay.jpg'],
+    ['kf-04-hood-open.png', 'engine-bay.jpg'],
     ['kf-07-seat-harness.png', 'safety-cage.jpg'],
     ['kf-09-copilot-detail.png', 'copilot.jpg'],
   ];
@@ -196,11 +194,12 @@ async function main() {
         frameCount: FRAME_COUNT,
         width: WIDTH,
         height: HEIGHT,
+        source: 'wrx-2010-test-racing continuous camera',
         chapters: [
-          { id: 'orbit', start: 0, end: 0.18 },
-          { id: 'performance', start: 0.18, end: 0.42 },
-          { id: 'securite', start: 0.42, end: 0.7 },
-          { id: 'accompagnement', start: 0.7, end: 1 },
+          { id: 'orbit', start: 0, end: 0.12 },
+          { id: 'performance', start: 0.12, end: 0.42 },
+          { id: 'securite', start: 0.42, end: 0.72 },
+          { id: 'accompagnement', start: 0.72, end: 1 },
         ],
       },
       null,

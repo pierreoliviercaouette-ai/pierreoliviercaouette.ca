@@ -188,10 +188,10 @@ export function AppleCinematicScroll({
 
   const p = progress;
   const introOpacity = reducedMotion
-    ? p < 0.2
+    ? p < 0.14
       ? 1
       : 0
-    : beatOpacity(p, 0, 0.02, 0.1, 0.18);
+    : beatOpacity(p, 0, 0.02, 0.08, 0.15);
   const mediaScale = reducedMotion ? 1 : 1.05 - p * 0.05;
   const mediaBrightness = reducedMotion ? 0.55 : 0.42 + p * 0.4;
 

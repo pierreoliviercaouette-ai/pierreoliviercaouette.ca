@@ -130,16 +130,19 @@ for fp in srcs:
     out = img.copy()
     mask = np.zeros((H, W), np.float32)
 
-    # Sparkle
-    mask = np.maximum(mask, feather_mask(1180, 550, 100, 100, 18))
+    # Sparkle coin bas-droit (parties 2–4 seulement ; orbite gérée sans inpaint carrosserie)
+    if i >= ENGINE_START:
+        mask = np.maximum(mask, feather_mask(1180, 560, 80, 80, 8))
 
     if i < ENGINE_START:
-        # Orbite : petit ID vitre éventuel
-        mask = np.maximum(mask, feather_mask(720, 150, 200, 80, 14))
-        m8 = (mask * 255).astype(np.uint8)
-        _, m8 = cv2.threshold(m8, 40, 255, cv2.THRESH_BINARY)
-        if cv2.countNonZero(m8):
-            out = cv2.inpaint(out, m8, 3, cv2.INPAINT_TELEA)
+        # Orbite : copie 1:1 depuis src, sparkle retiré dans ROI coin bas-droit
+        roi_x0, roi_y0 = W - 160, H - 140
+        roi = out[roi_y0:H, roi_x0:W]
+        gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+        bright = cv2.inRange(gray, 200, 255)
+        bright = cv2.dilate(bright, np.ones((7, 7), np.uint8), iterations=2)
+        if cv2.countNonZero(bright) > 0:
+            out[roi_y0:H, roi_x0:W] = cv2.inpaint(roi, bright, 3, cv2.INPAINT_TELEA)
 
     elif i < CABIN_START:
         # Capot : patch plate clean sur zone carte + inpaint cyan

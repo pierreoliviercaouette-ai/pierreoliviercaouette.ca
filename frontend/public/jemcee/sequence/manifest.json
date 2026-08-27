@@ -1,10 +1,14 @@
-{
+﻿{
   "fps": 24,
   "frameCount": 240,
   "width": 1280,
   "height": 720,
   "durationSec": 10,
-  "source": "reference-1to1 + inpaint-cards + copilot-passenger-ending",
-  "cabinStartFrame": 120,
-  "copilotStartFrame": 173
+  "source": "user Downloads/Regénère_une_nouvelle_vidéo_j.mp4",
+  "chapters": [
+    { "id": "orbit", "start": 0, "end": 0.15 },
+    { "id": "performance", "start": 0.15, "end": 0.4 },
+    { "id": "securite", "start": 0.4, "end": 0.75 },
+    { "id": "accompagnement", "start": 0.75, "end": 1 }
+  ]
 }
