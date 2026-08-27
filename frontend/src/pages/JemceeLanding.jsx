@@ -162,16 +162,18 @@ export const JemceeLanding = () => {
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <a
-                href="#contact"
+                href={JEMCEE_BOOKING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => trackCta('jemcee_hero_depart')}
-                className="jemcee-cta-primary pointer-events-auto inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest text-white"
+                className="pointer-events-auto inline-flex items-center bg-white px-8 py-4 font-heading text-lg tracking-widest text-[#01233f] shadow-[0_12px_40px_rgba(255,255,255,0.22)] transition hover:bg-secondary"
               >
                 PRENDRE LE DÉPART
               </a>
               <a
                 href="#performance"
                 onClick={() => trackCta('jemcee_hero_capot')}
-                className="pointer-events-auto inline-flex items-center border border-white/25 px-8 py-4 font-heading text-lg tracking-widest text-white transition-colors hover:border-secondary hover:text-secondary"
+                className="pointer-events-auto inline-flex items-center border-2 border-white/70 bg-white/10 px-8 py-4 font-heading text-lg tracking-widest text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/20"
               >
                 VOIR SOUS LE CAPOT
               </a>
@@ -179,20 +181,14 @@ export const JemceeLanding = () => {
           </>
         )}
         outro={() => (
-          <>
+          <div className="mx-auto w-full max-w-3xl text-center">
             <p className="font-heading text-sm tracking-[0.45em] text-secondary">LIGNE DE DÉPART</p>
-            <h2 className="mt-4 font-heading text-5xl leading-[0.92] text-white md:text-7xl">
-              Votre prochain mouvement{' '}
-              <span
-                className="bg-clip-text text-transparent"
-                style={{ backgroundImage: 'var(--jemcee-ember)' }}
-              >
-                commence ici
-              </span>
+            <h2 className="mt-4 font-heading text-4xl leading-[0.95] text-white sm:text-5xl md:text-7xl">
+              Prêt à accélérer ?
             </h2>
-            <p className="mx-auto mt-5 max-w-xl text-lg text-white/75">
-              30 minutes. Gratuit. Sans engagement. On bâtit le plan qui fait croître et protège —
-              et vous repartez avec une clarté que peu de gens ont.
+            <p className="mx-auto mt-5 max-w-xl text-base text-white/85 sm:text-lg">
+              30 minutes. Gratuit. Sans engagement. Un plan clair pour faire croître et protéger votre
+              patrimoine — et vous repartez avec une clarté que peu de gens ont.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <a
@@ -200,87 +196,56 @@ export const JemceeLanding = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackCta('jemcee_outro_booking')}
-                className="jemcee-cta-primary pointer-events-auto inline-flex items-center px-10 py-5 font-heading text-lg tracking-widest text-white"
+                className="pointer-events-auto inline-flex items-center bg-white px-10 py-5 font-heading text-lg tracking-widest text-[#01233f] shadow-[0_12px_40px_rgba(255,255,255,0.25)] transition hover:bg-secondary"
               >
                 RÉSERVER MA RENCONTRE
               </a>
               <a
                 href={PHONE_LINK}
                 onClick={() => trackCta('jemcee_outro_phone')}
-                className="pointer-events-auto inline-flex items-center border border-white/30 px-9 py-5 font-heading text-lg tracking-widest text-white transition-colors hover:border-secondary hover:text-secondary"
+                className="pointer-events-auto inline-flex items-center border-2 border-white/80 bg-white/10 px-9 py-5 font-heading text-lg tracking-widest text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/20"
               >
                 PARLER MAINTENANT
               </a>
             </div>
-          </>
+            <div className="mx-auto mt-14 grid max-w-3xl gap-6 border-t border-white/20 pt-8 text-left sm:grid-cols-3 sm:gap-8">
+              <div>
+                <p className="font-heading text-3xl text-secondary sm:text-4xl">0-100</p>
+                <p className="mt-2 text-sm text-white/70">Plan structuré dès la 1ʳᵉ rencontre</p>
+              </div>
+              <div>
+                <p className="font-heading text-3xl text-secondary sm:text-4xl">360°</p>
+                <p className="mt-2 text-sm text-white/70">
+                  Placements, assurance, fiscalité, succession
+                </p>
+              </div>
+              <div>
+                <p className="font-heading text-3xl text-secondary sm:text-4xl">1 copilote</p>
+                <p className="mt-2 text-sm text-white/70">Suivi humain, année après année</p>
+              </div>
+            </div>
+          </div>
         )}
       />
 
       <section
         id="contact"
-        className="relative scroll-mt-24 overflow-hidden px-6 py-32"
+        className="relative scroll-mt-24 border-t border-white/10 px-6 py-14 text-center"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(1,35,63,0.72) 0%, rgba(1,28,50,0.88) 55%, rgba(1,20,40,0.96) 100%), url(${outroPoster})`,
+          backgroundImage: `linear-gradient(180deg, rgba(1,28,50,0.92) 0%, rgba(1,20,40,0.98) 100%), url(${outroPoster})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: 'center bottom',
         }}
       >
-        <div className="relative mx-auto max-w-4xl text-center">
-          <p className="font-heading text-sm tracking-[0.4em] text-secondary">PASSEZ À L’ACTION</p>
-          <h2 className="mt-4 font-heading text-5xl leading-[0.95] text-white md:text-7xl">
-            Prêt à accélérer ?
-          </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-white/70">
-            La stratégie est claire. Le copilote est prêt. Il ne reste qu’à prendre le départ —
-            30 minutes pour un plan concret, sans pression.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <a
-              href={JEMCEE_BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackCta('jemcee_contact_booking')}
-              className="jemcee-cta-primary inline-flex items-center px-9 py-4 font-heading text-lg tracking-widest text-white"
-              data-testid="jemcee_contact_booking"
-            >
-              RÉSERVER MA RENCONTRE
-            </a>
-            <a
-              href={PHONE_LINK}
-              onClick={() => trackCta('jemcee_contact_phone')}
-              className="inline-flex items-center border border-white/25 px-9 py-4 font-heading text-lg tracking-widest text-white transition-colors hover:border-secondary hover:text-secondary"
-            >
-              PARLER MAINTENANT
-            </a>
-          </div>
-
-          <div className="mt-16 grid gap-8 border-t border-white/15 pt-10 text-left sm:grid-cols-3">
-            <div>
-              <p className="font-heading text-4xl text-secondary">0-100</p>
-              <p className="mt-2 text-sm text-white/65">Un plan structuré dès la première rencontre</p>
-            </div>
-            <div>
-              <p className="font-heading text-4xl text-secondary">360°</p>
-              <p className="mt-2 text-sm text-white/65">
-                Placements, assurance, fiscalité et succession
-              </p>
-            </div>
-            <div>
-              <p className="font-heading text-4xl text-secondary">1 copilote</p>
-              <p className="mt-2 text-sm text-white/65">Un suivi humain, année après année</p>
-            </div>
-          </div>
-
-          <p className="mt-12 text-sm text-white/45">
-            <a href={`mailto:${EMAIL}`} className="hover:text-secondary transition-colors">
-              {EMAIL}
-            </a>
-            {' · '}
-            <a href={PHONE_LINK} className="hover:text-secondary transition-colors">
-              {PHONE}
-            </a>
-          </p>
-        </div>
+        <p className="text-sm text-white/55">
+          <a href={`mailto:${EMAIL}`} className="hover:text-secondary transition-colors">
+            {EMAIL}
+          </a>
+          {' · '}
+          <a href={PHONE_LINK} className="hover:text-secondary transition-colors">
+            {PHONE}
+          </a>
+        </p>
       </section>
 
       <footer className="border-t border-white/10 px-6 py-8 text-center text-xs text-white/40">
