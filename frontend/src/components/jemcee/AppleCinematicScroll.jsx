@@ -94,6 +94,8 @@ export function AppleCinematicScroll({
     setReducedMotion(prefersReducedMotion());
     setPortalReady(true);
     setTrackVh(touch ? Math.min(scrollHeightVh, 780) : scrollHeightVh);
+    // Afficher l’UI immédiatement (frames/vidéo suivent en arrière-plan)
+    setReady(true);
   }, [scrollHeightVh]);
 
   // Précharge la séquence d’images (priorité aux premières frames)
@@ -262,7 +264,7 @@ export function AppleCinematicScroll({
       drawFrame(smoothRef.current);
       applyVideoFallback(smoothRef.current);
 
-      if (Math.abs(smoothRef.current - lastUiRef.current) > 0.004) {
+      if (Math.abs(smoothRef.current - lastUiRef.current) > 0.004 || lastUiRef.current < 0) {
         lastUiRef.current = smoothRef.current;
         setProgress(smoothRef.current);
       }
@@ -286,7 +288,8 @@ export function AppleCinematicScroll({
     ? p < 0.12
       ? 1
       : 0
-    : beatOpacity(p, 0, 0.02, 0.08, 0.15);
+    : // Visible dès le premier pixel (peakIn = 0), puis fade-out
+      beatOpacity(p, 0, 0, 0.08, 0.16);
   const outroOpacity = reducedMotion
     ? p >= 0.88
       ? 1
@@ -294,7 +297,9 @@ export function AppleCinematicScroll({
     : beatOpacity(p, 0.86, 0.9, 1, 1.05);
   const chapterGate = 1 - clamp01(outroOpacity * 1.35);
   const mediaScale = reducedMotion ? 1 : isTouch ? 1 : 1.05 - p * 0.04 + outroOpacity * 0.03;
-  const mediaBrightness = reducedMotion ? 0.7 : 0.42 + p * 0.28 - outroOpacity * 0.18;
+  const mediaBrightness = reducedMotion
+    ? 0.75
+    : 0.55 + p * 0.2 - outroOpacity * 0.18;
 
   const stage = (
     <div
@@ -359,9 +364,10 @@ export function AppleCinematicScroll({
         }}
       />
 
+      {/* Chargement discret : ne masque jamais l’intro */}
       {!ready && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-dark/90">
-          <div className="h-1 w-36 overflow-hidden rounded-full bg-white/15">
+        <div className="pointer-events-none absolute bottom-16 left-1/2 z-30 -translate-x-1/2">
+          <div className="h-1 w-28 overflow-hidden rounded-full bg-white/15">
             <div className="h-full w-1/2 animate-pulse bg-secondary" />
           </div>
         </div>
