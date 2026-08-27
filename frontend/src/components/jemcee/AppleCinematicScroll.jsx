@@ -29,14 +29,37 @@ function beatY(opacity) {
   return (1 - opacity) * 36;
 }
 
+function frameUrl(pattern, index1, publicUrl = '') {
+  const padded = String(index1).padStart(4, '0');
+  return `${publicUrl || ''}${pattern.replace('{}', padded)}`;
+}
+
+/** Dessine une image en cover ou contain dans le canvas. */
+function drawFitted(ctx, img, cw, ch, mode) {
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  if (!iw || !ih || !cw || !ch) return;
+  const scale =
+    mode === 'contain' ? Math.min(cw / iw, ch / ih) : Math.max(cw / iw, ch / ih);
+  const dw = iw * scale;
+  const dh = ih * scale;
+  const dx = (cw - dw) / 2;
+  const dy = (ch - dh) / 2;
+  ctx.clearRect(0, 0, cw, ch);
+  ctx.fillStyle = '#01233f';
+  ctx.fillRect(0, 0, cw, ch);
+  ctx.drawImage(img, dx, dy, dw, dh);
+}
+
 /**
  * Scroll cinématique type Apple.
- * Piste haute + stage fixed en portal (pin fiable desktop).
- * Sur tactile : scrub plus léger + piste un peu plus courte.
+ * Scrub via séquence d’images → canvas (fluide) ; vidéo en fallback.
  */
 export function AppleCinematicScroll({
   videoSrc,
   posterSrc,
+  framesPath,
+  frameCount = 0,
   scrollHeightVh = 720,
   chapters = [],
   intro,
@@ -45,15 +68,16 @@ export function AppleCinematicScroll({
 }) {
   const trackRef = useRef(null);
   const stageRef = useRef(null);
+  const canvasRef = useRef(null);
   const videoRef = useRef(null);
+  const framesRef = useRef([]);
+  const lastFrameRef = useRef(-1);
   const targetRef = useRef(0);
   const smoothRef = useRef(0);
-  const seekingRef = useRef(false);
-  const pendingTimeRef = useRef(null);
-  const seekWatchdogRef = useRef(0);
   const rafRef = useRef(0);
   const lastUiRef = useRef(-1);
   const touchRef = useRef(false);
+  const useFramesRef = useRef(false);
 
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
@@ -61,6 +85,7 @@ export function AppleCinematicScroll({
   const [portalReady, setPortalReady] = useState(false);
   const [trackVh, setTrackVh] = useState(scrollHeightVh);
   const [isTouch, setIsTouch] = useState(false);
+  const [framesReady, setFramesReady] = useState(false);
 
   useEffect(() => {
     const touch = isTouchPrimary();
@@ -71,7 +96,48 @@ export function AppleCinematicScroll({
     setTrackVh(touch ? Math.min(scrollHeightVh, 780) : scrollHeightVh);
   }, [scrollHeightVh]);
 
+  // Précharge la séquence d’images (priorité aux premières frames)
   useEffect(() => {
+    if (!framesPath || frameCount < 2) return undefined;
+
+    const publicUrl = process.env.PUBLIC_URL || '';
+    const images = new Array(frameCount);
+    let loaded = 0;
+    let cancelled = false;
+    const minReady = Math.min(24, frameCount);
+
+    const mark = () => {
+      loaded += 1;
+      if (!cancelled && loaded >= minReady && !useFramesRef.current) {
+        useFramesRef.current = true;
+        setFramesReady(true);
+        setReady(true);
+      }
+      if (!cancelled && loaded >= frameCount) {
+        framesRef.current = images;
+      }
+    };
+
+    for (let i = 1; i <= frameCount; i += 1) {
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => {
+        images[i - 1] = img;
+        framesRef.current = images;
+        mark();
+      };
+      img.onerror = mark;
+      img.src = frameUrl(framesPath, i, publicUrl);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [framesPath, frameCount]);
+
+  // Fallback vidéo si pas de frames
+  useEffect(() => {
+    if (framesPath && frameCount >= 2) return undefined;
     const video = videoRef.current;
     if (!video) return undefined;
 
@@ -85,56 +151,62 @@ export function AppleCinematicScroll({
       }
     };
 
-    const onSeeked = () => {
-      seekingRef.current = false;
-      window.clearTimeout(seekWatchdogRef.current);
-      const pending = pendingTimeRef.current;
-      const threshold = touchRef.current ? 0.06 : 0.025;
-      if (
-        pending != null &&
-        Number.isFinite(video.duration) &&
-        Math.abs(pending - video.currentTime) > threshold
-      ) {
-        seekingRef.current = true;
-        try {
-          video.currentTime = pending;
-        } catch {
-          seekingRef.current = false;
-        }
-      }
-    };
-
     video.addEventListener('loadedmetadata', onLoaded);
-    video.addEventListener('seeked', onSeeked);
     if (video.readyState >= 1) onLoaded();
-
-    return () => {
-      video.removeEventListener('loadedmetadata', onLoaded);
-      video.removeEventListener('seeked', onSeeked);
-      window.clearTimeout(seekWatchdogRef.current);
-    };
-  }, [videoSrc, portalReady]);
+    return () => video.removeEventListener('loadedmetadata', onLoaded);
+  }, [videoSrc, portalReady, framesPath, frameCount]);
 
   useEffect(() => {
-    const applyVideo = (p) => {
+    const drawFrame = (p) => {
+      const canvas = canvasRef.current;
+      if (!canvas || !useFramesRef.current || frameCount < 2) return;
+      const idx = Math.min(frameCount - 1, Math.max(0, Math.round(p * (frameCount - 1))));
+      if (idx === lastFrameRef.current) return;
+      let img = framesRef.current[idx];
+      if (!img || !img.complete) {
+        // Frame pas encore chargée : plus proche disponible
+        for (let d = 1; d < 12; d += 1) {
+          const a = framesRef.current[idx - d];
+          const b = framesRef.current[idx + d];
+          if (a?.complete) {
+            img = a;
+            break;
+          }
+          if (b?.complete) {
+            img = b;
+            break;
+          }
+        }
+      }
+      if (!img || !img.complete) return;
+      const ctx = canvas.getContext('2d', { alpha: false });
+      if (!ctx) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      const cw = Math.max(1, Math.round(rect.width * dpr));
+      const ch = Math.max(1, Math.round(rect.height * dpr));
+      if (canvas.width !== cw || canvas.height !== ch) {
+        canvas.width = cw;
+        canvas.height = ch;
+      }
+      drawFitted(ctx, img, cw, ch, touchRef.current ? 'contain' : 'cover');
+      // Ne fige l’index que si la frame exacte est dispo (sinon on réessaiera)
+      if (img === framesRef.current[idx]) lastFrameRef.current = idx;
+    };
+
+    const applyVideoFallback = (p) => {
+      if (useFramesRef.current) return;
       const video = videoRef.current;
       if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
       const t = p * Math.max(video.duration - 0.04, 0);
-      pendingTimeRef.current = t;
-      if (seekingRef.current) return;
-      const minDelta = touchRef.current ? 0.05 : 0.02;
-      if (Math.abs(video.currentTime - t) < minDelta) return;
-      seekingRef.current = true;
+      if (Math.abs(video.currentTime - t) < 0.02) return;
       try {
-        video.currentTime = t;
+        if (typeof video.fastSeek === 'function') video.fastSeek(t);
+        else video.currentTime = t;
       } catch {
-        seekingRef.current = false;
-        return;
+        /* ignore */
       }
-      window.clearTimeout(seekWatchdogRef.current);
-      seekWatchdogRef.current = window.setTimeout(() => {
-        seekingRef.current = false;
-      }, touchRef.current ? 280 : 180);
     };
 
     const syncPin = () => {
@@ -182,13 +254,15 @@ export function AppleCinematicScroll({
       syncPin();
       const target = targetRef.current;
       const prev = smoothRef.current;
-      const factor = reducedMotion ? 1 : touchRef.current ? 0.45 : 0.38;
+      // Suivi serré du scroll = sensation fluide (pas de “trainé” vidéo)
+      const factor = reducedMotion ? 1 : 0.72;
       const next = prev + (target - prev) * factor;
-      smoothRef.current = Math.abs(target - next) < 0.0008 ? target : next;
-      applyVideo(smoothRef.current);
+      smoothRef.current = Math.abs(target - next) < 0.0004 ? target : next;
 
-      const uiStep = touchRef.current ? 0.008 : 0.002;
-      if (Math.abs(smoothRef.current - lastUiRef.current) > uiStep) {
+      drawFrame(smoothRef.current);
+      applyVideoFallback(smoothRef.current);
+
+      if (Math.abs(smoothRef.current - lastUiRef.current) > 0.004) {
         lastUiRef.current = smoothRef.current;
         setProgress(smoothRef.current);
       }
@@ -205,7 +279,7 @@ export function AppleCinematicScroll({
       window.removeEventListener('scroll', syncPin);
       window.removeEventListener('resize', syncPin);
     };
-  }, [reducedMotion, ready, portalReady]);
+  }, [reducedMotion, ready, portalReady, framesReady, frameCount]);
 
   const p = progress;
   const introOpacity = reducedMotion
@@ -218,13 +292,8 @@ export function AppleCinematicScroll({
       ? 1
       : 0
     : beatOpacity(p, 0.86, 0.9, 1, 1.05);
-  // Exclusivité dure : dès que l'outro monte, les chapitres sont coupés
   const chapterGate = 1 - clamp01(outroOpacity * 1.35);
-  const mediaScale = reducedMotion
-    ? 1
-    : isTouch
-      ? 1
-      : 1.05 - p * 0.04 + outroOpacity * 0.03;
+  const mediaScale = reducedMotion ? 1 : isTouch ? 1 : 1.05 - p * 0.04 + outroOpacity * 0.03;
   const mediaBrightness = reducedMotion ? 0.7 : 0.42 + p * 0.28 - outroOpacity * 0.18;
 
   const stage = (
@@ -239,7 +308,6 @@ export function AppleCinematicScroll({
         width: '100%',
         height: '100svh',
         zIndex: 40,
-        // Critique mobile/PC : le calque ne doit jamais capturer le scroll
         pointerEvents: 'none',
         touchAction: 'pan-y',
       }}
@@ -253,10 +321,15 @@ export function AppleCinematicScroll({
           filter: `brightness(${mediaBrightness})`,
         }}
       >
+        <canvas
+          ref={canvasRef}
+          className={`pointer-events-none h-full w-full ${framesReady ? 'block' : 'hidden'}`}
+          aria-hidden
+        />
         <video
           ref={videoRef}
           className={`pointer-events-none h-full w-full ${
-            isTouch ? 'object-contain object-center' : 'object-cover'
+            framesReady ? 'hidden' : isTouch ? 'object-contain object-center' : 'object-cover'
           }`}
           src={videoSrc}
           poster={posterSrc}
@@ -412,8 +485,6 @@ export function AppleCinematicScroll({
     </div>
   );
 
-  // Ne jamais raccourcir la piste pour reduced-motion :
-  // sinon 1 écran = 2 crans de molette et tous les chapitres disparaissent.
   const heightVh = trackVh;
 
   return (

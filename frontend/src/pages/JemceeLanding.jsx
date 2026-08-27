@@ -140,6 +140,8 @@ export const JemceeLanding = () => {
       <AppleCinematicScroll
         videoSrc={videoSrc}
         posterSrc={posterSrc}
+        framesPath={JEMCEE_SEQUENCE.framesPath}
+        frameCount={JEMCEE_SEQUENCE.frameCount}
         scrollHeightVh={1100}
         chapters={CHAPTERS}
         intro={() => (

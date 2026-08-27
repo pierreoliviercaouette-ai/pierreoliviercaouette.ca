@@ -1,9 +1,11 @@
-/** Métadonnées scrub : vidéo utilisateur continue (9,2 s @ 48 fps, fin notes + chronomètre). */
+/** Métadonnées scrub : séquence d’images (fluide) + vidéo fallback. */
 export const JEMCEE_SEQUENCE = {
-  fps: 48,
+  fps: 30,
   durationSec: 9.15,
   width: 1280,
   height: 720,
+  frameCount: 274,
+  framesPath: '/jemcee/sequence/frames/frame-{}.jpg',
   videoSrc: '/jemcee/pillars-sequence.mp4',
   posterSrc: '/jemcee/engine-bay.jpg',
   /** Fractions 0–1 alignées sur le parcours caméra de la vidéo source. */
@@ -14,3 +16,10 @@ export const JEMCEE_SEQUENCE = {
     { id: 'accompagnement', start: 0.66, end: 0.84 },
   ],
 };
+
+/** Résout le chemin d’une frame 1-indexée. */
+export function jemceeFrameSrc(index1, publicUrl = '') {
+  const padded = String(index1).padStart(4, '0');
+  const path = JEMCEE_SEQUENCE.framesPath.replace('{}', padded);
+  return `${publicUrl || ''}${path}`;
+}

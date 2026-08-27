@@ -1,10 +1,11 @@
 ﻿{
-  "fps": 48,
-  "frameCount": 439,
+  "fps": 30,
+  "frameCount": 274,
   "width": 1280,
   "height": 720,
   "durationSec": 9.15,
-  "source": "user Downloads/Regénère_une_nouvelle_vidéo_j.mp4 (trim 9.2s)",
+  "source": "pillars-sequence.mp4 → sequence/frames (canvas scrub)",
+  "framesPath": "/jemcee/sequence/frames/frame-{}.jpg",
   "chapters": [
     { "id": "orbit", "start": 0, "end": 0.12 },
     { "id": "performance", "start": 0.12, "end": 0.38 },
