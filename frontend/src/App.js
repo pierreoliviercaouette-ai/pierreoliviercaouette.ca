@@ -60,7 +60,6 @@ function AppShell() {
         <ConsentAwareAnalytics />
         <Navbar />
         <JemceeLanding />
-        <Footer />
         <BackToTop />
         <CookieConsentBanner />
         <Toaster position="top-right" richColors />
