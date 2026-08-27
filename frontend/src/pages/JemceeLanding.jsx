@@ -76,9 +76,9 @@ const CHAPTERS = [
   {
     id: 'accompagnement',
     chapterLabel: 'CHAPITRE 03 — COPILOTE',
-    title: 'Réservez. On démarre.',
+    title: 'Notes claires. Timing précis.',
     description:
-      '30 minutes gratuites. Un plan clair. Un conseiller qui lit la route avec vous — et qui reste dans le siège à droite.',
+      'Le siège de droite, c’est le mien : lire la route, anticiper les virages, et vous garder concentré sur l’essentiel.',
     align: 'left',
     anchor: 0.74,
     start: 0.66,
@@ -88,18 +88,18 @@ const CHAPTERS = [
     bullets: [
       {
         num: '07',
-        title: 'Rencontre découverte offerte',
-        text: 'Sans frais, sans engagement. On ouvre le capot de votre situation en 30 minutes.',
+        title: 'Décisions sans jargon',
+        text: 'Chaque choix expliqué clairement — vous savez pourquoi on agit, pas seulement quoi faire.',
       },
       {
         num: '08',
-        title: 'Plan 360° sur mesure',
-        text: 'Placements, assurance, fiscalité, retraite — une feuille de route qui fait du sens.',
+        title: 'Vision d’ensemble',
+        text: 'Placements, fiscalité, protection et retraite lus comme une seule feuille de route.',
       },
       {
         num: '09',
-        title: 'Suivi qui tient la distance',
-        text: 'Vous n’êtes plus seul. Ajustements, rappels, décisions — année après année.',
+        title: 'Présence dans la durée',
+        text: 'Quand la vie change, on recalibre ensemble. Vous n’êtes plus seul face aux décisions.',
       },
     ],
   },
