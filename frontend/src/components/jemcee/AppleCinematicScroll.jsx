@@ -215,7 +215,9 @@ export function AppleCinematicScroll({
     ? p >= 0.88
       ? 1
       : 0
-    : beatOpacity(p, 0.88, 0.93, 1, 1.05);
+    : beatOpacity(p, 0.86, 0.9, 1, 1.05);
+  // Exclusivité dure : dès que l'outro monte, les chapitres sont coupés
+  const chapterGate = 1 - clamp01(outroOpacity * 1.35);
   const mediaScale = reducedMotion ? 1 : 1.05 - p * 0.04 + outroOpacity * 0.03;
   const mediaBrightness = reducedMotion ? 0.7 : 0.42 + p * 0.28 - outroOpacity * 0.18;
 
@@ -298,11 +300,13 @@ export function AppleCinematicScroll({
       )}
 
       {chapters.map((ch) => {
-        const opacity = reducedMotion
-          ? p >= ch.start && p < ch.end
-            ? 1
-            : 0
-          : beatOpacity(p, ch.start, ch.peakIn, ch.peakOut, ch.end);
+        const opacity =
+          chapterGate *
+          (reducedMotion
+            ? p >= ch.start && p < ch.end
+              ? 1
+              : 0
+            : beatOpacity(p, ch.start, ch.peakIn, ch.peakOut, ch.end));
         const fromRight = ch.align === 'right';
         return (
           <div
@@ -312,6 +316,7 @@ export function AppleCinematicScroll({
               opacity,
               transform: `translateY(${beatY(opacity)}px)`,
               visibility: opacity < 0.02 ? 'hidden' : 'visible',
+              pointerEvents: 'none',
             }}
           >
             <div className={`mx-auto w-full max-w-7xl ${fromRight ? 'flex justify-end' : ''}`}>

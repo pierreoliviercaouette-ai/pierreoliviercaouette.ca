@@ -80,11 +80,11 @@ const CHAPTERS = [
     description:
       '30 minutes gratuites. Un plan clair. Un conseiller qui lit la route avec vous — et qui reste dans le siège à droite.',
     align: 'left',
-    anchor: 0.8,
-    start: 0.68,
-    peakIn: 0.74,
-    peakOut: 0.84,
-    end: 0.9,
+    anchor: 0.74,
+    start: 0.66,
+    peakIn: 0.7,
+    peakOut: 0.78,
+    end: 0.84,
     bullets: [
       {
         num: '07',
@@ -166,14 +166,16 @@ export const JemceeLanding = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackCta('jemcee_hero_depart')}
-                className="pointer-events-auto inline-flex items-center bg-white px-8 py-4 font-heading text-lg tracking-widest text-[#01233f] shadow-[0_12px_40px_rgba(255,255,255,0.22)] transition hover:bg-secondary"
+                className="pointer-events-auto inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest shadow-[0_12px_40px_rgba(255,255,255,0.22)] transition hover:bg-secondary"
+                style={{ backgroundColor: '#ffffff', color: '#01233f' }}
               >
                 PRENDRE LE DÉPART
               </a>
               <a
                 href="#performance"
                 onClick={() => trackCta('jemcee_hero_capot')}
-                className="pointer-events-auto inline-flex items-center border-2 border-white/70 bg-white/10 px-8 py-4 font-heading text-lg tracking-widest text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/20"
+                className="pointer-events-auto inline-flex items-center border-2 border-white/70 bg-white/10 px-8 py-4 font-heading text-lg tracking-widest backdrop-blur-sm transition-colors hover:border-white hover:bg-white/20"
+                style={{ color: '#ffffff' }}
               >
                 VOIR SOUS LE CAPOT
               </a>
@@ -196,14 +198,16 @@ export const JemceeLanding = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackCta('jemcee_outro_booking')}
-                className="pointer-events-auto inline-flex items-center bg-white px-10 py-5 font-heading text-lg tracking-widest text-[#01233f] shadow-[0_12px_40px_rgba(255,255,255,0.25)] transition hover:bg-secondary"
+                className="jemcee-cta-solid pointer-events-auto inline-flex items-center px-10 py-5 font-heading text-lg tracking-widest shadow-[0_12px_40px_rgba(255,255,255,0.25)] transition hover:bg-secondary"
+                style={{ backgroundColor: '#ffffff', color: '#01233f' }}
               >
                 RÉSERVER MA RENCONTRE
               </a>
               <a
                 href={PHONE_LINK}
                 onClick={() => trackCta('jemcee_outro_phone')}
-                className="pointer-events-auto inline-flex items-center border-2 border-white/80 bg-white/10 px-9 py-5 font-heading text-lg tracking-widest text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/20"
+                className="pointer-events-auto inline-flex items-center border-2 border-white/80 bg-white/10 px-9 py-5 font-heading text-lg tracking-widest backdrop-blur-sm transition-colors hover:border-white hover:bg-white/20"
+                style={{ color: '#ffffff' }}
               >
                 PARLER MAINTENANT
               </a>
