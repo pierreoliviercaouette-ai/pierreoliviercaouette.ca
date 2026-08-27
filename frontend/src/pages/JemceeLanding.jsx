@@ -1,10 +1,11 @@
+import { Link } from 'react-router-dom';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 import { AppleCinematicScroll } from '../components/jemcee/AppleCinematicScroll';
 import { JEMCEE_SEQUENCE } from '../data/jemceeSequence';
 
-export const JEMCEE_BOOKING_URL =
-  'https://outlook.office.com/book/PierreOlivierCaouetteiAGroupefinancier@ia.ca/s/_4G_IKTvnEeGazDkP6WOUQ2?ismsaljsauthenabled';
+/** Réservation interne (page site). */
+export const JEMCEE_BOOKING_URL = '/rendez-vous';
 
 const PHONE = '819 806-1164';
 const PHONE_LINK = 'tel:+18198061164';
@@ -15,37 +16,39 @@ const asset = (path) => `${process.env.PUBLIC_URL || ''}${path}`;
 const CHAPTERS = [
   {
     id: 'performance',
-    chapterLabel: 'CHAPITRE 01 — PERFORMANCE',
+    chapterLabel: 'PERFORMANCE',
     title: 'Hauts rendements. Haute performance.',
     description:
-      'Votre argent mérite mieux qu’un compte dormant. Une stratégie calibrée pour accélérer — sans perdre le contrôle.',
+      'Votre argent mérite mieux qu’un compte dormant. Une stratégie calibrée pour accélérer, sans perdre le contrôle.',
     align: 'left',
     anchor: 0.23,
     start: 0.1,
     peakIn: 0.14,
     peakOut: 0.3,
     end: 0.36,
+    nextHref: '#securite',
+    nextLabel: 'VOIR LA PROTECTION',
     bullets: [
       {
         num: '01',
         title: 'Puissance de placement',
-        text: 'Portefeuilles construits pour performer selon votre horizon — chaque dollar au travail.',
+        text: 'Portefeuilles construits pour performer selon votre horizon, chaque dollar au travail.',
       },
       {
         num: '02',
         title: 'Optimisation fiscale maximale',
-        text: 'REER, CELI, CELIAPP, REEE : chaque avantage fiscal capturé, chaque dollar mieux placé.',
+        text: 'REER, CELI, CELIAPP, REEE : chaque avantage fiscal utilisé, chaque dollar mieux placé.',
       },
       {
         num: '03',
         title: 'L’avantage du pro',
-        text: 'Discipline, rééquilibrage et décisions prises à froid — l’écart qui se creuse avec le temps.',
+        text: 'Discipline, rééquilibrage et décisions prises à froid. L’écart qui se creuse avec le temps.',
       },
     ],
   },
   {
     id: 'securite',
-    chapterLabel: 'CHAPITRE 02 — PROTECTION',
+    chapterLabel: 'PROTECTION',
     title: 'Vos proches. Votre filet.',
     description:
       'La vraie performance, c’est d’avancer sans peur. On verrouille la protection avant d’appuyer sur l’accélérateur.',
@@ -55,6 +58,8 @@ const CHAPTERS = [
     peakIn: 0.4,
     peakOut: 0.56,
     end: 0.62,
+    nextHref: '#accompagnement',
+    nextLabel: 'VOIR LE COPILOTE',
     bullets: [
       {
         num: '04',
@@ -75,7 +80,7 @@ const CHAPTERS = [
   },
   {
     id: 'accompagnement',
-    chapterLabel: 'CHAPITRE 03 — COPILOTE',
+    chapterLabel: 'COPILOTE',
     title: 'Notes claires. Timing précis.',
     description:
       'Le siège de droite, c’est le mien : lire la route, anticiper les virages, et vous garder concentré sur l’essentiel.',
@@ -85,11 +90,13 @@ const CHAPTERS = [
     peakIn: 0.66,
     peakOut: 0.82,
     end: 0.88,
+    nextHref: '#contact',
+    nextLabel: 'LIGNE DE DÉPART',
     bullets: [
       {
         num: '07',
         title: 'Décisions sans jargon',
-        text: 'Chaque choix expliqué clairement — vous savez pourquoi on agit, pas seulement quoi faire.',
+        text: 'Chaque choix expliqué clairement. Vous savez pourquoi on agit, pas seulement quoi faire.',
       },
       {
         num: '08',
@@ -144,10 +151,11 @@ export const JemceeLanding = () => {
         frameCount={JEMCEE_SEQUENCE.frameCount}
         scrollHeightVh={1100}
         chapters={CHAPTERS}
+        onChapterNext={(itemId) => trackCta(itemId)}
         intro={() => (
           <>
             <p className="font-heading text-sm tracking-[0.45em] text-secondary">
-              CONSEILLER EN SÉCURITÉ FINANCIÈRE
+              PIERRE-OLIVIER CAOUETTE
             </p>
             <h1 className="mt-4 max-w-4xl font-heading text-5xl leading-[0.92] text-white md:text-7xl lg:text-8xl">
               Votre patrimoine mérite{' '}
@@ -163,16 +171,14 @@ export const JemceeLanding = () => {
               financière qui donne envie de prendre le départ maintenant.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
-              <a
-                href={JEMCEE_BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to={JEMCEE_BOOKING_URL}
                 onClick={() => trackCta('jemcee_hero_depart')}
                 className="pointer-events-auto inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest shadow-[0_12px_40px_rgba(255,255,255,0.22)] transition hover:bg-secondary"
                 style={{ backgroundColor: '#ffffff', color: '#01233f' }}
               >
                 PRENDRE LE DÉPART
-              </a>
+              </Link>
               <a
                 href="#performance"
                 onClick={() => trackCta('jemcee_hero_capot')}
@@ -192,19 +198,17 @@ export const JemceeLanding = () => {
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-base text-white/85 sm:text-lg">
               30 minutes. Gratuit. Sans engagement. Un plan clair pour faire croître et protéger votre
-              patrimoine — et vous repartez avec une clarté que peu de gens ont.
+              patrimoine, et vous repartez avec une clarté que peu de gens ont.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <a
-                href={JEMCEE_BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to={JEMCEE_BOOKING_URL}
                 onClick={() => trackCta('jemcee_outro_booking')}
                 className="jemcee-cta-solid pointer-events-auto inline-flex items-center px-10 py-5 font-heading text-lg tracking-widest shadow-[0_12px_40px_rgba(255,255,255,0.25)] transition hover:bg-secondary"
                 style={{ backgroundColor: '#ffffff', color: '#01233f' }}
               >
                 RÉSERVER MA RENCONTRE
-              </a>
+              </Link>
               <a
                 href={PHONE_LINK}
                 onClick={() => trackCta('jemcee_outro_phone')}
@@ -255,7 +259,7 @@ export const JemceeLanding = () => {
       </section>
 
       <footer className="border-t border-white/10 px-6 py-8 text-center text-xs text-white/40">
-        © {new Date().getFullYear()} — Pierre-Olivier Caouette, conseiller en sécurité financière.
+        © {new Date().getFullYear()} Pierre-Olivier Caouette, conseiller en sécurité financière.
         Les rendements passés ne garantissent pas les rendements futurs.
       </footer>
     </div>

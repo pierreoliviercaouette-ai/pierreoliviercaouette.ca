@@ -65,6 +65,7 @@ export function AppleCinematicScroll({
   chapters = [],
   intro,
   outro,
+  onChapterNext,
   children,
 }) {
   const trackRef = useRef(null);
@@ -458,6 +459,18 @@ export function AppleCinematicScroll({
                     );
                   })}
                 </ul>
+                {ch.nextHref && ch.nextLabel ? (
+                  <div className={`mt-8 ${fromRight ? 'md:flex md:justify-end' : ''}`}>
+                    <a
+                      href={ch.nextHref}
+                      onClick={() => onChapterNext?.(`jemcee_next_${ch.id}`)}
+                      className="pointer-events-auto inline-flex items-center border-2 border-white/70 bg-white/10 px-8 py-4 font-heading text-lg tracking-widest backdrop-blur-sm transition-colors hover:border-white hover:bg-white/20"
+                      style={{ color: '#ffffff' }}
+                    >
+                      {ch.nextLabel}
+                    </a>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
