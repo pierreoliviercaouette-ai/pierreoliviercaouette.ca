@@ -262,10 +262,6 @@ export const JemceeLanding = () => {
         </p>
       </section>
 
-      <footer className="border-t border-white/10 px-6 py-8 text-center text-xs text-white/40">
-        © {new Date().getFullYear()} Pierre-Olivier Caouette, conseiller en sécurité financière.
-        Les rendements passés ne garantissent pas les rendements futurs.
-      </footer>
     </div>
   );
 };

@@ -66,8 +66,8 @@ export function JemceeRendementsTeaser({ onCta }) {
           Banque vs modèles iA
         </h2>
         <p className="mt-4 max-w-xl text-base text-white/70">
-          Rendements nets annualisés sur 5 ans (au {DEFAULT_MODEL_PORTFOLIOS_AS_OF}), à profil égal.
-          Illustratif seulement.
+          Rendements nets annualisés sur 5 ans (au {DEFAULT_MODEL_PORTFOLIOS_AS_OF}), à profil
+          égal.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Profil de risque">
@@ -158,18 +158,24 @@ export function JemceeRendementsTeaser({ onCta }) {
             </p>
             <Link
               to="/outils/comparateur-rendements"
-              onClick={() => onCta?.('jemcee_rendements_outil')}
+              onClick={() => onCta?.('jemcee_rendements_details')}
               className="mt-6 inline-flex items-center border border-white/40 px-5 py-3 font-heading text-sm tracking-widest text-white transition-colors hover:border-secondary hover:text-secondary"
             >
-              COMPARER EN DÉTAIL
+              LIRE LES DÉTAILS
             </Link>
           </div>
         </div>
 
-        <p className="mt-8 text-xs text-white/40 max-w-3xl">
-          Moyennes bancaires illustratives à titre de comparaison. Les rendements passés ne
-          garantissent pas les rendements futurs. Le bon profil dépend de votre tolérance au risque
-          et de vos objectifs.
+        <p className="mt-6 max-w-3xl text-[11px] leading-relaxed text-white/35">
+          Illustration · fonds distincts, série Classique 75/75 · passés ≠ futurs · pas un conseil
+          personnalisé.{' '}
+          <Link
+            to="/outils/comparateur-rendements"
+            onClick={() => onCta?.('jemcee_rendements_details_footnote')}
+            className="text-white/50 underline underline-offset-2 transition-colors hover:text-secondary"
+          >
+            Lire les détails
+          </Link>
         </p>
       </div>
     </section>
