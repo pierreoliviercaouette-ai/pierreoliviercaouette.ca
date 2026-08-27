@@ -7,9 +7,17 @@
   "source": "pillars-sequence.mp4 → sequence/frames (canvas scrub)",
   "framesPath": "/jemcee/sequence/frames/frame-{}.jpg",
   "chapters": [
-    { "id": "orbit", "start": 0, "end": 0.12 },
-    { "id": "performance", "start": 0.12, "end": 0.38 },
-    { "id": "securite", "start": 0.4, "end": 0.84 },
-    { "id": "accompagnement", "start": 0.86, "end": 0.945 }
+    { "id": "orbit", "start": 0, "end": 0.1 },
+    { "id": "performance", "start": 0.1, "end": 0.36 },
+    { "id": "securite", "start": 0.36, "end": 0.62 },
+    { "id": "accompagnement", "start": 0.62, "end": 0.88 }
+  ],
+  "scrollToMedia": [
+    [0, 0],
+    [0.1, 0.12],
+    [0.36, 0.4],
+    [0.62, 0.86],
+    [0.88, 0.94],
+    [1, 1]
   ]
 }

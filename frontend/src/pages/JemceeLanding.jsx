@@ -20,11 +20,11 @@ const CHAPTERS = [
     description:
       'Votre argent mérite mieux qu’un compte dormant. Une stratégie calibrée pour accélérer — sans perdre le contrôle.',
     align: 'left',
-    anchor: 0.26,
-    start: 0.12,
-    peakIn: 0.18,
-    peakOut: 0.32,
-    end: 0.38,
+    anchor: 0.23,
+    start: 0.1,
+    peakIn: 0.14,
+    peakOut: 0.3,
+    end: 0.36,
     bullets: [
       {
         num: '01',
@@ -50,11 +50,11 @@ const CHAPTERS = [
     description:
       'La vraie performance, c’est d’avancer sans peur. On verrouille la protection avant d’appuyer sur l’accélérateur.',
     align: 'right',
-    anchor: 0.58,
-    start: 0.4,
-    peakIn: 0.48,
-    peakOut: 0.74,
-    end: 0.84,
+    anchor: 0.49,
+    start: 0.36,
+    peakIn: 0.4,
+    peakOut: 0.56,
+    end: 0.62,
     bullets: [
       {
         num: '04',
@@ -80,11 +80,11 @@ const CHAPTERS = [
     description:
       'Le siège de droite, c’est le mien : lire la route, anticiper les virages, et vous garder concentré sur l’essentiel.',
     align: 'left',
-    anchor: 0.9,
-    start: 0.86,
-    peakIn: 0.88,
-    peakOut: 0.92,
-    end: 0.945,
+    anchor: 0.75,
+    start: 0.62,
+    peakIn: 0.66,
+    peakOut: 0.82,
+    end: 0.88,
     bullets: [
       {
         num: '07',

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { mapScrollToMedia } from '../../data/jemceeSequence';
 
 function prefersReducedMotion() {
   return (
@@ -261,8 +262,8 @@ export function AppleCinematicScroll({
       const next = prev + (target - prev) * factor;
       smoothRef.current = Math.abs(target - next) < 0.0004 ? target : next;
 
-      drawFrame(smoothRef.current);
-      applyVideoFallback(smoothRef.current);
+      drawFrame(mapScrollToMedia(smoothRef.current));
+      applyVideoFallback(mapScrollToMedia(smoothRef.current));
 
       if (Math.abs(smoothRef.current - lastUiRef.current) > 0.004 || lastUiRef.current < 0) {
         lastUiRef.current = smoothRef.current;
@@ -285,16 +286,16 @@ export function AppleCinematicScroll({
 
   const p = progress;
   const introOpacity = reducedMotion
-    ? p < 0.12
+    ? p < 0.1
       ? 1
       : 0
-    : // Visible dès le premier pixel (peakIn = 0), puis fade-out
-      beatOpacity(p, 0, 0, 0.08, 0.16);
+    : // Visible dès le premier pixel (peakIn = 0), puis fade-out avant ch.01
+      beatOpacity(p, 0, 0, 0.06, 0.12);
   const outroOpacity = reducedMotion
-    ? p >= 0.95
+    ? p >= 0.9
       ? 1
       : 0
-    : beatOpacity(p, 0.94, 0.96, 1, 1.05);
+    : beatOpacity(p, 0.88, 0.92, 1, 1.05);
   const chapterGate = 1 - clamp01(outroOpacity * 1.35);
   const mediaScale = reducedMotion ? 1 : isTouch ? 1 : 1.05 - p * 0.04 + outroOpacity * 0.03;
   const mediaBrightness = reducedMotion
