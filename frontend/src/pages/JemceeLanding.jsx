@@ -50,11 +50,11 @@ const CHAPTERS = [
     description:
       'La vraie performance, c’est d’avancer sans peur. On verrouille la protection avant d’appuyer sur l’accélérateur.',
     align: 'right',
-    anchor: 0.52,
+    anchor: 0.58,
     start: 0.4,
-    peakIn: 0.46,
-    peakOut: 0.58,
-    end: 0.64,
+    peakIn: 0.48,
+    peakOut: 0.74,
+    end: 0.84,
     bullets: [
       {
         num: '04',
@@ -80,11 +80,11 @@ const CHAPTERS = [
     description:
       'Le siège de droite, c’est le mien : lire la route, anticiper les virages, et vous garder concentré sur l’essentiel.',
     align: 'left',
-    anchor: 0.74,
-    start: 0.66,
-    peakIn: 0.7,
-    peakOut: 0.78,
-    end: 0.84,
+    anchor: 0.9,
+    start: 0.86,
+    peakIn: 0.88,
+    peakOut: 0.92,
+    end: 0.945,
     bullets: [
       {
         num: '07',

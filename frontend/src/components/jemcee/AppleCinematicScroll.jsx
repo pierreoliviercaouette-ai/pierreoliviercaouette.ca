@@ -291,10 +291,10 @@ export function AppleCinematicScroll({
     : // Visible dès le premier pixel (peakIn = 0), puis fade-out
       beatOpacity(p, 0, 0, 0.08, 0.16);
   const outroOpacity = reducedMotion
-    ? p >= 0.88
+    ? p >= 0.95
       ? 1
       : 0
-    : beatOpacity(p, 0.86, 0.9, 1, 1.05);
+    : beatOpacity(p, 0.94, 0.96, 1, 1.05);
   const chapterGate = 1 - clamp01(outroOpacity * 1.35);
   const mediaScale = reducedMotion ? 1 : isTouch ? 1 : 1.05 - p * 0.04 + outroOpacity * 0.03;
   const mediaBrightness = reducedMotion

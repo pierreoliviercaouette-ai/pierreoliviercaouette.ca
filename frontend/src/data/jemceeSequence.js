@@ -12,8 +12,8 @@ export const JEMCEE_SEQUENCE = {
   chapters: [
     { id: 'orbit', start: 0, end: 0.12 },
     { id: 'performance', start: 0.12, end: 0.38 },
-    { id: 'securite', start: 0.4, end: 0.64 },
-    { id: 'accompagnement', start: 0.66, end: 0.84 },
+    { id: 'securite', start: 0.4, end: 0.84 },
+    { id: 'accompagnement', start: 0.86, end: 0.945 },
   ],
 };
 
