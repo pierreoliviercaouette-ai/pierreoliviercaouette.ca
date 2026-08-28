@@ -136,6 +136,37 @@ export async function loadPortfolioFundPerfMap(supabase) {
   return { perfByCode, asOfIso, codes, modelPortfolioRows: mpRows || [], loadError };
 }
 
+/**
+ * KPI sync model_portfolios — RPC public (017) puis select direct.
+ * @returns {Promise<{ rows: object[], asOfIso: string|null, error: string|null }>}
+ */
+export async function loadModelPortfolioKpiRows(supabaseClient) {
+  if (!supabaseClient) {
+    return { rows: [], asOfIso: null, error: 'no_client' };
+  }
+
+  const { data: rpcRows, error: rpcError } = await supabaseClient.rpc(
+    'get_public_model_portfolio_kpis'
+  );
+
+  if (!rpcError && rpcRows?.length) {
+    const asOfIso = rpcRows.find((r) => r.as_of_date)?.as_of_date ?? null;
+    return { rows: rpcRows, asOfIso, error: null };
+  }
+
+  const { data: rows, error } = await supabaseClient
+    .from('model_portfolios')
+    .select('key, name, ytd_2026, year_2025, annualized_3y, annualized_5y, href, as_of_date')
+    .order('display_order', { ascending: true });
+
+  if (error) {
+    return { rows: [], asOfIso: null, error: error.message };
+  }
+
+  const asOfIso = rows?.find((r) => r.as_of_date)?.as_of_date ?? null;
+  return { rows: rows || [], asOfIso, error: rpcError?.message || null };
+}
+
 /** KPI affiché : valeurs sync `model_portfolios` prioritaires sur la pondération fonds. */
 export function resolveSyncedPortfolioKpi(syncedValue, weightedValue) {
   if (syncedValue != null && syncedValue !== '') return Number(syncedValue);

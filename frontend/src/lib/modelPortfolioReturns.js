@@ -1,14 +1,10 @@
 /**
  * Source unique des rendements 5 ans net iA pour comparaisons (comparateur, jemcee, etc.).
- * Priorité : cache live Supabase (même calcul que /portefeuilles) → defaults pondérés → statique.
+ * Priorité : KPI sync `model_portfolios` (Supabase) → fallbacks statiques du repo.
  */
 
 import { DEFAULT_MODEL_PORTFOLIOS } from '../data/modelPortfolios';
 import { PORTFOLIO_PROFILE_LIST } from '../data/portfolioProfiles';
-import {
-  buildPackagedPerfByCode,
-  buildWeightedPortfolioCards,
-} from './portfolioFundPerf';
 
 const round1 = (n) => Math.round(Number(n) * 10) / 10;
 
@@ -16,21 +12,19 @@ const round1 = (n) => Math.round(Number(n) * 10) / 10;
 let liveReturnsByProfil = null;
 let liveAsOfLabel = null;
 
-/** Defaults pondérés (calculés une fois). */
-let packagedReturnsByProfil = null;
+/** Fallback statique (modelPortfolios.js — aligné admin sync). */
+let staticReturnsByProfil = null;
 
-function buildPackagedReturnsMap() {
-  const cards = buildWeightedPortfolioCards(buildPackagedPerfByCode(), []);
-  return Object.fromEntries(
-    cards.map((c) => [c.key, c.annualized5y != null ? round1(c.annualized5y) : null])
-  );
-}
-
-function getPackagedReturnsMap() {
-  if (!packagedReturnsByProfil) {
-    packagedReturnsByProfil = buildPackagedReturnsMap();
+function getStaticReturnsMap() {
+  if (!staticReturnsByProfil) {
+    staticReturnsByProfil = Object.fromEntries(
+      DEFAULT_MODEL_PORTFOLIOS.map((p) => [
+        p.key,
+        p.annualized5y != null ? round1(p.annualized5y) : null,
+      ])
+    );
   }
-  return packagedReturnsByProfil;
+  return staticReturnsByProfil;
 }
 
 function getStaticFallback5y(profil) {
@@ -40,18 +34,28 @@ function getStaticFallback5y(profil) {
   return row?.annualized5y != null ? round1(row.annualized5y) : null;
 }
 
-export function setLiveModelPortfolioReturns(cards, asOfLabel) {
-  if (!cards?.length) return;
+/** Alimente le cache depuis les lignes `model_portfolios` (annualized_5y sync). */
+export function setLiveFromModelPortfolioRows(rows, asOfLabel) {
+  if (!rows?.length) return;
   const next = {};
-  for (const card of cards) {
-    if (card.annualized5y != null) {
-      next[card.key] = round1(card.annualized5y);
+  for (const row of rows) {
+    if (row.annualized_5y != null && row.key) {
+      next[row.key] = round1(row.annualized_5y);
     }
   }
   if (Object.keys(next).length) {
     liveReturnsByProfil = next;
     liveAsOfLabel = asOfLabel || null;
   }
+}
+
+/** @deprecated Préférer setLiveFromModelPortfolioRows. */
+export function setLiveModelPortfolioReturns(cards, asOfLabel) {
+  if (!cards?.length) return;
+  setLiveFromModelPortfolioRows(
+    cards.map((c) => ({ key: c.key, annualized_5y: c.annualized5y })),
+    asOfLabel
+  );
 }
 
 export function getLiveModelPortfolioAsOfLabel() {
@@ -68,9 +72,9 @@ export function getIaPctForProfil(profil) {
   if (liveReturnsByProfil?.[profil] != null) {
     return liveReturnsByProfil[profil];
   }
-  const packaged = getPackagedReturnsMap()[profil];
-  if (packaged != null) {
-    return packaged;
+  const staticVal = getStaticReturnsMap()[profil];
+  if (staticVal != null) {
+    return staticVal;
   }
   return getStaticFallback5y(profil) ?? getStaticFallback5y('equilibre');
 }
@@ -83,4 +87,9 @@ export function getAllIaPctByProfil() {
 /** @deprecated Préférer getAllIaPctByProfil(). */
 export function getIaReturnsSnapshot() {
   return getAllIaPctByProfil();
+}
+
+/** Invalide le cache statique (tests). */
+export function resetStaticPortfolioReturnsCache() {
+  staticReturnsByProfil = null;
 }

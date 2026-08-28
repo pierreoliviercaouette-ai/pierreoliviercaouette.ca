@@ -203,6 +203,11 @@ export const ToolDetail = () => {
       <section className="py-8">
         <div className="container-max px-4 md:px-8">
           <ToolShell
+            key={
+              slug === 'comparateur-rendements'
+                ? `ia-${portfolioReturns.ready}-${portfolioReturns.returnsByProfil.audacieux}`
+                : slug
+            }
             fields={view.fields}
             values={formValues}
             onChange={handleChange}

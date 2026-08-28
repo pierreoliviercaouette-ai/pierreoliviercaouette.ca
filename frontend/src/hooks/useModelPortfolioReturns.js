@@ -3,16 +3,13 @@ import { DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../data/modelPortfolios';
 import { formatIsoDateLabelFr } from '../lib/portfolioCompliance';
 import {
   getAllIaPctByProfil,
-  setLiveModelPortfolioReturns,
+  setLiveFromModelPortfolioRows,
 } from '../lib/modelPortfolioReturns';
-import {
-  buildWeightedPortfolioCards,
-  loadPortfolioFundPerfMap,
-} from '../lib/portfolioFundPerf';
+import { loadModelPortfolioKpiRows } from '../lib/portfolioFundPerf';
 import { supabase } from '../lib/supabaseClient';
 
 /**
- * Charge les rendements pondérés iA (même source que /portefeuilles) et alimente le cache global.
+ * Charge les KPI sync model_portfolios (même source que l’admin) pour comparateur / jemcee.
  */
 export function useModelPortfolioReturns() {
   const [ready, setReady] = useState(false);
@@ -23,15 +20,17 @@ export function useModelPortfolioReturns() {
     let cancelled = false;
 
     const load = async () => {
-      const { perfByCode, asOfIso, modelPortfolioRows } = await loadPortfolioFundPerfMap(supabase);
-      const cards = buildWeightedPortfolioCards(perfByCode, modelPortfolioRows);
+      const { rows, asOfIso } = await loadModelPortfolioKpiRows(supabase);
       const label = asOfIso
         ? formatIsoDateLabelFr(asOfIso) || asOfIso
         : DEFAULT_MODEL_PORTFOLIOS_AS_OF;
 
       if (cancelled) return;
 
-      setLiveModelPortfolioReturns(cards, label);
+      if (rows.length) {
+        setLiveFromModelPortfolioRows(rows, label);
+      }
+
       setReturnsByProfil(getAllIaPctByProfil());
       setAsOfLabel(label);
       setReady(true);
