@@ -172,6 +172,15 @@ export function buildWeightedPortfolioCards(perfByCode, modelPortfolioRows = [])
   });
 }
 
+/** Perf map depuis defaults packaged (même pondération que /portefeuilles hors-ligne). */
+export function buildPackagedPerfByCode() {
+  const codes = getAllPortfolioFundCodes();
+  const fakeRows = codes
+    .filter((code) => getDefaultFundPerformance(code))
+    .map((external_code) => ({ external_code, metadata: {} }));
+  return mergeFundRowsIntoPerfMap({}, fakeRows);
+}
+
 /** Empty placeholder cards while loading (no packaged returns). */
 export function buildEmptyPortfolioCards() {
   return PORTFOLIO_PROFILE_LIST.map((p) => ({

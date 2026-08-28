@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { trackEvent } from '../lib/analytics';
 import { ToolShell } from '../components/tools/ToolShell';
 import { getToolView, hasToolView, runTool } from '../tools/registry';
+import { useModelPortfolioReturns } from '../hooks/useModelPortfolioReturns';
 
 export const ToolDetail = () => {
   const { slug } = useParams();
@@ -23,6 +24,7 @@ export const ToolDetail = () => {
   const [formValues, setFormValues] = useState({});
 
   const view = useMemo(() => getToolView(slug), [slug]);
+  const portfolioReturns = useModelPortfolioReturns();
 
   useEffect(() => {
     if (authLoading) return;
@@ -80,7 +82,7 @@ export const ToolDetail = () => {
       return { results: {}, presentation: { rows: [] } };
     }
     return runTool(slug, formValues);
-  }, [slug, formValues]);
+  }, [slug, formValues, portfolioReturns.ready, portfolioReturns.returnsByProfil]);
 
   const handleChange = (id, value) => {
     setFormValues((prev) => {

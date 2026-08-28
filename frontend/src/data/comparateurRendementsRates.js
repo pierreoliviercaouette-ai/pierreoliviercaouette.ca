@@ -1,4 +1,9 @@
-import { DEFAULT_MODEL_PORTFOLIOS } from './modelPortfolios';
+export {
+  getAllIaPctByProfil,
+  getIaPctForProfil,
+  getLiveModelPortfolioAsOfLabel,
+  setLiveModelPortfolioReturns,
+} from '../lib/modelPortfolioReturns';
 
 /** Moyennes illustratives banques (succursale / wrap), 5 ans net — par profil. */
 export const BANQUE_5Y_BY_PROFIL = {
@@ -17,22 +22,8 @@ export const PROFIL_RISQUE_LABELS = {
   audacieux: 'Audacieux',
 };
 
-/** Arrondi 1 décimale pour affichage / comparaison. */
-const round1 = (n) => Math.round(Number(n) * 10) / 10;
-
-/**
- * Rendements iA 5 ans net dérivés des portefeuilles modèles (même source que /portefeuilles).
- */
-export const IA_5Y_BY_PROFIL = Object.fromEntries(
-  DEFAULT_MODEL_PORTFOLIOS.map((p) => [p.key, round1(p.annualized5y)])
-);
-
 export function getBanqueAvgForProfil(profil) {
   return BANQUE_5Y_BY_PROFIL[profil] ?? BANQUE_5Y_BY_PROFIL.equilibre;
-}
-
-export function getIaPctForProfil(profil) {
-  return IA_5Y_BY_PROFIL[profil] ?? IA_5Y_BY_PROFIL.equilibre;
 }
 
 export function formatPctFr(n, digits = 1) {
