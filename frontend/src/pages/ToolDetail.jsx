@@ -77,12 +77,17 @@ export const ToolDetail = () => {
     fetchTool();
   }, [slug, authLoading, navigate, view]);
 
+  useEffect(() => {
+    if (slug !== 'comparateur-rendements' || !portfolioReturns.ready) return;
+    setFormValues((prev) => ({ ...prev }));
+  }, [slug, portfolioReturns.ready, portfolioReturns.returnsByProfil]);
+
   const { results, presentation } = useMemo(() => {
     if (!slug || !Object.keys(formValues).length) {
       return { results: {}, presentation: { rows: [] } };
     }
     return runTool(slug, formValues);
-  }, [slug, formValues, portfolioReturns.ready, portfolioReturns.returnsByProfil]);
+  }, [slug, formValues]);
 
   const handleChange = (id, value) => {
     setFormValues((prev) => {
