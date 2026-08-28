@@ -688,10 +688,11 @@ export const toolViews = {
         type: 'select',
         section: 'Comparaison',
         fullWidth: true,
-        options: Object.keys(PROFIL_RISQUE_LABELS).map((key) => ({
-          value: key,
-          label: `${PROFIL_RISQUE_LABELS[key]} — iA ${formatPctFr(getIaPctForProfil(key))} %`,
-        })),
+        options: () =>
+          Object.keys(PROFIL_RISQUE_LABELS).map((key) => ({
+            value: key,
+            label: `${PROFIL_RISQUE_LABELS[key]} — iA ${formatPctFr(getIaPctForProfil(key))} %`,
+          })),
         hint: (values) => {
           const profil = values.profil || 'equilibre';
           if (values.mode === 'avance') {

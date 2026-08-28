@@ -136,6 +136,12 @@ export async function loadPortfolioFundPerfMap(supabase) {
   return { perfByCode, asOfIso, codes, modelPortfolioRows: mpRows || [], loadError };
 }
 
+/** KPI affiché : valeurs sync `model_portfolios` prioritaires sur la pondération fonds. */
+export function resolveSyncedPortfolioKpi(syncedValue, weightedValue) {
+  if (syncedValue != null && syncedValue !== '') return Number(syncedValue);
+  return weightedValue ?? null;
+}
+
 /** Build display cards from fund perf map; optional model_portfolios rows as KPI fallback. */
 export function buildWeightedPortfolioCards(perfByCode, modelPortfolioRows = []) {
   const byKey = Object.fromEntries((modelPortfolioRows || []).map((r) => [r.key, r]));
@@ -148,22 +154,10 @@ export function buildWeightedPortfolioCards(perfByCode, modelPortfolioRows = [])
       key: p.key,
       name: legacy?.name || p.name,
       href: legacy?.href || p.href,
-      ytd2026:
-        periodReturns.ytd ??
-        (legacy?.ytd_2026 != null ? Number(legacy.ytd_2026) : null) ??
-        null,
-      yearPrev:
-        periodReturns.prevYear ??
-        (legacy?.year_2025 != null ? Number(legacy.year_2025) : null) ??
-        null,
-      annualized3y:
-        periodReturns.threeYear ??
-        (legacy?.annualized_3y != null ? Number(legacy.annualized_3y) : null) ??
-        null,
-      annualized5y:
-        periodReturns.fiveYear ??
-        (legacy?.annualized_5y != null ? Number(legacy.annualized_5y) : null) ??
-        null,
+      ytd2026: resolveSyncedPortfolioKpi(legacy?.ytd_2026, periodReturns.ytd),
+      yearPrev: resolveSyncedPortfolioKpi(legacy?.year_2025, periodReturns.prevYear),
+      annualized3y: resolveSyncedPortfolioKpi(legacy?.annualized_3y, periodReturns.threeYear),
+      annualized5y: resolveSyncedPortfolioKpi(legacy?.annualized_5y, periodReturns.fiveYear),
       periodReturns,
       incompleteByPeriod,
       ytdIncomplete: Boolean(incompleteByPeriod?.ytd),

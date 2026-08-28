@@ -35,7 +35,7 @@ import {
   formatReturnWithIncomplete,
 } from '../lib/portfolioCompliance';
 import { computeWeightedPeriodReturns } from '../lib/portfolioCsvImport';
-import { mergeFundRowsIntoPerfMap } from '../lib/portfolioFundPerf';
+import { mergeFundRowsIntoPerfMap, resolveSyncedPortfolioKpi } from '../lib/portfolioFundPerf';
 import { buildGrowthSeriesFromFundReturns } from '../lib/portfolioGrowth';
 import { getFundFicheUrl } from '../lib/portfolioFiches';
 import { exportPortfolioToPdf } from '../lib/portfolioPdfExport';
@@ -194,22 +194,10 @@ export const ModelPortfolioDetail = () => {
       setPortfolio({
         key: slug,
         name: legacyRow?.name || profile?.name || fallbackPortfolio?.name || slug,
-        ytd2026:
-          weighted.ytd ??
-          (legacyRow?.ytd_2026 != null ? Number(legacyRow.ytd_2026) : null) ??
-          null,
-        year2025:
-          weighted.prevYear ??
-          (legacyRow?.year_2025 != null ? Number(legacyRow.year_2025) : null) ??
-          null,
-        annualized3y:
-          weighted.threeYear ??
-          (legacyRow?.annualized_3y != null ? Number(legacyRow.annualized_3y) : null) ??
-          null,
-        annualized5y:
-          weighted.fiveYear ??
-          (legacyRow?.annualized_5y != null ? Number(legacyRow.annualized_5y) : null) ??
-          null,
+        ytd2026: resolveSyncedPortfolioKpi(legacyRow?.ytd_2026, weighted.ytd),
+        year2025: resolveSyncedPortfolioKpi(legacyRow?.year_2025, weighted.prevYear),
+        annualized3y: resolveSyncedPortfolioKpi(legacyRow?.annualized_3y, weighted.threeYear),
+        annualized5y: resolveSyncedPortfolioKpi(legacyRow?.annualized_5y, weighted.fiveYear),
         href: legacyRow?.href || profile?.href || (isAdminOnly ? `/admin/portefeuilles/${slug}` : `/portefeuilles/${slug}`),
         periodReturns: weighted,
       });
