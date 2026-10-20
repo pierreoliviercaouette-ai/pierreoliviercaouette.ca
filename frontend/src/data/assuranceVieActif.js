@@ -7,6 +7,9 @@ export const INSURER_RATE = 0.085;
 export const SAFETY_RATIO = 0.8;
 export const READ_AGES = [40, 51, 65, 85, 100];
 
+/** Taux qui reproduit l'impôt au rachat des illustrations (impôt ÷ (rachat − coût de base)). */
+export const ILLUSTRATION_TAX_RATE = 0.5331;
+
 export const SCENARIOS = [
   {
     id: 's1',
@@ -103,6 +106,72 @@ export function illustrateLoan(rows, { startYear, amount, repayment, horizonAge 
   };
 }
 
+/**
+ * Taux interne annuel. La prime de l'année k est versée au début de l'année,
+ * la valeur terminale est lue à la fin de la dernière année.
+ * Cette convention reproduit le « rendement au rachat » des illustrations.
+ */
+export function policyIrr(rows, terminalKey) {
+  const n = rows.length;
+  if (!n) return null;
+  const terminal = Number(rows[n - 1][terminalKey]) || 0;
+
+  const npv = (rate) => {
+    let total = -rows[0].premium;
+    for (let i = 1; i < n; i += 1) {
+      total -= rows[i].premium / (1 + rate) ** i;
+    }
+    total += terminal / (1 + rate) ** n;
+    return total;
+  };
+
+  let low = -0.85;
+  let high = 0.4;
+  let lowValue = npv(low);
+  let highValue = npv(high);
+  if (lowValue === 0) return low;
+  if (highValue === 0) return high;
+  if (lowValue * highValue > 0) return null;
+
+  for (let i = 0; i < 80; i += 1) {
+    const mid = (low + high) / 2;
+    const value = npv(mid);
+    if (Math.abs(value) < 0.01) return mid;
+    if (value > 0) low = mid;
+    else high = mid;
+  }
+  return (low + high) / 2;
+}
+
+/**
+ * Rendement imposable qu'un placement taxé chaque année au taux `taxRate`
+ * doit produire pour laisser le même rendement net que `rate`.
+ * Réservé aux rendements positifs : un taux négatif ne se grossit pas.
+ */
+export function taxableEquivalent(rate, taxRate) {
+  if (!Number.isFinite(rate) || rate <= 0) return null;
+  if (!Number.isFinite(taxRate) || taxRate < 0 || taxRate >= 0.95) return null;
+  return rate / (1 - taxRate);
+}
+
+export function yieldReading(scenario, age, taxRate) {
+  const row = rowAtAge(scenario, age);
+  if (!row) return null;
+  const held = row.irr / 100;
+  const slice = scenario.rows.filter((item) => item.year <= row.year);
+  const afterExit = policyIrr(slice, 'net');
+  const equivalent = taxableEquivalent(held, taxRate);
+  const afterExitEquivalent = taxableEquivalent(afterExit, taxRate);
+  return {
+    held,
+    advantage: equivalent == null ? null : equivalent - held,
+    equivalent,
+    afterExit,
+    afterExitEquivalent,
+    taxRate,
+  };
+}
+
 export function formatCad(value, fractionDigits) {
   const n = Number(value) || 0;
   const autoCents = Math.round(Math.abs(n) * 100) % 100 !== 0;
@@ -120,6 +189,17 @@ export function formatPct(value, digits = 2) {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   }).format(value)}\u00A0%`;
+}
+
+export function formatPoints(value) {
+  if (!Number.isFinite(value)) return '—';
+  const formatted = new Intl.NumberFormat('fr-CA', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(value) * 100);
+  if (value > 0) return `+${formatted}\u00A0pts`;
+  if (value < 0) return `−${formatted}\u00A0pts`;
+  return `${formatted}\u00A0pts`;
 }
 
 export function formatMultiple(value) {

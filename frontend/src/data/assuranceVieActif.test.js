@@ -1,9 +1,13 @@
 import {
   COLLATERAL_THRESHOLD,
+  ILLUSTRATION_TAX_RATE,
   firstCollateralYear,
   illustrateLoan,
+  policyIrr,
   rowAtAge,
   scenarioById,
+  taxableEquivalent,
+  yieldReading,
 } from './assuranceVieActif';
 
 describe('illustrations assurance vie — classe d’actif', () => {
@@ -48,5 +52,23 @@ describe('illustrations assurance vie — classe d’actif', () => {
     expect(later.rate).toBeCloseTo(0.055);
     expect(later.breach).toBeNull();
     expect(later.last.balance).toBeGreaterThan(100000);
+  });
+
+  test('le taux interne reproduit le rendement au rachat de l’illustration', () => {
+    const s1 = scenarioById('s1');
+    const first = policyIrr(s1.rows.slice(0, 1), 'csv') * 100;
+    const at65 = policyIrr(s1.rows.filter((row) => row.age <= 65), 'csv') * 100;
+    expect(first).toBeCloseTo(s1.rows[0].irr, 1);
+    expect(at65).toBeCloseTo(rowAtAge(s1, 65).irr, 1);
+  });
+
+  test('la rentabilité équivalente ajoute l’avantage fiscal à la croissance', () => {
+    const reading = yieldReading(scenarioById('s1'), 65, ILLUSTRATION_TAX_RATE);
+    expect(reading.held).toBeCloseTo(0.0498, 4);
+    expect(reading.equivalent).toBeCloseTo(0.0498 / (1 - ILLUSTRATION_TAX_RATE), 4);
+    expect(reading.advantage).toBeCloseTo(reading.equivalent - reading.held, 6);
+    expect(reading.afterExit).toBeGreaterThan(0);
+    expect(reading.afterExit).toBeLessThan(reading.held);
+    expect(taxableEquivalent(-0.02, ILLUSTRATION_TAX_RATE)).toBeNull();
   });
 });

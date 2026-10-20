@@ -22,13 +22,16 @@ import {
   SAFETY_RATIO,
   SCENARIOS,
   firstCollateralYear,
+  ILLUSTRATION_TAX_RATE,
   formatCad,
   formatCompactCad,
   formatMultiple,
   formatPct,
+  formatPoints,
   illustrateLoan,
   rowAtAge,
   scenarioById,
+  yieldReading,
 } from '../data/assuranceVieActif';
 
 const PATH = '/admin/assurance-vie-actif';
@@ -39,6 +42,7 @@ const NAV = [
   { href: '#mecanique', label: 'La mécanique' },
   { href: '#scenarios', label: 'Les trois contrats' },
   { href: '#lecture', label: 'Lecture chiffrée' },
+  { href: '#rentabilite', label: 'Rentabilité' },
   { href: '#levier', label: 'Le levier' },
   { href: '#conditions', label: 'Conditions' },
 ];
@@ -251,6 +255,7 @@ export const AssuranceVieActif = () => {
   const [loanAmount, setLoanAmount] = useState(100000);
   const [repayment, setRepayment] = useState(0);
   const [fullTable, setFullTable] = useState(false);
+  const [taxPct, setTaxPct] = useState(Math.round(ILLUSTRATION_TAX_RATE * 10000) / 100);
 
   useSeoMeta({
     title: 'Dossier privé | Assurance vie comme classe d’actif',
@@ -501,6 +506,133 @@ export const AssuranceVieActif = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div id="rentabilite" className="scroll-mt-32 mt-16 border-t border-prestige-beige pt-12">
+            <div className="grid gap-10 lg:grid-cols-12">
+              <div className="lg:col-span-7">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Rentabilité</p>
+                <h3 className="mt-3 font-heading text-3xl">Croissance, plus l’impôt qu’elle évite</h3>
+                <div className="mt-4 space-y-4 text-sm leading-relaxed text-dark/75">
+                  <p>
+                    La croissance est le taux interne de l’illustration&nbsp;: le rendement qui relie
+                    les primes versées à la valeur de rachat, avant l’impôt de sortie. Tant que le
+                    contrat est détenu, cette croissance n’entre pas dans le revenu imposable de
+                    la société.
+                  </p>
+                  <p>
+                    Un placement qui, lui, serait imposé chaque année doit donc rapporter plus
+                    avant impôt pour laisser le même résultat. Ce rendement équivalent se calcule
+                    ainsi&nbsp;: croissance ÷ (1 − taux d’impôt). L’écart entre les deux chiffres
+                    est l’avantage fiscal, en points de rendement.
+                  </p>
+                    <p>
+                    À {readAge} ans, la proportion entre croissance et avantage fiscal est la même
+                    pour les trois contrats. Elle ne dépend que du taux d’impôt. Ce qui diffère,
+                    c’est le taux de croissance sur lequel cet avantage s’applique.
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {READ_AGES.map((age) => (
+                      <button
+                        key={age}
+                        type="button"
+                        onClick={() => setReadAge(age)}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                          readAge === age ? 'bg-dark text-white' : 'bg-[#f4f1eb] text-dark'
+                        }`}
+                      >
+                        {age} ans
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="lg:col-span-5">
+                <label className="block rounded-2xl bg-[#f4f1eb] p-5">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-prestige-taupe">
+                    Impôt annuel d’un placement de société
+                  </span>
+                  <span className="mt-3 flex items-center gap-3">
+                    <input
+                      type="number"
+                      min={0}
+                      max={70}
+                      step={0.01}
+                      value={taxPct}
+                      onChange={(event) => setTaxPct(event.target.value)}
+                      className="w-28 rounded-xl border border-prestige-beige bg-white px-3 py-2.5 tabular-nums outline-none focus:border-primary"
+                    />
+                    <span className="text-sm font-semibold">%</span>
+                  </span>
+                  <span className="mt-3 block text-xs leading-relaxed text-dark/70">
+                    {formatPct(ILLUSTRATION_TAX_RATE * 100)} est le taux qui reproduit l’impôt au
+                    rachat de l’illustration. Une partie de l’impôt des sociétés sur le revenu de
+                    placement est remboursable quand des dividendes sont versés. Le taux permanent
+                    peut donc être plus bas&nbsp;: remplacez-le par celui du comptable.
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-6 lg:grid-cols-3">
+              {SCENARIOS.map((scenario) => {
+                const taxRate = Number(taxPct) / 100;
+                const reading = yieldReading(scenario, readAge, taxRate);
+                const growthShare = reading?.equivalent
+                  ? Math.min(100, (reading.held / reading.equivalent) * 100)
+                  : 0;
+                return (
+                  <article key={scenario.id} className="rounded-2xl border border-prestige-beige p-6">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-prestige-taupe">
+                      {scenario.label}
+                    </p>
+                    <p className="mt-3 flex flex-nowrap items-baseline gap-1 text-dark">
+                      <span className="font-heading text-4xl tabular-nums">
+                        {reading?.equivalent == null
+                          ? '—'
+                          : new Intl.NumberFormat('fr-CA', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }).format(reading.equivalent * 100)}
+                      </span>
+                      {reading?.equivalent != null && (
+                        <span className="font-heading text-2xl">%</span>
+                      )}
+                    </p>
+                    <p className="mt-1 text-sm text-prestige-taupe">Rentabilité équivalente, avant impôt</p>
+                    <div className="mt-5 flex h-2 overflow-hidden rounded-full bg-primary">
+                      <div className="h-full bg-dark" style={{ width: `${growthShare}%` }} />
+                    </div>
+                    <p className="mt-2 text-[11px] text-prestige-taupe">Foncé, la croissance. Bleu, l’avantage fiscal.</p>
+                    <dl className="mt-5 space-y-2 text-sm">
+                      <div className="flex items-baseline justify-between gap-4">
+                        <dt className="text-dark/70">Croissance illustrée</dt>
+                        <dd className="tabular-nums font-semibold">{reading ? formatPct(reading.held * 100) : '—'}</dd>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-4">
+                        <dt className="text-dark/70">Avantage fiscal</dt>
+                        <dd className="tabular-nums font-semibold text-primary">
+                          {formatPoints(reading?.advantage)}
+                        </dd>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-4 border-t border-prestige-beige pt-2">
+                        <dt className="text-dark/70">Si le contrat est racheté</dt>
+                        <dd className="tabular-nums">
+                          {reading?.afterExit == null ? '—' : formatPct(reading.afterExit * 100)}
+                        </dd>
+                      </div>
+                    </dl>
+                  </article>
+                );
+              })}
+            </div>
+            <p className="mt-6 max-w-3xl text-sm leading-relaxed text-dark/70">
+              La ligne «&nbsp;si le contrat est racheté&nbsp;» est le rendement sur l’argent
+              encaissé après l’impôt de sortie prévu à l’illustration. Elle est plus basse&nbsp;:
+              l’avantage fiscal décrit au-dessus est celui de la croissance pendant que le contrat
+              est détenu. Au décès, une partie du capital peut plutôt sortir par le compte de
+              dividendes en capital. Ce n’est pas le même calcul, et il se valide avec le comptable.
+            </p>
           </div>
 
           <div className="mt-8 grid gap-6 md:grid-cols-3">
