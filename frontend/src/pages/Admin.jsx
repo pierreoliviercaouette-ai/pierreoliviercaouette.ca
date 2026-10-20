@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { 
@@ -313,16 +313,26 @@ export const Admin = () => {
       {/* Header */}
       <section className="bg-white border-b border-prestige-beige py-8">
         <div className="container-max px-4 md:px-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-              <Settings className="w-6 h-6 text-white" />
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+                <Settings className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="font-heading text-2xl md:text-3xl font-bold text-dark">
+                  Administration
+                </h1>
+                <p className="text-prestige-taupe">Gérez votre site et vos données</p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-heading text-2xl md:text-3xl font-bold text-dark">
-                Administration
-              </h1>
-              <p className="text-prestige-taupe">Gérez votre site et vos données</p>
-            </div>
+            <Link
+              to="/admin/assurance-vie-actif"
+              className="rounded-2xl border border-prestige-beige bg-light px-5 py-4 transition-colors hover:border-primary"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Présentation</p>
+              <p className="mt-1 font-heading text-lg text-dark">Assurance vie comme classe d’actif</p>
+              <p className="text-sm text-prestige-taupe">Dossier privé · scénarios 1, 3 et 4</p>
+            </Link>
           </div>
         </div>
       </section>

@@ -33,6 +33,7 @@ import {
   RecommanderConseillerFinancier,
 } from "./pages/SeoLandingPages";
 import { JemceeLanding } from "./pages/JemceeLanding";
+import { AssuranceVieActif } from "./pages/AssuranceVieActif";
 
 const ModelPortfoliosBanner = lazy(() =>
   import("./components/layout/ModelPortfoliosBanner").then((m) => ({
@@ -49,7 +50,7 @@ const ModelPortfoliosIndex = lazy(() =>
 function AppShell() {
   const location = useLocation();
   const isJemcee = location.pathname.startsWith('/jemcee');
-  const hidePortfolioBanner = isJemcee;
+  const hidePortfolioBanner = isJemcee || location.pathname.startsWith('/admin/assurance-vie-actif');
 
   // Landing jemcee : hors du flex shell pour ne pas casser le scroll/pin
   if (isJemcee) {
@@ -92,6 +93,7 @@ function AppShell() {
             <Route path="/inscription" element={<Register />} />
             <Route path="/profil" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/assurance-vie-actif" element={<AssuranceVieActif />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/rendez-vous" element={<Appointment />} />
             <Route path="/recommandations/consentement" element={<ReferralConsent />} />
@@ -131,7 +133,7 @@ function AppShell() {
             <Route path="/conditions" element={<Terms />} />
           </Routes>
         </main>
-        <Footer />
+        {!location.pathname.startsWith('/admin/assurance-vie-actif') && <Footer />}
         <BackToTop />
         <CookieConsentBanner />
       </div>

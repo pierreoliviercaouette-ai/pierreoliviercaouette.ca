@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, User, Bell, ChevronDown, LogOut, Settings, Briefcase, Gift, Calendar } from 'lucide-react';
+import { Menu, X, User, Bell, ChevronDown, LogOut, Settings, Briefcase, Gift, Calendar, Landmark } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -178,6 +178,12 @@ export const Navbar = () => {
                             Administration
                           </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/assurance-vie-actif" className="flex items-center gap-2">
+                            <Landmark className="w-4 h-4" />
+                            Classe d’actif
+                          </Link>
+                        </DropdownMenuItem>
                       </>
                     )}
                     <DropdownMenuSeparator />
@@ -274,14 +280,24 @@ export const Navbar = () => {
                       )}
                     </Link>
                     {user.is_admin && (
-                      <Link
-                        to="/admin"
-                        onClick={() => setIsOpen(false)}
-                        className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-dark"
-                      >
-                        <Settings className="w-5 h-5" />
-                        Administration
-                      </Link>
+                      <>
+                        <Link
+                          to="/admin"
+                          onClick={() => setIsOpen(false)}
+                          className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-dark"
+                        >
+                          <Settings className="w-5 h-5" />
+                          Administration
+                        </Link>
+                        <Link
+                          to="/admin/assurance-vie-actif"
+                          onClick={() => setIsOpen(false)}
+                          className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-dark"
+                        >
+                          <Landmark className="w-5 h-5" />
+                          Classe d’actif
+                        </Link>
+                      </>
                     )}
                     <button
                       type="button"
