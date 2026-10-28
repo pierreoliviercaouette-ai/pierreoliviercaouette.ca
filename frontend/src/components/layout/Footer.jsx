@@ -6,9 +6,12 @@ import {
   IA_GROUPE_FINANCIER_URL,
   TUGO_ASSURANCE_VOYAGE_URL,
 } from '../../lib/branding';
+import { useAudienceMode } from '../../context/AudienceModeContext';
+import { getServicesForAudience } from '../../data/services';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { audience, isPrive, homePath } = useAudienceMode();
 
   const usefulLinks = [
     { name: 'iA Auto et Habitation', url: IA_AUTO_HABITATION_URL },
@@ -17,12 +20,11 @@ export const Footer = () => {
   ];
 
   const services = [
-    { name: 'Assurance vie', path: '/services/assurance-vie' },
-    { name: 'Assurance maladie grave', path: '/services/maladie-grave' },
-    { name: 'Assurance invalidité', path: '/services/invalidite' },
-    { name: 'Épargne et retraite', path: '/services/epargne' },
-    { name: 'Planification financière', path: '/services/planification' },
-    { name: 'Solutions entrepreneur', path: '/services/entreprise' },
+    ...getServicesForAudience(audience).map((service) => ({
+      name: service.subtitle || service.title,
+      path: `/services/${service.id}`,
+    })),
+    { name: 'Apprendre', path: '/apprendre' },
     { name: 'Portefeuilles modèles', path: '/portefeuilles' },
   ];
 
@@ -48,24 +50,31 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <a
-                href={IA_GROUPE_FINANCIER_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to={homePath}
                 className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded"
-                aria-label="iA Groupe financier — ouvrir le site"
+                aria-label="Retour à l’accueil"
               >
                 <img
                   src={IA_GROUPE_FINANCIER_LOGO}
                   alt="iA Groupe financier"
                   className="h-12 w-auto object-contain object-center brightness-0 invert"
                 />
-              </a>
+              </Link>
             </div>
             <p className="text-white/70 text-sm leading-relaxed">
-              Accompagnement personnalisé pour protéger ce qui compte vraiment. 
-              Une approche humaine, claire et adaptée au Québec.
+              {isPrive
+                ? 'Accompagnement patrimonial pour situations complexes : entreprise, fiscalité et transmission.'
+                : 'Accompagnement personnalisé pour protéger ce qui compte vraiment. Une approche humaine, claire et adaptée au Québec.'}
             </p>
+            <a
+              href={IA_GROUPE_FINANCIER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex text-xs text-white/50 hover:text-secondary transition-colors"
+            >
+              Site iA Groupe financier
+            </a>
             {/* Social Links */}
             <div className="flex items-center gap-4 pt-2">
               {socialLinks.map((social) => (

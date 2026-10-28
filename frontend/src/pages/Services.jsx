@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Calendar, CheckCircle2, ChevronRight } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
-import { services } from '../data/services';
+import { getServicesForAudience } from '../data/services';
+import { useAudienceMode } from '../context/AudienceModeContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
@@ -57,19 +58,29 @@ const ServiceCard = ({ service }) => {
 };
 
 export const Services = () => {
+  const { audience, isPrive } = useAudienceMode();
+  const services = getServicesForAudience(audience);
+
   useSeoMeta({
-    title: 'Services financiers | Assurance vie, retraite, invalidité',
-    description:
-      'Découvrez les services : assurance vie, épargne retraite, planification financière, invalidité et stratégies de protection au Québec.',
+    title: isPrive
+      ? 'Services patrimoniaux | Fiscalité, entreprise, employés'
+      : 'Services financiers | Assurance vie, retraite, invalidité',
+    description: isPrive
+      ? 'Maximisation du patrimoine, optimisation fiscale, stratégie corporative et assurances employés avec Pierre-Olivier Caouette.'
+      : 'Découvrez les services : assurance vie, épargne retraite, planification financière, invalidité et stratégies de protection au Québec.',
     canonicalPath: '/services',
   });
 
   return (
     <main data-testid="services-page">
       <PageHero
-        badge="Mes services"
-        title="Comment puis-je vous aider?"
-        description="Chaque situation est unique. Explorez un service pour voir comment il peut répondre à vos besoins — et pourquoi faire affaire avec moi."
+        badge={isPrive ? 'Clientèle patrimoniale' : 'Mes services'}
+        title={isPrive ? 'Solutions pour cas avancés' : 'Comment puis-je vous aider?'}
+        description={
+          isPrive
+            ? 'Patrimoine, fiscalité, corporatif et employés : explorez les services adaptés aux situations plus complexes.'
+            : 'Chaque situation est unique. Explorez un service pour voir comment il peut répondre à vos besoins — et pourquoi faire affaire avec moi.'
+        }
       />
 
       <section className="section-padding bg-white">

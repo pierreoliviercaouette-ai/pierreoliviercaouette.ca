@@ -1,8 +1,22 @@
-import { Shield, Heart, Umbrella, PiggyBank, FileText, Users } from 'lucide-react';
+import {
+  Shield,
+  Heart,
+  Umbrella,
+  PiggyBank,
+  FileText,
+  Users,
+  Landmark,
+  Scale,
+  Building2,
+} from 'lucide-react';
+
+export const AUDIENCE_PARTICULIER = 'particulier';
+export const AUDIENCE_PRIVE = 'prive';
 
 export const services = [
   {
     id: 'assurance-vie',
+    audiences: [AUDIENCE_PARTICULIER],
     icon: Shield,
     title: 'Protéger ma famille',
     subtitle: 'Assurance vie',
@@ -40,6 +54,7 @@ export const services = [
   },
   {
     id: 'epargne',
+    audiences: [AUDIENCE_PARTICULIER],
     icon: PiggyBank,
     title: 'Épargner pour la retraite',
     subtitle: 'REER, CELI, Fonds',
@@ -77,6 +92,7 @@ export const services = [
   },
   {
     id: 'planification',
+    audiences: [AUDIENCE_PARTICULIER],
     icon: FileText,
     title: 'Planifier mon avenir',
     subtitle: 'Vision globale',
@@ -113,6 +129,7 @@ export const services = [
   },
   {
     id: 'invalidite',
+    audiences: [AUDIENCE_PARTICULIER],
     icon: Umbrella,
     title: 'Prévenir les imprévus',
     subtitle: 'Assurance invalidité',
@@ -149,6 +166,7 @@ export const services = [
   },
   {
     id: 'maladie-grave',
+    audiences: [AUDIENCE_PARTICULIER],
     icon: Heart,
     title: 'Faire face à la maladie',
     subtitle: 'Assurance maladie grave',
@@ -184,10 +202,89 @@ export const services = [
     color: 'from-red-500 to-red-600',
   },
   {
+    id: 'patrimoine',
+    audiences: [AUDIENCE_PRIVE],
+    icon: Landmark,
+    title: 'Maximiser mon patrimoine',
+    subtitle: 'Stratégies patrimoniales',
+    shortDescription:
+      'Structurer et faire croître vos actifs avec des solutions d’assurance et d’épargne adaptées aux situations plus complexes.',
+    features: [
+      'Vision globale des actifs personnels et corporatifs',
+      'Protection et croissance du capital',
+      'Planification successorale claire',
+    ],
+    fullDescription: [
+      'Quand le patrimoine se complexifie — plusieurs actifs, société, immobilier, objectifs de transmission — une approche isolée produit par produit ne suffit plus.',
+      'Nous structurons ensemble une stratégie qui protège ce qui compte, vise une croissance stable et prépare la transmission, avec des concepts d’assurance et d’épargne adaptés à votre réalité.',
+    ],
+    whoIsItFor: [
+      'Professionnels et dirigeants à revenu élevé ou en forte croissance',
+      'Propriétaires d’entreprise — déjà établis ou en expansion',
+      'Personnes en voie de constituer un patrimoine plus élevé',
+      'Familles préparant une transmission ou une sortie d’affaires',
+    ],
+    examples: [
+      'Un couple d’entrepreneurs aligne protection, épargne corporative et objectifs de transmission',
+      'Un professionnel incorporé clarifie la répartition entre actifs personnels et actifs de société',
+      'Une famille en croissance de patrimoine met en place une liquidité successorale avant que le besoin soit urgent',
+    ],
+    whyMe: [
+      'Je commence par le portrait global — cash-flow, actifs, obligations — avant de parler de produit.',
+      'Les solutions restent proportionnées : assez pour protéger et structurer, sans complexité inutile.',
+      'Je travaille en cohérence avec vos autres experts (comptable, fiscaliste, notaire) lorsque le dossier le demande.',
+      'Vous repartez avec des prochaines étapes concrètes, pas seulement une présentation.',
+    ],
+    seoTitle: 'Maximisation du patrimoine | Stratégies avancées',
+    seoDescription:
+      'Structurer et faire croître votre patrimoine — déjà élevé ou en construction. Assurance, épargne et transmission avec Pierre-Olivier Caouette.',
+    color: 'from-zinc-700 to-zinc-900',
+  },
+  {
+    id: 'optimisation-fiscale',
+    audiences: [AUDIENCE_PRIVE],
+    icon: Scale,
+    title: 'Optimiser ma fiscalité',
+    subtitle: 'Stratégies fiscales',
+    shortDescription:
+      'Explorer les véhicules d’épargne, d’assurance et de détention corporative pour une fiscalité mieux organisée.',
+    features: [
+      'REER, CELI et structures d’épargne adaptées',
+      'Assurance comme outil de planification',
+      'Détention personnelle vs corporative',
+    ],
+    fullDescription: [
+      'L’optimisation fiscale, c’est choisir les bons outils au bon endroit — pas promettre d’éviter l’impôt. REER, CELI, assurance et détention corporative peuvent chacun jouer un rôle selon votre situation.',
+      'Nous identifions les pistes pertinentes pour votre profil. Les stratégies avancées sont toujours validées avec vous et, au besoin, avec un fiscaliste ou un comptable.',
+    ],
+    whoIsItFor: [
+      'Professionnels incorporés ou en voie de l’être',
+      'Propriétaires d’entreprise avec surplus (ou bientôt) de liquidités',
+      'Personnes dont la fiscalité se complexifie à mesure que le patrimoine croît',
+      'Familles préparant une transmission d’actifs',
+    ],
+    examples: [
+      'Un dirigeant compare l’épargne personnelle et corporative avant de déployer un surplus',
+      'Une famille évalue l’assurance permanente dans une logique de liquidité successorale',
+      'Un professionnel qui maximise REER/CELI explore les prochaines étapes patrimoniales',
+    ],
+    whyMe: [
+      'Je présente des options claires, avec avantages et limites — sans jargon ni promesses irréalistes.',
+      'Chaque piste reste ancrée dans les règles en vigueur et dans votre capacité réelle.',
+      'Je collabore avec vos experts fiscaux quand le dossier le justifie.',
+      'L’objectif : une structure lisible que vous comprenez et que vous pouvez suivre.',
+    ],
+    seoTitle: 'Optimisation fiscale | Épargne et assurance',
+    seoDescription:
+      'Pistes d’optimisation fiscale via REER, CELI, assurance et détention corporative — pour aujourd’hui et pour la suite. Pierre-Olivier Caouette.',
+    color: 'from-stone-600 to-stone-800',
+  },
+  {
     id: 'entreprise',
+    audiences: [AUDIENCE_PRIVE],
     icon: Users,
     title: 'Protéger mon entreprise',
-    subtitle: 'Solutions entrepreneur',
+    subtitle: 'Stratégie corporative',
     shortDescription: 'Sécurisez votre entreprise et vos associés avec les bonnes protections.',
     features: [
       'Assurance personne clé',
@@ -219,12 +316,56 @@ export const services = [
       "Personne clé, convention entre actionnaires et protection du patrimoine d'entreprise. Solutions adaptées avec Pierre-Olivier Caouette.",
     color: 'from-amber-500 to-amber-600',
   },
+  {
+    id: 'assurances-employes',
+    audiences: [AUDIENCE_PRIVE],
+    icon: Building2,
+    title: 'Assurer mes employés',
+    subtitle: 'Régimes pour employés',
+    shortDescription:
+      'Attirer et retenir les talents avec des régimes d’assurance adaptés à votre organisation.',
+    features: [
+      'Assurance collective et régimes complémentaires',
+      'Protection invalidité et vie pour l’équipe',
+      'Solutions pour cadres et employés clés',
+    ],
+    fullDescription: [
+      'Un bon régime d’avantages sociaux aide à attirer et conserver les employés et cadres importants. Il protège aussi l’organisation face à la perte d’une personne clé.',
+      'Nous évaluons les besoins de votre équipe et de votre structure pour proposer une couverture claire, proportionnée et simple à administrer.',
+    ],
+    whoIsItFor: [
+      'PME en croissance qui recrutent',
+      'Entreprises voulant retenir des cadres clés',
+      'Organisations sans régime collectif adéquat',
+      'Dirigeants qui souhaitent protéger l’équipe et la continuité',
+    ],
+    examples: [
+      'Une PME met en place une couverture collective pour stabiliser son offre d’emploi',
+      'Un dirigeant complète la protection d’un cadre clé au-delà du régime de base',
+    ],
+    whyMe: [
+      'Je clarifie d’abord ce que vous avez déjà (ou non) avant d’ajouter de la complexité.',
+      'On calibre le régime selon la taille de l’équipe et les priorités réelles, pas un modèle générique.',
+      'Je vous explique coûts, exclusions et options en langage clair.',
+      'L’objectif : un outil de rétention utile pour l’entreprise et compréhensible pour vos employés.',
+    ],
+    seoTitle: 'Assurances employés | Régimes collectifs',
+    seoDescription:
+      'Régimes d’assurance pour employés et cadres : collective, invalidité, vie. Solutions d’entreprise avec Pierre-Olivier Caouette.',
+    color: 'from-neutral-600 to-neutral-800',
+  },
 ];
 
 export function getServiceById(id) {
   return services.find((service) => service.id === id) ?? null;
 }
 
-export function getOtherServices(id) {
-  return services.filter((service) => service.id !== id);
+export function getServicesForAudience(audience) {
+  return services.filter((service) => (service.audiences || [AUDIENCE_PARTICULIER]).includes(audience));
+}
+
+export function getOtherServices(id, audience) {
+  const others = services.filter((service) => service.id !== id);
+  if (!audience) return others;
+  return others.filter((service) => (service.audiences || [AUDIENCE_PARTICULIER]).includes(audience));
 }

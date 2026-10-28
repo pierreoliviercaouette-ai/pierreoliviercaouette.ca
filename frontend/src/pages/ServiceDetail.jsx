@@ -2,11 +2,13 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowRight, Calendar, CheckCircle2, ChevronRight } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
 import { getOtherServices, getServiceById } from '../data/services';
+import { useAudienceMode } from '../context/AudienceModeContext';
 import { trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 export const ServiceDetail = () => {
   const { slug } = useParams();
+  const { audience } = useAudienceMode();
   const service = getServiceById(slug);
 
   useSeoMeta({
@@ -22,7 +24,7 @@ export const ServiceDetail = () => {
   }
 
   const Icon = service.icon;
-  const others = getOtherServices(service.id);
+  const others = getOtherServices(service.id, audience);
 
   return (
     <main data-testid={`service-detail-${service.id}`}>

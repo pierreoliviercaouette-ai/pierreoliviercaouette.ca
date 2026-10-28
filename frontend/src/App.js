@@ -1,6 +1,7 @@
 import "@/index.css";
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
+import { getFormationById } from "./data/formations";
 import { Toaster } from "@/components/ui/sonner";
 import { SupabaseAuthProvider as AuthProvider } from "./context/SupabaseAuthContext";
 import { Navbar } from "./components/layout/Navbar";
@@ -34,6 +35,10 @@ import {
 } from "./pages/SeoLandingPages";
 import { JemceeLanding } from "./pages/JemceeLanding";
 import { AssuranceVieActif } from "./pages/AssuranceVieActif";
+import { PatrimoineHome } from "./pages/PatrimoineHome";
+import { Apprendre } from "./pages/Apprendre";
+import { ApprendreDetail } from "./pages/ApprendreDetail";
+import { AudienceModeProvider } from "./context/AudienceModeContext";
 
 const ModelPortfoliosBanner = lazy(() =>
   import("./components/layout/ModelPortfoliosBanner").then((m) => ({
@@ -46,6 +51,22 @@ const ModelPortfolioDetail = lazy(() =>
 const ModelPortfoliosIndex = lazy(() =>
   import("./pages/ModelPortfoliosIndex").then((m) => ({ default: m.ModelPortfoliosIndex }))
 );
+
+function FormationsLegacyRedirect() {
+  const { courseSlug } = useParams();
+  if (getFormationById(courseSlug)) {
+    return <Navigate to={`/apprendre/${courseSlug}`} replace />;
+  }
+  return <Navigate to="/apprendre" replace />;
+}
+
+function FormationsLegacyLessonRedirect() {
+  const { lessonSlug } = useParams();
+  if (lessonSlug && getFormationById(lessonSlug)) {
+    return <Navigate to={`/apprendre/${lessonSlug}`} replace />;
+  }
+  return <Navigate to="/apprendre" replace />;
+}
 
 function AppShell() {
   const location = useLocation();
@@ -84,11 +105,23 @@ function AppShell() {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/patrimoine" element={<PatrimoineHome />} />
             <Route path="/a-propos" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/services/:slug" element={<ServiceDetail />} />
             <Route path="/outils" element={<Tools />} />
             <Route path="/outils/:slug" element={<ToolDetail />} />
+            <Route path="/apprendre" element={<Apprendre />} />
+            <Route path="/apprendre/:slug" element={<ApprendreDetail />} />
+            <Route path="/formations" element={<Navigate to="/apprendre" replace />} />
+            <Route
+              path="/formations/:courseSlug"
+              element={<FormationsLegacyRedirect />}
+            />
+            <Route
+              path="/formations/:courseSlug/:lessonSlug"
+              element={<FormationsLegacyLessonRedirect />}
+            />
             <Route path="/connexion" element={<Login />} />
             <Route path="/inscription" element={<Register />} />
             <Route path="/profil" element={<Profile />} />
@@ -145,7 +178,9 @@ function AppShell() {
 function App() {
   return (
     <BrowserRouter>
-      <AppShell />
+      <AudienceModeProvider>
+        <AppShell />
+      </AudienceModeProvider>
     </BrowserRouter>
   );
 }

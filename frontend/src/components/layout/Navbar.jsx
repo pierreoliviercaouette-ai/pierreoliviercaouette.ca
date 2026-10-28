@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, User, Bell, ChevronDown, LogOut, Settings, Briefcase, Gift, Calendar, Landmark } from 'lucide-react';
+import { useAudienceMode, AUDIENCE_PARTICULIER, AUDIENCE_PRIVE } from '../../context/AudienceModeContext';
+import { Menu, X, User, Bell, ChevronDown, LogOut, Settings, Briefcase, Gift, Calendar, Landmark, ArrowLeftRight } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,31 +14,61 @@ import { Badge } from '../ui/badge';
 import { trackEvent } from '../../lib/analytics';
 import { IA_GROUPE_FINANCIER_LOGO } from '../../lib/branding';
 
+const PARTICULIER_LINKS = [
+  { name: 'Accueil', path: '/' },
+  { name: 'À propos', path: '/a-propos' },
+  { name: 'Services', path: '/services' },
+  { name: 'Apprendre', path: '/apprendre' },
+  { name: 'Outils', path: '/outils' },
+];
+
+const PRIVE_LINKS = [
+  { name: 'Accueil', path: '/patrimoine' },
+  { name: 'Patrimoine', path: '/services/patrimoine' },
+  { name: 'Fiscalité', path: '/services/optimisation-fiscale' },
+  { name: 'Corporatif', path: '/services/entreprise' },
+  { name: 'Employés', path: '/services/assurances-employes' },
+  { name: 'Apprendre', path: '/apprendre' },
+  { name: 'À propos', path: '/a-propos' },
+  { name: 'Outils', path: '/outils' },
+];
+
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout, notifications, unreadCount, markNotificationRead } = useAuth();
   const location = useLocation();
+  const { isPrive, homePath, setAudience } = useAudienceMode();
 
-  const navLinks = [
-    { name: 'Accueil', path: '/' },
-    { name: 'À propos', path: '/a-propos' },
-    { name: 'Services', path: '/services' },
-    { name: 'Outils', path: '/outils' },
-  ];
+  const navLinks = isPrive ? PRIVE_LINKS : PARTICULIER_LINKS;
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (path === '/' || path === '/patrimoine') return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+
+  const switchAudience = () => {
+    if (isPrive) {
+      setAudience(AUDIENCE_PARTICULIER);
+      trackEvent('navigation_click', { location: 'navbar_audience_switch', destination: '/' });
+    } else {
+      setAudience(AUDIENCE_PRIVE);
+      trackEvent('navigation_click', { location: 'navbar_audience_switch', destination: '/patrimoine' });
+    }
+  };
+
+  const audienceSwitchPath = isPrive ? '/' : '/patrimoine';
+  const audienceSwitchLabel = isPrive ? 'Particuliers' : 'Clientèle privée';
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-prestige-beige/80 bg-white">
+    <nav className={`sticky top-0 z-50 border-b bg-white ${isPrive ? 'border-zinc-200' : 'border-prestige-beige/80'}`}>
       <div className="container-max">
         <div className="flex w-full min-w-0 items-center gap-3 h-20 px-4 md:px-8">
-          {/* Logo — colonne de gauche fixe */}
           <Link
-            to="/"
+            to={homePath}
             className="flex min-w-0 flex-shrink-0 items-center gap-2 sm:gap-3 z-10"
             data-testid="navbar-logo"
           >
-            <span className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-white px-2 py-1 ring-1 ring-prestige-beige/40">
+            <span className={`inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-white px-2 py-1 ring-1 ${isPrive ? 'ring-zinc-200' : 'ring-prestige-beige/40'}`}>
               <img
                 src={IA_GROUPE_FINANCIER_LOGO}
                 alt="iA Groupe financier"
@@ -50,16 +81,14 @@ export const Navbar = () => {
               <p className="font-heading font-semibold text-dark text-base lg:text-lg leading-tight truncate">
                 Pierre-Olivier
               </p>
-              <p className="text-xs text-prestige-taupe hidden md:block">Conseiller en sécurité financière</p>
+              <p className={`text-xs hidden md:block ${isPrive ? 'text-zinc-500' : 'text-prestige-taupe'}`}>
+                {isPrive ? 'Patrimoine · En chemin ou déjà là' : 'Conseiller en sécurité financière'}
+              </p>
             </div>
           </Link>
 
-          {/*
-            Liens : centrés dans l'espace *entre* le logo et les actions (évite le chevauchement
-            avec le CTA rendez-vous qu'un position:absolute pleine largeur provoquait).
-          */}
           <nav
-            className="hidden min-w-max flex-1 items-center justify-center gap-4 overflow-x-auto px-2 lg:flex xl:gap-5"
+            className="hidden min-w-max flex-1 items-center justify-center gap-3 overflow-x-auto px-2 lg:flex xl:gap-4"
             aria-label="Navigation principale"
           >
             {navLinks.map((link) => (
@@ -67,8 +96,8 @@ export const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: link.path })}
-                data-testid={`nav-link-${link.path.replace('/', '') || 'home'}`}
-                className={`inline-flex shrink-0 min-h-[44px] items-center justify-center whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors duration-200 hover:bg-light/50 ${
+                data-testid={`nav-link-${link.path.replace(/\//g, '-') || 'home'}`}
+                className={`inline-flex shrink-0 min-h-[44px] items-center justify-center whitespace-nowrap rounded-lg px-2.5 text-sm font-medium transition-colors duration-200 hover:bg-light/50 ${
                   isActive(link.path) ? 'text-primary' : 'text-dark hover:text-primary'
                 }`}
               >
@@ -79,9 +108,25 @@ export const Navbar = () => {
 
           <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
             <Link
+              to={audienceSwitchPath}
+              onClick={switchAudience}
+              className={`inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                isPrive
+                  ? 'rounded-full border-2 border-dark text-dark hover:bg-dark hover:text-white'
+                  : 'rounded-none border-2 border-dark bg-dark text-white hover:bg-transparent hover:text-dark'
+              }`}
+              data-testid="audience-switch"
+            >
+              <ArrowLeftRight className="h-4 w-4 shrink-0" />
+              <span className="whitespace-nowrap">{audienceSwitchLabel}</span>
+            </Link>
+
+            <Link
               to="/rendez-vous"
               onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/rendez-vous' })}
-              className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-full bg-dark px-4 py-2.5 text-sm font-semibold text-white shadow-md ring-2 ring-dark/10 transition-all hover:bg-dark/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 xl:px-5"
+              className={`inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 xl:px-5 ${
+                isPrive ? 'rounded-none bg-dark hover:bg-zinc-800' : 'rounded-full bg-dark ring-2 ring-dark/10 hover:bg-dark/90'
+              }`}
               data-testid="cta-rdv"
             >
               <Calendar className="h-4 w-4 shrink-0" />
@@ -90,7 +135,6 @@ export const Navbar = () => {
 
             {user ? (
               <>
-                {/* Notifications */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button 
@@ -129,7 +173,6 @@ export const Navbar = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button 
@@ -211,7 +254,7 @@ export const Navbar = () => {
                 <Link 
                   to="/contact" 
                   onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/contact' })}
-                  className="btn-secondary hidden text-sm lg:inline-flex"
+                  className={`hidden text-sm lg:inline-flex ${isPrive ? 'inline-flex min-h-[44px] items-center justify-center border-2 border-dark px-5 py-2.5 font-semibold text-dark hover:bg-dark hover:text-white' : 'btn-secondary'}`}
                   data-testid="cta-demande"
                 >
                   Faire une demande
@@ -220,7 +263,6 @@ export const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             type="button"
             className="relative z-10 ml-auto inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 hover:bg-light/80 lg:hidden"
@@ -232,9 +274,8 @@ export const Navbar = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isOpen && (
-          <div className="lg:hidden border-t border-prestige-beige animate-slide-down">
+          <div className={`lg:hidden border-t animate-slide-down ${isPrive ? 'border-zinc-200' : 'border-prestige-beige'}`}>
             <div className="px-4 py-6 space-y-4">
               {navLinks.map((link) => (
                 <Link
@@ -251,6 +292,19 @@ export const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
+
+              <Link
+                to={audienceSwitchPath}
+                onClick={() => {
+                  switchAudience();
+                  setIsOpen(false);
+                }}
+                className="flex min-h-[44px] items-center gap-2 py-2 font-semibold text-dark"
+                data-testid="audience-switch-mobile"
+              >
+                <ArrowLeftRight className="w-5 h-5" />
+                {audienceSwitchLabel}
+              </Link>
               
               <Link
                 to="/rendez-vous"
@@ -265,7 +319,7 @@ export const Navbar = () => {
                 Prendre rendez-vous
               </Link>
               
-              <div className="pt-4 border-t border-prestige-beige space-y-3">
+              <div className={`pt-4 border-t space-y-3 ${isPrive ? 'border-zinc-200' : 'border-prestige-beige'}`}>
                 {user ? (
                   <>
                     <Link
@@ -326,7 +380,7 @@ export const Navbar = () => {
                         trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/contact' });
                         setIsOpen(false);
                       }}
-                      className="btn-secondary flex min-h-[44px] items-center justify-center text-center"
+                      className={`flex min-h-[44px] items-center justify-center text-center ${isPrive ? 'border-2 border-dark font-semibold text-dark' : 'btn-secondary'}`}
                       data-testid="cta-demande-mobile"
                     >
                       Faire une demande

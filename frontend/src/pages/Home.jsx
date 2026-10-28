@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Shield, TrendingUp, Users, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink, Target, Handshake, Search, ClipboardList, LineChart } from 'lucide-react';
+import { Shield, TrendingUp, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink, Target, Handshake, Search, ClipboardList, LineChart } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
 import { trackEvent } from '../lib/analytics';
@@ -11,6 +11,7 @@ import {
 } from '../lib/branding';
 import { HomeTrustBanner } from '../components/home/HomeTrustBanner';
 import { PartnersTrustSection } from '../components/partners/PartnersTrustSection';
+import { FormationsTeaser } from '../components/formations/FormationsTeaser';
 
 const Hero = () => (
   <section className="relative min-h-[68vh] md:min-h-[72vh] overflow-hidden">
@@ -19,9 +20,9 @@ const Hero = () => (
     
     {/* Decorative shapes — radial gradients (pas de filter:blur) */}
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] glow-orb" style={{ '--glow': 'rgba(115, 196, 239, 0.35)' }} />
+      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] glow-orb" style={{ '--glow': 'var(--glow-secondary)' }} />
       <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] glow-orb" style={{ '--glow': 'rgba(255, 255, 255, 0.14)' }} />
-      <div className="absolute top-1/2 right-0 w-[300px] h-[300px] glow-orb" style={{ '--glow': 'rgba(6, 77, 217, 0.4)' }} />
+      <div className="absolute top-1/2 right-0 w-[300px] h-[300px] glow-orb" style={{ '--glow': 'var(--glow-primary)' }} />
     </div>
     
     {/* Grid pattern overlay */}
@@ -35,13 +36,13 @@ const Hero = () => (
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
             <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
-            <span className="text-white/90 text-sm font-medium">Des conseils clairs pour améliorer votre santé financière</span>
+            <span className="text-white/90 text-sm font-medium">Protection des familles · Épargne · Retraite</span>
           </div>
           
           <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1]">
-            Parce qu'il est temps d'avoir{' '}
+            Protégez votre famille et{' '}
             <span className="relative">
-              <span className="text-secondary">des conseils adaptés.</span>
+              <span className="text-secondary">préparez vos projets.</span>
               <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" fill="none">
                 <path d="M1 5.5C47 2 153 2 199 5.5" stroke="#C9A227" strokeWidth="3" strokeLinecap="round"/>
               </svg>
@@ -49,8 +50,8 @@ const Hero = () => (
           </h1>
           
           <p className="text-white/80 text-lg md:text-xl max-w-xl leading-relaxed">
-            Réduisez les zones d'incertitude, optimisez vos protections et avancez vers vos objectifs.
-            Mon accompagnement s'ajuste à votre situation, à votre rythme.
+            Assurance, épargne pour un projet et retraite : des conseils clairs pour sécuriser ce qui compte
+            et avancer à votre rythme.
           </p>
           
           <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
@@ -187,27 +188,27 @@ const Hero = () => (
 const ServicesSection = () => {
   const services = [
     {
-      icon: TrendingUp,
-      title: 'Augmentation du patrimoine',
-      description: 'Avec des stratégies d\'assurance et d\'épargne, vous visez une croissance plus stable de votre patrimoine.',
+      icon: Shield,
+      title: 'Protéger ma famille',
+      description: 'Assurance vie adaptée pour sécuriser vos proches, l’hypothèque et l’avenir des enfants.',
       color: 'from-blue-500 to-blue-600'
     },
     {
       icon: PiggyBank,
-      title: 'Optimisation des épargnes',
-      description: 'La mise à jour d\'épargnes systématique ainsi que la révision des portefeuilles d\'investissement.',
+      title: 'Épargner pour un projet',
+      description: 'REER, CELI et habitudes d’épargne pour financer un projet concret ou la retraite.',
       color: 'from-green-500 to-green-600'
     },
     {
-      icon: Shield,
-      title: 'Stratégie d\'assurances',
-      description: 'Protégez-vous et vos proches avec des stratégies avantageuses d\'assurance vie, maladie grave.',
+      icon: Heart,
+      title: 'Préparer la retraite',
+      description: 'Un plan d’épargne clair, suivi dans le temps, pour viser plus de sérénité plus tard.',
       color: 'from-purple-500 to-purple-600'
     },
     {
       icon: Umbrella,
-      title: 'Optimisation fiscale',
-      description: 'Analysons des stratégies adaptées pour optimiser votre situation fiscale selon les règles en vigueur.',
+      title: 'Faire face aux imprévus',
+      description: 'Invalidité et maladie grave : protéger votre revenu et votre budget si la vie bascule.',
       color: 'from-orange-500 to-orange-600'
     }
   ];
@@ -215,18 +216,18 @@ const ServicesSection = () => {
   return (
     <section className="section-padding bg-white relative overflow-hidden" data-testid="services-section">
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-96 h-96 glow-orb-soft -translate-y-1/2 translate-x-1/2" style={{ '--glow': 'rgba(6, 77, 217, 0.08)' }} />
+      <div className="absolute top-0 right-0 w-96 h-96 glow-orb-soft -translate-y-1/2 translate-x-1/2" />
       
       <div className="container-max relative">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-4 py-1 bg-secondary/10 text-secondary rounded-full text-sm font-medium mb-4">
-            Mes services
+            Pour les particuliers
           </span>
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-dark mb-4">
-            Une offre globale pour un service complet sur mesure
+            Des solutions pour votre famille et vos projets
           </h2>
           <p className="text-lg text-slate-600">
-            Des solutions adaptées à vos besoins pour protéger et faire fructifier votre patrimoine
+            Protection, épargne et retraite — adaptées à votre situation, sans jargon inutile
           </p>
         </div>
         
@@ -773,9 +774,9 @@ export const Home = () => {
   const [searchParams] = useSearchParams();
   const refFromQuery = searchParams.get('ref');
   useSeoMeta({
-    title: 'Conseiller en sécurité financière au Québec | Assurance vie, retraite et placements',
+    title: 'Conseiller en sécurité financière | Familles, épargne et retraite',
     description:
-      'Conseiller en sécurité financière à Victoriaville : assurance vie, invalidité, REER, CELI et planification financière personnalisée.',
+      'Protection des familles, épargne pour un projet et retraite à Victoriaville : assurance vie, invalidité, REER et CELI avec Pierre-Olivier Caouette.',
     canonicalPath: '/',
     image: DEFAULT_OG_IMAGE,
     imageAlt:
@@ -804,6 +805,7 @@ export const Home = () => {
       <DifferentiatorSection />
       <ProcessSection />
       <TestimonialSection />
+      <FormationsTeaser />
       <PartnersTrustSection sectionClassName="border-t border-prestige-beige bg-white py-12 md:py-16 px-5 sm:px-6 md:px-10 lg:px-14" />
       <CTASection />
     </main>

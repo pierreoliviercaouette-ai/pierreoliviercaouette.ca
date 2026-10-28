@@ -5,55 +5,55 @@ module.exports = {
     theme: {
     	extend: {
     		colors: {
-    			border: 'hsl(var(--border))',
-    			input: 'hsl(var(--input))',
-    			ring: 'hsl(var(--ring))',
-    			background: 'hsl(var(--background))',
-    			foreground: 'hsl(var(--foreground))',
+    			border: 'hsl(var(--border) / <alpha-value>)',
+    			input: 'hsl(var(--input) / <alpha-value>)',
+    			ring: 'hsl(var(--ring) / <alpha-value>)',
+    			background: 'hsl(var(--background) / <alpha-value>)',
+    			foreground: 'hsl(var(--foreground) / <alpha-value>)',
     			primary: {
-    				DEFAULT: '#064dd9',
-    				foreground: '#ffffff'
+    				DEFAULT: 'hsl(var(--brand-primary) / <alpha-value>)',
+    				foreground: 'hsl(var(--brand-primary-foreground) / <alpha-value>)'
     			},
     			secondary: {
-    				DEFAULT: '#73c4ef',
-    				foreground: '#01233f'
+    				DEFAULT: 'hsl(var(--brand-secondary) / <alpha-value>)',
+    				foreground: 'hsl(var(--brand-secondary-foreground) / <alpha-value>)'
     			},
     			dark: {
-    				DEFAULT: '#01233f'
+    				DEFAULT: 'hsl(var(--brand-dark) / <alpha-value>)'
     			},
     			light: {
-    				DEFAULT: '#dbf0ff'
+    				DEFAULT: 'hsl(var(--brand-light) / <alpha-value>)'
     			},
     			prestige: {
-    				beige: '#e2dcd0',
-    				taupe: '#756b5f'
+    				beige: 'hsl(var(--brand-prestige-beige) / <alpha-value>)',
+    				taupe: 'hsl(var(--brand-prestige-taupe) / <alpha-value>)'
     			},
     			destructive: {
-    				DEFAULT: 'hsl(var(--destructive))',
-    				foreground: 'hsl(var(--destructive-foreground))'
+    				DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
+    				foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)'
     			},
     			muted: {
-    				DEFAULT: 'hsl(var(--muted))',
-    				foreground: 'hsl(var(--muted-foreground))'
+    				DEFAULT: 'hsl(var(--muted) / <alpha-value>)',
+    				foreground: 'hsl(var(--muted-foreground) / <alpha-value>)'
     			},
     			accent: {
-    				DEFAULT: 'hsl(var(--accent))',
-    				foreground: 'hsl(var(--accent-foreground))'
+    				DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
+    				foreground: 'hsl(var(--accent-foreground) / <alpha-value>)'
     			},
     			popover: {
-    				DEFAULT: 'hsl(var(--popover))',
-    				foreground: 'hsl(var(--popover-foreground))'
+    				DEFAULT: 'hsl(var(--popover) / <alpha-value>)',
+    				foreground: 'hsl(var(--popover-foreground) / <alpha-value>)'
     			},
     			card: {
-    				DEFAULT: 'hsl(var(--card))',
-    				foreground: 'hsl(var(--card-foreground))'
+    				DEFAULT: 'hsl(var(--card) / <alpha-value>)',
+    				foreground: 'hsl(var(--card-foreground) / <alpha-value>)'
     			},
     			chart: {
-    				'1': 'hsl(var(--chart-1))',
-    				'2': 'hsl(var(--chart-2))',
-    				'3': 'hsl(var(--chart-3))',
-    				'4': 'hsl(var(--chart-4))',
-    				'5': 'hsl(var(--chart-5))'
+    				'1': 'hsl(var(--chart-1) / <alpha-value>)',
+    				'2': 'hsl(var(--chart-2) / <alpha-value>)',
+    				'3': 'hsl(var(--chart-3) / <alpha-value>)',
+    				'4': 'hsl(var(--chart-4) / <alpha-value>)',
+    				'5': 'hsl(var(--chart-5) / <alpha-value>)'
     			}
     		},
     		fontFamily: {
@@ -69,8 +69,8 @@ module.exports = {
     			'2xl': '1.5rem'
     		},
     		boxShadow: {
-    			'ia': '0 4px 6px -1px rgba(6, 77, 217, 0.1), 0 2px 4px -1px rgba(6, 77, 217, 0.06)',
-    			'ia-hover': '0 20px 25px -5px rgba(6, 77, 217, 0.1), 0 10px 10px -5px rgba(6, 77, 217, 0.04)'
+    			'ia': '0 4px 6px -1px rgba(var(--shadow-ia-rgb), 0.1), 0 2px 4px -1px rgba(var(--shadow-ia-rgb), 0.06)',
+    			'ia-hover': '0 20px 25px -5px rgba(var(--shadow-ia-rgb), 0.1), 0 10px 10px -5px rgba(var(--shadow-ia-rgb), 0.04)'
     		},
     		animation: {
     			'fade-in': 'fadeIn 0.5s ease-out',
