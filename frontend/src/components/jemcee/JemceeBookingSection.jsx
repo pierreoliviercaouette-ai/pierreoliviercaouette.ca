@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { trackEvent } from '../../lib/analytics';
 
 /** Outlook Bookings (même widget que /rendez-vous). */
@@ -7,8 +7,12 @@ export const JEMCEE_OUTLOOK_BOOKING_URL =
 
 /**
  * Rencontre exploratoire embarquée dans la landing jemcee.
+ * Le calendrier ne se charge qu’au clic — évite le vol de scroll
+ * (focus iframe Outlook) pendant la séquence cinématique.
  */
 export function JemceeBookingSection() {
+  const [showCalendar, setShowCalendar] = useState(false);
+
   useEffect(() => {
     trackEvent('view_item', {
       item_category: 'appointment',
@@ -20,7 +24,7 @@ export function JemceeBookingSection() {
     <section
       id="reservation"
       className="relative scroll-mt-24 border-t border-white/10 px-4 py-16 md:px-6 md:py-24"
-      style={{ backgroundColor: '#01101c' }}
+      style={{ backgroundColor: '#01101c', overflowAnchor: 'none' }}
       data-testid="jemcee-booking"
     >
       <div className="mx-auto max-w-4xl text-center">
@@ -33,37 +37,75 @@ export function JemceeBookingSection() {
         <p className="mx-auto mt-4 max-w-xl text-base text-white/70">
           30 minutes. Gratuit. Sans engagement. Choisissez le créneau qui vous convient.
         </p>
-        <a
-          href={JEMCEE_OUTLOOK_BOOKING_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() =>
-            trackEvent('select_content', {
-              content_type: 'cta',
-              item_id: 'jemcee_outlook_external',
-            })
-          }
-          className="mt-5 inline-flex text-sm text-secondary hover:underline"
-        >
-          Ouvrir le calendrier dans un nouvel onglet
-        </a>
+
+        {!showCalendar ? (
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                setShowCalendar(true);
+                trackEvent('select_content', {
+                  content_type: 'cta',
+                  item_id: 'jemcee_booking_reveal',
+                });
+              }}
+              className="inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest transition hover:bg-secondary"
+              style={{ backgroundColor: '#ffffff', color: '#01233f' }}
+              data-testid="jemcee-booking-reveal"
+            >
+              AFFICHER LE CALENDRIER
+            </button>
+            <a
+              href={JEMCEE_OUTLOOK_BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() =>
+                trackEvent('select_content', {
+                  content_type: 'cta',
+                  item_id: 'jemcee_outlook_external',
+                })
+              }
+              className="inline-flex text-sm text-secondary hover:underline"
+            >
+              Ouvrir dans un nouvel onglet
+            </a>
+          </div>
+        ) : (
+          <a
+            href={JEMCEE_OUTLOOK_BOOKING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              trackEvent('select_content', {
+                content_type: 'cta',
+                item_id: 'jemcee_outlook_external',
+              })
+            }
+            className="mt-5 inline-flex text-sm text-secondary hover:underline"
+          >
+            Ouvrir le calendrier dans un nouvel onglet
+          </a>
+        )}
       </div>
 
-      <div
-        className="mx-auto mt-10 w-full max-w-5xl overflow-hidden border border-white/10 bg-white"
-        data-testid="jemcee-booking-calendar"
-      >
-        <iframe
-          src={JEMCEE_OUTLOOK_BOOKING_URL}
-          className="block w-full"
-          style={{ border: 0, height: 2200, overflow: 'hidden' }}
-          title="Calendrier de rendez-vous · rencontre exploratoire"
-          loading="lazy"
-          scrolling="no"
-          referrerPolicy="no-referrer-when-downgrade"
-          allow="fullscreen"
-        />
-      </div>
+      {showCalendar ? (
+        <div
+          className="mx-auto mt-10 w-full max-w-5xl overflow-hidden border border-white/10 bg-white"
+          data-testid="jemcee-booking-calendar"
+          style={{ overflowAnchor: 'none' }}
+        >
+          <iframe
+            src={JEMCEE_OUTLOOK_BOOKING_URL}
+            className="block w-full"
+            style={{ border: 0, height: 2200, overflow: 'hidden' }}
+            title="Calendrier de rendez-vous · rencontre exploratoire"
+            scrolling="no"
+            tabIndex={-1}
+            referrerPolicy="no-referrer-when-downgrade"
+            allow="fullscreen"
+          />
+        </div>
+      ) : null}
     </section>
   );
 }
