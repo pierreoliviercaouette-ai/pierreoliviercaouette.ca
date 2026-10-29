@@ -61,10 +61,10 @@ Conversion secondaire : lecture module `/apprendre/...` (éducation, pas l’obj
 - Optimisation : **Clics vers le lien** (landing)
 - Pixel Meta (ID `3777221109164370`) : chargé **après consentement cookies** via `frontend/src/lib/analytics.js`
 - **Conversions à optimiser :**
-  - `Lead` — formulaire `/contact` envoyé avec succès (navigateur)
-  - `Schedule` — RDV Bookings créé → **Power Automate** → Edge Function Meta CAPI  
-    Guide : `supabase/functions/outlook-booking-meta-setup.txt`
-  - Secours : bouton « Oui, j’ai réservé » → `/rendez-vous/merci` (à retirer une fois Automate stable)
+  - `Lead` — formulaire `/contact` envoyé avec succès
+  - `Schedule` — bouton « Oui, j’ai réservé » → `/rendez-vous/merci`  
+    *(Automate → Meta CAPI exige l’action HTTP = licence Premium ; non dispo ici)*  
+    Détail : `supabase/functions/outlook-booking-meta-setup.txt`
 - Intention : `InitiateCheckout` (CTA RDV) ; `ViewContent` (landings) ; `Contact` (tél./courriel)
 - Quand volume OK : objectif Ads Manager sur **Lead** et/ou **Schedule** (pas seulement clics)
 
