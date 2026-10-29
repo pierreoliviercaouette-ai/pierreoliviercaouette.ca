@@ -3,7 +3,7 @@ import { ArrowRight, Calendar, CheckCircle2, ChevronRight } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
 import { getOtherServices, getServiceById } from '../data/services';
 import { useAudienceMode } from '../context/AudienceModeContext';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 export const ServiceDetail = () => {
@@ -36,12 +36,7 @@ export const ServiceDetail = () => {
       >
         <Link
           to="/rendez-vous"
-          onClick={() =>
-            trackEvent('select_content', {
-              content_type: 'cta',
-              item_id: `service_${service.id}_hero_rdv`,
-            })
-          }
+          onClick={() => trackRendezVousClick(`service_${service.id}_hero_rdv`)}
           className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-dark shadow-xl shadow-black/15 ring-2 ring-white/40 transition-all duration-300 hover:scale-[1.02] hover:bg-secondary hover:text-white hover:ring-secondary/50"
         >
           <Calendar className="w-5 h-5" />
@@ -142,12 +137,7 @@ export const ServiceDetail = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   to="/rendez-vous"
-                  onClick={() =>
-                    trackEvent('select_content', {
-                      content_type: 'cta',
-                      item_id: `service_${service.id}_bottom_rdv`,
-                    })
-                  }
+                  onClick={() => trackRendezVousClick(`service_${service.id}_bottom_rdv`)}
                   className="inline-flex items-center justify-center gap-2 bg-white text-primary rounded-full px-8 py-3 font-semibold shadow-lg hover:bg-secondary hover:text-white transition-all"
                   data-testid="service-detail-cta-rdv"
                 >

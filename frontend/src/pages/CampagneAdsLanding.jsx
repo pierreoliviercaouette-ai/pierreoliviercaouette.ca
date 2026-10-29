@@ -7,7 +7,7 @@ import {
   buildCampagneRdvPath,
   getCampagneAdsLanding,
 } from '../data/campagneAdsLandings';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 /**
@@ -57,12 +57,7 @@ export function CampagneAdsLanding() {
       >
         <Link
           to={rdvPath}
-          onClick={() =>
-            trackEvent('select_content', {
-              content_type: 'cta',
-              item_id: `campagne_${item.slug}_rdv`,
-            })
-          }
+          onClick={() => trackRendezVousClick(`campagne_${item.slug}_rdv`)}
           className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-primary shadow-lg transition-all duration-300 hover:bg-secondary hover:text-white"
           data-testid="campagne-ads-cta-rdv"
         >
@@ -131,12 +126,7 @@ export function CampagneAdsLanding() {
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
                 to={rdvPath}
-                onClick={() =>
-                  trackEvent('select_content', {
-                    content_type: 'cta',
-                    item_id: `campagne_${item.slug}_rdv_mid`,
-                  })
-                }
+                onClick={() => trackRendezVousClick(`campagne_${item.slug}_rdv_mid`)}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-primary transition-colors hover:bg-secondary hover:text-white"
               >
                 {item.ctaLabel}

@@ -1,0 +1,28 @@
+booking-ical-poll — Google Calendar iCal → Meta Schedule (sans Apps Script)
+===========================================================================
+
+Pourquoi : Google bloque souvent l’autorisation Apps Script sur Gmail perso.
+Cette Edge Function lit l’URL iCal secrète et envoie Schedule via CAPI.
+
+1) SQL Editor → exécuter migrations/020_booking_ical_schedule.sql
+
+2) Secrets Edge Functions :
+   GOOGLE_CALENDAR_ICAL_URL   = adresse secrète iCal (Calendar → Intégrer)
+   META_PIXEL_ID              = 1157851050245521
+   META_CAPI_ACCESS_TOKEN     = jeton CAPI
+   BOOKING_WEBHOOK_SECRET     = secret long (Bearer)
+   BOOKING_MY_EMAIL           = pierre.olivier.caouette@gmail.com (optionnel)
+   BOOKING_TITLE_INCLUDE      = Nouvelle réservation (optionnel)
+   BOOKING_LOOKBACK_MIN       = 45 (optionnel)
+
+3) Déployer la function booking-ical-poll (Dashboard ou CLI)
+
+4) Premier appel (bootstrap — n’envoie rien à Meta) :
+   POST https://gksqjvattwhmofdarqnq.supabase.co/functions/v1/booking-ical-poll
+   Header: Authorization: Bearer <BOOKING_WEBHOOK_SECRET>
+
+5) Automatiser toutes les 5–10 min :
+   - https://cron-job.org (gratuit) → URL ci-dessus + header Authorization
+   - ou schedule Edge Function Supabase si disponible
+
+Guide détaillé : ../GOOGLE_APPS_SCRIPT_SCHEDULE_SETUP.md

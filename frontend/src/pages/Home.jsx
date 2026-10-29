@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Shield, TrendingUp, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle2, Star, Quote, ExternalLink, Target, Handshake, Search, ClipboardList, LineChart } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { DEFAULT_OG_IMAGE, useSeoMeta } from '../lib/seo';
 import {
   AMF_REGISTRE_URL,
@@ -57,7 +57,7 @@ const Hero = () => (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
             <Link 
               to="/rendez-vous" 
-              onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'home_hero_rendez_vous' })}
+              onClick={() => trackRendezVousClick('home_hero_rendez_vous')}
               className="group order-first inline-flex min-h-[52px] min-w-[44px] items-center justify-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-dark shadow-xl shadow-black/15 ring-2 ring-white/40 transition-all duration-300 hover:scale-[1.02] hover:bg-secondary hover:text-white hover:ring-secondary/50 sm:px-12"
               data-testid="hero-cta-rdv"
             >
@@ -314,6 +314,7 @@ const AdvantageSection = () => (
           
           <Link 
             to="/rendez-vous" 
+            onClick={() => trackRendezVousClick('home_mid_rendez_vous')}
             className="btn-primary inline-flex items-center gap-2 mt-4"
           >
             Prendre rendez-vous
@@ -748,7 +749,7 @@ const CTASection = () => (
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Link 
             to="/rendez-vous" 
-            onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'home_final_rendez_vous' })}
+            onClick={() => trackRendezVousClick('home_final_rendez_vous')}
             className="group bg-white text-primary rounded-full px-8 py-4 font-semibold hover:bg-secondary hover:text-white transition-all duration-300 inline-flex items-center justify-center gap-2 shadow-lg"
             data-testid="cta-final-rdv"
           >

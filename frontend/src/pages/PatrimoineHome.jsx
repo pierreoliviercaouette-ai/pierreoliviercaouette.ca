@@ -15,13 +15,19 @@ import {
   UserCheck,
   GitBranch,
 } from 'lucide-react';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { DEFAULT_OG_IMAGE, useSeoMeta } from '../lib/seo';
 import { AMF_REGISTRE_URL } from '../lib/branding';
 import { FormationsTeaser } from '../components/formations/FormationsTeaser';
 
-const trackCta = (itemId) =>
+const trackCta = (itemId) => {
+  const id = String(itemId || '');
+  if (id.includes('_rdv') || id.includes('rendez_vous') || id.includes('consultation')) {
+    trackRendezVousClick(id);
+    return;
+  }
   trackEvent('select_content', { content_type: 'cta', item_id: itemId });
+};
 
 const AUDIENCE_PROFILES = [
   {

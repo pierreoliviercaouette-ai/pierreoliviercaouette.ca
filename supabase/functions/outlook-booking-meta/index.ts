@@ -2,15 +2,15 @@
  * Conversion Meta « Schedule » quand un RDV Outlook Bookings est créé.
  *
  * Pourquoi : l’iframe outlook.office.com est cross-origin — le site ne peut
- * PAS détecter la confirmation. On écoute plutôt la création côté Microsoft
- * (Power Automate) et on envoie l’événement serveur (Conversions API).
+ * PAS détecter la confirmation. On écoute plutôt un webhook externe
+ * (Google Apps Script / Power Automate) et on envoie Schedule via CAPI.
  *
  * Secrets (Supabase → Edge Functions → Secrets) :
  *   META_PIXEL_ID              — 1157851050245521
  *   META_CAPI_ACCESS_TOKEN     — Events Manager → Pixel → Settings → Generate access token
- *   BOOKING_WEBHOOK_SECRET     — même valeur que Bearer dans Power Automate
+ *   BOOKING_WEBHOOK_SECRET     — Bearer partagé (Apps Script ou Automate)
  *
- * Voir : outlook-booking-meta-setup.txt
+ * Voir : GOOGLE_APPS_SCRIPT_SCHEDULE_SETUP.md , outlook-booking-meta-setup.txt
  */
 
 const corsHeaders: Record<string, string> = {

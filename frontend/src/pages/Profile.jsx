@@ -18,6 +18,7 @@ import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { PageHero } from '../components/layout/PageHero';
 import { useSeoMeta } from '../lib/seo';
+import { trackRendezVousClick } from '../lib/analytics';
 
 export const Profile = () => {
   const { user, loading: authLoading, notifications, markNotificationRead, markAllNotificationsRead } = useAuth();
@@ -247,6 +248,7 @@ export const Profile = () => {
                         </Link>
                         <Link
                           to="/rendez-vous"
+                          onClick={() => trackRendezVousClick('profile_rendez_vous')}
                           className="flex w-full items-center gap-3 rounded-xl border border-prestige-beige bg-light/50 p-3 text-sm text-dark transition-colors hover:border-primary/30"
                         >
                           <Calendar className="h-5 w-5 shrink-0 text-primary" />

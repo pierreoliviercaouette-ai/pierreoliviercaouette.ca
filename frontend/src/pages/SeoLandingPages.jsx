@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
 import { useFaqSchema, useSeoMeta } from '../lib/seo';
+import { trackRendezVousClick } from '../lib/analytics';
 
 function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqItems = [] }) {
   useSeoMeta({ title, description, canonicalPath });
@@ -48,6 +49,7 @@ function SeoPage({ title, description, canonicalPath, h1, intro, sections, faqIt
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   to="/rendez-vous"
+                  onClick={() => trackRendezVousClick('seo_landing_rendez_vous')}
                   className="group inline-flex items-center justify-center gap-2 bg-white text-primary rounded-full px-8 py-3 font-semibold shadow-lg hover:bg-secondary hover:text-white transition-all duration-300"
                 >
                   Prendre rendez-vous

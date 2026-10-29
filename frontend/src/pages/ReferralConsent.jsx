@@ -7,7 +7,7 @@ import { Button } from '../components/ui/button';
 import { Checkbox } from '../components/ui/checkbox';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 
 const CONSENT_TEXT =
   "J'accepte que Pierre-Olivier Caouette, conseiller en sécurité financière, communique avec moi par téléphone ou par courriel au sujet de ses services de conseil, en se basant sur les renseignements que je fournis ci-dessous. Je comprends que je peux retirer ce consentement en tout temps en le lui signalant directement.";
@@ -103,7 +103,11 @@ export const ReferralConsent = () => {
               Retour à l’accueil
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link to="/rendez-vous" className="btn-secondary inline-flex items-center justify-center gap-2">
+            <Link
+              to="/rendez-vous"
+              onClick={() => trackRendezVousClick('referral_consent_rendez_vous')}
+              className="btn-secondary inline-flex items-center justify-center gap-2"
+            >
               Prendre rendez-vous
             </Link>
           </div>

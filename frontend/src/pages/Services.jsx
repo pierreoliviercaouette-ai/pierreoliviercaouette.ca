@@ -3,7 +3,7 @@ import { ArrowRight, Calendar, CheckCircle2, ChevronRight } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
 import { getServicesForAudience } from '../data/services';
 import { useAudienceMode } from '../context/AudienceModeContext';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 const ServiceCard = ({ service }) => {
@@ -106,6 +106,7 @@ export const Services = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/rendez-vous"
+                onClick={() => trackRendezVousClick('services_cta_rendez_vous')}
                 className="btn-primary inline-flex items-center justify-center gap-2"
                 data-testid="services-cta-rdv"
               >

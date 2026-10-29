@@ -7,7 +7,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { getMetaClickCookies } from '../lib/metaCookies';
 import { OUTLOOK_BOOKING_URL } from '../lib/booking';
 import { BookingScheduleConfirm } from '../components/booking/BookingScheduleConfirm';
@@ -270,7 +270,7 @@ export const Contact = () => {
                 </p>
                 <Link 
                   to="/rendez-vous"
-                  onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'contact_to_rendez_vous' })}
+                  onClick={() => trackRendezVousClick('contact_to_rendez_vous')}
                   className="inline-flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-full font-medium hover:bg-light transition-colors"
                 >
                   Prendre rendez-vous
@@ -319,12 +319,7 @@ export const Appointment = () => {
             href={CONTACT_INFO.bookingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() =>
-              trackEvent('select_content', {
-                content_type: 'cta',
-                item_id: 'outlook_booking_external',
-              })
-            }
+            onClick={() => trackRendezVousClick('outlook_booking_external')}
             className="inline-flex items-center gap-2 mt-4 text-primary font-medium hover:underline"
           >
             Ouvrir dans un nouvel onglet

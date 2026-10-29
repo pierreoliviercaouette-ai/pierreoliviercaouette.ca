@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { trackEvent } from '../../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../../lib/analytics';
 import { BookingScheduleConfirm } from '../booking/BookingScheduleConfirm';
 
 /** Outlook Bookings (même widget que /rendez-vous). */
@@ -45,10 +45,7 @@ export function JemceeBookingSection() {
               type="button"
               onClick={() => {
                 setShowCalendar(true);
-                trackEvent('select_content', {
-                  content_type: 'cta',
-                  item_id: 'jemcee_booking_reveal',
-                });
+                trackRendezVousClick('jemcee_booking_reveal');
               }}
               className="inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest transition hover:bg-secondary"
               style={{ backgroundColor: '#ffffff', color: '#01233f' }}
@@ -60,12 +57,7 @@ export function JemceeBookingSection() {
               href={JEMCEE_OUTLOOK_BOOKING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() =>
-                trackEvent('select_content', {
-                  content_type: 'cta',
-                  item_id: 'jemcee_outlook_external',
-                })
-              }
+              onClick={() => trackRendezVousClick('jemcee_outlook_external')}
               className="inline-flex text-sm text-secondary hover:underline"
             >
               Ouvrir dans un nouvel onglet
@@ -76,12 +68,7 @@ export function JemceeBookingSection() {
             href={JEMCEE_OUTLOOK_BOOKING_URL}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() =>
-              trackEvent('select_content', {
-                content_type: 'cta',
-                item_id: 'jemcee_outlook_external',
-              })
-            }
+            onClick={() => trackRendezVousClick('jemcee_outlook_external')}
             className="mt-5 inline-flex text-sm text-secondary hover:underline"
           >
             Ouvrir le calendrier dans un nouvel onglet

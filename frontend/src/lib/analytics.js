@@ -181,18 +181,32 @@ const trackMetaFromAppEvent = (eventName, params = {}) => {
     return;
   }
 
+  // Intention forte : clic « Prendre / Réserver rendez-vous »
+  if (eventName === 'begin_checkout') {
+    window.fbq('track', 'InitiateCheckout', {
+      content_name: params.item_id || params.content_name || 'rendez_vous_cta',
+      content_category: params.content_type || 'cta',
+    });
+    return;
+  }
+
   if (eventName === 'select_content') {
     const itemId = String(params.item_id || '');
-    const isRdvIntent =
-      itemId.includes('_rdv') ||
-      itemId.includes('outlook') ||
-      itemId.includes('rendez_vous') ||
-      itemId.includes('booking');
-    if (isRdvIntent) {
-      // Intention (pas encore une réservation confirmée)
+    if (isRendezVousIntentId(itemId)) {
       window.fbq('track', 'InitiateCheckout', {
         content_name: itemId || undefined,
         content_category: params.content_type || undefined,
+      });
+    }
+    return;
+  }
+
+  if (eventName === 'navigation_click') {
+    const dest = String(params.destination || '');
+    if (dest.includes('/rendez-vous')) {
+      window.fbq('track', 'InitiateCheckout', {
+        content_name: params.location || 'nav_rendez_vous',
+        content_category: 'navigation',
       });
     }
     return;
@@ -204,6 +218,19 @@ const trackMetaFromAppEvent = (eventName, params = {}) => {
       content_category: params.source || undefined,
     });
   }
+};
+
+const isRendezVousIntentId = (itemId) => {
+  const id = String(itemId || '').toLowerCase();
+  return (
+    id.includes('_rdv') ||
+    id.includes('rendez_vous') ||
+    id.includes('booking') ||
+    id.includes('outlook') ||
+    id.includes('reserver') ||
+    id.endsWith('_depart') || // jemcee hero → calendrier
+    id.includes('outro_booking')
+  );
 };
 
 /**
@@ -243,6 +270,18 @@ export const trackEvent = (eventName, params = {}) => {
     window.gtag('event', eventName, params);
   }
   trackMetaFromAppEvent(eventName, params);
+};
+
+/**
+ * Clic CTA « Prendre rendez-vous » / « Réserver… » → Meta InitiateCheckout.
+ * À utiliser sur tous les liens vers /rendez-vous (intention forte).
+ */
+export const trackRendezVousClick = (itemId, params = {}) => {
+  trackEvent('begin_checkout', {
+    content_type: 'cta',
+    item_id: itemId || 'rendez_vous_cta',
+    ...params,
+  });
 };
 
 export const setAnalyticsUser = (user = null) => {

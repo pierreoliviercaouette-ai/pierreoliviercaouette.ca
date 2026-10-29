@@ -9,7 +9,7 @@ import {
   getFormationsForAudience,
 } from '../data/formations';
 import { useFormationProgress } from '../hooks/useFormationProgress';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 export function Apprendre() {
@@ -45,9 +45,7 @@ export function Apprendre() {
       >
         <Link
           to="/rendez-vous"
-          onClick={() =>
-            trackEvent('select_content', { content_type: 'cta', item_id: 'apprendre_hero_rdv' })
-          }
+          onClick={() => trackRendezVousClick('apprendre_hero_rdv')}
           className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-dark shadow-xl ring-2 ring-white/40 transition-all hover:scale-[1.02] hover:bg-secondary hover:text-white"
         >
           En parler avec moi

@@ -18,7 +18,7 @@ import { FormationConceptDiagram } from '../components/formations/FormationConce
 import { FormationTimelineChart } from '../components/formations/FormationTimelineChart';
 import { FormationQuiz } from '../components/formations/FormationQuiz';
 import { useFormationProgress } from '../hooks/useFormationProgress';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 /** La page affiche déjà 01, 02… — retirer un préfixe « 1. » éventuel dans les données. */
@@ -424,12 +424,7 @@ export function ApprendreDetail() {
 
           <Link
             to="/rendez-vous"
-            onClick={() =>
-              trackEvent('select_content', {
-                content_type: 'cta',
-                item_id: `apprendre_${item.id}_rdv`,
-              })
-            }
+            onClick={() => trackRendezVousClick(`apprendre_${item.id}_rdv`)}
             className="inline-flex min-h-[48px] items-center gap-2 bg-dark px-8 text-sm font-semibold text-white transition-colors hover:bg-primary"
           >
             Appliquer ça à votre situation

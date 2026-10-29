@@ -6,7 +6,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -130,6 +130,7 @@ export const Login = () => {
           </p>
           <Link
             to="/rendez-vous"
+            onClick={() => trackRendezVousClick('auth_login_rendez_vous')}
             className="inline-flex items-center gap-2 text-primary font-medium hover:underline"
           >
             Prendre rendez-vous <ArrowRight className="w-4 h-4" />

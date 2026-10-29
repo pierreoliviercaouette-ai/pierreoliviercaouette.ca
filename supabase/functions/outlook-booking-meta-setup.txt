@@ -35,6 +35,9 @@ Jeton : Events Manager → Pixel → Paramètres → Conversions API → Génér
 
 Alternatives sans Premium Microsoft
 -----------------------------------
+- Google Apps Script (gratuit, Gmail perso) — invitation Agenda → webhook
+  Guide complet : ../GOOGLE_APPS_SCRIPT_SCHEDULE_SETUP.md
+  (réutilise cette Edge Function + BOOKING_WEBHOOK_SECRET)
 - Make.com / Zapier (souvent un appel HTTP inclus au forfait gratuit/limité)
   déclenché par courriel de confirmation Bookings ou webhook tiers
 - Rester sur Lead (/contact) + Schedule (bouton merci) uniquement

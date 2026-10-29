@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2, Award, Heart, Target, Star, Quote, ExternalLi
 import { PERSON_IMAGE, useSeoMeta } from '../lib/seo';
 import { PartnersTrustSection } from '../components/partners/PartnersTrustSection';
 import { AMF_REGISTRE_URL } from '../lib/branding';
+import { trackRendezVousClick } from '../lib/analytics';
 
 export const About = () => {
   useSeoMeta({
@@ -359,6 +360,7 @@ export const About = () => {
               </p>
               <Link 
                 to="/rendez-vous" 
+                onClick={() => trackRendezVousClick('about_cta_rendez_vous')}
                 className="inline-flex items-center gap-2 bg-white text-primary px-8 py-4 rounded-full font-semibold hover:bg-secondary hover:text-white transition-all duration-300 shadow-lg"
                 data-testid="about-cta-rdv"
               >

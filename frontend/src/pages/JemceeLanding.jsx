@@ -3,7 +3,7 @@ import { JemceeBookingSection } from '../components/jemcee/JemceeBookingSection'
 import { JemceeRendementsTeaser } from '../components/jemcee/JemceeRendementsTeaser';
 import { AppleCinematicScroll } from '../components/jemcee/AppleCinematicScroll';
 import { JEMCEE_SEQUENCE } from '../data/jemceeSequence';
-import { trackEvent } from '../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 /** Réservation via la page dédiée (pas d’ancre #reservation pendant le scroll cinématique). */
@@ -115,6 +115,16 @@ const CHAPTERS = [
 ];
 
 function trackCta(itemId) {
+  const id = String(itemId || '');
+  if (
+    id.includes('booking') ||
+    id.endsWith('_depart') ||
+    id.includes('outro_booking') ||
+    id.includes('reservation')
+  ) {
+    trackRendezVousClick(id);
+    return;
+  }
   trackEvent('select_content', { content_type: 'cta', item_id: itemId });
 }
 

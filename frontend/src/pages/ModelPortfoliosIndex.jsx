@@ -6,6 +6,7 @@ import {
   PORTFOLIO_GENERAL_DISCLAIMER,
 } from '../lib/portfolioCompliance';
 import { useSeoMeta } from '../lib/seo';
+import { trackRendezVousClick } from '../lib/analytics';
 
 export const ModelPortfoliosIndex = () => {
   useSeoMeta({
@@ -63,7 +64,11 @@ export const ModelPortfoliosIndex = () => {
                 Lire les conditions — fonds distincts
               </Link>
               {' · '}
-              <Link to="/rendez-vous" className="text-primary hover:underline">
+              <Link
+                to="/rendez-vous"
+                onClick={() => trackRendezVousClick('portefeuilles_rendez_vous')}
+                className="text-primary hover:underline"
+              >
                 Prendre rendez-vous
               </Link>
             </p>
