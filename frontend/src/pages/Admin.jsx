@@ -284,6 +284,23 @@ export const Admin = () => {
     }
   };
 
+  const deleteContactLead = async (contact) => {
+    const ok = window.confirm(
+      `Supprimer le lead « ${contact.name} » (${contact.email}) ? Cette action est irréversible.`
+    );
+    if (!ok) return;
+    try {
+      const { error } = await supabase.rpc('admin_delete_contact_lead', {
+        p_id: contact.id,
+      });
+      if (error) throw error;
+      toast.success('Lead supprimé');
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.message || 'Erreur lors de la suppression');
+    }
+  };
+
   const openSoldModal = (contact) => {
     setSoldModal(contact);
     setSoldValue(contact.sale_value != null ? String(contact.sale_value) : '');
@@ -940,6 +957,17 @@ export const Admin = () => {
                                 Renvoyer Purchase Meta
                               </Button>
                             )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => deleteContactLead(contact)}
+                              data-testid={`contact-delete-${contact.id}`}
+                              title="Supprimer"
+                            >
+                              <Trash2 className="mr-1 h-4 w-4" />
+                              Supprimer
+                            </Button>
                           </div>
                         </div>
                       );

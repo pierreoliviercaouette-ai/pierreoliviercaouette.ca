@@ -198,6 +198,7 @@ Bouton **Envoyer / Renvoyer Purchase Meta** sur une fiche déjà « Vendu » si 
 ## Checklist finale
 
 - [ ] Migration `018_contact_leads_crm.sql` exécutée
+- [ ] Migration `019_contact_leads_delete.sql` exécutée (suppression leads admin)
 - [ ] Secret `META_PIXEL_ID=1157851050245521`
 - [ ] Secret `META_CAPI_ACCESS_TOKEN` (jeton du **nouveau** Pixel)
 - [ ] Edge Function `meta-lead-purchase` déployée (Dashboard ou CLI)
