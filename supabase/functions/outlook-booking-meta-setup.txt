@@ -1,0 +1,100 @@
+Suivi RDV Outlook Bookings → Meta Schedule (Power Automate)
+===========================================================
+
+Principe
+--------
+L’iframe Bookings est cross-origin : le site ne voit pas la confirmation.
+Power Automate détecte la création du RDV côté Microsoft, puis appelle notre
+Edge Function qui envoie l’événement standard Meta « Schedule » (Conversions API).
+
+
+Étape 1 — Token Meta Conversions API
+------------------------------------
+1. Meta Events Manager → Pixel 3777221109164370
+2. Paramètres → Conversions API → Générer un jeton d’accès
+3. Copier le token (affiché une seule fois)
+
+
+Étape 2 — Secrets Supabase
+--------------------------
+Dashboard Supabase → Project Settings → Edge Functions → Secrets :
+
+  META_PIXEL_ID=3777221109164370
+  META_CAPI_ACCESS_TOKEN=<jeton de l’étape 1>
+  BOOKING_WEBHOOK_SECRET=<longue chaîne aléatoire, ex. 32+ caractères>
+
+Génère un secret, ex. (PowerShell) :
+  -join ((48..57 + 65..90 + 97..122) | Get-Random -Count 40 | ForEach-Object {[char]$_})
+
+
+Étape 3 — Déployer la fonction
+------------------------------
+Dans le dossier du repo :
+
+  supabase functions deploy outlook-booking-meta
+
+URL (remplace PROJECT_REF) :
+  https://PROJECT_REF.supabase.co/functions/v1/outlook-booking-meta
+
+Tu trouves PROJECT_REF dans Supabase → Settings → General → Reference ID
+(ou dans l’URL du projet : https://PROJECT_REF.supabase.co).
+
+
+Étape 4 — Power Automate
+------------------------
+1. https://make.powerautomate.com → Créer → Flux de cloud automatisé
+2. Nom : Meta Schedule — Bookings
+3. Déclencheur : chercher « Bookings »
+   → « When an appointment is created » / « Quand un rendez-vous est créé »
+   Champ Booking page → Entrée personnalisée / valeur personnalisée :
+     PierreOlivierCaouetteiAGroupefinancier@ia.ca
+   (= adresse SMTP de la page, visible aussi dans Bookings → Intégrations → Power Automate,
+    ou dans l’URL /book/…@ia.ca/)
+   Tu dois être admin de la page Bookings.
+   (Si le connecteur Bookings est indisponible : « Quand un événement est créé (V3) »
+    sur le calendrier Bookings.)
+
+4. Nouvelle étape → HTTP
+   - Méthode : POST
+   - URI : https://PROJECT_REF.supabase.co/functions/v1/outlook-booking-meta
+   - En-têtes :
+       Authorization   Bearer VOTRE_BOOKING_WEBHOOK_SECRET
+       Content-Type    application/json
+   - Corps (mode texte) — adapte les champs dynamiques du déclencheur :
+
+{
+  "appointment_id": "@{triggerOutputs()?['body/id']}",
+  "customer_email": "@{triggerOutputs()?['body/customerEmail']}",
+  "customer_phone": "@{triggerOutputs()?['body/customerPhone']}",
+  "customer_name": "@{triggerOutputs()?['body/customerName']}",
+  "service_name": "@{triggerOutputs()?['body/serviceName']}",
+  "start_time": "@{triggerOutputs()?['body/start']}",
+  "source": "power_automate_bookings"
+}
+
+Astuce : dans le designer, utilise « Ajouter du contenu dynamique » plutôt que
+de coller les @{…} à la main — les noms exacts varient selon le connecteur
+(CustomerEmail vs customerEmail, etc.). Notre fonction accepte plusieurs alias.
+
+5. Enregistrer le flux.
+
+
+Étape 5 — Test
+--------------
+1. Créer un vrai RDV test via https://www.pierreoliviercaouette.ca/rendez-vous
+2. Power Automate → Historique d’exécution → doit être « Réussi » (HTTP 200)
+3. Meta Events Manager → Vue d’ensemble / Événements de test :
+   événement Schedule (source Serveur)
+
+
+Étape 6 — Ads Manager
+---------------------
+Optimiser les campagnes sur l’événement standard Schedule
+(et Lead pour le formulaire /contact).
+
+
+Secours navigateur (optionnel)
+------------------------------
+Tant que le flux n’est pas validé, le bouton « Oui, j’ai réservé » sous le
+calendrier envoie aussi Schedule via le Pixel navigateur. Une fois Power
+Automate stable, tu peux retirer ce bouton pour éviter le double comptage.

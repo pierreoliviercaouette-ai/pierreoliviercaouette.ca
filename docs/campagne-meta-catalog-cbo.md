@@ -59,7 +59,14 @@ Conversion secondaire : lecture module `/apprendre/...` (éducation, pas l’obj
 - Budget journalier test : **120–200 $ / jour** (14 ensembles — laisser assez de volume à l’algo)
 - Emplacements : Advantage+
 - Optimisation : **Clics vers le lien** (landing)
-- Quand ≥ ~50 réservations / mois pixel propre : tester objectif **Leads** ou optimisation sur événement `Schedule` / `Lead`
+- Pixel Meta (ID `3777221109164370`) : chargé **après consentement cookies** via `frontend/src/lib/analytics.js`
+- **Conversions à optimiser :**
+  - `Lead` — formulaire `/contact` envoyé avec succès (navigateur)
+  - `Schedule` — RDV Bookings créé → **Power Automate** → Edge Function Meta CAPI  
+    Guide : `supabase/functions/outlook-booking-meta-setup.txt`
+  - Secours : bouton « Oui, j’ai réservé » → `/rendez-vous/merci` (à retirer une fois Automate stable)
+- Intention : `InitiateCheckout` (CTA RDV) ; `ViewContent` (landings) ; `Contact` (tél./courriel)
+- Quand volume OK : objectif Ads Manager sur **Lead** et/ou **Schedule** (pas seulement clics)
 
 ### Géo (tous les ensembles)
 - Centre-du-Québec / Victoriaville + rayons pertinents  

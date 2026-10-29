@@ -3,10 +3,12 @@ import { hasAnalyticsConsent } from './consent';
 export const GA_MEASUREMENT_ID = 'G-CKGLFKD958';
 export const POSTHOG_KEY = 'phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs';
 export const POSTHOG_HOST = 'https://us.i.posthog.com';
+export const META_PIXEL_ID = '3777221109164370';
 
 const hasWindow = () => typeof window !== 'undefined';
 
 const isGtagReady = () => hasWindow() && typeof window.gtag === 'function';
+const isFbqReady = () => hasWindow() && typeof window.fbq === 'function';
 
 let analyticsBootstrapped = false;
 
@@ -106,8 +108,106 @@ const initPostHog = () => {
   window.__posthogInitialized = true;
 };
 
+/** Meta Pixel — same stub as Meta Events Manager snippet; only after consent. */
+const initMetaPixel = () => {
+  if (!hasWindow() || window.__metaPixelInitialized) return;
+
+  /* eslint-disable */
+  !(function (f, b, e, v, n, t, s) {
+    if (f.fbq) return;
+    n = f.fbq = function () {
+      n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+    };
+    if (!f._fbq) f._fbq = n;
+    n.push = n;
+    n.loaded = !0;
+    n.version = '2.0';
+    n.queue = [];
+    t = b.createElement(e);
+    t.async = !0;
+    t.src = v;
+    s = b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t, s);
+  })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+  /* eslint-enable */
+
+  window.fbq('init', META_PIXEL_ID);
+  window.fbq('track', 'PageView');
+
+  if (!document.getElementById('meta-pixel-noscript')) {
+    const noscript = document.createElement('noscript');
+    noscript.id = 'meta-pixel-noscript';
+    const img = document.createElement('img');
+    img.height = 1;
+    img.width = 1;
+    img.style.display = 'none';
+    img.alt = '';
+    img.src = `https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`;
+    noscript.appendChild(img);
+    document.body.appendChild(noscript);
+  }
+
+  window.__metaPixelInitialized = true;
+};
+
+const trackMetaFromAppEvent = (eventName, params = {}) => {
+  if (!isFbqReady()) return;
+
+  // Conversion principale : formulaire de contact envoyé
+  if (eventName === 'generate_lead') {
+    window.fbq('track', 'Lead', {
+      content_name: params.method || 'contact_form',
+      content_category: 'contact',
+    });
+    return;
+  }
+
+  // Conversion : confirmation RDV (page /rendez-vous/merci — iframe Outlook non lisible)
+  if (eventName === 'schedule') {
+    window.fbq('track', 'Schedule', {
+      content_name: params.method || 'booking_self_confirm',
+      content_category: params.source || 'appointment',
+    });
+    return;
+  }
+
+  if (eventName === 'view_item') {
+    window.fbq('track', 'ViewContent', {
+      content_name: params.item_id || undefined,
+      content_category: params.item_category || undefined,
+      content_ids: params.item_id ? [String(params.item_id)] : undefined,
+      content_type: 'product',
+    });
+    return;
+  }
+
+  if (eventName === 'select_content') {
+    const itemId = String(params.item_id || '');
+    const isRdvIntent =
+      itemId.includes('_rdv') ||
+      itemId.includes('outlook') ||
+      itemId.includes('rendez_vous') ||
+      itemId.includes('booking');
+    if (isRdvIntent) {
+      // Intention (pas encore une réservation confirmée)
+      window.fbq('track', 'InitiateCheckout', {
+        content_name: itemId || undefined,
+        content_category: params.content_type || undefined,
+      });
+    }
+    return;
+  }
+
+  if (eventName === 'contact_click') {
+    window.fbq('track', 'Contact', {
+      content_name: params.channel || undefined,
+      content_category: params.source || undefined,
+    });
+  }
+};
+
 /**
- * Load GA + PostHog once after explicit consent.
+ * Load GA + PostHog + Meta Pixel once after explicit consent.
  */
 export const bootstrapAnalytics = async () => {
   if (!hasAnalyticsConsent() || analyticsBootstrapped) return false;
@@ -115,6 +215,7 @@ export const bootstrapAnalytics = async () => {
   try {
     await initGoogleAnalytics();
     initPostHog();
+    initMetaPixel();
     return true;
   } catch (error) {
     console.error('Analytics bootstrap failed:', error);
@@ -124,16 +225,24 @@ export const bootstrapAnalytics = async () => {
 };
 
 export const trackPageView = (path, title = document?.title || '') => {
-  if (!hasAnalyticsConsent() || !isGtagReady()) return;
-  window.gtag('config', GA_MEASUREMENT_ID, {
-    page_path: path,
-    page_title: title,
-  });
+  if (!hasAnalyticsConsent()) return;
+  if (isGtagReady()) {
+    window.gtag('config', GA_MEASUREMENT_ID, {
+      page_path: path,
+      page_title: title,
+    });
+  }
+  if (isFbqReady()) {
+    window.fbq('track', 'PageView');
+  }
 };
 
 export const trackEvent = (eventName, params = {}) => {
-  if (!hasAnalyticsConsent() || !isGtagReady()) return;
-  window.gtag('event', eventName, params);
+  if (!hasAnalyticsConsent()) return;
+  if (isGtagReady()) {
+    window.gtag('event', eventName, params);
+  }
+  trackMetaFromAppEvent(eventName, params);
 };
 
 export const setAnalyticsUser = (user = null) => {

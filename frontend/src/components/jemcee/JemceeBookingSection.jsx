@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { trackEvent } from '../../lib/analytics';
+import { BookingScheduleConfirm } from '../booking/BookingScheduleConfirm';
 
 /** Outlook Bookings (même widget que /rendez-vous). */
 export const JEMCEE_OUTLOOK_BOOKING_URL =
@@ -89,22 +90,27 @@ export function JemceeBookingSection() {
       </div>
 
       {showCalendar ? (
-        <div
-          className="mx-auto mt-10 w-full max-w-5xl overflow-hidden border border-white/10 bg-white"
-          data-testid="jemcee-booking-calendar"
-          style={{ overflowAnchor: 'none' }}
-        >
-          <iframe
-            src={JEMCEE_OUTLOOK_BOOKING_URL}
-            className="block w-full"
-            style={{ border: 0, height: 2200, overflow: 'hidden' }}
-            title="Calendrier de rendez-vous · rencontre exploratoire"
-            scrolling="no"
-            tabIndex={-1}
-            referrerPolicy="no-referrer-when-downgrade"
-            allow="fullscreen"
-          />
-        </div>
+        <>
+          <div
+            className="mx-auto mt-10 w-full max-w-5xl overflow-hidden border border-white/10 bg-white"
+            data-testid="jemcee-booking-calendar"
+            style={{ overflowAnchor: 'none' }}
+          >
+            <iframe
+              src={JEMCEE_OUTLOOK_BOOKING_URL}
+              className="block w-full"
+              style={{ border: 0, height: 2200, overflow: 'hidden' }}
+              title="Calendrier de rendez-vous · rencontre exploratoire"
+              scrolling="no"
+              tabIndex={-1}
+              referrerPolicy="no-referrer-when-downgrade"
+              allow="fullscreen"
+            />
+          </div>
+          <div className="mx-auto mt-2 max-w-xl">
+            <BookingScheduleConfirm source="jemcee" variant="dark" />
+          </div>
+        </>
       ) : null}
     </section>
   );

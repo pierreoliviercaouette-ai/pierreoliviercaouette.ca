@@ -16,7 +16,7 @@ export const Privacy = () => {
               Politique de confidentialité
             </h1>
 
-            <p className="text-slate-600 mb-6">Dernière mise à jour : 2026-07-22</p>
+            <p className="text-slate-600 mb-6">Dernière mise à jour : 2026-08-20</p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
               1. Responsable de la protection des renseignements personnels
@@ -88,6 +88,10 @@ export const Privacy = () => {
                 <strong>PostHog</strong> — analytique produit / comportement (si consentie ; voir
                 transferts)
               </li>
+              <li>
+                <strong>Meta Pixel</strong> — mesure des campagnes publicitaires Meta (si
+                consentie ; voir transferts)
+              </li>
             </ul>
             <p className="text-slate-600 mb-6">
               Nous ne vendons pas vos renseignements personnels. Le partage se limite aux
@@ -99,8 +103,8 @@ export const Privacy = () => {
             </h2>
             <p className="text-slate-600 mb-4">
               Un bandeau de consentement s&apos;affiche lors de votre première visite. Google
-              Analytics, PostHog et Vercel Analytics ne sont chargés que si vous acceptez.
-              Refuser n&apos;empêche pas d&apos;utiliser le site.
+              Analytics, PostHog, Meta Pixel et Vercel Analytics ne sont chargés que si vous
+              acceptez. Refuser n&apos;empêche pas d&apos;utiliser le site.
             </p>
             <p className="text-slate-600 mb-4">
               Pour modifier votre choix, utilisez le bouton ci-dessous : le bandeau réapparaîtra
@@ -122,9 +126,10 @@ export const Privacy = () => {
             </h2>
             <p className="text-slate-600 mb-6">
               Si vous acceptez l&apos;analytique, PostHog peut traiter des données via des
-              infrastructures situées aux États-Unis. Google Analytics et Vercel peuvent
-              également traiter des données hors Québec. Ces traitements servent uniquement à
-              mesurer et améliorer le site.
+              infrastructures situées aux États-Unis. Google Analytics, Meta (Facebook) et
+              Vercel peuvent également traiter des données hors Québec. Ces traitements servent
+              à mesurer et améliorer le site, ainsi qu&apos;à mesurer l&apos;efficacité des
+              publicités.
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
@@ -270,7 +275,7 @@ export const Terms = () => {
               <li>
                 Pour chaque tirage trimestriel, chaque point équivaut à 1 chance de participation
               </li>
-              <li>La valeur du tirage trimestriel est d&apos;environ 750 $</li>
+              <li>La valeur du tirage trimestriel est d&apos;environ 300 $</li>
               <li>
                 Pierre-Olivier Caouette se réserve le droit de qualifier ou rejeter une
                 participation non conforme

@@ -8,6 +8,8 @@ import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
 import { trackEvent } from '../lib/analytics';
+import { OUTLOOK_BOOKING_URL } from '../lib/booking';
+import { BookingScheduleConfirm } from '../components/booking/BookingScheduleConfirm';
 import { useSeoMeta } from '../lib/seo';
 import { PageHero } from '../components/layout/PageHero';
 
@@ -17,7 +19,7 @@ const CONTACT_INFO = {
   phoneLink: 'tel:8198061164',
   email: 'p-o.caouette@agc.ia.ca',
   region: 'Victoriaville, Québec',
-  bookingUrl: 'https://outlook.office.com/book/PierreOlivierCaouetteiAGroupefinancier@ia.ca/'
+  bookingUrl: OUTLOOK_BOOKING_URL,
 };
 
 export const Contact = () => {
@@ -299,7 +301,8 @@ export const Appointment = () => {
         description="Reservez une consultation gratuite et sans engagement. Choisissez le moment qui vous convient."
       />
 
-      {/* Outlook Bookings — pleine largeur d'écran */}
+      {/* Outlook Bookings = iframe cross-origin : pas de signal de fin de réservation.
+          Schedule Meta = confirmation explicite (BookingScheduleConfirm → /merci). */}
       <section className="pt-8 md:pt-10 pb-12 md:pb-16">
         <div className="container-max px-4 md:px-8 text-center mb-8">
           <h2 className="font-heading text-2xl font-bold text-dark mb-2">
@@ -312,7 +315,12 @@ export const Appointment = () => {
             href={CONTACT_INFO.bookingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackEvent('select_content', { content_type: 'cta', item_id: 'outlook_booking_external' })}
+            onClick={() =>
+              trackEvent('select_content', {
+                content_type: 'cta',
+                item_id: 'outlook_booking_external',
+              })
+            }
             className="inline-flex items-center gap-2 mt-4 text-primary font-medium hover:underline"
           >
             Ouvrir dans un nouvel onglet
@@ -337,6 +345,8 @@ export const Appointment = () => {
         </div>
 
         <div className="container-max px-4 md:px-8">
+          <BookingScheduleConfirm source="rendez_vous" />
+
           {/* Info Steps */}
           <div className="grid md:grid-cols-3 gap-6 mt-10">
             <div className="text-center">
