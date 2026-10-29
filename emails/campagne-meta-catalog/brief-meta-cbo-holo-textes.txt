@@ -1,0 +1,1395 @@
+BRIEF CAMPAGNE META ADS — CATALOGUE CBO — 14 ENSEMBLES
+Pierre-Olivier Caouette — conseiller en sécurité financière
+Document pour Holo : textes d'annonces prêts à coller. Visuels à créer de ton côté.
+
+Règle créatives : focus outil interactif gratuit (sans compte, sans formulaire). RDV 15 min = soft close.
+CTA bouton Meta (tous) : En savoir plus
+Langue : français québécois parlé (tu / t'as / pis).
+Conformité : valider avec iA / superviseur avant diffusion payante.
+
+========================================================================
+1. SETUP ADS MANAGER
+========================================================================
+
+CAMPAGNE
+- Nom : 2026 | CBO Catalog | Particuliers RDV
+- Objectif phase 1 : Trafic (lien)
+- Achat d'annonces : Enchères
+- Advantage campaign budget (CBO) : activé
+- Budget journalier test : 120-200 $ / jour
+- Emplacements : Advantage+
+- Optimisation : Clics vers le lien (landing)
+- Durée test : 4-6 semaines, puis scale des ensembles gagnants
+
+GÉO (tous)
+- Centre-du-Québec / Victoriaville + rayons pertinents
+- Élargir QC si CPA acceptable après ~14 jours
+
+EXCLUSIONS
+- Liste clients email (si uploadée)
+- Employés / listes internes
+
+UTM (obligatoire)
+utm_source=meta
+utm_medium=paid
+utm_campaign=cbo_catalog_2026
+utm_content={prefixe}_ad{n}
+
+Exemple Ad1 CELIAPP :
+https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad1
+
+========================================================================
+2. VUE D'ENSEMBLE DES 14 ENSEMBLES
+========================================================================
+
+ 1. Comparateur | Mythe bancaire | Âge 30–60 | /campagnes/comparateur-rendements | UTM comparateur | Outil : Comparateur banque vs portefeuilles modèles (PDF export)
+ 2. CELIAPP | 1re propriété | Âge 20–40 | /campagnes/celiapp | UTM celiapp | Outil : Simulateur mise de fonds CELIAPP
+ 3. Hypothèque + assurance vie | Âge 28–55 | /campagnes/hypotheque-assurance-vie | UTM hypotheque_vie | Outil : Estimateur capital / hypothèque + vie
+ 4. Assurance invalidité | Âge 25–55 | /campagnes/assurance-invalidite | UTM invalidite | Outil : Calculateur trou de revenu
+ 5. Retraite REER CELI | Âge 35–60 | /campagnes/retraite-reer-celi | UTM retraite | Outil : Prioriseur REER / CELI
+ 6. Maladie grave | Âge 30–55 | /campagnes/maladie-grave | UTM maladie_grave | Outil : Estimateur capital maladie grave
+ 7. REEE | Âge 25–50 | /campagnes/reee | UTM reee | Outil : Simulateur subventions REEE
+ 8. Fonds d’urgence | Âge 22–50 | /campagnes/fonds-urgence | UTM fonds_urgence | Outil : Calculateur filet d’urgence
+ 9. CELI | Droits inutilisés | Âge 25–55 | /campagnes/celi-droits | UTM celi_droits | Outil : Estimateur droits CELI
+10. Trop jeune pour m’assurer | Âge 22–40 | /campagnes/trop-jeune-assurance | UTM trop_jeune | Outil : Score besoin + capital (présent / futur)
+11. Assurance collective | Âge 25–55 | /campagnes/assurance-collective | UTM collective | Outil : Checklist assurance collective
+12. Travailleur autonome | Âge 25–55 | /campagnes/travailleur-autonome | UTM autonome | Outil : Checklist filet autonome
+13. Plan global | Âge 30–60 | /campagnes/plan-global | UTM plan_global | Outil : Ordre d’attaque (plan global)
+14. Succession | Bases | Âge 35–65 | /campagnes/succession-bases | UTM succession | Outil : Checklist liquidité succession
+
+Ciblage : audiences larges (Advantage+ ou intérêts légers). Ne pas empiler 15 intérêts.
+
+Notes visuels (à toi) : dark navy, contraste fort, typo bold ; mentionner outil gratuit ; feed 1:1 ou 4:5 + Stories 9:16 ; pas de promesses de rendement.
+
+========================================================================
+ENSEMBLE 1/14 — Comparateur | Mythe bancaire
+========================================================================
+Âge : 30–60
+Outil landing : Comparateur banque vs portefeuilles modèles (PDF export)
+Landing : https://www.pierreoliviercaouette.ca/campagnes/comparateur-rendements
+UTM content : comparateur_ad1 / comparateur_ad2 / comparateur_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Illustration. Rendements nets annualisés 5 ans. Moyennes bancaires vs Portefeuilles Modèles iA (série Classique 75/75). Produits différents. Passés ≠ futurs. Pas un conseil personnalisé. Titre : conseiller en sécurité financière. Produits d'assurance de iA Groupe financier.
+
+------------------------------------------------------------------------
+Ad1 - Mythe (outil gratuit, zéro compte)
+------------------------------------------------------------------------
+Titre Meta : Compare gratuitement - zéro compte
+Description : Outil interactif | sans formulaire pour commencer
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour comparer mes rendements banque vs ailleurs, fallait déjà prendre un rendez-vous. Remplir un formulaire. Créer un compte.
+
+Comme beaucoup de monde.
+
+Faux.
+
+Y'a un outil gratuit sur ma page. Tu l'ouvres, tu choisis ton profil, tu ajustes le taux (préréglage ou ton relevé), pis tu vois tout de suite banque vs portefeuilles modèles - même profil des deux côtés. Tu peux même télécharger un PDF pour garder ton comparatif.
+
+Pas de compte. Pas de formulaire pour commencer. Tu joues avec l'outil tout de suite.
+
+Beaucoup laissent leurs REER et CELI « à la banque » pendant des années, convaincus que c'est correct pis que tout le monde a à peu près les mêmes rendements. Des fois, oui. Souvent, l'écart est plus large qu'on croit - et l'argent compose.
+
+Ouvre le comparateur gratuit ici :
+https://www.pierreoliviercaouette.ca/campagnes/comparateur-rendements
+
+Si les chiffres te chicottent après, on peut prendre 15 minutes - zéro pression. Mais commence par l'outil.
+
+-
+Illustration. Passés ≠ futurs. Produits différents. Pas un conseil personnalisé. Titre : conseiller en sécurité financière.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/comparateur-rendements?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=comparateur_ad1
+
+------------------------------------------------------------------------
+Ad2 - Joue avec les profils et les taux
+------------------------------------------------------------------------
+Titre Meta : Profils, taux, PDF - gratuit
+Description : Ouvre l'outil | joue tout de suite
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que 2-3 % de plus par année, sur un relevé, c'était du détail. Presque rien.
+
+Comme beaucoup de monde.
+
+Jusqu'à ce que tu projettes - pis que tu vois ce que ça fait quand l'argent compose.
+
+Au lieu de te fier à un post, ouvre l'outil gratuit. Même profil des deux côtés : côté banque (préréglage ou ton taux) vs côté modèles. Change de profil. Change le taux. Regarde l'écart. Télécharge le PDF si tu veux le garder.
+
+C'est interactif. C'est gratuit. Pis t'as rien à remplir pour commencer - tu ouvres, tu joues.
+
+C'est pas une promesse de rendement. C'est une invitation à regarder ton relevé autrement, à profil égal.
+
+Essaie l'outil ici :
+https://www.pierreoliviercaouette.ca/campagnes/comparateur-rendements
+
+Ensuite, si tu veux relier ça à ta situation, 15 minutes avec moi - soft, sans pression.
+
+-
+Illustration. Rendements passés ≠ futurs. Pas un conseil personnalisé. Conseiller en sécurité financière.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/comparateur-rendements?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=comparateur_ad2
+
+------------------------------------------------------------------------
+Ad3 - Mythe cassé + soft close
+------------------------------------------------------------------------
+Titre Meta : Ouvre l'outil. Compare. Décide.
+Description : Gratuit | sans compte | conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que ma banque me donnait de bons rendements. Que tout le monde avait à peu près la même affaire.
+
+Comme beaucoup de monde.
+
+Faux - ou en tout cas, pas toujours. À profil égal, l'écart peut se répéter année après année. Pis l'argent compose.
+
+Avant de m'écrire, compare toi-même. L'outil gratuit sur la landing te laisse choisir un profil, coller un taux (ou garder le préréglage), voir banque vs modèles, pis sortir un PDF. Sans créer de compte. Sans formulaire de contact pour démarrer.
+
+Tu joues d'abord. Tu décides après.
+
+Compare ici :
+https://www.pierreoliviercaouette.ca/campagnes/comparateur-rendements
+
+Si ça te chicotte, on regarde ça en 15 minutes - zéro pression. Pas pour te vendre un produit en vitesse : pour relier l'illustration à ton horizon pis à ce que t'as déjà.
+
+-
+Illustration seulement. Produits différents (frais, structure, garanties). Passés ≠ futurs. Pas un conseil personnalisé. Titre : conseiller en sécurité financière. Produits d'assurance de iA Groupe financier.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/comparateur-rendements?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=comparateur_ad3
+
+========================================================================
+ENSEMBLE 2/14 — CELIAPP | 1re propriété
+========================================================================
+Âge : 20–40
+Outil landing : Simulateur mise de fonds CELIAPP
+Landing : https://www.pierreoliviercaouette.ca/campagnes/celiapp
+UTM content : celiapp_ad1 / celiapp_ad2 / celiapp_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Aucune promesse de rendement. Plafonds, admissibilité et règles fiscales évoluent - à revalider avant diffusion.
+
+------------------------------------------------------------------------
+Ad1 - Mythe « plus tard »
+------------------------------------------------------------------------
+Titre Meta : CELIAPP : vois ta mise de fonds avant
+Description : Simulateur gratuit | sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que le CELIAPP, j'allais m'en occuper « quand ce serait plus sérieux ». Quand j'aurais trouvé la bonne maison. Quand mon salaire aurait monté.
+
+Comme beaucoup de monde.
+
+En vrai, j'avais parké ça dans la case « plus tard ». Pas urgent. Le genre d'affaire qu'on ouvre quand l'offre d'achat est déjà sur la table… sauf que le CELIAPP marche pas de même. Qui a le droit, combien tu peux mettre par année, jusqu'à quand - ça suit pas toujours le « on verra ».
+
+Faux, donc : c'est pas un dossier à ouvrir le jour où tu signes.
+
+Avant de stresser ou de prendre un RDV « pour rien », tu peux déjà projeter ta mise de fonds. J'ai mis un simulateur gratuit sur ma page : tu entres ton rythme de cotisation pis ton horizon d'achat - et tu vois où ça te mène. Sans compte. Sans formulaire. Sans engagement.
+
+C'est éducatif : plafonds illustratifs, pas de rendement inventé, pas de promesse magique. Juste une photo nette pour arrêter de cotiser au feeling.
+
+Essaie l'outil ici :
+https://www.pierreoliviercaouette.ca/campagnes/celiapp
+
+Si après ça tu veux démêler ton cas pour vrai, 15 minutes avec moi - zéro pression. On clarifie. On achète rien sous pression.
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Aucune promesse de rendement. Règles et plafonds à revalider.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad1
+
+------------------------------------------------------------------------
+Ad2 - Mise de fonds au feeling
+------------------------------------------------------------------------
+Titre Meta : Projette ta mise de fonds (gratuit)
+Description : Éducatif | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que la mise de fonds, ça allait « se bâtir toute seule » - un peu d'épargne ici, un bonus là, pis un jour le total serait assez gros.
+
+Comme beaucoup de monde.
+
+Le problème, c'est que « un peu partout » sans cadre, ça avance lentement. Tu mets de côté… pis tu retires. Tu te promets d'augmenter le montant… pis la vie reprend le dessus. Et pendant ce temps-là, tu entends parler du CELIAPP sans vraiment savoir s'il accélère ta mise de fonds ou s'il vient juste tout mélanger.
+
+Faux : ouvrir le compte « plus tard », c'est pas une stratégie.
+
+Le CELIAPP existe pour aider à bâtir une mise de fonds - encore faut-il voir ce que ton rythme donne pour vrai. Pas une promesse. Une projection : cotisation, horizon, plafonds illustratifs. Rien de magique.
+
+C'est pour ça que j'ai mis un simulateur gratuit sur la page. Tu testes en 2 minutes. Sans créer de compte. Sans laisser ton email. Sans formulaire.
+
+Cotiser au feeling, ça donne l'impression d'avancer. Voir le chiffre, ça donne une direction.
+
+Lance le simulateur :
+https://www.pierreoliviercaouette.ca/campagnes/celiapp
+
+Ensuite, si tu veux qu'on regarde ton échéancier ensemble, 15 minutes - zéro pression. Soft. Concret. À toi.
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Aucune promesse de rendement. Plafonds / règles à revalider.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad2
+
+------------------------------------------------------------------------
+Ad3 - Pas besoin de RDV pour commencer
+------------------------------------------------------------------------
+Titre Meta : Simulateur CELIAPP - sans compte
+Description : Conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour comprendre le CELIAPP, fallait déjà prendre un rendez-vous.
+
+Comme beaucoup de monde.
+
+Tu vises une première propriété. T'as peut-être un CELI. Ou tu mélanges les deux. Ou tu te dis que tu vas « choisir le jour venu ». Sauf que le jour venu, t'as plus le luxe de démêler qui a le droit, les plafonds, pis ce qui se passe si l'achat glisse.
+
+Faux : tu peux déjà voir clair sans ouvrir un dossier.
+
+Sur la page, il y a un outil gratuit - un simulateur de mise de fonds CELIAPP. Tu mets ton rythme pis ton horizon. Tu vois une projection simple (cotisations + plafonds illustratifs, sans rendement inventé). Sans compte. Sans formulaire. Sans pression.
+
+Deux outils (CELIAPP vs CELI). Deux jobs. Un ordre qui dépend de toi - pas d'un slogan. L'outil te donne une base ; un RDV, c'est seulement si tu veux aller plus loin.
+
+Essaie d'abord :
+https://www.pierreoliviercaouette.ca/campagnes/celiapp
+
+(pouce) si ça te parle  
+Ou 15 minutes après - zéro pression - si les chiffres te chicottent.
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Aucune promesse de rendement.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad3
+
+========================================================================
+ENSEMBLE 3/14 — Hypothèque + assurance vie
+========================================================================
+Âge : 28–55
+Outil landing : Estimateur capital / hypothèque + vie
+Landing : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
+UTM content : hypotheque_vie_ad1 / hypotheque_vie_ad2 / hypotheque_vie_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. L'assurance créancier et l'assurance vie personnelle ne sont pas interchangeables automatiquement. Produits d'assurance de iA Groupe financier (Industrielle Alliance, Assurance et services financiers inc.).
+
+------------------------------------------------------------------------
+Ad1 - Estimateur gratuit (mythe « juste le prêt »)
+------------------------------------------------------------------------
+Titre Meta : Combien pour protéger la maison ?
+Description : Estimateur gratuit - sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que « couvrir le solde de l'hypothèque », c'était assez pour protéger la maison.
+
+Comme beaucoup de monde.
+
+Au moment de signer, on te parle d'une protection. Tu coches. Tu te dis : si quelque chose m'arrive, au moins le prêt est réglé. Fin de l'histoire.
+
+Faux - ou du moins, incomplet.
+
+Le solde, c'est une partie. Les proches, eux, doivent souvent tenir le toit et le quotidien : factures, épicerie, activités, transition. L'assurance créancier répond surtout au prêteur. Une couverture personnelle, c'est une autre logique - pensée pour la famille.
+
+Avant de prendre un rendez-vous, tu peux déjà chiffrer ça toi-même. Sur la page, y'a un estimateur gratuit : solde d'hypothèque + ce qu'il faudrait vraiment aux proches. Sans créer de compte. Sans formulaire. Tu bouges les chiffres, tu vois le total.
+
+Ensuite, si le résultat te chicote, on peut en parler 15 minutes. Zéro pression. Contenu éducatif - pas un conseil personnalisé.
+https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypotheque_vie_ad1
+
+------------------------------------------------------------------------
+Ad2 - Chiffre avant de croire la banque
+------------------------------------------------------------------------
+Titre Meta : Prêt vs famille - chiffre-toi
+Description : Éducatif | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que l'assurance de la banque = ma famille garde la maison sans stress.
+
+Comme beaucoup de monde.
+
+On park ça dans la case « déjà réglé ». On dort dessus. On se dit que c'est réglé parce qu'on a coché une case le jour de la signature.
+
+Faux.
+
+Protéger le prêt, c'est pas automatiquement protéger les proches. Deux produits. Deux logiques. Beaucoup de monde découvre la différence trop tard - ou jamais.
+
+Pas besoin de m'écrire pour commencer. Essaie l'estimateur sur la page : tu entres le solde de l'hypothèque, un revenu à remplacer, un petit coussin… et tu vois tout de suite l'écart entre « juste le prêt » et un montant pensé pour la famille. Gratuit. Sans compte. Sans formulaire.
+
+Si après ça tu veux mettre les chiffres en contexte chez toi, on prend 15 minutes. Calme. Concret. Sans pitch agressif.
+https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypotheque_vie_ad2
+
+------------------------------------------------------------------------
+Ad3 - Soft close RDV après l'outil
+------------------------------------------------------------------------
+Titre Meta : Estime d'abord, on en parle après
+Description : Conseiller en sécurité financière - Victoriaville
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour estimer le capital d'assurance vie lié à l'hypothèque, fallait déjà booker un rendez-vous.
+
+Comme beaucoup de monde.
+
+Pas nécessairement.
+
+Sur la page, y'a un outil gratuit. Tu estimes ce qu'il faudrait aux proches : solde d'hypothèque, autres dettes, revenu temporaire, imprévus. Tu compares avec « juste le solde du prêt » - la logique qu'on confond souvent avec l'assurance de la banque. Sans compte. Sans formulaire. Illustration éducative seulement.
+
+Trois questions que l'outil t'aide à poser :
+1) Combien il reste sur l'hypothèque ?
+2) Qu'est-ce qui existe déjà - créancier, ou protection personnelle ?
+3) Combien faudrait-il vraiment pour garder le toit et le rythme de vie ?
+
+Essaie d'abord. Ensuite, si tu veux y voir clair avec quelqu'un, on regarde ça ensemble en 15 minutes. Zéro pression. Clarifier, c'est pas acheter.
+https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypotheque_vie_ad3
+
+========================================================================
+ENSEMBLE 4/14 — Assurance invalidité
+========================================================================
+Âge : 25–55
+Outil landing : Calculateur trou de revenu
+Landing : https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite
+UTM content : invalidite_ad1 / invalidite_ad2 / invalidite_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Ce que ton assurance collective t'offre et ce que tu peux prendre de ton bord varient selon les contrats. Aucun pourcentage de remplacement de revenu n'est promis comme garantie.
+
+------------------------------------------------------------------------
+Ad1 - Mythe « mon assurance collective me suffit »
+------------------------------------------------------------------------
+Titre Meta : Et ton trou de revenu, lui ?
+Description : Conseiller en sécurité financière - Victoriaville
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que mon assurance collective me couvrait « assez » si je pouvais plus travailler.
+
+Comme beaucoup de monde.
+
+Une ligne dans le livret. Un pourcentage. Une case cochée à l'embauche. On range ça dans la tête : c'est réglé. On ouvre jamais vraiment les chiffres.
+
+Faux.
+
+Ce que ton assurance collective t'offre, c'est souvent une partie du salaire - pas le salaire au complet. Pis le premier chèque arrive après un délai. Pendant ce temps-là, l'hypo, l'épicerie, la garderie, elles, elles attendent pas.
+
+Sur la page : un outil gratuit pour voir le trou de revenu. Tu entres ton revenu, ce que ton assurance collective remplace (selon ton livret), le délai d'attente, tes dépenses fixes. Le trou apparaît tout de suite. Sans compte. Sans formulaire. Sans pitch.
+
+Ensuite, si les chiffres te chicottent, on prend 15 minutes. Pas pour te vendre une peur. Pour relier l'illustration à ta situation - ou confirmer que t'es déjà correct.
+
+https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=invalidite_ad1
+
+------------------------------------------------------------------------
+Ad2 - Le délai avant le premier chèque
+------------------------------------------------------------------------
+Titre Meta : Combien tient l'attente ?
+Description : Éducatif | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que « j'ai une invalidité avec mon assurance collective » voulait dire : salaire remplacé, point.
+
+Comme beaucoup de monde.
+
+Sauf que y'a souvent un délai. 30 jours. 90 jours. Des fois plus. Pendant l'attente, c'est toi - ou ton fonds d'urgence - qui tient le fort. Et même après, ce que ton assurance collective t'offre, c'est rarement 100 % de ce qui rentrait avant.
+
+La question, c'est pas « est-ce que j'ai une couverture ? ». C'est : combien manque chaque mois vs mes dépenses… et combien faut tenir pendant l'attente ?
+
+C'est exactement c'que l'outil gratuit sur la page calcule. Trou vs dépenses. Trou vs revenu. Coussin pendant le délai. Tu sors même avec un mini résumé PDF si tu veux le coller à ton livret.
+
+Pas de compte. Pas de formulaire. Contenu éducatif - pas un conseil personnalisé. Aucun % promis comme une garantie : chaque contrat est différent.
+
+Si après tu veux démêler la définition d'invalidité, les exclusions, ou ce que tu pourrais ajouter de ton bord - 15 minutes avec moi. Zéro pression.
+
+https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=invalidite_ad2
+
+------------------------------------------------------------------------
+Ad3 - Pas besoin de RDV pour commencer
+------------------------------------------------------------------------
+Titre Meta : Vois le trou avant le RDV
+Description : Conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour voir si mon filet tenait, fallait déjà prendre un rendez-vous.
+
+Comme beaucoup de monde.
+
+Avant de m'écrire, tu peux déjà voir le trou. L'outil gratuit sur la page compare ton revenu, ce que ton assurance collective t'offre, tes dépenses fixes, pis le délai avant le premier chèque. En deux minutes, tu vois ce qui manque - ou ce qui tient.
+
+Sans créer de compte. Sans formulaire. Sans qu'on te relance.
+
+Beaucoup de gens découvrent ça le jour d'une réclamation. Trop tard pour le faire calmement. Ici, tu le fais à ton rythme, avec ton livret à côté.
+
+Ensuite, si les chiffres te chicottent - ou si tu veux juste valider que t'as bien lu -, on prend 15 minutes. Clarifier, c'est pas acheter. Clarifier, c'est décider.
+
+https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=invalidite_ad3
+
+========================================================================
+ENSEMBLE 5/14 — Retraite REER CELI
+========================================================================
+Âge : 35–60
+Outil landing : Prioriseur REER / CELI
+Landing : https://www.pierreoliviercaouette.ca/campagnes/retraite-reer-celi
+UTM content : retraite_ad1 / retraite_ad2 / retraite_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Aucune promesse de rendement. L'outil donne une piste éducative, pas un conseil sur mesure.
+
+------------------------------------------------------------------------
+Ad1 - Mythe « toujours le REER d'abord »
+------------------------------------------------------------------------
+Titre Meta : Toujours le REER d'abord ?
+Description : Conseiller en sécurité financière - Victoriaville
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais qu'il fallait toujours cotiser au REER en premier.
+
+Comme beaucoup de monde.
+
+On l'entend partout : « maximise ton REER », « prends ton remboursement », « c'est la base ». Alors tu cotises. Automatiquement. Sans vraiment te demander si c'est le bon compte pour toi - avec ton salaire d'aujourd'hui, tes projets, pis ce dont t'as besoin d'avoir sous la main.
+
+Faux - du moins, pas pour tout le monde, pas à chaque étape.
+
+Le REER peut être excellent. Le CELI aussi. Deux outils. Deux jobs. Impôts aujourd'hui vs demain, argent accessible, horizon : ça change l'ordre qui a du sens. Cotiser « parce que tout le monde le fait », c'est pas une stratégie. C'est un réflexe.
+
+Sur la page, y a un prioriseur gratuit. Tu réponds à quelques questions simples - tranche, horizon, liquidité - pis tu vois une piste d'ordre REER / CELI. Sans créer de compte. Sans formulaire. Sans te faire harceler.
+
+Ensuite, si tu veux démêler ça avec quelqu'un, on peut prendre 15 minutes. Soft. Zéro pression.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/retraite-reer-celi
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/retraite-reer-celi?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=retraite_ad1
+
+------------------------------------------------------------------------
+Ad2 - Cotiser au feeling
+------------------------------------------------------------------------
+Titre Meta : Arrêter de cotiser au feeling
+Description : Éducatif | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Tu épargnes. Tu mets de l'argent de côté. Tant mieux.
+
+Mais si je te demandais pourquoi ce dollar-là va au REER plutôt qu'au CELI… t'aurais une réponse nette ?
+
+Beaucoup de monde cotise au feeling. Un peu ici, un peu là. Parce que le plafond le permet. Parce que janvier approche. Parce que le collègue a fait pareil. Ou parce que « c'est ce qu'on m'a toujours dit ».
+
+Le problème, c'est pas d'épargner. C'est de plus savoir à quoi sert chaque enveloppe. Un ordre REER / CELI, c'est pas une formule magique. C'est une logique : objectifs, argent accessible, fiscalité, prochain dollar.
+
+Avant de booker quoi que ce soit, teste le prioriseur sur la landing. Gratuit. Sans compte. Sans formulaire. Tu sors avec une piste claire - CELI d'abord, REER d'abord, ou un mix - selon ta situation.
+
+Si ça te chicotte encore après, on en parle 15 minutes. Pas de pitch. Juste remettre de l'ordre.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/retraite-reer-celi
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/retraite-reer-celi?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=retraite_ad2
+
+------------------------------------------------------------------------
+Ad3 - Essaie l'outil, puis on regarde
+------------------------------------------------------------------------
+Titre Meta : Essaie le prioriseur
+Description : Conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour savoir REER ou CELI en premier, fallait déjà prendre un rendez-vous.
+
+Comme beaucoup de monde.
+
+Avant de m'écrire, tu peux déjà te situer. Le prioriseur sur la page te pose quelques questions (tranche d'impôt, horizon, besoin de liquidité) pis te propose un ordre éducatif - où mettre le prochain dollar, et pourquoi. Sans compte. Sans formulaire. Sans pression.
+
+La mauvaise réponse, c'est « toujours le même pour tout le monde ». La bonne, c'est celle qui tient compte de toi : revenus, projets à court terme, accès à l'argent, horizon retraite.
+
+Trois questions que l'outil aide à cadrer :
+1) Si j'ai besoin de cet argent avant la retraite, c'est grave ou pas ?
+2) Est-ce que mon revenu d'aujourd'hui justifie vraiment de « forcer » le REER ?
+3) Qu'est-ce que je veux que cet argent fasse dans 2 ans… et dans 20 ans ?
+
+Essaie d'abord. Ensuite, si tu veux coller ça à ta vraie vie, 15 minutes avec moi - soft close, zéro vente forcée.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/retraite-reer-celi
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/retraite-reer-celi?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=retraite_ad3
+
+========================================================================
+ENSEMBLE 6/14 — Maladie grave
+========================================================================
+Âge : 30–55
+Outil landing : Estimateur capital maladie grave
+Landing : https://www.pierreoliviercaouette.ca/campagnes/maladie-grave
+UTM content : maladie_grave_ad1 / maladie_grave_ad2 / maladie_grave_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Les maladies couvertes, délais de survie, montants et exclusions dépendent du contrat. L'invalidité et la maladie grave, c'est pas la même affaire - et c'est pas interchangeable. Aucun capital n'est promis comme une garantie.
+
+------------------------------------------------------------------------
+Ad1 - Mythe « j'ai déjà l'invalidité »
+------------------------------------------------------------------------
+Titre Meta : Invalidité ≠ capital maladie grave
+Description : Outil gratuit | sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que mon assurance invalidité réglait « aussi » une maladie grave.
+
+Comme beaucoup de monde.
+
+Même mot « maladie », même idée de protection… donc même outil, non ? Tu te dis : j'ai déjà un revenu de remplacement - via ton assurance collective ou une couverture de ton bord - ça devrait coller si y'a un gros diagnostic.
+
+Faux.
+
+L'invalidité, c'est surtout un chèque de paie partiel pendant que tu travailles plus. La maladie grave, quand le contrat s'applique, c'est un capital. Une grosse somme. Une fois. Deux jobs différentes.
+
+Le capital, lui, peut servir à trois affaires concrètes : remplacer un moment le revenu du conjoint qui coupe ses heures, payer des soins / déplacements pas tous couverts, et garder un surplus pour la qualité de vie - voyage, bucket list, juste du temps sans tout décider sous pression d'argent.
+
+Avant de prendre rendez-vous, t'as un outil gratuit sur la page. Tu bouges trois curseurs. Ça te donne un ordre de grandeur. Sans créer de compte. Sans formulaire. Sans pitch.
+
+Ensuite, si le chiffre te chicotte, on prend 15 minutes. Clarifier ≠ acheter. Clarifier = décider.
+
+https://www.pierreoliviercaouette.ca/campagnes/maladie-grave
+
+Contenu éducatif. Pas un conseil personnalisé. Les garanties dépendent du contrat.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/maladie-grave?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=maladie_grave_ad1
+
+------------------------------------------------------------------------
+Ad2 - Trois blocs, un ordre de grandeur
+------------------------------------------------------------------------
+Titre Meta : Conjoint + soins + qualité de vie
+Description : Estimateur gratuit | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Combien viser en cas de maladie grave ?
+
+La mauvaise réponse, c'est un chiffre magique copié d'Internet. Ou « j'ai déjà quelque chose dans mon assurance collective, c'est réglé ».
+
+La bonne, c'est de décomposer en trois blocs - calmes, concrets :
+1) Remplacer un moment le revenu du conjoint (s'il réduit ses heures pour t'accompagner)
+2) Couvrir les soins / frais non remboursés (déplacements, aides, trucs que le régime paie pas toujours)
+3) Garder un surplus qualité de vie - parce qu'un diagnostic lourd, c'est pas juste des factures
+
+Ça complète l'invalidité. Ça la remplace pas.
+
+J'ai mis un estimateur gratuit sur la page. Tu changes un chiffre - le total se met à jour. Tu compares même avec ce que t'as déjà (collective ou individuel). Pas de compte. Pas de formulaire. Illustration seulement - pas une promesse de montant.
+
+Quand t'as ton ordre de grandeur, tu décides : trop tôt, déjà couvert, ou on regarde ensemble en 15 minutes. Zéro pression.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/maladie-grave
+
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/maladie-grave?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=maladie_grave_ad2
+
+------------------------------------------------------------------------
+Ad3 - Essaie l'outil, ensuite on parle (si tu veux)
+------------------------------------------------------------------------
+Titre Meta : Essaie l'outil - sans compte
+Description : Soft close | 15 min si tu veux
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour chiffrer une maladie grave, fallait déjà booker un rendez-vous.
+
+Comme beaucoup de monde.
+
+Pas nécessairement.
+
+Sur la page, y'a un outil gratuit. Tu estimes : revenu du conjoint à remplacer un moment, soins non couverts, surplus qualité de vie. Tu vois un capital illustratif - et l'écart vs ce que t'as déjà. Sans créer de compte. Sans laisser ton courriel. Sans pitch agressif.
+
+C'est éducatif. C'est général. Ça remplace pas une lecture de contrat (maladies listées, délai de survie, exclusions - ça varie). Mais ça te sort du flou « j'pense que c'est assez ».
+
+Si après ça t'as encore des questions - ce que ton assurance collective couvre vraiment, ce qui manquerait, si un capital a du sens chez toi - on prend 15 minutes. Soft. Calme. À toi.
+
+Essaie d'abord. Parle ensuite - ou pas.
+
+https://www.pierreoliviercaouette.ca/campagnes/maladie-grave
+
+Contenu éducatif. Pas un conseil personnalisé. Titre : conseiller en sécurité financière.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/maladie-grave?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=maladie_grave_ad3
+
+========================================================================
+ENSEMBLE 7/14 — REEE
+========================================================================
+Âge : 25–50
+Outil landing : Simulateur subventions REEE
+Landing : https://www.pierreoliviercaouette.ca/campagnes/reee
+UTM content : reee_ad1 / reee_ad2 / reee_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Subventions, plafonds et règles évoluent - à revalider selon les règles en vigueur avant diffusion. Aucune promesse de rendement.
+
+------------------------------------------------------------------------
+Ad1 - Compte ouvert ≠ subventions maximisées
+------------------------------------------------------------------------
+Titre Meta : Outil gratuit : subventions REEE
+Description : Sans compte | conseiller en sécurité financière - Victoriaville
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais qu'ouvrir un REEE, c'était « déjà fait ».
+
+Comme beaucoup de parents.
+
+Le compte existe. Quelques cotisations de temps en temps. On se dit que les études, c'est loin - qu'on ajustera plus tard. Que tant qu'il y a un REEE quelque part, on est corrects.
+
+Faux.
+
+Selon les règles en vigueur, une partie des aides publiques liées au REEE suit pas automatiquement un compte ouvert sans rythme. C'est pas une condamnation. C'est un calendrier. Chaque année sans cadre clair, c'est souvent de la place laissée sur la table - pas parce qu'on est « mauvais parents », mais parce que personne a posé le cadre.
+
+Avant de prendre un rendez-vous, t'as un outil gratuit sur la page : tu entres l'âge de ton enfant pis ce que tu mets par année - on te montre les subventions illustratives. Sans créer de compte. Sans formulaire. Sans pitch.
+
+Ensuite, si les chiffres te chicottent, on prend 15 minutes. Calme. Concret. Zéro pression.
+https://www.pierreoliviercaouette.ca/campagnes/reee
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Subventions / plafonds à revalider.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/reee?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=reee_ad1
+
+------------------------------------------------------------------------
+Ad2 - Combien tu laisses sur la table
+------------------------------------------------------------------------
+Titre Meta : Subventions REEE : vois-le en clair
+Description : Outil gratuit | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que les subventions du REEE, ça « rentrait tout seul » dès que le compte était ouvert.
+
+Comme beaucoup de monde.
+
+Sauf que « tout seul », ça dépend souvent du rythme. Cotiser au feeling, c'est pas un plan - c'est un espoir. Les années file. Et selon les règles en vigueur, ce qui aurait pu accompagner tes cotisations se rattrape pas toujours comme on l'imagine.
+
+Pas de culpabilité. Juste une photo nette.
+
+J'ai mis un outil gratuit sur la page : âge de l'enfant, cotisation annuelle → subventions illustratives (dont le max annuel / à vie selon le scénario). Pas besoin de compte. Pas de formulaire. Tu restes anonyme. Tu regardes. Tu décides.
+
+Si après ça tu veux relier les chiffres à ta vraie vie (budget, autres enfants, ce que t'as déjà), 15 minutes avec moi - zéro pression. On clarifie. On vend rien sous pression.
+https://www.pierreoliviercaouette.ca/campagnes/reee
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Illustration seulement - règles à revalider.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/reee?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=reee_ad2
+
+------------------------------------------------------------------------
+Ad3 - Essaie l'outil, RDV seulement si tu veux
+------------------------------------------------------------------------
+Titre Meta : Essaie l'outil. RDV si tu veux.
+Description : Conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour comprendre mon REEE, fallait déjà prendre un rendez-vous.
+
+Comme beaucoup de monde.
+
+Avant de m'écrire, tu peux déjà te situer. L'outil gratuit sur la page te montre, en illustration, ce que tes cotisations pourraient générer en subventions - selon l'âge de ton enfant pis ton rythme. Sans créer de compte. Sans formulaire. Sans laisser ton email.
+
+Ensuite, si ça te parle pis que tu veux démêler le reste (rythme réaliste, plafonds, ce qui est déjà en place), on prend 15 minutes. Pas pour te vendre un produit en vitesse. Pour relier l'outil à ta situation.
+
+T'as un REEE « quelque part » ? Tu cotises au feeling ? Ou tu te dis depuis deux ans que tu vas « t'asseoir là-dessus » ? Commence par l'outil. Ensuite on regarde - si tu le veux.
+
+Essaie d'abord :
+https://www.pierreoliviercaouette.ca/campagnes/reee
+
+Ou réserve 15 minutes - zéro pression.
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Subventions / plafonds évoluent - à revalider.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/reee?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=reee_ad3
+
+========================================================================
+ENSEMBLE 8/14 — Fonds d’urgence
+========================================================================
+Âge : 22–50
+Outil landing : Calculateur filet d’urgence
+Landing : https://www.pierreoliviercaouette.ca/campagnes/fonds-urgence
+UTM content : fonds_urgence_ad1 / fonds_urgence_ad2 / fonds_urgence_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé.
+
+------------------------------------------------------------------------
+Ad1 - Mythe « j'investirai d'abord »
+------------------------------------------------------------------------
+Titre Meta : Calcule ton filet avant d'accélérer
+Description : Calculateur gratuit | sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que le plus important, c'était d'investir le plus vite possible.
+
+Comme beaucoup de monde.
+
+Ouvrir un REER, maximiser le CELI, « faire travailler l'argent » - ça sonne bien. Le filet d'urgence, on se dit qu'on verra après. Ça a l'air sage… jusqu'au premier vrai imprévu.
+
+Faux.
+
+Sans coussin accessible, l'imprévu force souvent une mauvaise décision : vendre au mauvais moment, ou sortir la carte. Ce que tu pensais gagner en rendement, tu peux le perdre en stress ou en intérêts.
+
+Avant de stresser ou de booker un RDV « pour rien », tu peux déjà voir si ton filet tient la route. J'ai mis un calculateur gratuit sur ma page : tu entres tes dépenses pis ton horizon - et tu vois un montant cible clair. Sans compte. Sans formulaire. Sans engagement.
+
+C'est éducatif : un ordre de grandeur pour arrêter de viser au feeling. Pas un conseil personnalisé.
+
+Essaie l'outil ici :
+https://www.pierreoliviercaouette.ca/campagnes/fonds-urgence
+
+Si après ça tu veux démêler ton cas pour vrai, 15 minutes avec moi - zéro pression. On clarifie. On pousse rien.
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/fonds-urgence?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=fonds_urgence_ad1
+
+------------------------------------------------------------------------
+Ad2 - Imprévu : vente ou carte
+------------------------------------------------------------------------
+Titre Meta : Ton filet, en chiffres (gratuit)
+Description : Éducatif | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que « ça n'arriverait pas à moi ».
+
+Comme beaucoup de monde.
+
+Puis l'imprévu arrive. Auto. Toit. Emploi. Santé. Une facture qui peut pas attendre. Et là, deux options reviennent trop souvent : liquider un placement… ou mettre ça sur la carte.
+
+Vendre sous pression, c'est pas une stratégie. La carte, c'est pas un fonds d'urgence non plus - c'est un prêt cher déguisé en solution rapide.
+
+Un vrai filet, c'est de l'argent accessible, calé sur tes dépenses. Pas un chiffre magique copié d'Internet. Pas l'argent déjà « investi pour dans 20 ans ».
+
+C'est pour ça que j'ai mis un calculateur gratuit sur la page. Tu testes en 2 minutes. Sans créer de compte. Sans laisser ton email. Sans formulaire.
+
+« J'ai un peu d'épargne », ça rassure. Voir le chiffre, ça dit si ça tient vraiment.
+
+Lance le calculateur :
+https://www.pierreoliviercaouette.ca/campagnes/fonds-urgence
+
+Ensuite, si tu veux qu'on regarde ton filet ensemble, 15 minutes - zéro pression. Soft. Concret. À toi.
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/fonds-urgence?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=fonds_urgence_ad2
+
+------------------------------------------------------------------------
+Ad3 - Pas besoin de RDV pour commencer
+------------------------------------------------------------------------
+Titre Meta : Calculateur filet - sans compte
+Description : Conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour savoir si mon fonds d'urgence était correct, fallait déjà prendre un rendez-vous.
+
+Comme beaucoup de monde.
+
+T'as un peu d'épargne. Peut-être dans le même compte que le reste. Ou tu vises « 3 mois » parce que t'as lu ça quelque part - sans vraiment savoir si ça colle à tes dépenses.
+
+Faux : tu peux déjà voir clair sans ouvrir un dossier.
+
+Sur la page, il y a un outil gratuit - un calculateur de filet d'urgence. Tu mets tes dépenses mensuelles pis le nombre de mois que tu vises. Tu vois un montant cible simple. Sans compte. Sans formulaire. Sans pression.
+
+L'outil te donne une base ; un RDV, c'est seulement si tu veux aller plus loin - ordre des priorités, où garer l'argent, prochaine étape.
+
+Essaie d'abord :
+https://www.pierreoliviercaouette.ca/campagnes/fonds-urgence
+
+(pouce) si ça te parle  
+Ou 15 minutes après - zéro pression - si le chiffre te chicotte.
+
+-
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/fonds-urgence?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=fonds_urgence_ad3
+
+========================================================================
+ENSEMBLE 9/14 — CELI | Droits inutilisés
+========================================================================
+Âge : 25–55
+Outil landing : Estimateur droits CELI
+Landing : https://www.pierreoliviercaouette.ca/campagnes/celi-droits
+UTM content : celi_droits_ad1 / celi_droits_ad2 / celi_droits_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Estimation illustrée seulement - plafonds et droits à revalider auprès de l'ARC / de ton institution.
+
+------------------------------------------------------------------------
+Ad1 - Mythe « c'est juste le plafond de cette année »
+------------------------------------------------------------------------
+Titre Meta : Plus que le plafond de l'année
+Description : Outil gratuit | sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que mes droits CELI, c'était juste le plafond de cette année.
+
+Comme beaucoup de monde.
+
+Tu regardes le chiffre annuel. Tu te dis « j'ai pas maxé ». Pis tu passes à autre chose - sans jamais additionner ce qui s'est accumulé depuis que t'as 18 ans.
+
+Faux.
+
+Les droits inutilisés disparaissent pas au 31 décembre. Ils s'empilent. Année après année. Souvent, y'a ben plus de place restante que le plafond de l'année en cours - et personne te le crie dans l'oreille.
+
+Avant de booker quoi que ce soit, t'as un outil gratuit sur la page. Tu entres ton année de naissance (on part de l'année de tes 18 ans), ce que t'as déjà cotisé, pis ce que tu vises. Tu vois une estimation de la place qui reste. Sans créer de compte. Sans formulaire. Sans pitch.
+
+Ensuite, si le chiffre te chicotte - ou si tu veux coller un objectif dessus - on prend 15 minutes. Clarifier ≠ cotiser demain. Clarifier = savoir où t'en es.
+
+https://www.pierreoliviercaouette.ca/campagnes/celi-droits
+
+Contenu éducatif. Estimation illustrée. Pas un conseil personnalisé.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celi-droits?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celi_droits_ad1
+
+------------------------------------------------------------------------
+Ad2 - Année de naissance → place restante
+------------------------------------------------------------------------
+Titre Meta : Place restante CELI - en 2 min
+Description : Année de naissance | sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Combien de place te reste-t-il dans ton CELI - pour vrai ?
+
+Pas le plafond affiché sur Google. Pas « à peu près le max de cette année ». La vraie place restante : ce qui s'est accumulé depuis que t'es admissible, moins ce que t'as déjà cotisé.
+
+Sur la page, y'a un outil gratuit. Tu indiques ton année de naissance. Tu ajoutes ce que t'as déjà mis. Tu vois une estimation de ce qu'il te reste. Sans compte. Sans formulaire. Sans laisser ton courriel.
+
+C'est illustratif - à revalider avec ton avis / ton institution. Mais ça te sort du flou « j'pense que j'ai encore de la place ».
+
+Quand t'as ton ordre de grandeur, tu décides : je cotise, j'attends, ou on regarde ensemble à quoi servirait cet argent. Soft. 15 minutes si tu veux. Sinon, l'outil suffit.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/celi-droits
+
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celi-droits?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celi_droits_ad2
+
+------------------------------------------------------------------------
+Ad3 - Essaie l'outil, ensuite on parle (si tu veux)
+------------------------------------------------------------------------
+Titre Meta : Essaie l'outil - sans compte
+Description : Soft close | 15 min si tu veux
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour savoir ce qu'il me restait à cotiser en CELI, fallait déjà un rendez-vous.
+
+Comme beaucoup de monde.
+
+Pas nécessairement.
+
+J'ai mis un estimateur gratuit sur la page : année de naissance → droits cumulés estimés → place restante selon ce que t'as déjà cotisé. Tu peux même viser un montant pour cette année et voir si ça rentre. Sans créer de compte. Sans formulaire. Sans pression.
+
+C'est éducatif. C'est général. Ça remplace pas ton relevé officiel. Mais ça te donne un point de départ clair avant de décider quoi faire avec ces droits qui dorment.
+
+Si après ça tu veux coller un objectif (urgence, projet, long terme) ou juste valider l'ordre avec le reste de ton plan - on prend 15 minutes. Soft. À toi.
+
+Essaie d'abord. Parle ensuite - ou pas.
+
+https://www.pierreoliviercaouette.ca/campagnes/celi-droits
+
+Contenu éducatif. Estimation illustrée. Pas un conseil personnalisé. Titre : conseiller en sécurité financière.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celi-droits?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celi_droits_ad3
+
+========================================================================
+ENSEMBLE 10/14 — Trop jeune pour m’assurer
+========================================================================
+Âge : 22–40
+Outil landing : Score besoin + capital (présent / futur)
+Landing : https://www.pierreoliviercaouette.ca/campagnes/trop-jeune-assurance
+UTM content : trop_jeune_ad1 / trop_jeune_ad2 / trop_jeune_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Le score et le capital sont illustratifs seulement - pas une soumission ni une recommandation.
+
+------------------------------------------------------------------------
+Ad1 - Le mythe « trop jeune »
+------------------------------------------------------------------------
+Titre Meta : Trop jeune… vraiment ?
+Description : Score gratuit | sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que l'assurance vie, c'était « pour plus tard ».
+
+Comme beaucoup de monde.
+
+Genre 45 ans. Ou après les enfants. Ou quand on est « vraiment installé ». En attendant, on avance : auto, hypothèque, conjoint, projets - et on se dit que le sujet peut attendre. Qu'on est trop jeune pour que ça compte vraiment.
+
+Faux.
+
+L'âge sur la carte, c'est pas le filtre. Les obligations, oui. Pis les projets que tu connais déjà - une hypothèque qui s'en vient, une famille dans les prochaines années - ça compte aussi. Même si « aujourd'hui » a l'air léger.
+
+Avant de booker quoi que ce soit, t'as un outil gratuit sur la page : un score. Tu rentres ce que t'as maintenant, pis ce que tu sais déjà qui s'en vient. Tu vois un score /100 et un montant illustratif. Sans créer de compte. Sans formulaire. Sans pitch.
+
+Ensuite, si le score te chicotte, on prend 15 minutes. Clarifier ≠ acheter. Clarifier = décider.
+
+https://www.pierreoliviercaouette.ca/campagnes/trop-jeune-assurance
+
+Contenu éducatif. Pas un conseil personnalisé.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/trop-jeune-assurance?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=trop_jeune_ad1
+
+------------------------------------------------------------------------
+Ad2 - Présent + futur déjà connu
+------------------------------------------------------------------------
+Titre Meta : Présent + projets connus
+Description : Outil score | sans formulaire
+
+TEXTE PRINCIPAL (copier-coller) :
+
+« J'ai rien de gros aujourd'hui, donc je regarde pas. »
+
+Courant. Pas toujours juste.
+
+Parce que le vrai portrait, c'est rarement juste « aujourd'hui ». C'est aussi ce que tu sais déjà : une hypothèque dans 2-3 ans, des enfants d'ici cinq ans, un conjoint qui compte sur ton salaire. L'âge seul change rien à ça.
+
+J'ai mis un score gratuit sur la page. Tu coches le présent (maison, dettes, qui dépend de toi) pis les projets futurs déjà connus (hypothèque prévue, famille prévue). Le score bouge. Le montant illustratif aussi. Pas de compte. Pas de formulaire. Tu restes anonyme.
+
+C'est éducatif. C'est général. Ça remplace pas une analyse complète. Mais ça te sort du flou « trop jeune = pas concerné ».
+
+Quand t'as ton score, tu décides : trop tôt, déjà clair, ou on regarde ensemble en 15 minutes. Zéro pression.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/trop-jeune-assurance
+
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/trop-jeune-assurance?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=trop_jeune_ad2
+
+------------------------------------------------------------------------
+Ad3 - Essaie le score, ensuite on parle (si tu veux)
+------------------------------------------------------------------------
+Titre Meta : Score d'abord - sans compte
+Description : Soft close | 15 min si tu veux
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour savoir si « trop jeune » tenait encore, fallait déjà prendre rendez-vous.
+
+Comme beaucoup de monde.
+
+Pas nécessairement.
+
+Sur la page, y'a un outil gratuit. Tu estimes : obligations d'aujourd'hui + hypothèque / famille déjà en projet. Tu sors avec un score et un capital illustratif - même un mini résumé PDF si tu veux le garder. Sans créer de compte. Sans laisser ton courriel. Sans pitch agressif.
+
+Si après ça t'as encore des questions - ce que ton assurance collective couvre, ce qui manquerait, si le mythe tient encore chez toi - on prend 15 minutes. Soft. Calme. À toi.
+
+Essaie d'abord. Parle ensuite - ou pas.
+
+https://www.pierreoliviercaouette.ca/campagnes/trop-jeune-assurance
+
+Contenu éducatif. Pas un conseil personnalisé. Titre : conseiller en sécurité financière.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/trop-jeune-assurance?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=trop_jeune_ad3
+
+========================================================================
+ENSEMBLE 11/14 — Assurance collective
+========================================================================
+Âge : 25–55
+Outil landing : Checklist assurance collective
+Landing : https://www.pierreoliviercaouette.ca/campagnes/assurance-collective
+UTM content : collective_ad1 / collective_ad2 / collective_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Ce que ton assurance collective t'offre varie d'un employeur à l'autre. Le livret prime toujours.
+
+------------------------------------------------------------------------
+Ad1 - Mythe « mon assurance collective me couvre pour vrai »
+------------------------------------------------------------------------
+Titre Meta : Checklist gratuite + résumé PDF
+Description : Sans compte | conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que mon assurance collective me couvrait « pour vrai ».
+
+Comme beaucoup de monde.
+
+Dentaire, un peu d'assurance vie, quelque chose si tu peux plus travailler… On se dit que c'est réglé. Que « assez », ça veut dire quelque chose.
+
+Faux.
+
+« Assez », c'est vague. Ton livret, lui, est précis - pourcentages, délais, définitions, parfois plusieurs paliers (court terme / long terme). Des trous possibles. Des faits, pas du drama.
+
+Sur la page : une checklist gratuite. Tu coches avec ton livret à côté - invalidité (paliers inclus si y'en a), vie, départ d'emploi. Tu sors avec un mini résumé PDF. Sans compte. Sans formulaire. Sans pitch.
+
+Ensuite, si quelque chose te chicotte, on prend 15 minutes. Clarifier, c'est pas acheter.
+
+https://www.pierreoliviercaouette.ca/campagnes/assurance-collective
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/assurance-collective?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=collective_ad1
+
+------------------------------------------------------------------------
+Ad2 - Les paliers, personne t'en a parlé
+------------------------------------------------------------------------
+Titre Meta : Un %… ou plusieurs paliers ?
+Description : Éducatif | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais qu'« invalidité avec mon assurance collective » = un seul pourcentage, point.
+
+Comme beaucoup de monde.
+
+Sauf que ton livret a souvent des paliers. Court terme. Long terme. Un délai avant le premier chèque. Une définition de « incapable de travailler » qui change après quelques mois. Tu le découvres… le jour d'une réclamation. Trop tard pour le lire calmement.
+
+C'est exactement c'que la checklist gratuite sur la page te force à noter : un seul %… ou plusieurs paliers, tel que dans ton livret. Tu coches. Tu notes. Tu télécharges un mini résumé PDF pour le coller à côté du document RH.
+
+Pas de compte. Pas de formulaire. Contenu éducatif - pas un conseil personnalisé. Chaque contrat est différent.
+
+Si après tu veux démêler ce qui tient vraiment - ou ce qui arriverait si tu changes d'employeur - 15 minutes avec moi. Zéro pression.
+
+https://www.pierreoliviercaouette.ca/campagnes/assurance-collective
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/assurance-collective?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=collective_ad2
+
+------------------------------------------------------------------------
+Ad3 - Pas besoin de RDV pour commencer
+------------------------------------------------------------------------
+Titre Meta : Checklist avant le RDV
+Description : Gratuit | sans compte | Victoriaville
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour savoir ce que mon assurance collective m'offre vraiment, fallait déjà prendre un rendez-vous.
+
+Comme beaucoup de monde.
+
+Avant de m'écrire, tu peux déjà te situer. Checklist gratuite sur la page : tu ouvres ton livret, tu coches vie / invalidité (paliers possibles) / départ d'emploi, tu sors un mini résumé PDF. En quelques minutes. À ton rythme.
+
+Sans créer de compte. Sans formulaire. Sans qu'on te relance.
+
+Beaucoup de gens ouvrent ça le jour où ça presse. Ici, tu le fais avant - avec le document sous les yeux, pas dans le stress.
+
+Ensuite, si les cases vides te chicottent - ou si tu veux juste valider que t'as bien lu -, on prend 15 minutes. Clarifier, c'est décider.
+
+https://www.pierreoliviercaouette.ca/campagnes/assurance-collective
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/assurance-collective?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=collective_ad3
+
+========================================================================
+ENSEMBLE 12/14 — Travailleur autonome
+========================================================================
+Âge : 25–55
+Outil landing : Checklist filet autonome
+Landing : https://www.pierreoliviercaouette.ca/campagnes/travailleur-autonome
+UTM content : autonome_ad1 / autonome_ad2 / autonome_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil personnalisé.
+
+------------------------------------------------------------------------
+Ad1 - Pas d'assurance collective fournie
+------------------------------------------------------------------------
+Titre Meta : Ton employeur, c'est toi
+Description : Checklist gratuite | sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais qu'en étant autonome, « je me débrouillerais » si ça arrivait.
+
+Comme beaucoup de monde.
+
+T'as pas d'assurance collective fournie par un employeur. Personne qui t'envoie un PDF une fois par année. Pas de RH. Pas de régime au travail. T'es ton propre boss - pis le filet, c'est toi qui le construis… ou personne.
+
+Urgence. Revenu qui s'arrête. Hypo qui, elle, s'arrête pas. Factures qui continuent.
+
+Avant de m'écrire, coche ton filet toi-même. Sur la page : une checklist gratuite - liquidité, protection du revenu, proches / hypo, structure. Tu coches. Tu vois ce qui tient pis ce qui manque. Tu peux même sortir un mini résumé PDF.
+
+Pas de compte. Pas de formulaire. Sans pitch.
+
+Ensuite, si une case te chicotte, on prend 15 minutes. Clarifier ≠ acheter. Clarifier = décider.
+
+https://www.pierreoliviercaouette.ca/campagnes/travailleur-autonome
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/travailleur-autonome?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=autonome_ad1
+
+------------------------------------------------------------------------
+Ad2 - Revenu irrégulier, filet dans le bon ordre
+------------------------------------------------------------------------
+Titre Meta : Revenu variable, filet clair
+Description : Outil gratuit | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Les bons mois font oublier les mauvais.
+
+Comme beaucoup d'autonomes.
+
+Factures payées. Clients qui répondent. On avance - TPS, soumissions, prochain projet - sans vraiment regarder ce qui arriverait si le revenu stoppait pour vrai. Ou si tu pouvais plus travailler.
+
+Sauf que l'invalidité et l'hypo, elles, négocient pas le rythme de tes facturations. Pis t'as pas d'assurance collective fournie : y'a pas de pourcentage qui tombe « en attendant ».
+
+Le filet minimal, c'est pas une pile de produits. C'est un ordre :
+1) liquidité  
+2) protéger le revenu  
+3) proches / hypo  
+4) structure
+
+J'ai mis une checklist gratuite sur la page. Tu coches ce qui est vraiment en place. Tu vois les trous dans le bon ordre. PDF optionnel. Pas de compte. Pas de formulaire.
+
+Quand t'as ton portrait, tu décides : trop tôt, déjà solide, ou 15 minutes avec moi. Zéro pression.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/travailleur-autonome
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/travailleur-autonome?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=autonome_ad2
+
+------------------------------------------------------------------------
+Ad3 - Essaie la checklist, ensuite on parle (si tu veux)
+------------------------------------------------------------------------
+Titre Meta : Checklist filet - sans compte
+Description : Soft close | 15 min si tu veux
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour voir mon filet d'autonome, fallait déjà booker un rendez-vous.
+
+Comme beaucoup de monde.
+
+Pas nécessairement.
+
+Sur la page, y'a une checklist gratuite. Tu coches : fonds d'urgence, factures qui tiennent, protection si tu peux plus travailler, vie / proches / hypo, comptes séparés, épargne planifiée. Tu sors avec un mini résumé PDF si tu veux.
+
+Sans créer de compte. Sans laisser ton courriel. Sans pitch agressif.
+
+C'est éducatif. C'est général. Ça remplace pas une analyse sur mesure. Mais ça te sort du flou « je pense que ça tient ».
+
+Si après ça t'as encore des questions - ce qui manque vraiment, par où commencer, si ça vaut la peine de regarder ensemble - on prend 15 minutes. Soft. Calme. À toi.
+
+Essaie d'abord. Parle ensuite - ou pas.
+
+https://www.pierreoliviercaouette.ca/campagnes/travailleur-autonome
+
+Contenu éducatif. Pas un conseil personnalisé. Titre : conseiller en sécurité financière.
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/travailleur-autonome?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=autonome_ad3
+
+========================================================================
+ENSEMBLE 13/14 — Plan global
+========================================================================
+Âge : 30–60
+Outil landing : Ordre d’attaque (plan global)
+Landing : https://www.pierreoliviercaouette.ca/campagnes/plan-global
+UTM content : plan_global_ad1 / plan_global_ad2 / plan_global_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. L'outil donne une piste éducative (urgent / important / plus tard), pas un plan sur mesure.
+
+------------------------------------------------------------------------
+Ad1 - Produits ≠ plan
+------------------------------------------------------------------------
+Titre Meta : Des produits ≠ un plan
+Description : Conseiller en sécurité financière - Victoriaville
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que « avoir un REER + une assurance + un CELI » = être organisé.
+
+Comme beaucoup de monde.
+
+Pendant des années, j'ai vu des gens accumuler des produits - un compte ici, une police là, un placement « parce que c'était le temps » - convaincus que la pile faisait un plan.
+
+Faux.
+
+Des produits côte à côte, c'est pas une feuille de route. C'est un tiroir. Ça peut être utile… sans répondre à la seule question qui compte : quoi faire en premier, quoi ensuite, quoi laisser pour plus tard.
+
+Sur la page, y a un outil gratuit : tu coches ce qui est vrai chez toi (filet, dettes, salaire, hypothèque, épargne…) pis tu reçois un ordre d'attaque simple. Sans créer de compte. Sans formulaire. Sans te faire harceler.
+
+Ensuite, si tu veux coller ça à ta vraie vie, on peut prendre 15 minutes. Soft. Zéro pression.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/plan-global
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/plan-global?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=plan_global_ad1
+
+------------------------------------------------------------------------
+Ad2 - Tout en même temps
+------------------------------------------------------------------------
+Titre Meta : Arrêter de tout attaquer en même temps
+Description : Éducatif | pas un conseil personnalisé
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Tu as « des affaires » ouvertes. Tant mieux.
+
+Mais si je te demandais quoi attaquer en premier cette année… t'aurais une réponse nette ?
+
+Beaucoup de monde fait un peu de tout en même temps. Un peu d'épargne. Un peu de dette. Un peu d'assurance « on verra ». Ce que ton assurance collective t'offre d'un côté, un CELI de l'autre. Pis aucun ordre clair.
+
+Le problème, c'est pas d'avoir des produits. C'est de plus savoir quoi prioriser. Urgent. Important. Plus tard. Sans ça, tu gères au feeling - et le feeling change chaque mois.
+
+Avant de booker quoi que ce soit, teste l'ordre d'attaque sur la landing. Gratuit. Sans compte. Sans formulaire. Tu coches, tu vois une piste - quoi faire en premier, quoi ensuite.
+
+Si ça te chicotte encore après, on en parle 15 minutes. Pas de pitch. Juste remettre de l'ordre.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/plan-global
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/plan-global?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=plan_global_ad2
+
+------------------------------------------------------------------------
+Ad3 - Essaie l'outil, puis on regarde
+------------------------------------------------------------------------
+Titre Meta : Essaie l'ordre d'attaque
+Description : Conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour avoir une vision globale, fallait déjà prendre un rendez-vous.
+
+Comme beaucoup de monde.
+
+Avant de m'écrire, tu peux déjà te situer. L'outil sur la page te fait cocher ce qui est vrai chez toi - imprévus, dettes chères, protection du salaire, hypothèque, épargne sans ordre, projet bientôt - pis te propose un ordre d'attaque éducatif. Sans compte. Sans formulaire. Sans pression.
+
+La mauvaise réponse, c'est « tout faire en même temps ». La bonne, c'est une logique simple : filet et dettes chères avant d'optimiser le reste. Des produits ouverts ≠ une feuille de route.
+
+Trois questions que l'outil aide à cadrer :
+1) Si demain un imprévu tombe, est-ce que mon plan casse ?
+2) Est-ce que je paie encore trop d'intérêts pendant que j'épargne « pour plus tard » ?
+3) Qu'est-ce qui est vraiment urgent… vs ce qui peut attendre sans culpabilité ?
+
+Essaie d'abord. Ensuite, si tu veux coller ça à ta vraie vie, 15 minutes avec moi - soft close, zéro vente forcée.
+
+→ https://www.pierreoliviercaouette.ca/campagnes/plan-global
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/plan-global?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=plan_global_ad3
+
+========================================================================
+ENSEMBLE 14/14 — Succession | Bases
+========================================================================
+Âge : 35–65
+Outil landing : Checklist liquidité succession
+Landing : https://www.pierreoliviercaouette.ca/campagnes/succession-bases
+UTM content : succession_ad1 / succession_ad2 / succession_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Ne remplace pas un notaire. Pas un conseil personnalisé.
+
+------------------------------------------------------------------------
+Ad1 - Mythe « on verra plus tard »
+------------------------------------------------------------------------
+Titre Meta : Plus tard, c'est souvent trop tard
+Description : Checklist gratuite | sans compte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que la succession, c'était « pour plus tard ».
+
+Comme beaucoup de monde.
+
+Genre retraite. Ou grand âge. Un dossier qu'on ouvre quand on a le temps - et la tête pour y penser.
+
+Faux.
+
+Ce dont une famille a besoin tout de suite, c'est de l'argent accessible. Des bénéficiaires à jour. Une idée claire de qui paie quoi pendant que les dossiers avancent. Pas juste un patrimoine « sur papier ». Liquidité ≠ actifs.
+
+Sur la page : une checklist gratuite liquidité / succession. Tu coches ce qui est vrai aujourd'hui - argent accessible, dettes / hypo, bénéficiaires, testament, inventaire, famille informée. Ton portrait des trous se remplit en direct. Sans compte. Sans formulaire. Sans pitch.
+
+Ensuite, si ça te chicotte, on prend 15 minutes. Pas pour dramatiser. Pour relier la checklist à ta situation - ou confirmer que t'es déjà correct.
+
+https://www.pierreoliviercaouette.ca/campagnes/succession-bases
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/succession-bases?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=succession_ad1
+
+------------------------------------------------------------------------
+Ad2 - Liquidité ≠ actifs sur papier
+------------------------------------------------------------------------
+Titre Meta : Liquidité d'abord
+Description : Éducatif | ne remplace pas un notaire
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais qu'avoir une maison et des placements, c'était « être en ordre » pour sa famille.
+
+Comme beaucoup de monde.
+
+Sur le papier, ça fait riche. Dans la vraie vie, c'est pas la même affaire qu'avoir de l'argent disponible au bon moment. Une famille peut être « confortable » sur le relevé… et coincée le mois suivant : impôts, dettes, hypo, délais.
+
+Faux, donc : empiler des actifs règle pas automatiquement le « maintenant ».
+
+C'est exactement c'que la checklist gratuite sur la page te fait regarder en premier : argent accessible les premiers mois, plan si ton revenu disparaît, bénéficiaires à jour, testament qui se parle avec tes contrats. Tu coches. Tu vois ce qui manque. Tu sors même avec un mini résumé PDF si tu veux.
+
+Pas de compte. Pas de formulaire. Contenu éducatif - ça remplace pas un notaire.
+
+Si après tu veux démêler un trou de liquidité ou ce que ton assurance collective t'offre côté vie - 15 minutes avec moi. Zéro pression.
+
+https://www.pierreoliviercaouette.ca/campagnes/succession-bases
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/succession-bases?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=succession_ad2
+
+------------------------------------------------------------------------
+Ad3 - Pas besoin de RDV pour commencer
+------------------------------------------------------------------------
+Titre Meta : Checklist avant le RDV
+Description : Gratuit | sans compte | conseiller en sécurité financière
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour voir si ma succession tenait, fallait déjà prendre un rendez-vous. Remplir un formulaire. Parler à quelqu'un.
+
+Comme beaucoup de monde.
+
+Avant de m'écrire, tu peux déjà cocher. L'outil gratuit sur la page, c'est une checklist liquidité / succession : six points simples - argent accessible, dettes / hypo, bénéficiaires, testament, inventaire, proches au courant. En deux minutes, tu vois ce qui est clair… pis ce qui l'est pas.
+
+Sans créer de compte. Sans formulaire. Sans qu'on te relance.
+
+Le notaire reste essentiel pour le cadre légal. Cette checklist le remplace pas - elle prépare la bonne conversation.
+
+Ensuite, si les cases vides te chicottent - ou si tu veux juste valider -, on prend 15 minutes. Clarifier, c'est pas acheter. Clarifier, c'est décider.
+
+https://www.pierreoliviercaouette.ca/campagnes/succession-bases
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/succession-bases?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=succession_ad3
+
+========================================================================
+3. CHECKLIST AVANT DIFFUSION
+========================================================================
+[ ] 14 ensembles créés + 2-3 annonces chacun
+[ ] URLs avec UTM complets sur chaque annonce
+[ ] CTA En savoir plus partout
+[ ] Commentaire épinglé / disclaimer où requis
+[ ] Budget journalier CBO + plafond mensuel définis
+[ ] Exclusions listes clients / employés
+[ ] Validation conformité iA / superviseur (textes + visuels)
+[ ] Pixel / événements : view landing + RDV trackés
+
+Site : https://www.pierreoliviercaouette.ca
+RDV : https://www.pierreoliviercaouette.ca/rendez-vous
+Landings : https://www.pierreoliviercaouette.ca/campagnes/{slug}
+
+Source : emails/campagne-meta-catalog/*.md

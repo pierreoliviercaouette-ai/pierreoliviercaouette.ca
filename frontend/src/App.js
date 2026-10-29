@@ -38,6 +38,7 @@ import { AssuranceVieActif } from "./pages/AssuranceVieActif";
 import { PatrimoineHome } from "./pages/PatrimoineHome";
 import { Apprendre } from "./pages/Apprendre";
 import { ApprendreDetail } from "./pages/ApprendreDetail";
+import { CampagneAdsLanding } from "./pages/CampagneAdsLanding";
 import { AudienceModeProvider } from "./context/AudienceModeContext";
 
 const ModelPortfoliosBanner = lazy(() =>
@@ -129,6 +130,7 @@ function AppShell() {
             <Route path="/admin/assurance-vie-actif" element={<AssuranceVieActif />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/rendez-vous" element={<Appointment />} />
+            <Route path="/campagnes/:slug" element={<CampagneAdsLanding />} />
             <Route path="/recommandations/consentement" element={<ReferralConsent />} />
             <Route path="/recommandations" element={<Referral />} />
             <Route

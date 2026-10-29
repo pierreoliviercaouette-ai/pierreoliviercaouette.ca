@@ -1,47 +1,64 @@
-# Publication Facebook / LinkedIn — Phase d'attraction
+# Publication Facebook — Phase d'attraction
 
-**Objectif :** Attirer des demandes d'analyse / messages privés  
-**CTA :** Écrire en privé ou comparer ses relevés en 15 minutes  
-**Suite :** Courriel 1 de conversion (`courriel-1.html`)
+**Objectif :** Messages privés + prise de rendez-vous  
+**CTA :** Comparateur en ligne + lien rendez-vous  
+**Suite :** Courriel 1 (`courriel-1.html`)  
+**Visuels :** `facebook-campagne-rendements.png` (16:9) · `facebook-campagne-rendements-9x16.png` (9:16)
 
----
-
-## Texte à publier
-
-Avant de faire ce métier, je croyais (à tort) que ma banque m'offrait le meilleur… et que seul un comptable pouvait m'aider avec mes impôts.
-
-Je vais vous faire un aveu.
-
-Il y a quelques années, avant de passer de l'autre côté du miroir et d'obtenir mon permis, je gérais mes affaires comme la grande majorité des Québécois.
-
-1️⃣ Je laissais mes REER et mes CELI dans les fonds de ma banque, pensant que les rendements se ressemblaient partout.
-
-2️⃣ Je croyais que pour avoir de vraies stratégies d'optimisation fiscale, je devais absolument payer un comptable.
-
-Puis, j'ai commencé à étudier l'industrie de l'intérieur.
-
-Ça a été une véritable douche froide.
-
-J'ai réalisé que le comptable est essentiel pour produire la déclaration d'impôt une fois l'année terminée, mais que c'est le rôle d'un vrai conseiller financier de bâtir la stratégie fiscale **en amont**.
-
-Le problème ? Au guichet ou avec le conseiller de passage à la banque, on ne vous parle presque jamais de stratégie d'intégration fiscale ou de décaissement optimisé. On prend votre dépôt REER, et au suivant.
-
-L'autre choc a été de voir les vrais chiffres.
-
-J'ai vu la différence concrète entre un produit vendu à la masse et un portefeuille activement géré.
-
-Si on regarde les portefeuilles équilibrés standards des grandes institutions bancaires, on parle d'un rendement net d'environ **6,3 %** sur 5 ans.
-
-Mon Portefeuille Modèle Équilibré chez iA Groupe financier ? Il affiche un rendement net de **9,7 %** sur la même période, tout en incluant des protections d'assurance pour le capital.
-
-Ne présumez pas que vous avez la meilleure stratégie simplement parce que votre compte chèque est à la même place que vos placements.
-
-📩 Écrivez-moi en privé. Prenez 15 minutes pour comparer vos relevés actuels avec d'autres options. Vous n'avez rien à perdre, sauf peut-être l'opportunité de faire fructifier votre argent à sa juste valeur.
+> À faire valider par la conformité iA / superviseur avant diffusion large ou pub payante.
 
 ---
 
-## Notes de conformité (à garder / ajouter selon votre conformité interne)
+## Texte à coller sur Facebook
 
-- Mentionner que les rendements passés ne garantissent pas les rendements futurs.
-- Indiquer la source et la date des chiffres (feuillets publics, juin/juillet 2026 ; rendement net au 14 juillet 2026, modèle de base, série Classique 75/75).
-- Éviter de nommer les banques concurrentes dans le post public (utiliser « grandes institutions » / « Institution A/B » dans le courriel).
+Je pensais que ma banque me donnait de bons rendements.
+
+Comme beaucoup de monde.
+
+Pendant des années, j’ai laissé mes REER et mes CELI « chez eux », convaincu que c’était correct. Que tout le monde avait à peu près les mêmes rendements.
+
+Faux.
+
+Ce n’est pas juste un chiffre. À **profil égal**, l’écart se répète — prudent, équilibré ou plus dynamique.
+
+Les portefeuilles que j’ai montés avec iA affichent, selon le profil de risque, entre environ **5 % et 15 % par année** (rendement net annualisé sur 5 ans*). Les solutions bancaires clés en main tournent souvent autour de **4 % à 11 %** sur la même base.
+
+Voici l’illustration par profil :
+
+**Solutions bancaires clés en main** (moyenne, séries grand public) :
+• Prudent : ~4,0 % · Modéré : ~5,2 % · Équilibré : ~6,3 % · Croissance : ~8,6 % · Audacieux : ~11,4 %
+
+**Mes Portefeuilles Modèles iA** (fonds distincts, série Classique 75/75) :
+• Prudent : ~5,0 % · Modéré : ~7,5 % · Équilibré : ~9,7 % · Croissance : ~12,3 % · Audacieux : ~15,0 %
+
+Selon ton profil de risque, l’écart tourne souvent autour de **1 % à environ 3,7 % par année** (équilibré : ~**3,4 %**).
+Ça a l’air de rien.
+
+Sauf que l’argent compose.
+
+Prenons le profil **équilibré** — le plus courant :
+sur **50 000 $** laissés 20 ans (projection hypothétique : mêmes taux historiques composés, sans nouveaux versements) :
+• ~6,3 % → environ **170 000 $**
+• ~9,7 % → environ **318 000 $**
+
+Écart illustratif : près de **150 000 $**.
+Pour « juste » **3,4 %**.
+
+Si tu te demandes où ton relevé se situe dans tout ça…
+
+Compare toi-même à profil égal (sans compte) :
+https://www.pierreoliviercaouette.ca/outils/comparateur-rendements
+
+Ou réserve 15 minutes avec moi — zéro pression :
+https://www.pierreoliviercaouette.ca/rendez-vous
+
+Tu peux aussi m’écrire en privé si tu préfères.
+
+—
+*Illustration seulement. Rendements nets annualisés 5 ans au **30 juin 2026**. Moyennes bancaires = panier de portefeuilles succursale / wraps publics ; iA = Portefeuilles Modèles, série Classique 75/75. Profil Modéré bancaire = estimation illustrative (pas de série uniforme partout). Ce ne sont **pas** les mêmes produits (frais, structure, garanties). Les rendements passés ne garantissent pas les rendements futurs. Ceci ne constitue pas un conseil personnalisé. Produits d’assurance de iA Groupe financier (Industrielle Alliance, Assurance et services financiers inc.).*
+
+---
+
+## Commentaire épinglé (recommandé)
+
+Même disclaimer que l’astérisque ci-dessus, pour qu’il reste visible si Facebook coupe le texte du post. Méthodologie détaillée : `emails/sources-rendements-institutions.md` (usage interne).

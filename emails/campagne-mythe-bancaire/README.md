@@ -7,8 +7,12 @@ Séquence en 2 phases (+ teaser d'un Courriel 2).
 | Élément | Fichier |
 |---|---|
 | Post Facebook / LinkedIn | `post-attraction.md` |
+| Visuel 16:9 | `facebook-campagne-rendements.png` |
+| Visuel 9:16 (Stories) | `facebook-campagne-rendements-9x16.png` |
 | CTA | Message privé / 15 min de comparaison de relevés |
 | Lead magnet implicite | Demande d'analyse |
+
+**Conformité :** le post et les visuels incluent disclaimer FCP/wraps vs fonds distincts, date (30 juin 2026), série Classique 75/75, passés ≠ futurs. Faire valider par conformité iA avant diffusion large.
 
 ## Phase 2 — Conversion (courriel)
 
@@ -23,7 +27,7 @@ Séquence en 2 phases (+ teaser d'un Courriel 2).
 
 ## Phase 3 — À venir (annoncé dans le Courriel 1)
 
-**Courriel 2 (teaser)** : impact d'une différence de rendement d'environ 3 % sur la retraite.
+**Courriel 2 (teaser)** : impact d'une différence de rendement d'environ 3,4 % (profil équilibré) sur la retraite.
 
 ## Ancien fichier
 
