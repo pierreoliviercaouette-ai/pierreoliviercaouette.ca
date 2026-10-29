@@ -103,6 +103,8 @@ export const campagneAdsLandings = [
   },
   {
     slug: 'retraite-reer-celi',
+    /** Alias URL (ex. /campagnes/reer-ou-celi → même landing). */
+    aliases: ['reer-ou-celi', 'reer-celi'],
     badge: 'Retraite',
     title: 'REER ou CELI : où va le prochain dollar ?',
     seoTitle: 'REER et CELI pour la retraite | Conseiller en sécurité financière',
