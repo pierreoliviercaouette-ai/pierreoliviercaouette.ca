@@ -454,6 +454,8 @@ export const campagneAdsLandings = [
   },
   {
     slug: 'succession-bases',
+    /** Alias URL (ex. /campagnes/succession → même landing). */
+    aliases: ['succession'],
     badge: 'Succession',
     title: 'Succession : liquidité et clarté avant le « plus tard »',
     seoTitle: 'Bases de la succession | Conseiller en sécurité financière',
@@ -490,7 +492,13 @@ export const campagneAdsLandings = [
 ];
 
 export function getCampagneAdsLanding(slug) {
-  return campagneAdsLandings.find((item) => item.slug === slug) || null;
+  if (!slug) return null;
+  const direct = campagneAdsLandings.find((item) => item.slug === slug);
+  if (direct) return direct;
+  return (
+    campagneAdsLandings.find((item) => (item.aliases || []).includes(slug)) ||
+    null
+  );
 }
 
 /**
