@@ -8,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
 import { trackEvent } from '../lib/analytics';
+import { getMetaClickCookies } from '../lib/metaCookies';
 import { OUTLOOK_BOOKING_URL } from '../lib/booking';
 import { BookingScheduleConfirm } from '../components/booking/BookingScheduleConfirm';
 import { useSeoMeta } from '../lib/seo';
@@ -55,13 +56,16 @@ export const Contact = () => {
     setLoading(true);
 
     try {
+      const { fbp, fbc } = getMetaClickCookies();
       const { error } = await supabase.rpc('create_contact_submission', {
         p_name: formData.name,
         p_email: formData.email,
         p_phone: formData.phone || null,
         p_subject: formData.subject,
         p_message: formData.message,
-        p_referral_code: formData.referral_code || null
+        p_referral_code: formData.referral_code || null,
+        p_meta_fbp: fbp,
+        p_meta_fbc: fbc,
       });
       if (error) throw error;
       setSubmitted(true);

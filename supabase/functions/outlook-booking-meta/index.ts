@@ -6,7 +6,7 @@
  * (Power Automate) et on envoie l’événement serveur (Conversions API).
  *
  * Secrets (Supabase → Edge Functions → Secrets) :
- *   META_PIXEL_ID              — 3777221109164370
+ *   META_PIXEL_ID              — 1157851050245521
  *   META_CAPI_ACCESS_TOKEN     — Events Manager → Pixel → Settings → Generate access token
  *   BOOKING_WEBHOOK_SECRET     — même valeur que Bearer dans Power Automate
  *
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const pixelId = Deno.env.get('META_PIXEL_ID') || '3777221109164370';
+    const pixelId = Deno.env.get('META_PIXEL_ID') || '1157851050245521';
     const accessToken = Deno.env.get('META_CAPI_ACCESS_TOKEN');
     if (!accessToken) {
       console.error('Missing META_CAPI_ACCESS_TOKEN');

@@ -25,7 +25,7 @@ Booking page (valeur personnalisée) :
 
 Action : HTTP (connecteur HTTP) — POST
 URI :
-  https://graph.facebook.com/v21.0/3777221109164370/events?access_token=JETON_CAPI
+  https://graph.facebook.com/v21.0/1157851050245521/events?access_token=JETON_CAPI
 
 Corps JSON (événement Schedule) — voir aussi outlook-booking-meta/index.ts
 pour une variante via Edge Function Supabase (hash email SHA-256).

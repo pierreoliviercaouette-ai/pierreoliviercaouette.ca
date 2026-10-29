@@ -59,14 +59,14 @@ Conversion secondaire : lecture module `/apprendre/...` (éducation, pas l’obj
 - Budget journalier test : **120–200 $ / jour** (14 ensembles — laisser assez de volume à l’algo)
 - Emplacements : Advantage+
 - Optimisation : **Clics vers le lien** (landing)
-- Pixel Meta (ID `3777221109164370`) : chargé **après consentement cookies** via `frontend/src/lib/analytics.js`
+- Pixel Meta (ID `1157851050245521`) : chargé **après consentement cookies** via `frontend/src/lib/analytics.js`
 - **Conversions à optimiser :**
   - `Lead` — formulaire `/contact` envoyé avec succès
-  - `Schedule` — bouton « Oui, j’ai réservé » → `/rendez-vous/merci`  
-    *(Automate → Meta CAPI exige l’action HTTP = licence Premium ; non dispo ici)*  
-    Détail : `supabase/functions/outlook-booking-meta-setup.txt`
+  - `Schedule` — bouton « Oui, j’ai réservé » → `/rendez-vous/merci`
+  - `Purchase` — vente marquée dans l’admin (mini-CRM Contacts) avec montant $ → Meta CAPI  
+    (`supabase/functions/meta-lead-purchase` ; secret `META_CAPI_ACCESS_TOKEN`)
 - Intention : `InitiateCheckout` (CTA RDV) ; `ViewContent` (landings) ; `Contact` (tél./courriel)
-- Quand volume OK : objectif Ads Manager sur **Lead** et/ou **Schedule** (pas seulement clics)
+- Quand volume OK : objectif Ads Manager sur **Lead** ; plus tard **Purchase** (valeur) si assez de ventes
 
 ### Géo (tous les ensembles)
 - Centre-du-Québec / Victoriaville + rayons pertinents  

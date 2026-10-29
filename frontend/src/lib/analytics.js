@@ -3,7 +3,7 @@ import { hasAnalyticsConsent } from './consent';
 export const GA_MEASUREMENT_ID = 'G-CKGLFKD958';
 export const POSTHOG_KEY = 'phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs';
 export const POSTHOG_HOST = 'https://us.i.posthog.com';
-export const META_PIXEL_ID = '3777221109164370';
+export const META_PIXEL_ID = '1157851050245521';
 
 const hasWindow = () => typeof window !== 'undefined';
 

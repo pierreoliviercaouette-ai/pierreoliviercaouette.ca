@@ -20,6 +20,29 @@ import {
   COMPARATEUR_RENDEMENTS_HTML,
 } from '../data/comparateurRendementsTool';
 
+const CONTACT_STATUS_LABELS = {
+  new: 'Nouveau',
+  contacted: 'Contacté',
+  qualified: 'Qualifié',
+  sold: 'Vendu',
+  lost: 'Perdu',
+};
+
+const contactStatusBadgeClass = (status) => {
+  switch (status) {
+    case 'sold':
+      return 'bg-green-100 text-green-800';
+    case 'qualified':
+      return 'bg-blue-100 text-blue-800';
+    case 'contacted':
+      return 'bg-amber-100 text-amber-900';
+    case 'lost':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-slate-100 text-slate-700';
+  }
+};
+
 export const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -43,8 +66,13 @@ export const Admin = () => {
   const [allReferrals, setAllReferrals] = useState([]);
   const [referralFilter, setReferralFilter] = useState('all');
 
-  // Contacts state
+  // Contacts / mini-CRM leads
   const [contacts, setContacts] = useState([]);
+  const [contactFilter, setContactFilter] = useState('all');
+  const [soldModal, setSoldModal] = useState(null); // contact row or null
+  const [soldValue, setSoldValue] = useState('');
+  const [soldNotes, setSoldNotes] = useState('');
+  const [soldBusy, setSoldBusy] = useState(false);
 
   // Users state
   const [users, setUsers] = useState([]);
@@ -241,6 +269,99 @@ export const Admin = () => {
     setShowToolForm(true);
   };
 
+  const updateContactStatus = async (contact, status) => {
+    try {
+      const { error } = await supabase.rpc('admin_update_contact_lead', {
+        p_id: contact.id,
+        p_status: status,
+        p_admin_notes: null,
+      });
+      if (error) throw error;
+      toast.success('Statut mis à jour');
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.message || 'Erreur');
+    }
+  };
+
+  const openSoldModal = (contact) => {
+    setSoldModal(contact);
+    setSoldValue(contact.sale_value != null ? String(contact.sale_value) : '');
+    setSoldNotes(contact.admin_notes || '');
+  };
+
+  const sendMetaPurchase = async (contactId, saleValue, { resend = false } = {}) => {
+    const { data, error } = await supabase.functions.invoke('meta-lead-purchase', {
+      body: {
+        contact_id: contactId,
+        sale_value: Number(saleValue),
+        currency: 'CAD',
+        resend,
+      },
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
+
+  const confirmSold = async () => {
+    if (!soldModal) return;
+    const value = Number(String(soldValue).replace(',', '.'));
+    if (!Number.isFinite(value) || value <= 0) {
+      toast.error('Entre un montant de vente valide (ex. 2500)');
+      return;
+    }
+    setSoldBusy(true);
+    try {
+      const { error } = await supabase.rpc('admin_mark_contact_sold', {
+        p_id: soldModal.id,
+        p_sale_value: value,
+        p_admin_notes: soldNotes || null,
+        p_sale_currency: 'CAD',
+      });
+      if (error) throw error;
+
+      try {
+        const meta = await sendMetaPurchase(soldModal.id, value, {
+          resend: Boolean(soldModal.meta_purchase_sent_at),
+        });
+        if (meta?.skipped) {
+          toast.success('Vendu enregistré (Purchase Meta déjà envoyé)');
+        } else {
+          toast.success('Vendu enregistré + Purchase envoyé à Meta');
+        }
+      } catch (metaErr) {
+        console.error(metaErr);
+        toast.success('Vendu enregistré');
+        toast.error(
+          metaErr.message ||
+            'Envoi Meta Purchase échoué — tu pourras renvoyer depuis la fiche'
+        );
+      }
+
+      setSoldModal(null);
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.message || 'Erreur');
+    } finally {
+      setSoldBusy(false);
+    }
+  };
+
+  const resendMetaPurchase = async (contact) => {
+    if (!contact.sale_value) {
+      toast.error('Aucune valeur de vente');
+      return;
+    }
+    try {
+      await sendMetaPurchase(contact.id, contact.sale_value, { resend: true });
+      toast.success('Purchase renvoyé à Meta');
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.message || 'Erreur Meta');
+    }
+  };
+
   // Referral handlers
   const updateReferralStatus = async (ref, status) => {
     try {
@@ -286,6 +407,10 @@ export const Admin = () => {
 
   const filteredReferrals = allReferrals.filter(ref => 
     referralFilter === 'all' || ref.status === referralFilter
+  );
+
+  const filteredContacts = contacts.filter(
+    (c) => contactFilter === 'all' || (c.status || 'new') === contactFilter
   );
 
   const filteredUsers = users.filter((u) => {
@@ -678,45 +803,216 @@ export const Admin = () => {
               </div>
             </TabsContent>
 
-            {/* Contacts Tab */}
+            {/* Contacts / mini-CRM leads */}
             <TabsContent value="contacts">
               <div className="bg-white rounded-2xl p-6 shadow-ia">
-                <h3 className="font-heading text-xl font-semibold text-dark mb-6">
-                  Demandes de contact ({contacts.length})
-                </h3>
-                
-                {contacts.length === 0 ? (
-                  <p className="text-prestige-taupe text-center py-8">Aucune demande</p>
+                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 className="font-heading text-xl font-semibold text-dark">
+                    Leads / contacts ({filteredContacts.length})
+                  </h3>
+                  <select
+                    value={contactFilter}
+                    onChange={(e) => setContactFilter(e.target.value)}
+                    className="rounded-lg border border-prestige-beige px-3 py-2 text-sm"
+                    data-testid="admin-contact-filter"
+                  >
+                    <option value="all">Tous</option>
+                    <option value="new">Nouveaux</option>
+                    <option value="contacted">Contactés</option>
+                    <option value="qualified">Qualifiés</option>
+                    <option value="sold">Vendus</option>
+                    <option value="lost">Perdus</option>
+                  </select>
+                </div>
+
+                {filteredContacts.length === 0 ? (
+                  <p className="py-8 text-center text-prestige-taupe">Aucune demande</p>
                 ) : (
                   <div className="space-y-3">
-                    {contacts.map((contact) => (
-                      <div 
-                        key={contact.id}
-                        className="p-4 bg-light rounded-xl"
-                        data-testid={`admin-contact-${contact.id}`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <p className="font-semibold text-dark">{contact.name}</p>
-                            <p className="text-sm text-prestige-taupe">{contact.email}</p>
-                            {contact.phone && (
-                              <p className="text-sm text-prestige-taupe">{contact.phone}</p>
+                    {filteredContacts.map((contact) => {
+                      const status = contact.status || 'new';
+                      return (
+                        <div
+                          key={contact.id}
+                          className="rounded-xl bg-light p-4"
+                          data-testid={`admin-contact-${contact.id}`}
+                        >
+                          <div className="mb-2 flex items-start justify-between gap-3">
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="font-semibold text-dark">{contact.name}</p>
+                                <Badge className={contactStatusBadgeClass(status)}>
+                                  {CONTACT_STATUS_LABELS[status] || status}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-prestige-taupe">{contact.email}</p>
+                              {contact.phone && (
+                                <p className="text-sm text-prestige-taupe">{contact.phone}</p>
+                              )}
+                            </div>
+                            <p className="shrink-0 text-xs text-prestige-taupe">
+                              {new Date(contact.created_at).toLocaleDateString('fr-CA')}
+                            </p>
+                          </div>
+                          <p className="text-sm font-medium text-dark">{contact.subject}</p>
+                          <p className="mt-1 text-sm text-prestige-taupe">{contact.message}</p>
+                          {contact.admin_notes && (
+                            <p className="mt-2 text-xs italic text-prestige-taupe">
+                              Notes : {contact.admin_notes}
+                            </p>
+                          )}
+                          {status === 'sold' && contact.sale_value != null && (
+                            <p className="mt-2 text-sm font-medium text-green-800">
+                              Vente :{' '}
+                              {Number(contact.sale_value).toLocaleString('fr-CA', {
+                                style: 'currency',
+                                currency: contact.sale_currency || 'CAD',
+                              })}
+                              {contact.sold_at
+                                ? ` · ${new Date(contact.sold_at).toLocaleDateString('fr-CA')}`
+                                : ''}
+                              {contact.meta_purchase_sent_at
+                                ? ' · Meta Purchase envoyé'
+                                : ' · Meta Purchase non envoyé'}
+                            </p>
+                          )}
+                          {contact.referral_code && (
+                            <Badge className="mt-2">Code ref: {contact.referral_code}</Badge>
+                          )}
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {status === 'new' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateContactStatus(contact, 'contacted')}
+                                data-testid={`contact-mark-contacted-${contact.id}`}
+                              >
+                                Marquer contacté
+                              </Button>
+                            )}
+                            {(status === 'new' || status === 'contacted') && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateContactStatus(contact, 'qualified')}
+                              >
+                                Qualifier
+                              </Button>
+                            )}
+                            {status !== 'sold' && status !== 'lost' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 text-white hover:bg-green-700"
+                                  onClick={() => openSoldModal(contact)}
+                                  data-testid={`contact-mark-sold-${contact.id}`}
+                                >
+                                  <CheckCircle2 className="mr-1 h-4 w-4" />
+                                  Vendu
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-red-600 text-red-600"
+                                  onClick={() => updateContactStatus(contact, 'lost')}
+                                >
+                                  <XCircle className="mr-1 h-4 w-4" />
+                                  Perdu
+                                </Button>
+                              </>
+                            )}
+                            {status === 'sold' && !contact.meta_purchase_sent_at && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => resendMetaPurchase(contact)}
+                              >
+                                Envoyer Purchase à Meta
+                              </Button>
+                            )}
+                            {status === 'sold' && contact.meta_purchase_sent_at && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => resendMetaPurchase(contact)}
+                              >
+                                Renvoyer Purchase Meta
+                              </Button>
                             )}
                           </div>
-                          <p className="text-xs text-prestige-taupe">
-                            {new Date(contact.created_at).toLocaleDateString('fr-CA')}
-                          </p>
                         </div>
-                        <p className="font-medium text-dark text-sm">{contact.subject}</p>
-                        <p className="text-prestige-taupe text-sm mt-1">{contact.message}</p>
-                        {contact.referral_code && (
-                          <Badge className="mt-2">Code ref: {contact.referral_code}</Badge>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
+
+              {soldModal && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="sold-modal-title"
+                  data-testid="admin-sold-modal"
+                >
+                  <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-ia">
+                    <h4
+                      id="sold-modal-title"
+                      className="font-heading text-lg font-semibold text-dark"
+                    >
+                      Marquer vendu — {soldModal.name}
+                    </h4>
+                    <p className="mt-1 text-sm text-prestige-taupe">
+                      Le montant sera envoyé à Meta (Purchase) pour optimiser les campagnes.
+                    </p>
+                    <div className="mt-4 space-y-3">
+                      <div>
+                        <Label htmlFor="sold-value">Valeur de la vente ($ CAD) *</Label>
+                        <Input
+                          id="sold-value"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={soldValue}
+                          onChange={(e) => setSoldValue(e.target.value)}
+                          placeholder="2500"
+                          data-testid="admin-sold-value"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="sold-notes">Notes (optionnel)</Label>
+                        <Textarea
+                          id="sold-notes"
+                          value={soldNotes}
+                          onChange={(e) => setSoldNotes(e.target.value)}
+                          rows={3}
+                          placeholder="Produit, commission, etc."
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-5 flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={soldBusy}
+                        onClick={() => setSoldModal(null)}
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        type="button"
+                        className="bg-green-600 text-white hover:bg-green-700"
+                        disabled={soldBusy}
+                        onClick={confirmSold}
+                        data-testid="admin-sold-confirm"
+                      >
+                        {soldBusy ? 'Enregistrement…' : 'Confirmer la vente'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             {/* Users Tab */}
