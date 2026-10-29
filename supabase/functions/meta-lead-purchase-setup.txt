@@ -1,0 +1,30 @@
+﻿Meta Purchase depuis le mini-CRM admin
+======================================
+
+Quand tu marques un lead "Vendu" avec un montant $, le site appelle
+l'Edge Function meta-lead-purchase qui envoie Purchase a Meta (CAPI).
+
+
+Secrets Supabase (Edge Functions -> Secrets)
+-------------------------------------------
+  META_PIXEL_ID=1157851050245521
+  META_CAPI_ACCESS_TOKEN=<jeton Events Manager -> Conversions API>
+
+(SUPABASE_URL / ANON / SERVICE_ROLE sont injectes automatiquement.)
+
+
+Deploiement
+-----------
+  supabase functions deploy meta-lead-purchase
+
+
+Migration
+---------
+Appliquer supabase/migrations/018_contact_leads_crm.sql
+
+
+Test
+----
+1. Accepter les cookies sur le site, envoyer /contact
+2. Admin -> Contacts -> Vendu -> montant
+3. Events Manager -> evenement Purchase (serveur) avec value/currency

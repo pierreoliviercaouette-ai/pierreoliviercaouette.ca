@@ -1,0 +1,40 @@
+Suivi RDV Outlook Bookings → Meta Schedule
+==========================================
+
+SANS Power Automate Premium (cas actuel)
+----------------------------------------
+L’action « HTTP » de Power Automate exige une licence Premium.
+Sans ça, Automate ne peut pas appeler Meta Conversions API.
+
+Suivi possible sur le site (déjà branché) :
+1) Formulaire /contact → événement Meta Lead (automatique)
+2) Après réservation dans le calendrier Outlook, le visiteur clique
+   « Oui, j’ai réservé » → /rendez-vous/merci → événement Meta Schedule
+
+L’iframe Bookings est cross-origin : le site ne peut pas lire la confirmation
+tout seul. Le clic explicite est le suivi Schedule sans Premium.
+
+
+AVEC Power Automate Premium (optionnel plus tard)
+-------------------------------------------------
+Si tu as Premium un jour : déclencheur Bookings
+« Quand un rendez-vous est créé » + action HTTP → Meta CAPI.
+
+Booking page (valeur personnalisée) :
+  PierreOlivierCaouetteiAGroupefinancier@ia.ca
+
+Action : HTTP (connecteur HTTP) — POST
+URI :
+  https://graph.facebook.com/v21.0/1157851050245521/events?access_token=JETON_CAPI
+
+Corps JSON (événement Schedule) — voir aussi outlook-booking-meta/index.ts
+pour une variante via Edge Function Supabase (hash email SHA-256).
+
+Jeton : Events Manager → Pixel → Paramètres → Conversions API → Générer.
+
+
+Alternatives sans Premium Microsoft
+-----------------------------------
+- Make.com / Zapier (souvent un appel HTTP inclus au forfait gratuit/limité)
+  déclenché par courriel de confirmation Bookings ou webhook tiers
+- Rester sur Lead (/contact) + Schedule (bouton merci) uniquement

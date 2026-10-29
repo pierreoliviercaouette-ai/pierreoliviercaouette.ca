@@ -42,9 +42,9 @@ export const CookieConsentBanner = () => {
             Témoins et analytique
           </p>
           <p id="cookie-consent-desc" className="text-sm leading-relaxed text-slate-600">
-            Nous utilisons des témoins et des outils d’analyse (Google Analytics, PostHog, Vercel
-            Analytics) pour comprendre l’utilisation du site. Vous pouvez accepter ou refuser.
-            Détails dans la{' '}
+            Nous utilisons des témoins et des outils d’analyse (Google Analytics, PostHog, Meta
+            Pixel, Vercel Analytics) pour comprendre l’utilisation du site et mesurer nos
+            publicités. Vous pouvez accepter ou refuser. Détails dans la{' '}
             <Link to="/confidentialite" className="font-medium text-primary underline-offset-2 hover:underline">
               politique de confidentialité
             </Link>
