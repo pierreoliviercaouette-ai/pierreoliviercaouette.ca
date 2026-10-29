@@ -321,6 +321,7 @@ export const campagneAdsLandings = [
   },
   {
     slug: 'trop-jeune-assurance',
+    aliases: ['trop-jeune-pour-assurer', 'trop-jeune'],
     badge: 'Assurance vie',
     title: '« Je suis trop jeune pour m’assurer » — vraiment ?',
     seoTitle: 'Assurance vie jeune adulte | Conseiller en sécurité financière',
@@ -421,6 +422,7 @@ export const campagneAdsLandings = [
   },
   {
     slug: 'plan-global',
+    aliases: ['plan-financier-global', 'plan-financier'],
     badge: 'Vision globale',
     title: 'Arrêter d’empiler des produits sans plan',
     seoTitle: 'Planification financière globale | Conseiller en sécurité financière',
