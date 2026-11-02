@@ -1,9 +1,10 @@
 # Ensemble Assurance hypothécaire — copies Meta (ton québécois)
 
-**Landing :** https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire  
-**UTM content :** `hypothecaire_ad1` / `hypothecaire_ad2` / `hypothecaire_ad3`  
+**Landing (URL à utiliser) :** https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie  
+**Alias (même page) :** `/campagnes/assurance-hypothecaire`  
+**UTM content :** `hypotheque_vie_ad1` / `hypotheque_vie_ad2` / `hypotheque_vie_ad3`  
 **CTA bouton :** En savoir plus  
-**Focus Ads :** Outil gratuit — comparer assurance du prêteur vs protection personnelle. Sans compte. Sans formulaire. Soft close RDV ensuite.  
+**Focus Ads :** Outil gratuit — comparer assurance du prêteur vs protection personnelle **+** estimer un capital pour la famille. Sans compte. Sans formulaire. Soft close RDV ensuite.  
 **Disclaimer :** Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. L’assurance créancier et l’assurance vie personnelle ne sont pas interchangeables automatiquement. Produits d’assurance de iA Groupe financier (Industrielle Alliance, Assurance et services financiers inc.).
 
 ---
@@ -21,10 +22,10 @@
 >
 > Souvent, la couverture suit le solde qui baisse. La prime, elle, peut rester semblable. Résultat : tu paies de plus en plus cher… pour de moins en moins de protection. Et le premier protégé, c’est souvent le prêteur — pas automatiquement ta famille.
 >
-> Sur la page, y’a un outil gratuit : tu entres ton solde, une prime approx., et tu vois l’effet « couverture qui diminue / coût relatif qui monte ». Sans compte. Sans formulaire.
+> Sur la page, y’a un outil gratuit : tu compares banque vs personnel, tu vois le coût relatif, pis tu chiffres ce qu’il faudrait vraiment aux proches (au-delà du seul solde). Sans compte. Sans formulaire.
 >
 > Ensuite, si ça te chicote, on en parle 15 minutes. Zéro pression. Contenu éducatif — pas un conseil personnalisé.
-> https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire
+> https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
 
 **Titre :** Banque vs famille — compare  
 **Description :** Outil gratuit — sans compte
@@ -44,17 +45,17 @@
 >
 > Protéger le prêt, c’est pas automatiquement protéger les proches. Deux produits. Deux logiques. Bénéficiaire, montant, flexibilité si tu refinances ou vends — ça change tout.
 >
-> Pas besoin de m’écrire pour commencer. Essaie le comparateur sur la page : prêteur vs protection personnelle, point par point. Gratuit. Sans compte. Sans formulaire.
+> Pas besoin de m’écrire pour commencer. Essaie le comparateur sur la page : prêteur vs protection personnelle, point par point — puis l’estimateur « juste le solde » vs capital famille. Gratuit. Sans compte. Sans formulaire.
 >
 > Si après ça tu veux mettre ça en contexte chez toi, on prend 15 minutes. Calme. Concret. Sans pitch agressif.
-> https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire
+> https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
 
 **Titre :** Le prêt ≠ ta famille  
 **Description :** Éducatif · pas un conseil personnalisé
 
 ---
 
-## Ad3 — Soft close flexibilité long terme
+## Ad3 — Soft close chiffre + flexibilité
 
 **Texte principal :**
 > Je pensais que pour comprendre l’assurance de mon hypothèque, fallait déjà booker un rendez‑vous.
@@ -63,17 +64,17 @@
 >
 > Pas nécessairement.
 >
-> Sur la page, y’a un outil gratuit. Tu compares : couverture qui baisse avec le solde, coût relatif qui grimpe, qui encaisse vraiment, et ce qui reste portable après le prêt. Sans compte. Sans formulaire. Illustration éducative seulement.
+> Sur la page, y’a un outil gratuit. Tu compares : couverture qui baisse avec le solde, coût relatif qui grimpe, qui encaisse vraiment. Ensuite tu estimes un montant pour la famille : solde + dettes + revenu de transition + imprévus. Sans compte. Sans formulaire. Illustration éducative seulement.
 >
 > Trois questions que l’outil t’aide à poser :
 > 1) Qui est le bénéficiaire — banque ou famille ?
 > 2) Ma couverture diminue-t-elle pendant que je paie encore ?
-> 3) Est-ce que je peux garder une protection quand l’hypothèque est finie ?
+> 3) Combien faudrait‑il vraiment pour garder le toit *et* le rythme de vie ?
 >
 > Essaie d’abord. Ensuite, si tu veux y voir clair avec quelqu’un, on regarde ça ensemble en 15 minutes. Zéro pression. Clarifier, c’est pas acheter.
-> https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire
+> https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
 
-**Titre :** Compare d’abord, on en parle après  
+**Titre :** Compare et chiffre d’abord  
 **Description :** Conseiller en sécurité financière — Victoriaville
 
 ---
@@ -81,6 +82,6 @@
 ## Notes Holo / Media buyer
 
 - Âge suggéré : **28–55**
-- Ne pas confondre avec l’ensemble `hypotheque-assurance-vie` (estimateur de capital famille). Ici = **créancier vs personnel**.
-- Hook = outil comparatif gratuit ; RDV en soft close seulement.
+- **URL unique à utiliser dans Meta :** `/campagnes/hypotheque-assurance-vie`
+- Hook = outil comparatif + estimateur ; RDV en soft close seulement.
 - Visuel : contraste banque vs maison/famille ; dark navy comme le reste du catalogue.

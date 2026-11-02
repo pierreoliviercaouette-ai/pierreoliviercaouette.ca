@@ -56,7 +56,7 @@ Conversion secondaire : lecture module `/apprendre/...` (éducation, pas l’obj
 - Objectif phase 1 : **Trafic** (lien)
 - Achat d’annonces : Enchères
 - **Advantage campaign budget (CBO) : activé**
-- Budget journalier test : **120–200 $ / jour** (15 ensembles — laisser assez de volume à l’algo)
+- Budget journalier test : **120–200 $ / jour** (14 ensembles — laisser assez de volume à l’algo)
 - Emplacements : Advantage+
 - Optimisation : **Clics vers le lien** (landing)
 - Pixel Meta (ID `1157851050245521`) : chargé **après consentement cookies** via `frontend/src/lib/analytics.js`
@@ -78,7 +78,7 @@ Conversion secondaire : lecture module `/apprendre/...` (éducation, pas l’obj
 
 ---
 
-## 3) Les 15 ensembles
+## 3) Les 14 ensembles
 
 Ton créatif : **même esprit que** `emails/campagne-mythe-bancaire/` — récit à la 1ʳᵉ personne, mythe cassé, preuve / contraste, CTA soft (comparateur ou 15 min), disclaimer.
 
@@ -86,7 +86,7 @@ Ton créatif : **même esprit que** `emails/campagne-mythe-bancaire/` — récit
 |---|--------------|-----|---------|---------------------|
 | 1 | `Comparateur \| Mythe bancaire` | 30–60 | `/campagnes/comparateur-rendements` | `comparateur` |
 | 2 | `CELIAPP \| 1re propriété` | 20–40 | `/campagnes/celiapp` | `celiapp` |
-| 3 | `Hypothèque + assurance vie` | 28–55 | `/campagnes/hypotheque-assurance-vie` | `hypotheque_vie` |
+| 3 | `Assurance hypothécaire \| Banque vs famille` | 28–55 | `/campagnes/hypotheque-assurance-vie` | `hypotheque_vie` |
 | 4 | `Assurance invalidité` | 25–55 | `/campagnes/assurance-invalidite` | `invalidite` |
 | 5 | `Retraite REER CELI` | 35–60 | `/campagnes/retraite-reer-celi` | `retraite` |
 | 6 | `Maladie grave` | 30–55 | `/campagnes/maladie-grave` | `maladie_grave` |
@@ -98,11 +98,10 @@ Ton créatif : **même esprit que** `emails/campagne-mythe-bancaire/` — récit
 | 12 | `Travailleur autonome` | 25–55 | `/campagnes/travailleur-autonome` | `autonome` |
 | 13 | `Plan global` | 30–60 | `/campagnes/plan-global` | `plan_global` |
 | 14 | `Succession \| Bases` | 35–65 | `/campagnes/succession-bases` | `succession` |
-| 15 | `Assurance hypothécaire \| Banque vs perso` | 28–55 | `/campagnes/assurance-hypothecaire` | `hypothecaire` |
 
 **Ciblage :** audiences **larges** (Advantage+ ou intérêts légers). Ne pas empiler trop d’intérêts.  
 **Budget test :** **120–200 $ / jour** CBO (plus d’ensembles = laisser l’algo assez de volume).  
-**Note #15 vs #3 :** `#3` estime le capital famille ; `#15` compare **assurance créancier (banque)** vs **protection personnelle**.
+**#3 :** compare créancier vs personnel **et** estime le capital famille. Alias : `/campagnes/assurance-hypothecaire`.
 
 **URL de destination (exemple CELIAPP ad1) :**
 ```
@@ -120,8 +119,7 @@ CTA bouton Meta : **En savoir plus** → landing.
 |----------|-----|-----|-----|
 | Comparateur | Mythe « bons rendements banque » | Chiffre composé 20 ans | Soft outil + RDV |
 | CELIAPP | « Je verrai plus tard » | Mise de fonds | Admissibilité |
-| Hypo+vie | Assurance banque ≠ famille | Scénario conjoint | 3 questions |
-| Hypothécaire | Coût ↑ couverture ↓ | Qui est protégé | Flexibilité long terme |
+| Hypothécaire | Coût ↑ couverture ↓ | Qui est protégé | Capital famille + soft RDV |
 | Invalidité | Revenu = vrai actif | Trous de la collective | 90 jours |
 | Retraite | REER vs CELI « toujours pareil » | Horizon flou | Question ouverte |
 | MG | Confusion vs invalidité | Capital = temps | Vie vs MG |
@@ -192,7 +190,7 @@ Si l’internaute clique le CTA sur la landing sans UTM pub, fallback : `{slug}_
 
 ## 8) Checklist avant « Diffuser »
 
-- [ ] 15 ensembles créés + 2–3 annonces chacun
+- [ ] 14 ensembles créés + 2–3 annonces chacun
 - [ ] Landings `/campagnes/*` en prod, testées mobile
 - [ ] UTM collés sur chaque annonce
 - [ ] Visuels feed (+ Stories si dispo) uploadés

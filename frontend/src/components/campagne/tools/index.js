@@ -1,6 +1,5 @@
 import { ComparateurRendementsTool } from './ComparateurRendementsTool';
 import { CeliappTool } from './CeliappTool';
-import { HypothequeVieTool } from './HypothequeVieTool';
 import { InvaliditeTool } from './InvaliditeTool';
 import { RetraiteReerCeliTool } from './RetraiteReerCeliTool';
 import { MaladieGraveTool } from './MaladieGraveTool';
@@ -20,7 +19,7 @@ import { AssuranceHypothecaireTool } from './AssuranceHypothecaireTool';
 export const campagneAdsTools = {
   'comparateur-rendements': ComparateurRendementsTool,
   celiapp: CeliappTool,
-  'hypotheque-assurance-vie': HypothequeVieTool,
+  'hypotheque-assurance-vie': AssuranceHypothecaireTool,
   'assurance-invalidite': InvaliditeTool,
   'retraite-reer-celi': RetraiteReerCeliTool,
   'maladie-grave': MaladieGraveTool,

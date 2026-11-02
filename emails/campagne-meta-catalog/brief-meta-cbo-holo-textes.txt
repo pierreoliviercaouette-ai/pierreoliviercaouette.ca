@@ -39,12 +39,12 @@ Exemple Ad1 CELIAPP :
 https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad1
 
 ========================================================================
-2. VUE D'ENSEMBLE DES 15 ENSEMBLES
+2. VUE D'ENSEMBLE DES 14 ENSEMBLES
 ========================================================================
 
  1. Comparateur | Mythe bancaire | Âge 30–60 | /campagnes/comparateur-rendements | UTM comparateur | Outil : Comparateur banque vs portefeuilles modèles (PDF export)
  2. CELIAPP | 1re propriété | Âge 20–40 | /campagnes/celiapp | UTM celiapp | Outil : Simulateur mise de fonds CELIAPP
- 3. Hypothèque + assurance vie | Âge 28–55 | /campagnes/hypotheque-assurance-vie | UTM hypotheque_vie | Outil : Estimateur capital / hypothèque + vie
+ 3. Assurance hypothécaire | Banque vs famille | Âge 28–55 | /campagnes/hypotheque-assurance-vie | UTM hypotheque_vie | Outil : Comparateur créancier vs personnel + estimateur capital famille (alias : /campagnes/assurance-hypothecaire)
  4. Assurance invalidité | Âge 25–55 | /campagnes/assurance-invalidite | UTM invalidite | Outil : Calculateur trou de revenu
  5. Retraite REER CELI | Âge 35–60 | /campagnes/retraite-reer-celi | UTM retraite | Outil : Prioriseur REER / CELI
  6. Maladie grave | Âge 30–55 | /campagnes/maladie-grave | UTM maladie_grave | Outil : Estimateur capital maladie grave
@@ -56,10 +56,8 @@ https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_mediu
 12. Travailleur autonome | Âge 25–55 | /campagnes/travailleur-autonome | UTM autonome | Outil : Checklist filet autonome
 13. Plan global | Âge 30–60 | /campagnes/plan-global | UTM plan_global | Outil : Ordre d’attaque (plan global)
 14. Succession | Bases | Âge 35–65 | /campagnes/succession-bases | UTM succession | Outil : Checklist liquidité succession
-15. Assurance hypothécaire | Banque vs perso | Âge 28–55 | /campagnes/assurance-hypothecaire | UTM hypothecaire | Outil : Comparateur créancier vs personnel
 
 Ciblage : audiences larges (Advantage+ ou intérêts légers). Ne pas empiler trop d’intérêts.
-Note : #3 = estimateur capital famille ; #15 = assurance du prêteur vs protection personnelle.
 
 Notes visuels (à toi) : dark navy, contraste fort, typo bold ; mentionner outil gratuit ; feed 1:1 ou 4:5 + Stories 9:16 ; pas de promesses de rendement.
 
@@ -269,92 +267,19 @@ Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil 
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad3
 
 ========================================================================
-ENSEMBLE 3/14 — Hypothèque + assurance vie
+ENSEMBLE 3/14 — Assurance hypothécaire | Banque vs famille (fusionné)
 ========================================================================
 Âge : 28–55
-Outil landing : Estimateur capital / hypothèque + vie
+Outil landing : Comparateur créancier vs personnel + estimateur capital famille
 Landing : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
+Alias : https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire
 UTM content : hypotheque_vie_ad1 / hypotheque_vie_ad2 / hypotheque_vie_ad3
 CTA bouton : En savoir plus
 
-DISCLAIMER / CONFORMITÉ :
-Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. L'assurance créancier et l'assurance vie personnelle ne sont pas interchangeables automatiquement. Produits d'assurance de iA Groupe financier (Industrielle Alliance, Assurance et services financiers inc.).
+Copies Ad1–Ad3 + disclaimer : emails/campagne-meta-catalog/assurance-hypothecaire.md
 
-------------------------------------------------------------------------
-Ad1 - Estimateur gratuit (mythe « juste le prêt »)
-------------------------------------------------------------------------
-Titre Meta : Combien pour protéger la maison ?
-Description : Estimateur gratuit - sans compte
-
-TEXTE PRINCIPAL (copier-coller) :
-
-Je pensais que « couvrir le solde de l'hypothèque », c'était assez pour protéger la maison.
-
-Comme beaucoup de monde.
-
-Au moment de signer, on te parle d'une protection. Tu coches. Tu te dis : si quelque chose m'arrive, au moins le prêt est réglé. Fin de l'histoire.
-
-Faux - ou du moins, incomplet.
-
-Le solde, c'est une partie. Les proches, eux, doivent souvent tenir le toit et le quotidien : factures, épicerie, activités, transition. L'assurance créancier répond surtout au prêteur. Une couverture personnelle, c'est une autre logique - pensée pour la famille.
-
-Avant de prendre un rendez-vous, tu peux déjà chiffrer ça toi-même. Sur la page, y'a un estimateur gratuit : solde d'hypothèque + ce qu'il faudrait vraiment aux proches. Sans créer de compte. Sans formulaire. Tu bouges les chiffres, tu vois le total.
-
-Ensuite, si le résultat te chicote, on peut en parler 15 minutes. Zéro pression. Contenu éducatif - pas un conseil personnalisé.
-https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
-
-URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypotheque_vie_ad1
-
-------------------------------------------------------------------------
-Ad2 - Chiffre avant de croire la banque
-------------------------------------------------------------------------
-Titre Meta : Prêt vs famille - chiffre-toi
-Description : Éducatif | pas un conseil personnalisé
-
-TEXTE PRINCIPAL (copier-coller) :
-
-Je pensais que l'assurance de la banque = ma famille garde la maison sans stress.
-
-Comme beaucoup de monde.
-
-On park ça dans la case « déjà réglé ». On dort dessus. On se dit que c'est réglé parce qu'on a coché une case le jour de la signature.
-
-Faux.
-
-Protéger le prêt, c'est pas automatiquement protéger les proches. Deux produits. Deux logiques. Beaucoup de monde découvre la différence trop tard - ou jamais.
-
-Pas besoin de m'écrire pour commencer. Essaie l'estimateur sur la page : tu entres le solde de l'hypothèque, un revenu à remplacer, un petit coussin… et tu vois tout de suite l'écart entre « juste le prêt » et un montant pensé pour la famille. Gratuit. Sans compte. Sans formulaire.
-
-Si après ça tu veux mettre les chiffres en contexte chez toi, on prend 15 minutes. Calme. Concret. Sans pitch agressif.
-https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
-
-URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypotheque_vie_ad2
-
-------------------------------------------------------------------------
-Ad3 - Soft close RDV après l'outil
-------------------------------------------------------------------------
-Titre Meta : Estime d'abord, on en parle après
-Description : Conseiller en sécurité financière - Victoriaville
-
-TEXTE PRINCIPAL (copier-coller) :
-
-Je pensais que pour estimer le capital d'assurance vie lié à l'hypothèque, fallait déjà booker un rendez-vous.
-
-Comme beaucoup de monde.
-
-Pas nécessairement.
-
-Sur la page, y'a un outil gratuit. Tu estimes ce qu'il faudrait aux proches : solde d'hypothèque, autres dettes, revenu temporaire, imprévus. Tu compares avec « juste le solde du prêt » - la logique qu'on confond souvent avec l'assurance de la banque. Sans compte. Sans formulaire. Illustration éducative seulement.
-
-Trois questions que l'outil t'aide à poser :
-1) Combien il reste sur l'hypothèque ?
-2) Qu'est-ce qui existe déjà - créancier, ou protection personnelle ?
-3) Combien faudrait-il vraiment pour garder le toit et le rythme de vie ?
-
-Essaie d'abord. Ensuite, si tu veux y voir clair avec quelqu'un, on regarde ça ensemble en 15 minutes. Zéro pression. Clarifier, c'est pas acheter.
-https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
-
-URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypotheque_vie_ad3
+URL destination (ex. ad1) :
+https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypotheque_vie_ad1
 
 ========================================================================
 ENSEMBLE 4/14 — Assurance invalidité
@@ -1379,37 +1304,9 @@ https://www.pierreoliviercaouette.ca/campagnes/succession-bases
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/succession-bases?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=succession_ad3
 
 ========================================================================
-ENSEMBLE 15/15 — Assurance hypothécaire | Banque vs perso
-========================================================================
-Âge : 28–55
-Outil landing : Comparateur assurance créancier (prêteur) vs protection personnelle
-Landing : https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire
-Différence vs ensemble #3 : ici = banque/prêteur vs personnel (coût relatif, bénéficiaire, flexibilité) ; #3 = estimateur de capital famille.
-
---- Ad1 (UTM hypothecaire_ad1) ---
-Titre : Banque vs famille — compare
-Description : Outil gratuit — sans compte
-Texte : voir assurance-hypothecaire.md (Ad1) — hook coût ↑ / couverture ↓
-
---- Ad2 (UTM hypothecaire_ad2) ---
-Titre : Le prêt ≠ ta famille
-Description : Éducatif · pas un conseil personnalisé
-Texte : voir assurance-hypothecaire.md (Ad2)
-
---- Ad3 (UTM hypothecaire_ad3) ---
-Titre : Compare d’abord, on en parle après
-Description : Conseiller en sécurité financière — Victoriaville
-Texte : voir assurance-hypothecaire.md (Ad3)
-
-URL avec UTM (ex. ad1) :
-https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypothecaire_ad1
-
-Copies complètes : emails/campagne-meta-catalog/assurance-hypothecaire.md
-
-========================================================================
 3. CHECKLIST AVANT DIFFUSION
 ========================================================================
-[ ] 15 ensembles créés + 2-3 annonces chacun
+[ ] 14 ensembles créés + 2-3 annonces chacun
 [ ] URLs avec UTM complets sur chaque annonce
 [ ] CTA En savoir plus partout
 [ ] Commentaire épinglé / disclaimer où requis

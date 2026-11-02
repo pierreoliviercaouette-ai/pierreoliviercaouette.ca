@@ -1,4 +1,4 @@
-# Campagne Meta — Catalogue CBO multi-sujets (15 ensembles)
+# Campagne Meta — Catalogue CBO multi-sujets (14 ensembles)
 
 Playbook : `docs/campagne-meta-catalog-cbo.md`  
 Landings : `/campagnes/{slug}`  
@@ -20,7 +20,7 @@ Régénérer : `python build_brief_holo_pdf.py`
 |---|-------|---------|---------|------------------|
 | 1 | Comparateur / mythe bancaire | `comparateur-rendements.md` | `/campagnes/comparateur-rendements` | Compare banque vs modèle |
 | 2 | CELIAPP | `celiapp.md` | `/campagnes/celiapp` | Simulateur mise de fonds |
-| 3 | Hypothèque + vie | `hypotheque-assurance-vie.md` | `/campagnes/hypotheque-assurance-vie` | Estimateur capital hypo |
+| 3 | Assurance hypothécaire | `assurance-hypothecaire.md` | `/campagnes/hypotheque-assurance-vie` | Banque vs perso + capital famille |
 | 4 | Invalidité | `assurance-invalidite.md` | `/campagnes/assurance-invalidite` | Trou de revenu |
 | 5 | Retraite REER/CELI | `retraite-reer-celi.md` | `/campagnes/retraite-reer-celi` | Prioriseur REER/CELI |
 | 6 | Maladie grave | `maladie-grave.md` | `/campagnes/maladie-grave` | Estimateur capital |
@@ -32,7 +32,8 @@ Régénérer : `python build_brief_holo_pdf.py`
 | 12 | Travailleur autonome | `travailleur-autonome.md` | `/campagnes/travailleur-autonome` | Checklist filet |
 | 13 | Plan global | `plan-global.md` | `/campagnes/plan-global` | Ordre d’attaque |
 | 14 | Succession | `succession-bases.md` | `/campagnes/succession-bases` | Checklist liquidité |
-| 15 | Assurance hypothécaire | `assurance-hypothecaire.md` | `/campagnes/assurance-hypothecaire` | Banque vs personnel |
+
+> Alias `/campagnes/assurance-hypothecaire` → même page `#3`.
 
 Composants : `frontend/src/components/campagne/tools/`
 

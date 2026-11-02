@@ -42,36 +42,6 @@ export const campagneAdsLandings = [
     ctaLabel: 'Réserver 15 minutes',
   },
   {
-    slug: 'hypotheque-assurance-vie',
-    badge: 'Assurance vie',
-    title: 'Couvrir l’hypothèque avec l’assurance vie',
-    seoTitle: 'Assurance vie et hypothèque | Conseiller en sécurité financière',
-    seoDescription:
-      'Estimer un capital pour la maison, les dettes et le quotidien — et comparer avec « juste le solde » (logique banque). Conseiller en sécurité financière à Victoriaville.',
-    promise:
-      'Chiffrer ce qu’il faudrait aux proches pour garder la maison — au-delà du seul solde du prêt.',
-    bullets: [
-      'Banque vs personnel : protéger le prêt n’est pas la même chose que protéger la famille',
-      'Estimateur : solde + dettes + revenu de transition + imprévus → un montant illustratif',
-      'PDF à garder : comparer « juste le solde » et le total pour les proches',
-    ],
-    faq: [
-      {
-        question: 'L’assurance de la banque suffit-elle ?',
-        answer:
-          'Parfois non. Elle est souvent liée au prêt, au créancier, et aux conditions de la banque. Une couverture personnelle peut offrir plus de flexibilité pour la famille — à évaluer au cas par cas.',
-      },
-      {
-        question: 'Faut-il assurer 100 % du solde ?',
-        answer:
-          'Pas automatiquement. On regarde le solde, les revenus du conjoint, les autres dettes et les objectifs. L’outil ci-dessus est une illustration : pas un conseil personnalisé.',
-      },
-    ],
-    apprendrePath: '/apprendre/assurance-vie-temporaire',
-    apprendreLabel: 'Lire la capsule assurance vie temporaire',
-    ctaLabel: 'Réserver 15 minutes',
-  },
-  {
     slug: 'assurance-invalidite',
     badge: 'Invalidité',
     title: 'Si le salaire s’arrête : le trou de ton assurance collective',
@@ -494,35 +464,42 @@ export const campagneAdsLandings = [
     ctaLabel: 'Réserver 15 minutes',
   },
   {
-    slug: 'assurance-hypothecaire',
+    slug: 'hypotheque-assurance-vie',
+    /** Variantes courtes → même landing fusionnée. */
     aliases: [
+      'assurance-hypothecaire',
       'assurance-hypotheque',
       'assurance-creancier',
       'hypothecaire-banque-vs-privee',
     ],
     badge: 'Assurance hypothécaire',
-    title: 'Assurance de la banque ou protection personnelle ?',
+    title: 'Assurance de la banque ou protection pour la famille ?',
     seoTitle:
       'Assurance hypothécaire banque vs personnelle | Conseiller en sécurité financière',
     seoDescription:
-      'Comparer l’assurance offerte par le prêteur et une protection personnelle : coût relatif, bénéficiaire, flexibilité. Contenu éducatif. Victoriaville.',
+      'Comparer l’assurance du prêteur et une protection personnelle : coût relatif, bénéficiaire, flexibilité — puis estimer un capital pour la famille. Contenu éducatif. Victoriaville.',
     promise:
-      'Voir la différence entre protéger le prêt (banque) et protéger la famille — coût qui monte pendant que la couverture baisse, flexibilité à long terme.',
+      'Comparer banque vs personnel (coût qui monte, couverture qui baisse), puis chiffrer ce qu’il faudrait vraiment aux proches — au-delà du seul solde.',
     bullets: [
-      'Banque / prêteur : couverture souvent liée au solde qui diminue',
-      'Prime stable + couverture qui baisse = coût « par dollar » qui grimpe',
+      'Banque / prêteur : couverture souvent liée au solde qui diminue ; le coût « par dollar » peut grimper',
       'Personnel : bénéficiaires, capital choisi, portable après l’hypothèque',
+      'Estimateur : solde + dettes + revenu de transition + imprévus → montant illustratif pour la famille',
     ],
     faq: [
       {
         question: 'C’est la même chose que l’assurance vie ?',
         answer:
-          'Pas exactement. L’assurance créancier (souvent proposée à la signature du prêt) vise surtout à rembourser le prêteur. Une protection personnelle est pensée pour tes bénéficiaires, avec d’autres règles de durée, de montant et de portabilité.',
+          'Pas exactement. L’assurance créancier vise surtout à rembourser le prêteur. Une protection personnelle est pensée pour tes bénéficiaires, avec d’autres règles de durée, de montant et de portabilité.',
       },
       {
         question: 'Pourquoi le coût « augmente » si ma prime ne change pas ?',
         answer:
-          'Si la prime reste semblable pendant que le solde (et donc souvent la couverture) diminue, tu paies un prix relatif plus élevé pour chaque dollar de protection. C’est une illustration éducative — ton contrat peut différer.',
+          'Si la prime reste semblable pendant que le solde (et donc souvent la couverture) diminue, tu paies un prix relatif plus élevé pour chaque dollar de protection. Illustration éducative — ton contrat peut différer.',
+      },
+      {
+        question: 'Faut-il assurer 100 % du solde seulement ?',
+        answer:
+          'Pas automatiquement. On regarde aussi le quotidien des proches : autres dettes, revenu de transition, imprévus. L’outil compare « juste le solde » et un total illustratif pour la famille.',
       },
       {
         question: 'Je dois annuler celle de la banque ?',
