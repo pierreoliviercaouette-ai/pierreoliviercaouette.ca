@@ -39,7 +39,7 @@ Exemple Ad1 CELIAPP :
 https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad1
 
 ========================================================================
-2. VUE D'ENSEMBLE DES 14 ENSEMBLES
+2. VUE D'ENSEMBLE DES 15 ENSEMBLES
 ========================================================================
 
  1. Comparateur | Mythe bancaire | Âge 30–60 | /campagnes/comparateur-rendements | UTM comparateur | Outil : Comparateur banque vs portefeuilles modèles (PDF export)
@@ -56,8 +56,10 @@ https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_mediu
 12. Travailleur autonome | Âge 25–55 | /campagnes/travailleur-autonome | UTM autonome | Outil : Checklist filet autonome
 13. Plan global | Âge 30–60 | /campagnes/plan-global | UTM plan_global | Outil : Ordre d’attaque (plan global)
 14. Succession | Bases | Âge 35–65 | /campagnes/succession-bases | UTM succession | Outil : Checklist liquidité succession
+15. Assurance hypothécaire | Banque vs perso | Âge 28–55 | /campagnes/assurance-hypothecaire | UTM hypothecaire | Outil : Comparateur créancier vs personnel
 
-Ciblage : audiences larges (Advantage+ ou intérêts légers). Ne pas empiler 15 intérêts.
+Ciblage : audiences larges (Advantage+ ou intérêts légers). Ne pas empiler trop d’intérêts.
+Note : #3 = estimateur capital famille ; #15 = assurance du prêteur vs protection personnelle.
 
 Notes visuels (à toi) : dark navy, contraste fort, typo bold ; mentionner outil gratuit ; feed 1:1 ou 4:5 + Stories 9:16 ; pas de promesses de rendement.
 
@@ -1377,9 +1379,37 @@ https://www.pierreoliviercaouette.ca/campagnes/succession-bases
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/succession-bases?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=succession_ad3
 
 ========================================================================
+ENSEMBLE 15/15 — Assurance hypothécaire | Banque vs perso
+========================================================================
+Âge : 28–55
+Outil landing : Comparateur assurance créancier (prêteur) vs protection personnelle
+Landing : https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire
+Différence vs ensemble #3 : ici = banque/prêteur vs personnel (coût relatif, bénéficiaire, flexibilité) ; #3 = estimateur de capital famille.
+
+--- Ad1 (UTM hypothecaire_ad1) ---
+Titre : Banque vs famille — compare
+Description : Outil gratuit — sans compte
+Texte : voir assurance-hypothecaire.md (Ad1) — hook coût ↑ / couverture ↓
+
+--- Ad2 (UTM hypothecaire_ad2) ---
+Titre : Le prêt ≠ ta famille
+Description : Éducatif · pas un conseil personnalisé
+Texte : voir assurance-hypothecaire.md (Ad2)
+
+--- Ad3 (UTM hypothecaire_ad3) ---
+Titre : Compare d’abord, on en parle après
+Description : Conseiller en sécurité financière — Victoriaville
+Texte : voir assurance-hypothecaire.md (Ad3)
+
+URL avec UTM (ex. ad1) :
+https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypothecaire_ad1
+
+Copies complètes : emails/campagne-meta-catalog/assurance-hypothecaire.md
+
+========================================================================
 3. CHECKLIST AVANT DIFFUSION
 ========================================================================
-[ ] 14 ensembles créés + 2-3 annonces chacun
+[ ] 15 ensembles créés + 2-3 annonces chacun
 [ ] URLs avec UTM complets sur chaque annonce
 [ ] CTA En savoir plus partout
 [ ] Commentaire épinglé / disclaimer où requis
@@ -1389,7 +1419,7 @@ URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/succ
 [ ] Pixel / événements : view landing + RDV trackés
 
 Site : https://www.pierreoliviercaouette.ca
-RDV : https://www.pierreoliviercaouette.ca/rendez-vous
+RDV campagne : https://www.pierreoliviercaouette.ca/rendez-vous/campagne
 Landings : https://www.pierreoliviercaouette.ca/campagnes/{slug}
 
 Source : emails/campagne-meta-catalog/*.md

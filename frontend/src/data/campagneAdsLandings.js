@@ -493,6 +493,47 @@ export const campagneAdsLandings = [
     apprendreLabel: 'Lire la capsule succession',
     ctaLabel: 'Réserver 15 minutes',
   },
+  {
+    slug: 'assurance-hypothecaire',
+    aliases: [
+      'assurance-hypotheque',
+      'assurance-creancier',
+      'hypothecaire-banque-vs-privee',
+    ],
+    badge: 'Assurance hypothécaire',
+    title: 'Assurance de la banque ou protection personnelle ?',
+    seoTitle:
+      'Assurance hypothécaire banque vs personnelle | Conseiller en sécurité financière',
+    seoDescription:
+      'Comparer l’assurance offerte par le prêteur et une protection personnelle : coût relatif, bénéficiaire, flexibilité. Contenu éducatif. Victoriaville.',
+    promise:
+      'Voir la différence entre protéger le prêt (banque) et protéger la famille — coût qui monte pendant que la couverture baisse, flexibilité à long terme.',
+    bullets: [
+      'Banque / prêteur : couverture souvent liée au solde qui diminue',
+      'Prime stable + couverture qui baisse = coût « par dollar » qui grimpe',
+      'Personnel : bénéficiaires, capital choisi, portable après l’hypothèque',
+    ],
+    faq: [
+      {
+        question: 'C’est la même chose que l’assurance vie ?',
+        answer:
+          'Pas exactement. L’assurance créancier (souvent proposée à la signature du prêt) vise surtout à rembourser le prêteur. Une protection personnelle est pensée pour tes bénéficiaires, avec d’autres règles de durée, de montant et de portabilité.',
+      },
+      {
+        question: 'Pourquoi le coût « augmente » si ma prime ne change pas ?',
+        answer:
+          'Si la prime reste semblable pendant que le solde (et donc souvent la couverture) diminue, tu paies un prix relatif plus élevé pour chaque dollar de protection. C’est une illustration éducative — ton contrat peut différer.',
+      },
+      {
+        question: 'Je dois annuler celle de la banque ?',
+        answer:
+          'Pas automatiquement. On compare d’abord les deux logiques, puis ta situation. Cette page ne remplace pas la lecture de ta police ni un conseil personnalisé.',
+      },
+    ],
+    apprendrePath: '/apprendre/assurance-vie-temporaire',
+    apprendreLabel: 'Lire la capsule assurance vie temporaire',
+    ctaLabel: 'Réserver 15 minutes',
+  },
 ];
 
 export function getCampagneAdsLanding(slug) {

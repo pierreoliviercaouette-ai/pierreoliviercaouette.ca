@@ -12,6 +12,7 @@ import { CollectiveChecklistTool } from './CollectiveChecklistTool';
 import { AutonomeChecklistTool } from './AutonomeChecklistTool';
 import { PlanGlobalTool } from './PlanGlobalTool';
 import { SuccessionChecklistTool } from './SuccessionChecklistTool';
+import { AssuranceHypothecaireTool } from './AssuranceHypothecaireTool';
 
 /**
  * Mini-outils interactifs des landings /campagnes/:slug
@@ -31,6 +32,7 @@ export const campagneAdsTools = {
   'travailleur-autonome': AutonomeChecklistTool,
   'plan-global': PlanGlobalTool,
   'succession-bases': SuccessionChecklistTool,
+  'assurance-hypothecaire': AssuranceHypothecaireTool,
 };
 
 export function getCampagneAdsTool(slug) {

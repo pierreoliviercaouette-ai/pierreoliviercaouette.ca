@@ -1,4 +1,4 @@
-# Campagne Meta — Catalogue CBO multi-sujets (14 ensembles)
+# Campagne Meta — Catalogue CBO multi-sujets (15 ensembles)
 
 Playbook : `docs/campagne-meta-catalog-cbo.md`  
 Landings : `/campagnes/{slug}`  
@@ -32,6 +32,7 @@ Régénérer : `python build_brief_holo_pdf.py`
 | 12 | Travailleur autonome | `travailleur-autonome.md` | `/campagnes/travailleur-autonome` | Checklist filet |
 | 13 | Plan global | `plan-global.md` | `/campagnes/plan-global` | Ordre d’attaque |
 | 14 | Succession | `succession-bases.md` | `/campagnes/succession-bases` | Checklist liquidité |
+| 15 | Assurance hypothécaire | `assurance-hypothecaire.md` | `/campagnes/assurance-hypothecaire` | Banque vs personnel |
 
 Composants : `frontend/src/components/campagne/tools/`
 
