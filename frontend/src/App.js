@@ -23,6 +23,7 @@ import { Login, Register } from "./pages/Auth";
 import { Profile } from "./pages/Profile";
 import { Admin } from "./pages/Admin";
 import { Contact, Appointment } from "./pages/Contact";
+import { CampagneAppointment } from "./pages/CampagneAppointment";
 import { BookingThanks } from "./pages/BookingThanks";
 import { Privacy, Terms } from "./pages/Legal";
 import { Referral } from "./pages/Referral";
@@ -131,6 +132,7 @@ function AppShell() {
             <Route path="/admin/assurance-vie-actif" element={<AssuranceVieActif />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/rendez-vous" element={<Appointment />} />
+            <Route path="/rendez-vous/campagne" element={<CampagneAppointment />} />
             <Route path="/rendez-vous/merci" element={<BookingThanks />} />
             <Route path="/campagnes/:slug" element={<CampagneAdsLanding />} />
             <Route path="/recommandations/consentement" element={<ReferralConsent />} />

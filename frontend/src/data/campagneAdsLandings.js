@@ -506,7 +506,8 @@ export function getCampagneAdsLanding(slug) {
 }
 
 /**
- * Lien RDV avec UTM. Si la landing a déjà des UTM Meta (clic pub), on les conserve.
+ * Lien RDV campagne (page dédiée + iframe Bookings ads) avec UTM.
+ * Si la landing a déjà des UTM Meta (clic pub), on les conserve.
  */
 export function buildCampagneRdvPath(slug, incomingSearch = '') {
   const incoming = new URLSearchParams(
@@ -518,5 +519,5 @@ export function buildCampagneRdvPath(slug, incomingSearch = '') {
     utm_campaign: incoming.get('utm_campaign') || CAMPAGNE_ADS_UTM_CAMPAIGN,
     utm_content: incoming.get('utm_content') || `${slug}_landing`,
   });
-  return `/rendez-vous?${params.toString()}`;
+  return `/rendez-vous/campagne?${params.toString()}`;
 }
