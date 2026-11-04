@@ -1,8 +1,16 @@
-﻿import { useMemo, useState } from 'react';
-import { AlertTriangle, Check } from 'lucide-react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
-import { CampagneToolShell, ToolDownloadPdf } from '../CampagneToolShell';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import {
+  CampagneToolShell,
+  ToolClimaxReveal,
+  ToolDownloadPdf,
+  ToolSoftClose,
+} from '../CampagneToolShell';
 
 function toNum(value) {
   const n = Number(value);
@@ -111,40 +119,28 @@ function Block({ step, title, subtitle, children, done }) {
   );
 }
 
-function ResultCard({ label, value, detail, tone = 'default' }) {
-  const toneClass =
-    tone === 'warn'
-      ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white'
-      : tone === 'ok'
-        ? 'border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white'
-        : 'border-primary/15 bg-gradient-to-br from-primary/[0.04] to-secondary/[0.05]';
-
-  const icon =
-    tone === 'warn' ? (
-      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600" strokeWidth={2.25} aria-hidden />
-    ) : tone === 'ok' ? (
-      <Check className="h-3.5 w-3.5 shrink-0 text-emerald-600" strokeWidth={2.5} aria-hidden />
-    ) : null;
-
+function BreakdownRow({ label, value, muted, strong }) {
   return (
-    <div className={`rounded-2xl border px-4 py-3.5 ${toneClass}`}>
-      <div className="flex items-center gap-1.5">
-        {icon}
-        <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">{label}</p>
-      </div>
-      <p className="font-heading mt-1.5 text-2xl font-bold tabular-nums text-dark">{value}</p>
-      {detail ? <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">{detail}</p> : null}
+    <div className="flex items-baseline justify-between gap-3 text-sm">
+      <span className={strong ? 'font-medium text-dark' : muted ? 'text-prestige-taupe' : 'text-dark'}>
+        {label}
+      </span>
+      <span
+        className={`tabular-nums ${
+          strong ? 'font-semibold text-dark' : muted ? 'font-medium text-prestige-taupe' : 'font-medium text-dark'
+        }`}
+      >
+        {value}
+      </span>
     </div>
   );
 }
 
-function BreakdownRow({ label, value, muted }) {
+function BreakdownGroup({ title, children }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 text-sm">
-      <span className={muted ? 'text-prestige-taupe' : 'text-dark'}>{label}</span>
-      <span className={`font-medium tabular-nums ${muted ? 'text-prestige-taupe' : 'text-dark'}`}>
-        {value}
-      </span>
+    <div className="space-y-1.5">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-secondary">{title}</p>
+      {children}
     </div>
   );
 }
@@ -160,12 +156,16 @@ export function TropJeuneTool() {
   const [conjointDepend, setConjointDepend] = useState('non');
   const [autresDettes, setAutresDettes] = useState('5000');
   const [revenuMensuel, setRevenuMensuel] = useState('4200');
-  const [projetHypotheque, setProjetHypotheque] = useState('oui');
+  // Anti-spoiler : futur en non au load (score ~dettes, pas 455 k$)
+  const [projetHypotheque, setProjetHypotheque] = useState('non');
   const [anneesHypotheque, setAnneesHypotheque] = useState('3');
   const [montantHypothequePrevue, setMontantHypothequePrevue] = useState('350000');
-  const [projetFamille, setProjetFamille] = useState('oui');
+  const [projetFamille, setProjetFamille] = useState('non');
   const [anneesFamille, setAnneesFamille] = useState('5');
+  const futurToggleTracked = useRef(false);
+  const dualRevealTracked = useRef(false);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_trop-jeune-assurance_pdf');
+  const rdvPath = buildCampagneRdvPath('trop-jeune-assurance');
 
   const maisonActuelle = toNum(soldeMaison);
   const nbEnfants = Math.floor(toNum(enfants));
@@ -201,14 +201,24 @@ export function TropJeuneTool() {
   const capitalConjoint = conjointOui ? 24 * revenu : 0;
   const capitalFutureHypo = hypoFutureOui ? montantHypoPrevue : 0;
   const capitalFutureFamille = familleFutureOui ? 100000 : 0;
-  const capital =
-    maisonActuelle + dettes + capitalEnfants + capitalConjoint + capitalFutureHypo + capitalFutureFamille;
+  const capitalAujourdhui = maisonActuelle + dettes + capitalEnfants + capitalConjoint;
+  const capitalProjets = capitalFutureHypo + capitalFutureFamille;
+  const capital = capitalAujourdhui + capitalProjets;
 
   const aDuFutur = hypoFutureOui || familleFutureOui;
   const aDuPresent = maisonActuelle > 0 || nbEnfants > 0 || conjointOui || dettes > 0;
   const scoreEleve = score >= 40;
   const scoreMoyen = score >= 15;
-  const tone = scoreEleve ? 'warn' : scoreMoyen ? 'default' : 'ok';
+  const projetsPlusLourds = capitalProjets > capitalAujourdhui;
+
+  useEffect(() => {
+    if (!aDuFutur || dualRevealTracked.current) return;
+    dualRevealTracked.current = true;
+    trackEvent('select_content', {
+      content_type: 'tool',
+      item_id: 'campagne_trop-jeune-assurance_dual_reveal',
+    });
+  }, [aDuFutur]);
 
   const lectureScore = scoreEleve
     ? aDuFutur && !aDuPresent
@@ -218,6 +228,27 @@ export function TropJeuneTool() {
       ? 'Y’a déjà des raisons de regarder — aujourd’hui ou dans les prochaines années.'
       : 'Besoin plus léger pour l’instant. Ajoute tes projets connus (hypothèque, famille) si tu les as en tête.';
 
+  const softCloseCopy = scoreEleve
+    ? {
+        headline: `Score ${score}/100 · ~${formatCad(capital)} illustratifs`,
+        subline:
+          capitalProjets > capitalAujourdhui
+            ? 'Surtout tes projets connus. 15 min pour lire ça ensemble — clarifier ≠ acheter.'
+            : 'Présent + projets connus. 15 min pour lire ça ensemble — clarifier ≠ acheter.',
+        rdvLabel: 'Lire mon score en 15 min',
+      }
+    : scoreMoyen
+      ? {
+          headline: `Score ${score}/100 · y’a déjà de quoi regarder`,
+          subline: '15 min pour clarifier présent + projets — sans pression.',
+          rdvLabel: 'Clarifier mon score · 15 min',
+        }
+      : {
+          headline: 'Besoin plus léger pour l’instant',
+          subline: 'Garde le PDF — ou 15 min si tu veux valider que t’oublies rien.',
+          rdvLabel: 'Ou 15 min avec un conseiller',
+        };
+
   const milestones = useMemo(
     () => [
       {
@@ -226,11 +257,11 @@ export function TropJeuneTool() {
       },
       {
         id: 'futur',
-        done: projetHypotheque === 'oui' || projetHypotheque === 'non' || projetFamille === 'oui' || projetFamille === 'non',
+        done: projetHypotheque === 'oui' || projetFamille === 'oui',
       },
-      { id: 'lecture', done: score >= 0 },
+      { id: 'lecture', done: scoreMoyen || aDuFutur || aDuPresent },
     ],
-    [age, conjointDepend, projetHypotheque, projetFamille, score]
+    [age, conjointDepend, projetHypotheque, projetFamille, scoreMoyen, aDuFutur, aDuPresent]
   );
 
   const doneCount = milestones.filter((m) => m.done).length;
@@ -239,25 +270,47 @@ export function TropJeuneTool() {
   const contribs = [
     { id: 'maison', label: 'Maison actuelle', pts: Math.round(ptsMaison), color: 'bg-primary' },
     { id: 'enfants', label: 'Enfants', pts: Math.round(ptsEnfants), color: 'bg-secondary' },
-    { id: 'conjoint', label: 'Salaire', pts: Math.round(ptsConjoint), color: 'bg-amber-500' },
+    { id: 'conjoint', label: 'Proche dépend de toi', pts: Math.round(ptsConjoint), color: 'bg-amber-500' },
     { id: 'dettes', label: 'Dettes', pts: Math.round(ptsDettes), color: 'bg-prestige-taupe' },
     { id: 'hypo-futur', label: 'Hypothèque prévue', pts: Math.round(poidsHypoFuture), color: 'bg-primary/70' },
     { id: 'famille-futur', label: 'Famille prévue', pts: Math.round(poidsFamilleFuture), color: 'bg-secondary/70' },
   ].filter((c) => c.pts > 0);
 
   const statusDetail = scoreEleve
-    ? 'Le score tient compte du présent et du futur déjà connu. Garde le PDF.'
+    ? 'Apporte ce résumé en RDV — on le lit ensemble.'
     : 'Ajuste tes projets (maison, famille) — souvent c’est ça qui change le portrait.';
+
+  const trackFuturToggle = (nextValue) => {
+    if (nextValue === 'oui' && !futurToggleTracked.current) {
+      futurToggleTracked.current = true;
+      trackEvent('select_content', {
+        content_type: 'tool',
+        item_id: 'campagne_trop-jeune-assurance_toggle_futur',
+      });
+    }
+  };
+
+  const handleProjetHypotheque = (value) => {
+    trackFuturToggle(value);
+    setProjetHypotheque(value);
+  };
+
+  const handleProjetFamille = (value) => {
+    trackFuturToggle(value);
+    setProjetFamille(value);
+  };
+
+  const handleRdvOutil = () => trackRendezVousClick('campagne_trop-jeune-assurance_rdv_outil');
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Resume — trop jeune pour s’assurer ?',
+      title: 'Résumé — trop jeune pour s’assurer ?',
       filename: 'resume-trop-jeune-assurance.pdf',
       sections: [
         {
           heading: 'Aujourd’hui',
           rows: [
-            { label: 'Age (contexte)', value: `${ageN} ans` },
+            { label: 'Âge (contexte)', value: `${ageN} ans` },
             { label: 'Solde maison actuel', value: formatCad(maisonActuelle) },
             { label: 'Enfants', value: String(nbEnfants) },
             {
@@ -269,32 +322,35 @@ export function TropJeuneTool() {
           ],
         },
         {
-          heading: 'Besoins futurs deja connus',
+          heading: 'Besoins futurs déjà connus',
           rows: [
             {
-              label: 'Hypotheque prevue',
+              label: 'Hypothèque prévue',
               value: hypoFutureOui
                 ? `Oui — dans ~${anneesHypo} an(s), ~${formatCad(montantHypoPrevue)}`
                 : 'Non',
             },
             {
-              label: 'Famille / enfants prevus',
+              label: 'Famille / enfants prévus',
               value: familleFutureOui ? `Oui — d’ici ~${anneesFam} an(s)` : 'Non',
             },
           ],
         },
         {
-          heading: 'Resultats',
+          heading: 'Résultats',
           rows: [
-            { label: 'Score (present + futur)', value: `${score} / 100` },
-            { label: 'Montant illustratif a viser', value: formatCad(capital) },
+            { label: 'Score (présent + futur)', value: `${score} / 100` },
+            { label: 'Aujourd’hui (illustratif)', value: formatCad(capitalAujourdhui) },
+            { label: 'Projets connus (illustratif)', value: formatCad(capitalProjets) },
+            { label: 'Montant illustratif à viser', value: formatCad(capital) },
           ],
         },
       ],
       notes: [
         lectureScore,
-        'On regarde aussi les besoins futurs deja connus — pas seulement aujourd’hui.',
-        'Illustration educative seulement — pas une soumission ni un conseil personnalise.',
+        'On regarde aussi les besoins futurs déjà connus — pas seulement aujourd’hui.',
+        'Apporte ce PDF — 15 min pour le lire ensemble.',
+        'Illustration éducative seulement — pas une soumission ni un conseil personnalisé.',
       ],
     });
 
@@ -307,7 +363,16 @@ export function TropJeuneTool() {
         footer={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
-            <ToolDownloadPdf busy={busy} onClick={handleDownload} label="Télécharger mon résumé PDF" />
+            {scoreMoyen ? (
+              <ToolDownloadPdf
+                busy={busy}
+                onClick={handleDownload}
+                label="Garder mon résumé PDF"
+                variant="ghost"
+              />
+            ) : (
+              <ToolDownloadPdf busy={busy} onClick={handleDownload} label="Télécharger mon résumé PDF" />
+            )}
           </div>
         }
       >
@@ -439,13 +504,16 @@ export function TropJeuneTool() {
             subtitle="Hypothèque ou famille prévues — même si ce n’est pas encore arrivé."
             done={milestones[1].done}
           >
+            <p className="mb-4 rounded-xl bg-secondary/[0.08] px-3.5 py-2.5 text-sm leading-relaxed text-dark">
+              Coche tes projets connus — c’est souvent ça qui fait bouger le score.
+            </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <YesNo
                   id="tj-projet-hypo"
                   label="Tu prévois une hypothèque / un achat dans les prochaines années ?"
                   value={projetHypotheque}
-                  onChange={setProjetHypotheque}
+                  onChange={handleProjetHypotheque}
                   hint="Même si tu n’as pas encore acheté — un projet clair compte."
                 />
               </div>
@@ -478,7 +546,7 @@ export function TropJeuneTool() {
                   id="tj-projet-famille"
                   label="Tu prévois fonder / agrandir une famille d’ici quelques années ?"
                   value={projetFamille}
-                  onChange={setProjetFamille}
+                  onChange={handleProjetFamille}
                 />
               </div>
               {familleFutureOui ? (
@@ -503,43 +571,138 @@ export function TropJeuneTool() {
             subtitle="Score présent + futur — montant illustratif, pas une soumission."
             done={milestones[2].done}
           >
-            <ResultCard
-              label="Montant à viser (illustration)"
-              value={formatCad(capital)}
-              detail="Inclut aujourd’hui et les projets déjà connus (hypothèque prévue, famille prévue)."
-              tone={tone}
-            />
+            <ToolClimaxReveal key={aDuFutur ? 'futur-on' : 'futur-off'}>
+              <div
+                className="grid gap-3 sm:grid-cols-2"
+                data-testid="trop-jeune-dual-capital"
+              >
+                <div className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-white px-4 py-3.5">
+                  <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">
+                    Aujourd’hui
+                  </p>
+                  <p className="font-heading mt-1.5 text-3xl font-bold tabular-nums text-dark md:text-4xl">
+                    {formatCad(capitalAujourdhui)}
+                  </p>
+                </div>
+                <div
+                  className={`rounded-2xl border px-4 py-3.5 ${
+                    projetsPlusLourds
+                      ? 'border-secondary/30 bg-gradient-to-br from-secondary/[0.08] to-white'
+                      : 'border-primary/15 bg-gradient-to-br from-primary/[0.04] to-white'
+                  }`}
+                >
+                  <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">
+                    Projets connus
+                  </p>
+                  <p
+                    className={`font-heading mt-1.5 text-3xl font-bold tabular-nums md:text-4xl ${
+                      projetsPlusLourds ? 'text-secondary' : 'text-dark'
+                    }`}
+                  >
+                    {formatCad(capitalProjets)}
+                  </p>
+                  {projetsPlusLourds ? (
+                    <p className="mt-1.5 text-xs text-prestige-taupe">
+                      C’est souvent ici que le mythe tombe.
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+              <p className="mt-3 text-center">
+                <span className="text-xs uppercase tracking-wide text-prestige-taupe">
+                  Total illustratif
+                </span>
+                <span className="font-heading mt-0.5 block text-xl font-semibold tabular-nums text-dark md:text-2xl">
+                  {formatCad(capital)}
+                </span>
+              </p>
+            </ToolClimaxReveal>
+
             <div className="mt-3 rounded-2xl bg-prestige-beige/25 px-4 py-3.5">
               <p className="text-xs font-medium uppercase tracking-wide text-secondary">
                 D’où vient le montant
               </p>
-              <div className="mt-2.5 space-y-1.5">
-                <BreakdownRow label="Maison actuelle" value={formatCad(maisonActuelle)} muted />
-                <BreakdownRow label="Autres dettes" value={formatCad(dettes)} muted />
-                {capitalEnfants > 0 ? (
-                  <BreakdownRow label="Enfants (aujourd’hui)" value={formatCad(capitalEnfants)} muted />
-                ) : null}
-                {capitalConjoint > 0 ? (
-                  <BreakdownRow
-                    label={`24 mois × ${formatCad(revenu)}`}
-                    value={formatCad(capitalConjoint)}
-                    muted
-                  />
-                ) : null}
-                {capitalFutureHypo > 0 ? (
-                  <BreakdownRow
-                    label={`Hypothèque prévue (~${anneesHypo} an${anneesHypo > 1 ? 's' : ''})`}
-                    value={formatCad(capitalFutureHypo)}
-                    muted
-                  />
-                ) : null}
-                {capitalFutureFamille > 0 ? (
-                  <BreakdownRow label="Famille prévue (ordre de grandeur)" value={formatCad(capitalFutureFamille)} muted />
-                ) : null}
+              <div className="mt-2.5 space-y-3.5">
+                <BreakdownGroup title="Présent">
+                  <BreakdownRow label="Maison actuelle" value={formatCad(maisonActuelle)} muted />
+                  <BreakdownRow label="Autres dettes" value={formatCad(dettes)} muted />
+                  {capitalEnfants > 0 ? (
+                    <BreakdownRow label="Enfants (aujourd’hui)" value={formatCad(capitalEnfants)} muted />
+                  ) : null}
+                  {capitalConjoint > 0 ? (
+                    <BreakdownRow
+                      label={`24 mois × ${formatCad(revenu)}`}
+                      value={formatCad(capitalConjoint)}
+                      muted
+                    />
+                  ) : null}
+                  <BreakdownRow label="Sous-total aujourd’hui" value={formatCad(capitalAujourdhui)} />
+                </BreakdownGroup>
+                <BreakdownGroup title="Projets connus">
+                  {capitalFutureHypo > 0 ? (
+                    <BreakdownRow
+                      label={`Hypothèque prévue (~${anneesHypo} an${anneesHypo > 1 ? 's' : ''})`}
+                      value={formatCad(capitalFutureHypo)}
+                      muted
+                    />
+                  ) : (
+                    <BreakdownRow label="Hypothèque prévue" value={formatCad(0)} muted />
+                  )}
+                  {capitalFutureFamille > 0 ? (
+                    <BreakdownRow
+                      label="Famille prévue (ordre de grandeur)"
+                      value={formatCad(capitalFutureFamille)}
+                      muted
+                    />
+                  ) : (
+                    <BreakdownRow label="Famille prévue" value={formatCad(0)} muted />
+                  )}
+                  <BreakdownRow label="Sous-total projets" value={formatCad(capitalProjets)} />
+                </BreakdownGroup>
                 <div className="border-t border-prestige-beige/80 pt-2">
-                  <BreakdownRow label="Total illustratif" value={formatCad(capital)} />
+                  <BreakdownRow label="Total illustratif" value={formatCad(capital)} strong />
                 </div>
               </div>
+            </div>
+
+            <div className="mt-4">
+              {scoreMoyen ? (
+                <ToolSoftClose
+                  headline={softCloseCopy.headline}
+                  subline={softCloseCopy.subline}
+                  rdvPath={rdvPath}
+                  rdvLabel={softCloseCopy.rdvLabel}
+                  onRdvClick={handleRdvOutil}
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                  pdfLabel="Garder mon résumé PDF"
+                />
+              ) : (
+                <div
+                  className="space-y-4 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.06] to-secondary/[0.05] px-4 py-4 md:px-5"
+                  data-testid="campagne-tool-soft-close"
+                >
+                  <p className="font-heading text-base font-semibold text-dark md:text-lg">
+                    {softCloseCopy.headline}
+                  </p>
+                  <p className="text-sm leading-relaxed text-prestige-taupe">{softCloseCopy.subline}</p>
+                  <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+                    <ToolDownloadPdf
+                      onClick={handleDownload}
+                      busy={busy}
+                      label="Télécharger mon résumé PDF"
+                    />
+                    <Link
+                      to={rdvPath}
+                      onClick={handleRdvOutil}
+                      className="inline-flex w-full items-center justify-center text-sm font-medium text-primary hover:underline sm:w-auto"
+                      data-testid="campagne-tool-cta-rdv"
+                    >
+                      {softCloseCopy.rdvLabel}
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </Block>
         </div>

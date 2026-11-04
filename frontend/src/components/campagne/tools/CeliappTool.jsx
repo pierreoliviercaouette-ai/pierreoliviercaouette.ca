@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Check, Home } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
 import {
   CampagneToolShell,
-  ToolDownloadPdf,
+  ToolSoftClose,
 } from '../CampagneToolShell';
 
 /** Plafonds illustratifs 2026 — non indexés historiquement, à revalider. */
@@ -29,9 +32,9 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-function Field({ id, label, hint, children }) {
+function Field({ id, label, hint, children, className = '' }) {
   return (
-    <div className="min-w-0">
+    <div className={`min-w-0 ${className}`}>
       <label htmlFor={id} className={labelClass}>
         {label}
       </label>
@@ -41,7 +44,7 @@ function Field({ id, label, hint, children }) {
   );
 }
 
-function MoneyInput({ id, value, onChange, min, max, step, placeholder }) {
+function MoneyInput({ id, value, onChange, onBlur, min, max, step, placeholder }) {
   return (
     <div className="relative">
       <input
@@ -54,6 +57,7 @@ function MoneyInput({ id, value, onChange, min, max, step, placeholder }) {
         className={`${inputClass} pr-8`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
         placeholder={placeholder}
       />
       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-prestige-taupe">
@@ -96,6 +100,8 @@ function buildLecture(result) {
     plafondAtteint,
     coupeParPlafondAnnuel,
     coupeParPlafondVie,
+    cible,
+    ecart,
   } = result;
 
   if (years <= 0 || prevu <= 0) {
@@ -133,6 +139,12 @@ function buildLecture(result) {
     );
   }
 
+  if (cible > 0) {
+    points.push(
+      `Ta cible est ${formatCad(cible)} — écart ~${formatCad(ecart)} (cotisations seulement).`
+    );
+  }
+
   points.push(
     'Rappel : ce total, c’est tes cotisations seulement. Un placement peut monter ou baisser — on n’invente pas de rendement ici.'
   );
@@ -149,15 +161,20 @@ function buildLecture(result) {
 }
 
 export function CeliappTool() {
-  const [cotisationAnnuelle, setCotisationAnnuelle] = useState('8000');
-  const [annees, setAnnees] = useState('5');
+  const location = useLocation();
+  const [cotisationAnnuelle, setCotisationAnnuelle] = useState('4000');
+  const [annees, setAnnees] = useState('4');
   const [dejaCotise, setDejaCotise] = useState('0');
+  const [miseCible, setMiseCible] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_celiapp_pdf');
+
+  const rdvPath = buildCampagneRdvPath('celiapp', location.search);
 
   const result = useMemo(() => {
     const prevu = Math.max(0, toNumber(cotisationAnnuelle));
     const years = Math.max(0, Math.min(15, Math.floor(toNumber(annees))));
     const deja = Math.min(PLAFOND_VIE, Math.max(0, toNumber(dejaCotise)));
+    const cible = Math.max(0, toNumber(miseCible));
 
     const droitsRestantsAvant = Math.max(0, PLAFOND_VIE - deja);
     const cotisationEffective = Math.min(prevu, PLAFOND_ANNUEL, droitsRestantsAvant);
@@ -167,6 +184,7 @@ export function CeliappTool() {
     const coupeParPlafondAnnuel = prevu > PLAFOND_ANNUEL && droitsRestantsAvant > 0;
     const coupeParPlafondVie =
       years > 0 && cotisationEffective * years > droitsRestantsAvant;
+    const ecart = cible > 0 ? cible - totalProjete : 0;
 
     return {
       prevu,
@@ -177,11 +195,13 @@ export function CeliappTool() {
       miseDeFonds: totalProjete,
       years,
       deja,
+      cible,
+      ecart,
       plafondAtteint: droitsRestantsApres <= 0 && totalProjete > 0,
       coupeParPlafondAnnuel,
       coupeParPlafondVie,
     };
-  }, [cotisationAnnuelle, annees, dejaCotise]);
+  }, [cotisationAnnuelle, annees, dejaCotise, miseCible]);
 
   const lecture = useMemo(() => buildLecture(result), [result]);
 
@@ -215,8 +235,41 @@ export function CeliappTool() {
     doneCount < 2
       ? 'Dis-nous combien tu mets par année et dans combien d’années tu vises d’acheter.'
       : result.plafondAtteint
-        ? 'Max à vie atteint dans ce scénario. Télécharge le PDF pour le garder.'
-        : 'Ta projection est prête. Télécharge le PDF et mets-le avec ton plan d’achat.';
+        ? 'Max à vie dans ce scénario. 15 min pour valider la suite — PDF en bonus.'
+        : 'Ta projection est prête. Clarifie le prochain vrai pas en 15 min — ou garde le PDF.';
+
+  const softCloseCopy = result.plafondAtteint
+    ? {
+        headline: `Dans ce scénario, tu touches le max à vie (${formatCad(PLAFOND_VIE)} illustratif).`,
+        subline:
+          'En 15 min, on regarde si le rythme tient, l’admissibilité, et quoi faire du surplus ailleurs — zéro pression.',
+      }
+    : {
+        headline: `T’as ~${formatCad(result.totalProjete)} de projetés (cotisations seulement) et encore ${formatCad(result.droitsRestantsApres)} de place.`,
+        subline:
+          'En 15 minutes : droit d’ouvrir, rythme, et si le CELI reste à côté — zéro pression.',
+      };
+
+  const handleChipMax = () => {
+    setCotisationAnnuelle('8000');
+    setAnnees('5');
+    trackEvent('select_content', {
+      content_type: 'cta',
+      item_id: 'campagne_celiapp_chip_max',
+    });
+  };
+
+  const trackCibleIfSet = (raw) => {
+    const cible = Math.max(0, toNumber(raw));
+    if (cible <= 0) return;
+    trackEvent('select_content', {
+      content_type: 'tool_climax',
+      item_id: 'campagne_celiapp_cible',
+      value: cible,
+    });
+  };
+
+  const handleRdvClick = () => trackRendezVousClick('campagne_celiapp_rdv_outil');
 
   const handleDownload = () =>
     downloadPdf({
@@ -235,6 +288,9 @@ export function CeliappTool() {
               value: `${result.years} an${result.years > 1 ? 's' : ''}`,
             },
             { label: 'Deja dans le CELIAPP', value: formatCad(result.deja) },
+            ...(result.cible > 0
+              ? [{ label: 'Mise cible', value: formatCad(result.cible) }]
+              : []),
           ],
         },
         {
@@ -250,6 +306,9 @@ export function CeliappTool() {
               label: 'Place restante a vie',
               value: formatCad(result.droitsRestantsApres),
             },
+            ...(result.cible > 0
+              ? [{ label: 'Ecart vs cible', value: formatCad(result.ecart) }]
+              : []),
           ],
         },
         {
@@ -273,19 +332,35 @@ export function CeliappTool() {
       ],
     });
 
+  const softCloseActions = (
+    <ToolSoftClose
+      headline={softCloseCopy.headline}
+      subline={softCloseCopy.subline}
+      rdvPath={rdvPath}
+      rdvLabel="Clarifier mon CELIAPP (15 min)"
+      onRdvClick={handleRdvClick}
+      onPdf={handleDownload}
+      pdfBusy={busy}
+      pdfLabel="Télécharger ma projection PDF"
+    />
+  );
+
   return (
     <div data-testid="tool-celiapp">
       <CampagneToolShell
         title="Combien pour ta mise de fonds ?"
-        intro="Le CELIAPP, c’est un compte pour épargner ta mise de fonds (1re propriété) — jusqu’à 8 000 $ / an et 40 000 $ à vie. Entre ce que tu mets, ce que t’as déjà, et dans combien d’années tu vises d’acheter."
-        disclaimer="Illustration éducative seulement — pas un conseil personnalisé. Chiffres 2026 illustratifs (8 000 $ / année, 40 000 $ à vie). Qui a le droit, les retraits et l’impôt : à revalider selon ta situation."
+        intro="Le CELIAPP, c’est un compte pour bâtir une mise de fonds (1ʳᵉ propriété). Jusqu’à 8 000 $ de nouveaux droits / an et 40 000 $ à vie (illustratifs 2026). Entre ce que tu mets, ce que t’as déjà, et dans combien d’années tu vises d’acheter."
+        disclaimer="Illustration éducative seulement — pas un conseil personnalisé. Chiffres 2026 illustratifs (8 000 $ de nouveaux droits / année, 40 000 $ à vie ; les reports peuvent changer le max d’une année). Qui a le droit, les retraits et l’impôt : à revalider selon ta situation. Aucun rendement inventé."
         footer={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3">
             <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
-            <ToolDownloadPdf
-              busy={busy}
-              onClick={handleDownload}
-              label="Télécharger ma projection PDF"
+            <ToolSoftClose
+              rdvPath={rdvPath}
+              rdvLabel="Clarifier mon CELIAPP (15 min)"
+              onRdvClick={handleRdvClick}
+              onPdf={handleDownload}
+              pdfBusy={busy}
+              pdfLabel="Télécharger ma projection PDF"
             />
           </div>
         }
@@ -331,16 +406,15 @@ export function CeliappTool() {
             <Field
               id="celiapp-cotisation"
               label="Combien tu mets par année"
-              hint={`Max ${PLAFOND_ANNUEL.toLocaleString('fr-CA')} $ / année (2026). Ex. : 8 000 $ si tu vises le max.`}
+              hint={`Plafond illustratif ${PLAFOND_ANNUEL.toLocaleString('fr-CA')} $ de nouveaux droits / année (2026). Tu peux viser plus — on clampera dans le calcul.`}
             >
               <MoneyInput
                 id="celiapp-cotisation"
                 value={cotisationAnnuelle}
                 onChange={setCotisationAnnuelle}
                 min={0}
-                max={PLAFOND_ANNUEL}
                 step="100"
-                placeholder="8000"
+                placeholder="4000"
               />
             </Field>
             <Field
@@ -358,6 +432,16 @@ export function CeliappTool() {
                 placeholder="0"
               />
             </Field>
+            <div className="sm:col-span-2">
+              <button
+                type="button"
+                onClick={handleChipMax}
+                className="inline-flex items-center rounded-full border border-prestige-beige bg-white px-3.5 py-1.5 text-xs font-medium text-dark transition-colors hover:border-primary/30 hover:text-primary"
+                data-testid="celiapp-chip-max"
+              >
+                Viser le max 8 k $ × 5 ans
+              </button>
+            </div>
           </Block>
 
           <Block
@@ -382,7 +466,7 @@ export function CeliappTool() {
                   className={`${inputClass} pr-12`}
                   value={annees}
                   onChange={(e) => setAnnees(e.target.value)}
-                  placeholder="5"
+                  placeholder="4"
                 />
                 <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-prestige-taupe">
                   ans
@@ -398,6 +482,22 @@ export function CeliappTool() {
                   : 'Ajoute un nombre d’années pour voir ce que ça donne.'}
               </p>
             </div>
+            <Field
+              id="celiapp-cible"
+              label="Mise de fonds que tu vises (optionnel)"
+              hint="Ex. : 20 000 $, 35 000 $ — ce que toi tu as en tête. Cotisations seulement en face."
+              className="sm:col-span-2"
+            >
+              <MoneyInput
+                id="celiapp-cible"
+                value={miseCible}
+                onChange={setMiseCible}
+                onBlur={() => trackCibleIfSet(miseCible)}
+                min={0}
+                step="500"
+                placeholder="25000"
+              />
+            </Field>
           </Block>
 
           <div className="relative pl-11">
@@ -432,13 +532,64 @@ export function CeliappTool() {
                   : 'bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06]'
               }`}
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-                {result.plafondAtteint ? 'Max à vie' : 'Total pour la mise de fonds'}
-              </p>
-              <p className="font-heading mt-1 text-3xl font-bold tracking-tight text-dark sm:text-4xl">
-                {formatCad(result.miseDeFonds)}
+              {result.plafondAtteint ? (
+                <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                  Max à vie
+                </p>
+              ) : null}
+              <p
+                className={`font-heading text-3xl font-bold tracking-tight text-dark sm:text-4xl ${
+                  result.plafondAtteint ? 'mt-1' : ''
+                }`}
+              >
+                {lecture.headline}
               </p>
               <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{lecture.detail}</p>
+
+              {result.cible > 0 && milestones[2].done ? (
+                <div
+                  key={`gap-${result.cible}-${result.totalProjete}`}
+                  className="mt-4 grid gap-3 border-t border-dark/[0.06] pt-4 sm:grid-cols-3"
+                  data-testid="celiapp-gap-cible"
+                >
+                  <div>
+                    <p className="text-xs text-prestige-taupe">Projection</p>
+                    <p className="mt-0.5 font-heading text-lg font-semibold text-dark sm:text-xl">
+                      {formatCad(result.totalProjete)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-prestige-taupe">Cible</p>
+                    <p className="mt-0.5 font-heading text-lg font-semibold text-dark sm:text-xl">
+                      {formatCad(result.cible)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-prestige-taupe">Écart</p>
+                    <p
+                      className={`mt-0.5 font-heading text-lg font-semibold sm:text-xl ${
+                        result.ecart > 0
+                          ? 'text-primary'
+                          : result.ecart < 0
+                            ? 'text-emerald-700'
+                            : 'text-dark'
+                      }`}
+                    >
+                      {formatCad(Math.abs(result.ecart))}
+                    </p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-prestige-taupe">
+                      {result.ecart > 0
+                        ? '~à combler'
+                        : result.ecart < 0
+                          ? 'Au-dessus de ta cible (cotisations seulement)'
+                          : 'Dans la cible (cotisations)'}
+                    </p>
+                  </div>
+                  <p className="sm:col-span-3 text-xs leading-relaxed text-prestige-taupe">
+                    L’écart, c’est cotisations vs ton souhait — pas une promesse d’achat.
+                  </p>
+                </div>
+              ) : null}
 
               {lecture.points.length > 0 ? (
                 <ul className="mt-4 space-y-2.5 border-t border-dark/[0.06] pt-4">
@@ -485,6 +636,8 @@ export function CeliappTool() {
                   </p>
                 </div>
               </div>
+
+              {milestones[2].done ? <div className="mt-5">{softCloseActions}</div> : null}
             </div>
 
             <div className="mt-4 rounded-2xl bg-prestige-beige/40 px-5 py-4">

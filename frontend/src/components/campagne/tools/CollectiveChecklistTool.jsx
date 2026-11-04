@@ -1,9 +1,13 @@
 ﻿import { useMemo, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { AlertTriangle, Check, FileText } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import {
   CampagneToolShell,
   ToolDownloadPdf,
+  ToolSoftClose,
 } from '../CampagneToolShell';
 
 const DEFINITION_OPTIONS = [
@@ -50,16 +54,16 @@ function Field({ id, label, hint, children, className = '' }) {
 
 function displayOrDash(value, suffix = '') {
   const v = String(value ?? '').trim();
-  if (!v) return 'Non renseigne';
+  if (!v) return 'Non renseigné';
   return suffix ? `${v}${suffix}` : v;
 }
 
 function definitionLabel(value) {
-  return DEFINITION_OPTIONS.find((o) => o.value === value)?.label || 'Non renseigne';
+  return DEFINITION_OPTIONS.find((o) => o.value === value)?.label || 'Non renseigné';
 }
 
 function departLabel(value) {
-  return DEPART_OPTIONS.find((o) => o.value === value)?.label || 'Non renseigne';
+  return DEPART_OPTIONS.find((o) => o.value === value)?.label || 'Non renseigné';
 }
 
 function formatMoney(value) {
@@ -93,7 +97,7 @@ function Block({ step, title, subtitle, children, done }) {
 function ResultCard({ label, value, detail, tone = 'default' }) {
   const toneClass =
     tone === 'warn'
-      ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white'
+      ? 'border-amber-300/90 bg-gradient-to-br from-amber-50 to-white'
       : tone === 'ok'
         ? 'border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white'
         : 'border-primary/15 bg-gradient-to-br from-primary/[0.04] to-secondary/[0.05]';
@@ -117,7 +121,33 @@ function ResultCard({ label, value, detail, tone = 'default' }) {
   );
 }
 
+function LivretCheckbox({ id, hasLivret, onChange }) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer items-start gap-3 rounded-2xl bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06] px-4 py-3.5 shadow-[inset_0_0_0_1px_rgba(1,35,63,0.06)]"
+    >
+      <input
+        id={id}
+        type="checkbox"
+        checked={hasLivret}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-1 h-4 w-4 shrink-0 rounded border-input text-primary focus:ring-primary"
+      />
+      <span>
+        <span className="block text-sm font-semibold text-dark">
+          J’ai le livret de mon assurance collective
+        </span>
+        <span className="mt-0.5 block text-xs leading-relaxed text-prestige-taupe">
+          Pas juste la carte — le PDF ou le document RH avec les vrais chiffres.
+        </span>
+      </span>
+    </label>
+  );
+}
+
 export function CollectiveChecklistTool() {
+  const location = useLocation();
   const [employeur, setEmployeur] = useState('');
   const [structureInvalidite, setStructureInvalidite] = useState('simple');
   const [pctInvalidite, setPctInvalidite] = useState('');
@@ -134,6 +164,7 @@ export function CollectiveChecklistTool() {
   const [notesLibres, setNotesLibres] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_assurance-collective_pdf');
 
+  const rdvPath = buildCampagneRdvPath('assurance-collective', location.search);
   const multiPalier = structureInvalidite === 'paliers';
 
   const invaliditeChiffresOk = multiPalier
@@ -144,27 +175,13 @@ export function CollectiveChecklistTool() {
 
   const milestones = useMemo(
     () => [
-      { id: 'employeur', done: Boolean(employeur.trim()) },
-      {
-        id: 'invalidite',
-        done: invaliditeChiffresOk,
-      },
-      {
-        id: 'vieSante',
-        done: Boolean(capitalVie.trim() && sante.trim()),
-      },
-      { id: 'depart', done: Boolean(depart || trousNotes.trim()) },
+      { id: 'invalidite', done: invaliditeChiffresOk },
+      { id: 'vieSante', done: Boolean(capitalVie.trim() && sante.trim()) },
+      { id: 'depart', done: Boolean(depart) },
       { id: 'livret', done: hasLivret },
+      { id: 'employeur', done: Boolean(employeur.trim()) },
     ],
-    [
-      employeur,
-      invaliditeChiffresOk,
-      capitalVie,
-      sante,
-      depart,
-      trousNotes,
-      hasLivret,
-    ]
+    [invaliditeChiffresOk, capitalVie, sante, depart, hasLivret, employeur]
   );
 
   const doneCount = milestones.filter((m) => m.done).length;
@@ -179,7 +196,8 @@ export function CollectiveChecklistTool() {
     Boolean(delaiJours.trim()) ||
     Boolean(definition) ||
     Boolean(notesPaliers.trim());
-  const invaliditeDone = milestones[1].done;
+  const invaliditeDone = milestones[0].done;
+  const invaliditeWarn = !invaliditeDone;
 
   const invaliditeValue = invaliditeDone
     ? multiPalier
@@ -194,11 +212,11 @@ export function CollectiveChecklistTool() {
       ? `${definitionLabel(definition)}. Couverture en plusieurs paliers — vérifie toujours ton livret (court / long terme peuvent différer).`
       : `${definitionLabel(definition)}. C’est ce que ton assurance collective t’offre si tu ne peux plus travailler.`
     : invaliditePartial
-      ? 'Complète délai, définition et % (ou tes paliers) — c’est dans le livret.'
-      : 'Ouvre ton livret, section invalidité. Attention : parfois plusieurs paliers (court terme / long terme).';
+      ? 'Complète délai, définition et % (ou paliers). C’est écrit dans le livret — pas sur la carte.'
+      : 'Sans % ni délai, tu découvres le filet le jour d’une réclamation. Ouvre la section invalidité — un % ou plusieurs paliers.';
 
   const capitalFmt = formatMoney(capitalVie);
-  const vieSanteDone = milestones[2].done;
+  const vieSanteDone = milestones[1].done;
   const vieSantePartial = Boolean(capitalVie.trim()) || Boolean(sante.trim());
 
   const vieSanteValue = vieSanteDone
@@ -211,65 +229,86 @@ export function CollectiveChecklistTool() {
     ? `Vie : ${capitalFmt || `${capitalVie.trim()} $`}. Santé : ${sante.trim()}.`
     : vieSantePartial
       ? 'Ajoute le montant vie et ce que le dentaire / les médicaments couvrent vraiment.'
-      : 'Combien pour tes proches, et quel plafond dentaire / médicaments ?';
+      : 'Combien pour tes proches, et quel plafond dentaire / médicaments — vraiment ?';
 
-  const departDone = Boolean(depart);
-  const departValue = departDone ? departLabel(depart) : trousNotes.trim() ? 'Trous notés' : 'À clarifier';
+  const departDone = milestones[2].done;
+  const departValue = departDone ? departLabel(depart) : 'À clarifier';
   const departDetail = departDone
     ? trousNotes.trim()
       ? `Trous notés : ${trousNotes.trim()}`
       : 'Vérifie aussi s’il reste des trous (invalidité trop basse, pas de maladie grave…).'
-    : 'Quand tu quittes, ton assurance collective suit rarement. Note ce qui reste — et ce qui tombe.';
+    : 'Quand tu changes d’emploi, la collective suit rarement. Note ce qui tombe avant d’en avoir besoin.';
 
   const livretValue = hasLivret ? 'Oui' : 'Pas encore';
   const livretDetail = hasLivret
     ? 'Garde le PDF avec ton livret. Revalide si ton emploi ou ton salaire change.'
-    : 'Pas juste la carte : le PDF RH avec les vrais chiffres de ton assurance collective.';
+    : 'Sans le PDF RH, tu devines. Avec, tu sais ce que ton assurance collective t’offre vraiment.';
 
-  const statusDetail =
-    doneCount >= 4
-      ? 'Bon résumé de ton assurance collective. Télécharge le PDF et range-le avec ton livret.'
-      : doneCount >= 2
-        ? `${missingCount} point${missingCount > 1 ? 's' : ''} encore flou${missingCount > 1 ? 's' : ''}. Les cases vides, c’est ce qu’il te reste à trouver dans ton livret.`
-        : 'Ouvre le livret de ton assurance collective. Commence par l’invalidité — c’est souvent le plus important.';
+  const showSoftClose = missingCount > 0 || invaliditeWarn;
+
+  const softHeadline = showSoftClose
+    ? `T’as encore ${missingCount} case${missingCount > 1 ? 's' : ''} floue${missingCount > 1 ? 's' : ''}${
+        invaliditeWarn ? ' — dont l’invalidité' : ''
+      }.`
+    : 'Bon résumé.';
+
+  const softSubline = showSoftClose
+    ? '15 min, on les démêle ensemble, livret ouvert. Clarifier, c’est pas acheter.'
+    : 'Range le PDF avec ton livret — et revalide si ton emploi ou ton salaire change.';
+
+  const handleLivretChange = (checked) => {
+    setHasLivret(checked);
+    if (checked) {
+      trackEvent('select_content', {
+        content_type: 'tool',
+        item_id: 'campagne_assurance-collective_livret_check',
+      });
+    }
+  };
+
+  const handleStructureChange = (value) => {
+    setStructureInvalidite(value);
+    if (value === 'paliers') {
+      trackEvent('select_content', {
+        content_type: 'tool',
+        item_id: 'campagne_assurance-collective_paliers',
+      });
+    }
+  };
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Resume — ton assurance collective',
+      title: 'Résumé — ton assurance collective',
       filename: 'resume-assurance-collective.pdf',
       sections: [
         {
-          heading: 'Employeur',
-          rows: [{ label: 'Employeur', value: displayOrDash(employeur) }],
-        },
-        {
-          heading: 'Invalidite',
+          heading: 'Invalidité',
           rows: [
             {
               label: 'Structure',
               value: multiPalier
                 ? 'Plusieurs paliers (court / long terme)'
-                : 'Un % principal (simplifie)',
+                : 'Un % principal (simplifié)',
             },
             ...(multiPalier
               ? [
                   { label: '% court terme', value: displayOrDash(pctCourtTerme, ' %') },
                   { label: '% long terme', value: displayOrDash(pctLongTerme, ' %') },
-                  { label: 'Details paliers', value: displayOrDash(notesPaliers) },
+                  { label: 'Détails paliers', value: displayOrDash(notesPaliers) },
                 ]
-              : [{ label: '% du salaire remplace', value: displayOrDash(pctInvalidite, ' %') }]),
-            { label: 'Delai (jours avant argent)', value: displayOrDash(delaiJours, ' jours') },
+              : [{ label: '% du salaire remplacé', value: displayOrDash(pctInvalidite, ' %') }]),
+            { label: 'Délai (jours avant argent)', value: displayOrDash(delaiJours, ' jours') },
             {
-              label: 'Definition',
-              value: definition ? definitionLabel(definition) : 'Non renseigne',
+              label: 'Définition',
+              value: definition ? definitionLabel(definition) : 'Non renseigné',
             },
           ],
         },
         {
-          heading: 'Vie et sante',
+          heading: 'Vie et santé',
           rows: [
             { label: 'Capital vie', value: displayOrDash(capitalVie, ' $') },
-            { label: 'Sante (dentaire / medicaments)', value: displayOrDash(sante) },
+            { label: 'Santé (dentaire / médicaments)', value: displayOrDash(sante) },
           ],
         },
         {
@@ -277,11 +316,15 @@ export function CollectiveChecklistTool() {
           rows: [
             {
               label: 'Si tu quittes',
-              value: depart ? departLabel(depart) : 'Non renseigne',
+              value: depart ? departLabel(depart) : 'Non renseigné',
             },
             { label: 'Trous / questions', value: displayOrDash(trousNotes) },
-            { label: 'Acces au livret', value: hasLivret ? 'Oui' : 'A obtenir' },
+            { label: 'Accès au livret', value: hasLivret ? 'Oui' : 'À obtenir' },
           ],
+        },
+        {
+          heading: 'Employeur',
+          rows: [{ label: 'Employeur', value: displayOrDash(employeur) }],
         },
         ...(notesLibres.trim()
           ? [
@@ -293,9 +336,9 @@ export function CollectiveChecklistTool() {
           : []),
       ],
       notes: [
-        `${doneCount}/${total} blocs clarifies.`,
-        'Outil simplifie : ton livret peut avoir plusieurs paliers, plafonds ou definitions plus fines — c’est le document qui prime.',
-        'Revalide ce resume si ton emploi, ton salaire ou ton assurance collective change.',
+        `${doneCount}/${total} blocs clarifiés.`,
+        'Outil simplifié : ton livret peut avoir plusieurs paliers, plafonds ou définitions plus fines — c’est le document qui prime.',
+        'Revalide ce résumé si ton emploi, ton salaire ou ton assurance collective change.',
       ],
     });
 
@@ -303,40 +346,108 @@ export function CollectiveChecklistTool() {
     <div data-testid="tool-collective-checklist">
       <CampagneToolShell
         title="Checklist — ton assurance collective"
-        intro="Ouvre le livret de ton assurance collective. Remplis case par case — ton mini résumé se construit en direct, prêt à télécharger en PDF."
-        disclaimer="Contenu éducatif seulement — pas un conseil personnalisé. Cet outil est une grille simplifiée : ton livret peut prévoir plusieurs paliers d’invalidité, des plafonds ou des définitions plus fines. Le livret prime toujours."
+        intro="Idéal avec le PDF RH ouvert. Remplis case par case — ton mini résumé se construit en direct."
+        disclaimer="Contenu éducatif seulement — pas un conseil personnalisé. Grille simplifiée : ton livret peut prévoir plusieurs paliers, plafonds ou définitions plus fines. Le livret prime toujours."
         footer={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
-            <ToolDownloadPdf
-              busy={busy}
-              onClick={handleDownload}
-              label="Télécharger mon résumé PDF"
+          showSoftClose ? (
+            <ToolSoftClose
+              headline={softHeadline}
+              subline={softSubline}
+              rdvPath={rdvPath}
+              rdvLabel="Démêler mes cases floues (15 min)"
+              onRdvClick={() =>
+                trackRendezVousClick('campagne_assurance-collective_rdv_cases_floues')
+              }
+              onPdf={handleDownload}
+              pdfBusy={busy}
+              pdfLabel="Garder mon résumé PDF"
             />
-          </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className="font-heading text-base font-semibold text-dark md:text-lg">
+                {softHeadline}
+              </p>
+              <p className="text-sm leading-relaxed text-prestige-taupe">{softSubline}</p>
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+                <ToolDownloadPdf
+                  busy={busy}
+                  onClick={handleDownload}
+                  label="Télécharger mon résumé PDF"
+                />
+                <Link
+                  to={rdvPath}
+                  onClick={() =>
+                    trackRendezVousClick('campagne_assurance-collective_rdv_validation')
+                  }
+                  className="inline-flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:underline sm:w-auto"
+                  data-testid="campagne-tool-cta-rdv-soft"
+                >
+                  Valider ensemble en 15 min
+                </Link>
+              </div>
+            </div>
+          )
         }
       >
-        {/* Progression */}
+        {/* Gate livret */}
+        <div
+          className="mb-6 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/90 to-white px-4 py-4"
+          data-testid="tool-collective-livret-gate"
+        >
+          <p className="text-sm font-semibold text-dark">Idéal avec le PDF RH ouvert</p>
+          <p className="mt-1 text-sm leading-relaxed text-prestige-taupe">
+            Pas juste la carte : ouvre le document avec les % et les délais.{' '}
+            <a
+              href="#faq-livret"
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Où est mon livret ?
+            </a>
+          </p>
+          <div className="mt-3">
+            <LivretCheckbox
+              id="collective-livret-gate"
+              hasLivret={hasLivret}
+              onChange={handleLivretChange}
+            />
+          </div>
+        </div>
+
+        {/* Progression — climax flous */}
         <div className="mb-6">
           <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
                 Progression
               </p>
-              <p className="font-heading mt-1 text-2xl font-bold text-dark">
-                {doneCount}
-                <span className="text-base font-medium text-prestige-taupe"> / {total}</span>
-              </p>
+              {missingCount > 0 ? (
+                <>
+                  <p className="font-heading mt-1 text-3xl font-bold tracking-tight text-amber-700 sm:text-4xl">
+                    {missingCount} encore flou{missingCount > 1 ? 's' : ''}
+                  </p>
+                  <p className="mt-1 text-sm text-prestige-taupe">
+                    {doneCount}/{total} · {progress} %
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-heading mt-1 text-3xl font-bold tracking-tight text-emerald-700 sm:text-4xl">
+                    Complet
+                  </p>
+                  <p className="mt-1 text-sm text-prestige-taupe">
+                    5/5 — range ton PDF avec le livret
+                  </p>
+                </>
+              )}
             </div>
-            <p className="text-sm text-prestige-taupe">
-              {missingCount === 0
-                ? 'Complet'
-                : `${missingCount} à clarifier · ${progress} %`}
-            </p>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-prestige-beige/70">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 ease-out"
+              className={`h-full rounded-full transition-all duration-500 ease-out ${
+                missingCount === 0
+                  ? 'bg-emerald-500'
+                  : 'bg-gradient-to-r from-amber-400 to-amber-600'
+              }`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -345,37 +456,28 @@ export function CollectiveChecklistTool() {
           </p>
         </div>
 
-        {/* Résultat utile immédiat */}
+        {/* Mini résumé */}
         <div className="mb-8">
-          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-                Ton mini résumé
-              </p>
-              <p className="mt-1 text-sm text-prestige-taupe">
-                Se remplit au fur et à mesure — rien à attendre à la fin.
-              </p>
-            </div>
-            <div className="shrink-0">
-              <ToolDownloadPdf
-                busy={busy}
-                onClick={handleDownload}
-                label="Télécharger mon résumé PDF"
-              />
-            </div>
+          <div className="mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+              Ton mini résumé
+            </p>
+            <p className="mt-1 text-sm text-prestige-taupe">
+              Se remplit au fur et à mesure — rien à attendre à la fin.
+            </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <ResultCard
               label="Invalidité"
               value={invaliditeValue}
               detail={invaliditeDetail}
-              tone={invaliditeDone ? 'ok' : invaliditePartial ? 'warn' : 'default'}
+              tone={invaliditeDone ? 'ok' : 'warn'}
             />
             <ResultCard
               label="Vie et santé"
               value={vieSanteValue}
               detail={vieSanteDetail}
-              tone={vieSanteDone ? 'ok' : vieSantePartial ? 'warn' : 'default'}
+              tone={vieSanteDone ? 'ok' : 'warn'}
             />
             <ResultCard
               label="Si tu quittes"
@@ -395,32 +497,9 @@ export function CollectiveChecklistTool() {
         <div className="relative space-y-8 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-prestige-beige">
           <Block
             step={1}
-            title="Employeur"
-            subtitle="Pour savoir de quel contrat on parle."
-            done={milestones[0].done}
-          >
-            <Field
-              id="collective-employeur"
-              label="Nom de l’employeur"
-              hint="Celui qui figure sur le livret de ton assurance collective."
-              className="sm:col-span-2"
-            >
-              <input
-                id="collective-employeur"
-                className={inputClass}
-                value={employeur}
-                onChange={(e) => setEmployeur(e.target.value)}
-                placeholder="Ex. ABC Inc."
-                autoComplete="organization"
-              />
-            </Field>
-          </Block>
-
-          <Block
-            step={2}
             title="Invalidité"
             subtitle="Si tu ne peux plus travailler — combien, et quand l’argent commence. Parfois le livret a plusieurs paliers."
-            done={milestones[1].done}
+            done={milestones[0].done}
           >
             <Field
               id="collective-structure"
@@ -438,7 +517,7 @@ export function CollectiveChecklistTool() {
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setStructureInvalidite(opt.value)}
+                      onClick={() => handleStructureChange(opt.value)}
                       className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                         active
                           ? 'bg-primary text-white'
@@ -583,10 +662,10 @@ export function CollectiveChecklistTool() {
           </Block>
 
           <Block
-            step={3}
+            step={2}
             title="Vie et santé"
             subtitle="Combien pour tes proches, et ce que le dentaire / les médicaments couvrent vraiment."
-            done={milestones[2].done}
+            done={milestones[1].done}
           >
             <Field
               id="collective-capital"
@@ -626,10 +705,10 @@ export function CollectiveChecklistTool() {
           </Block>
 
           <Block
-            step={4}
+            step={3}
             title="Si tu quittes et trous"
             subtitle="Ce que ton assurance collective garde… et ce qui tombe."
-            done={milestones[3].done}
+            done={milestones[2].done}
           >
             <Field
               id="collective-depart"
@@ -682,26 +761,17 @@ export function CollectiveChecklistTool() {
                 <FileText className="h-3.5 w-3.5" />
               )}
             </div>
-            <label
-              htmlFor="collective-livret"
-              className="flex cursor-pointer items-start gap-3 rounded-2xl bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06] px-4 py-3.5 shadow-[inset_0_0_0_1px_rgba(1,35,63,0.06)]"
-            >
-              <input
-                id="collective-livret"
-                type="checkbox"
-                checked={hasLivret}
-                onChange={(e) => setHasLivret(e.target.checked)}
-                className="mt-1 h-4 w-4 shrink-0 rounded border-input text-primary focus:ring-primary"
-              />
-              <span>
-                <span className="block text-sm font-semibold text-dark">
-                  J’ai le livret de mon assurance collective
-                </span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-prestige-taupe">
-                  Pas juste la carte — le PDF ou le document RH avec les vrais chiffres.
-                </span>
-              </span>
-            </label>
+            <div className="mb-3">
+              <h3 className="font-heading text-base font-semibold text-dark">Livret en main</h3>
+              <p className="mt-0.5 text-sm leading-snug text-prestige-taupe">
+                Même case qu’en tête — coche ici ou là-haut.
+              </p>
+            </div>
+            <LivretCheckbox
+              id="collective-livret"
+              hasLivret={hasLivret}
+              onChange={handleLivretChange}
+            />
             <div className="mt-3">
               <Field
                 id="collective-notes"
@@ -719,6 +789,29 @@ export function CollectiveChecklistTool() {
               </Field>
             </div>
           </div>
+
+          <Block
+            step={5}
+            title="Employeur (optionnel)"
+            subtitle="Pour savoir de quel contrat on parle — utile, pas bloquant."
+            done={milestones[4].done}
+          >
+            <Field
+              id="collective-employeur"
+              label="Nom de l’employeur"
+              hint="Celui qui figure sur le livret de ton assurance collective."
+              className="sm:col-span-2"
+            >
+              <input
+                id="collective-employeur"
+                className={inputClass}
+                value={employeur}
+                onChange={(e) => setEmployeur(e.target.value)}
+                placeholder="Ex. ABC Inc."
+                autoComplete="organization"
+              />
+            </Field>
+          </Block>
         </div>
       </CampagneToolShell>
     </div>

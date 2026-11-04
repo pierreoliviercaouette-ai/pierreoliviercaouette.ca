@@ -1,9 +1,13 @@
 ﻿import { useMemo, useState } from 'react';
-import { FileText, ListOrdered } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowRight, FileText, ListOrdered } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { trackRendezVousClick } from '../../../lib/analytics';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
 import {
   CampagneToolShell,
   ToolDownloadPdf,
+  ToolSoftClose,
 } from '../CampagneToolShell';
 
 /** Coche → ordre d’attaque (urgence d’abord). Labels sans jargon. */
@@ -70,6 +74,35 @@ const PRIORITY_IDS = [
   'successionFloue',
 ];
 
+/** Paliers ads Ad2 — ordre dans un tier = PRIORITY_IDS */
+const TIER_BY_ID = {
+  fondsUrgenceFaible: 'urgent',
+  dettesCheres: 'urgent',
+  revenuNonProtege: 'important',
+  hypoSansVie: 'important',
+  epargneSansOrdre: 'later',
+  projetCourt: 'later',
+  successionFloue: 'later',
+};
+
+const TIER_SECTIONS = [
+  {
+    id: 'urgent',
+    title: 'Urgent',
+    aide: 'À traiter avant d’optimiser le reste',
+  },
+  {
+    id: 'important',
+    title: 'Important',
+    aide: 'Protection et risques qui pèsent lourd',
+  },
+  {
+    id: 'later',
+    title: 'Plus tard',
+    aide: 'Utile — sans culpabilité de ne pas tout faire maintenant',
+  },
+];
+
 const BY_ID = Object.fromEntries(ITEMS.map((item) => [item.id, item]));
 const INITIAL_CHECKED = Object.fromEntries(ITEMS.map((item) => [item.id, false]));
 
@@ -83,12 +116,12 @@ function statusDetail(count) {
     return 'Coche ce qui est vrai chez toi — l’ordre d’attaque se construit en bas.';
   }
   if (count === 1) {
-    return 'Un point à traiter. Télécharge le PDF et commence par le n°1.';
+    return 'Ton n°1 est clair. 15 min pour l’ancrer — ou PDF pour le garder.';
   }
   if (count <= 3) {
     return 'Quelques fronts ouverts. L’ordre évite de tout attaquer en même temps.';
   }
-  return 'Plusieurs priorités. Garde le PDF sous la main — on affine ensemble en 15 minutes si tu veux.';
+  return 'Plusieurs priorités. Ton n°1 d’abord — PDF pour garder l’ordre, 15 min pour coller ça à ta vie.';
 }
 
 function SoftCheckItem({ id, checked, onChange, label, hint }) {
@@ -119,6 +152,7 @@ function SoftCheckItem({ id, checked, onChange, label, hint }) {
 }
 
 export function PlanGlobalTool() {
+  const location = useLocation();
   const [checked, setChecked] = useState(INITIAL_CHECKED);
   const [notesLibres, setNotesLibres] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_plan-global_pdf');
@@ -130,10 +164,31 @@ export function PlanGlobalTool() {
 
   const doneCount = selectedOrdered.length;
   const total = ITEMS.length;
-  const progress = Math.round((doneCount / total) * 100);
+  const barWidth = Math.round((doneCount / total) * 100);
   const detail = statusDetail(doneCount);
   const first = selectedOrdered[0] || null;
   const rest = selectedOrdered.slice(1);
+  const restByTier = useMemo(() => {
+    const grouped = { urgent: [], important: [], later: [] };
+    selectedOrdered.slice(1).forEach((item) => {
+      const tier = TIER_BY_ID[item.id];
+      if (tier && grouped[tier]) grouped[tier].push(item);
+    });
+    return grouped;
+  }, [selectedOrdered]);
+  const rdvPath = buildCampagneRdvPath('plan-global', location.search);
+  const counterLabel =
+    doneCount === 0
+      ? `0 / ${total}`
+      : `${doneCount} cochée${doneCount > 1 ? 's' : ''} · Ordre prêt`;
+  const softHeadline =
+    doneCount === 1
+      ? `Un seul front clair : ${first.order}.`
+      : `Ton n°1 : ${first?.order}.`;
+  const softSubline =
+    doneCount === 1
+      ? '15 min pour le coller à ta situation — ou garde le PDF pour plus tard.'
+      : '15 minutes pour l’ancrer à ta vraie vie — soft, zéro pitch. Zéro pile de produits.';
 
   const toggle = (id) => (value) => {
     setChecked((prev) => ({ ...prev, [id]: value }));
@@ -141,21 +196,21 @@ export function PlanGlobalTool() {
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Resume — ordre d’attaque',
+      title: 'Résumé — ordre d’attaque',
       filename: 'resume-plan-global.pdf',
       sections: [
         {
-          heading: 'Chez toi (coche)',
+          heading: 'Chez toi (coché)',
           rows: ITEMS.map((item) => ({
             label: item.label,
             value: checked[item.id] ? 'Oui' : 'Non',
           })),
         },
         {
-          heading: "Ordre d'attaque",
+          heading: 'Ordre d’attaque',
           rows:
             selectedOrdered.length === 0
-              ? [{ label: 'Ordre', value: 'Rien de coche' }]
+              ? [{ label: 'Ordre', value: 'Rien de coché' }]
               : selectedOrdered.map((item, i) => ({
                   label: `${i + 1}.`,
                   value: `${item.order} — ${item.why}`,
@@ -174,9 +229,12 @@ export function PlanGlobalTool() {
         doneCount === 0
           ? 'Coche ce qui est vrai chez toi pour voir un ordre.'
           : `Ordre : ${selectedOrdered.map((item) => item.order).join(' → ')}.`,
-        'Illustration educative seulement — pas un conseil personnalise. Des produits ouverts ne font pas un plan.',
+        'Illustration éducative seulement — pas un conseil personnalisé. Des produits ouverts ne font pas un plan.',
       ],
     });
+
+  const handleRdvOutil = () => trackRendezVousClick('campagne_plan-global_rdv_outil');
+  const handleRdvFooter = () => trackRendezVousClick('campagne_plan-global_rdv_outil_footer');
 
   return (
     <div data-testid="tool-plan-global">
@@ -187,11 +245,25 @@ export function PlanGlobalTool() {
         footer={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm leading-relaxed text-prestige-taupe">{detail}</p>
-            <ToolDownloadPdf
-              busy={busy}
-              onClick={handleDownload}
-              label="Télécharger mon ordre PDF"
-            />
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+              {doneCount > 0 ? (
+                <Link
+                  to={rdvPath}
+                  onClick={handleRdvFooter}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-colors hover:bg-dark sm:w-auto"
+                  data-testid="campagne-plan-global-rdv-footer"
+                >
+                  Ancrer mon n°1 — 15 min
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              ) : null}
+              <ToolDownloadPdf
+                busy={busy}
+                onClick={handleDownload}
+                label="Télécharger mon ordre PDF"
+                variant="ghost"
+              />
+            </div>
           </div>
         }
       >
@@ -206,14 +278,15 @@ export function PlanGlobalTool() {
                 <span className="text-base font-medium text-prestige-taupe"> / {total}</span>
               </p>
             </div>
-            <p className="text-sm text-prestige-taupe">{progress} %</p>
+            <p className="text-sm font-medium text-dark">{counterLabel}</p>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-prestige-beige/70">
             <div
               className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
+              style={{ width: `${barWidth}%` }}
             />
           </div>
+          <p className="mt-1.5 text-xs text-prestige-taupe">Urgent d’abord — pas un score</p>
         </div>
 
         <div className="space-y-2" aria-label="Situations à cocher">
@@ -267,28 +340,65 @@ export function PlanGlobalTool() {
                 <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">{first.why}</p>
               </div>
 
+              <ToolSoftClose
+                headline={softHeadline}
+                subline={softSubline}
+                rdvPath={rdvPath}
+                rdvLabel="Ancrer mon n°1 — 15 min"
+                onRdvClick={handleRdvOutil}
+                onPdf={handleDownload}
+                pdfBusy={busy}
+                pdfLabel="Télécharger mon ordre PDF"
+              />
+
               {rest.length > 0 ? (
-                <ol className="space-y-2">
-                  {rest.map((item, i) => (
-                    <li
-                      key={item.id}
-                      className="flex items-start gap-3 rounded-2xl bg-prestige-beige/25 px-4 py-3"
-                    >
-                      <span
-                        className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]"
-                        aria-hidden
-                      >
-                        {i + 2}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-sm font-medium text-dark">{item.order}</span>
-                        <span className="mt-0.5 block text-xs leading-relaxed text-prestige-taupe">
-                          {item.why}
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+                <div className="space-y-4" data-testid="plan-global-buckets">
+                  {TIER_SECTIONS.map((section) => {
+                    const items = restByTier[section.id];
+                    if (!items.length) return null;
+                    return (
+                      <section key={section.id} aria-labelledby={`plan-global-tier-${section.id}`}>
+                        <div className="mb-2">
+                          <p
+                            id={`plan-global-tier-${section.id}`}
+                            className="text-xs font-semibold uppercase tracking-wide text-secondary"
+                          >
+                            {section.title}
+                          </p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-prestige-taupe">
+                            {section.aide}
+                          </p>
+                        </div>
+                        <ul className="space-y-2">
+                          {items.map((item) => {
+                            const rank = selectedOrdered.findIndex((row) => row.id === item.id) + 1;
+                            return (
+                              <li
+                                key={item.id}
+                                className="flex items-start gap-3 rounded-2xl bg-prestige-beige/25 px-4 py-3"
+                              >
+                                <span
+                                  className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]"
+                                  aria-hidden
+                                >
+                                  {rank}
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block text-sm font-medium text-dark">
+                                    {item.order}
+                                  </span>
+                                  <span className="mt-0.5 block text-xs leading-relaxed text-prestige-taupe">
+                                    {item.why}
+                                  </span>
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </section>
+                    );
+                  })}
+                </div>
               ) : null}
             </div>
           )}

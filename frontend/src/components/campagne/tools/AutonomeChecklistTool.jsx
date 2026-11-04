@@ -1,9 +1,12 @@
-﻿import { useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AlertTriangle, Check, FileText } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import {
   CampagneToolShell,
-  ToolDownloadPdf,
+  ToolSoftClose,
 } from '../CampagneToolShell';
 
 /**
@@ -16,7 +19,7 @@ const ITEMS = [
     pillar: 'liquidite',
     short: 'Fonds d’urgence',
     label: 'Argent de côté pour 3 à 6 mois de dépenses',
-    hint: 'Disponible vite si un mois est mauvais.',
+    hint: 'Disponible vite si un mois (ou trois) est mauvais.',
     next: 'Mettre de l’argent de côté accessible (3 à 6 mois).',
   },
   {
@@ -24,7 +27,7 @@ const ITEMS = [
     pillar: 'liquidite',
     short: 'Factures fixes 3 mois',
     label: 'Mes factures fixes tiennent 3 mois sans facturer',
-    hint: 'hypothèque, taxes, essentiels — même si le revenu tombe à zéro.',
+    hint: 'Hypothèque, taxes, essentiels — même si le revenu tombe à zéro.',
     next: 'Vérifier si hypothèque + essentiels tiennent 3 mois sans facturer.',
   },
   {
@@ -32,7 +35,7 @@ const ITEMS = [
     pillar: 'revenu',
     short: 'Protection du revenu',
     label: 'Assurance si je ne peux plus travailler',
-    hint: 'Pour remplacer une partie du revenu. Pas d’assurance collective fournie.',
+    hint: 'Pour remplacer une partie du revenu quand tu ne peux plus travailler — sans filet d’employeur.',
     next: 'Regarder une protection si tu ne peux plus travailler.',
   },
   {
@@ -40,7 +43,7 @@ const ITEMS = [
     pillar: 'proches',
     short: 'Vie / proches',
     label: 'Assurance vie si j’ai une hypothèque, un conjoint ou des enfants',
-    hint: 'Pour que les proches ne se retrouvent pas coincés.',
+    hint: 'Pour que les proches ne se retrouvent pas coincés (hypo / conjoint / enfants).',
     next: 'Clarifier hypothèque / conjoint / enfants : qui assume si tu n’es plus là.',
   },
   {
@@ -56,7 +59,7 @@ const ITEMS = [
     pillar: 'structure',
     short: 'Épargne planifiée',
     label: 'Épargne planifiée chaque mois (même petit montant)',
-    hint: 'Un montant décidé d’avance, pas au feeling.',
+    hint: 'Un montant décidé d’avance, pas au feeling des bons mois.',
     next: 'Fixer un montant d’épargne automatique chaque mois.',
   },
   {
@@ -129,16 +132,47 @@ function ResultCard({ label, value, detail, tone = 'default' }) {
 
 function statusDetail(doneCount, missingCount, nextItem) {
   if (doneCount >= 6) {
-    return 'Bonne base. Télécharge le PDF et garde-le sous la main — revalide si ton revenu ou ta famille change.';
+    return 'Bonne base. Garde le résumé sous la main — revalide si ton revenu ou ta famille change. Apporte-le aux 15 min si tu veux.';
   }
   if (doneCount >= 3) {
     return nextItem
-      ? `Du progrès, mais ${missingCount} trou${missingCount > 1 ? 's' : ''} restent. Prochaine case : ${nextItem.short.toLowerCase()}. Pas d’assurance collective fournie — chaque case non cochée, c’est toi qui assumes.`
-      : 'Du progrès, mais des trous restent. Pas d’assurance collective fournie.';
+      ? `Du progrès, mais ${missingCount} trou${missingCount > 1 ? 's' : ''} restent. Prochaine case : ${nextItem.short.toLowerCase()}. Si un mois (ou trois) est mauvais, rien ne tombe automatiquement.`
+      : 'Du progrès, mais des trous restent. Si un mois (ou trois) est mauvais, rien ne tombe automatiquement.';
   }
   return nextItem
-    ? `Le filet est mince. Commence par : ${nextItem.next} Pas d’assurance collective fournie — construis-le une case à la fois.`
-    : 'Le filet est mince. Pas d’assurance collective fournie — construis-le une case à la fois.';
+    ? `Le filet est mince. Si un mois est mauvais, rien ne tombe auto. Commence par : ${nextItem.next}`
+    : 'Le filet est mince. Si un mois est mauvais, rien ne tombe automatiquement — construis-le une case à la fois.';
+}
+
+function softCloseCopy(filetValue, nextItem, missingCount) {
+  if (filetValue === 'Solide') {
+    return {
+      headline: 'Bonne base.',
+      subline:
+        'Garde le PDF à jour — ou 15 min si une case te chicotte encore. Clarifier ≠ acheter · sans pression.',
+      rdvLabel: 'Clarifier en 15 min',
+    };
+  }
+  if (filetValue === 'En cours' && nextItem) {
+    return {
+      headline: `Du progrès — il reste ${missingCount} trou${missingCount > 1 ? 's' : ''}. Prochaine case : ${nextItem.short}.`,
+      subline: 'On priorise ensemble en 15 min si tu veux. Clarifier ≠ acheter · sans pression.',
+      rdvLabel: `Clarifier : ${nextItem.short} en 15 min`,
+    };
+  }
+  if (nextItem) {
+    return {
+      headline: `Ton filet est mince — prochaine case : ${nextItem.short}.`,
+      subline:
+        '15 min pour décider si tu commences par la liquidité ou le revenu qui stoppe. Clarifier ≠ acheter · sans pression.',
+      rdvLabel: `Clarifier : ${nextItem.short} en 15 min`,
+    };
+  }
+  return {
+    headline: 'Ton filet se construit.',
+    subline: '15 min pour prioriser tes prochaines cases. Clarifier ≠ acheter · sans pression.',
+    rdvLabel: 'Clarifier en 15 min',
+  };
 }
 
 function pillarTone(done, total) {
@@ -148,9 +182,12 @@ function pillarTone(done, total) {
 }
 
 export function AutonomeChecklistTool() {
+  const location = useLocation();
   const [checked, setChecked] = useState(INITIAL_CHECKED);
   const [notesLibres, setNotesLibres] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_travailleur-autonome_pdf');
+  const progressSent = useRef(new Set());
+  const filetMinceSent = useRef(false);
 
   const doneCount = useMemo(
     () => ITEMS.reduce((sum, item) => sum + (checked[item.id] ? 1 : 0), 0),
@@ -191,7 +228,7 @@ export function AutonomeChecklistTool() {
 
   const filetDetail =
     doneCount === 0
-      ? 'Aucune case cochée. Pas d’assurance collective fournie — le filet, c’est toi qui le bâtis.'
+      ? 'Aucune case cochée. Le filet, c’est toi qui le bâtis — personne n’envoie le PDF annuel.'
       : doneCount >= 6
         ? `${doneCount}/${total} en place. Garde le PDF à jour.`
         : `${doneCount}/${total} en place · ${missingCount} à faire.`;
@@ -199,7 +236,33 @@ export function AutonomeChecklistTool() {
   const nextValue = nextItem ? nextItem.short : 'Rien de prioritaire';
   const nextDetail = nextItem
     ? nextItem.next
-    : 'Toutes les cases cochées. Télécharge ton PDF.';
+    : 'Toutes les cases cochées. Garde le PDF à jour.';
+
+  const showSoftClose = doneCount >= 1;
+  const soft = showSoftClose ? softCloseCopy(filetValue, nextItem, missingCount) : null;
+  const rdvPath = buildCampagneRdvPath('travailleur-autonome', location.search);
+
+  useEffect(() => {
+    if (doneCount === 1 || doneCount === 3) {
+      if (!progressSent.current.has(doneCount)) {
+        progressSent.current.add(doneCount);
+        trackEvent('select_content', {
+          content_type: 'tool',
+          item_id: 'campagne_travailleur-autonome_progress',
+          done_count: doneCount,
+          filet_value: filetValue,
+        });
+      }
+    }
+    if (filetValue === 'Mince' && doneCount >= 1 && !filetMinceSent.current) {
+      filetMinceSent.current = true;
+      trackEvent('select_content', {
+        content_type: 'tool',
+        item_id: 'campagne_travailleur-autonome_filet_mince',
+        next: nextItem?.id || null,
+      });
+    }
+  }, [doneCount, filetValue, nextItem]);
 
   const toggle = (id) => {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -207,23 +270,23 @@ export function AutonomeChecklistTool() {
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Resume — filet travailleur autonome',
+      title: 'Résumé — filet travailleur autonome',
       filename: 'checklist-travailleur-autonome.pdf',
       sections: [
         {
           heading: 'Checklist',
           rows: ITEMS.map((item) => ({
             label: item.label,
-            value: checked[item.id] ? 'Fait' : 'A faire',
+            value: checked[item.id] ? 'Fait' : 'À faire',
           })),
         },
         {
           heading: 'Filet',
           rows: [
             { label: 'Progression', value: `${doneCount}/${total}` },
-            { label: 'Etat', value: filetValue },
+            { label: 'État', value: filetValue },
             {
-              label: 'Prochaine etape',
+              label: 'Prochaine étape',
               value: nextItem ? nextItem.next : 'Rien de prioritaire',
             },
             { label: 'Lecture', value: detail },
@@ -249,9 +312,10 @@ export function AutonomeChecklistTool() {
           : []),
       ],
       notes: [
-        `${doneCount}/${total} points coches.`,
-        'Pas d’assurance collective fournie — chaque case non cochee, c’est toi qui assumes.',
-        'Contenu educatif seulement — pas un conseil personnalise.',
+        `${doneCount}/${total} points cochés.`,
+        'Pas d’assurance collective fournie — chaque case non cochée, c’est toi qui assumes.',
+        'Contenu éducatif seulement — pas un conseil personnalisé.',
+        'Apporte ce résumé aux 15 min si tu veux — Clarifier ≠ acheter.',
       ],
     });
 
@@ -260,16 +324,9 @@ export function AutonomeChecklistTool() {
       <CampagneToolShell
         title="Checklist : ton filet d’autonome"
         intro="Pas d’assurance collective fournie. Coche ce qui est vraiment en place — ton ordre d’attaque se construit en direct."
-        disclaimer="Contenu éducatif seulement — pas un conseil personnalisé."
+        disclaimer="Contenu éducatif seulement — pas un conseil personnalisé. Les cases et l’ordre sont illustratifs — montants et priorités dépendent de ton revenu net et de ta situation."
         footer={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm leading-relaxed text-prestige-taupe">{detail}</p>
-            <ToolDownloadPdf
-              busy={busy}
-              onClick={handleDownload}
-              label="Télécharger mon PDF"
-            />
-          </div>
+          <p className="text-sm leading-relaxed text-prestige-taupe">{detail}</p>
         }
       >
         <div className="mb-6">
@@ -296,116 +353,12 @@ export function AutonomeChecklistTool() {
             />
           </div>
           <p className="mt-2 text-xs leading-relaxed text-prestige-taupe">
-            Ordre : liquidité → revenu → proches / hypothèque → structure. Pas d’assurance collective
-            fournie.
+            Ordre : liquidité → revenu → proches / hypothèque → structure.
           </p>
         </div>
 
-        <div className="mb-8">
-          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-                Ton filet
-              </p>
-              <p className="mt-1 text-sm text-prestige-taupe">
-                Se remplit au fur et à mesure — prochaine étape claire, prêt en PDF.
-              </p>
-            </div>
-            <div className="shrink-0">
-              <ToolDownloadPdf
-                busy={busy}
-                onClick={handleDownload}
-                label="Télécharger mon PDF"
-              />
-            </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <ResultCard
-              label="État du filet"
-              value={filetValue}
-              detail={filetDetail}
-              tone={filetTone}
-            />
-            <ResultCard
-              label="Prochaine étape"
-              value={nextValue}
-              detail={nextDetail}
-              tone={nextItem ? 'warn' : 'ok'}
-            />
-          </div>
-
-          {missingOrdered.length === 0 ? (
-            <div className="mt-4 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white px-4 py-4">
-              <p className="text-sm font-semibold text-dark">Filet complet sur cette liste</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-prestige-taupe">
-                Télécharge le PDF. Revalide si ton revenu, ta famille ou ton métier change.
-              </p>
-            </div>
-          ) : doneCount > 0 ? (
-            <div className="mt-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-                Trous restants (ordre)
-              </p>
-              <ol className="mt-2 space-y-2">
-                {missingOrdered.map((item, i) => (
-                  <li
-                    key={item.id}
-                    className={`flex items-center gap-3 rounded-2xl px-4 py-3 ${
-                      i === 0
-                        ? 'bg-gradient-to-br from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(245,158,11,0.25)]'
-                        : 'bg-prestige-beige/25'
-                    }`}
-                  >
-                    <span
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                        i === 0
-                          ? 'bg-amber-500 text-white'
-                          : 'bg-white text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]'
-                      }`}
-                      aria-hidden
-                    >
-                      {i + 1}
-                    </span>
-                    <span className="min-w-0 text-sm font-medium text-dark">
-                      {item.next}
-                      {i === 0 ? (
-                        <span className="ml-2 text-xs font-normal text-amber-700">
-                          {' '}
-                          en premier
-                        </span>
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ) : null}
-
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {pillarStats.map((pillar) => (
-              <div
-                key={pillar.id}
-                className={`rounded-xl border px-3 py-2.5 ${
-                  pillarTone(pillar.done, pillar.total) === 'ok'
-                    ? 'border-emerald-200/80 bg-emerald-50/60'
-                    : pillarTone(pillar.done, pillar.total) === 'warn'
-                      ? 'border-amber-200/70 bg-amber-50/40'
-                      : 'border-primary/10 bg-white/70'
-                }`}
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-prestige-taupe">
-                  {pillar.title}
-                </p>
-                <p className="mt-0.5 text-sm font-semibold text-dark">
-                  {pillar.done}/{pillar.total}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div
-          className="relative space-y-8 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-prestige-beige"
+          className="relative mb-8 space-y-8 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-prestige-beige"
           aria-label="Checklist travailleur autonome"
         >
           {pillarStats.map((pillar) => (
@@ -508,6 +461,119 @@ export function AutonomeChecklistTool() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mb-2">
+          <div className="mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+              Ton filet
+            </p>
+            <p className="mt-1 text-sm text-prestige-taupe">
+              {doneCount === 0
+                ? 'Coche pour voir ton filet se remplir.'
+                : 'Se remplit au fur et à mesure — prochaine étape claire.'}
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ResultCard
+              label="État du filet"
+              value={filetValue}
+              detail={filetDetail}
+              tone={filetTone}
+            />
+            <ResultCard
+              label="Prochaine étape"
+              value={nextValue}
+              detail={nextDetail}
+              tone={nextItem ? 'warn' : 'ok'}
+            />
+          </div>
+
+          {missingOrdered.length === 0 && doneCount > 0 ? (
+            <div className="mt-4 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white px-4 py-4">
+              <p className="text-sm font-semibold text-dark">Filet complet sur cette liste</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-prestige-taupe">
+                Garde le PDF à jour. Revalide si ton revenu, ta famille ou ton métier change.
+              </p>
+            </div>
+          ) : doneCount > 0 ? (
+            <div className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                Trous restants (ordre)
+              </p>
+              <ol className="mt-2 space-y-2">
+                {missingOrdered.map((item, i) => (
+                  <li
+                    key={item.id}
+                    className={`flex items-center gap-3 rounded-2xl px-4 py-3 ${
+                      i === 0
+                        ? 'bg-gradient-to-br from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(245,158,11,0.25)]'
+                        : 'bg-prestige-beige/25'
+                    }`}
+                  >
+                    <span
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                        i === 0
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-white text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]'
+                      }`}
+                      aria-hidden
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="min-w-0 text-sm font-medium text-dark">
+                      {item.next}
+                      {i === 0 ? (
+                        <span className="ml-2 text-xs font-normal text-amber-700">
+                          {' '}
+                          en premier
+                        </span>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {pillarStats.map((pillar) => (
+              <div
+                key={pillar.id}
+                className={`rounded-xl border px-3 py-2.5 ${
+                  pillarTone(pillar.done, pillar.total) === 'ok'
+                    ? 'border-emerald-200/80 bg-emerald-50/60'
+                    : pillarTone(pillar.done, pillar.total) === 'warn'
+                      ? 'border-amber-200/70 bg-amber-50/40'
+                      : 'border-primary/10 bg-white/70'
+                }`}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-prestige-taupe">
+                  {pillar.title}
+                </p>
+                <p className="mt-0.5 text-sm font-semibold text-dark">
+                  {pillar.done}/{pillar.total}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {soft ? (
+            <div className="mt-5">
+              <ToolSoftClose
+                headline={soft.headline}
+                subline={soft.subline}
+                rdvPath={rdvPath}
+                rdvLabel={soft.rdvLabel}
+                onRdvClick={() =>
+                  trackRendezVousClick('campagne_travailleur-autonome_rdv_tool')
+                }
+                onPdf={handleDownload}
+                pdfBusy={busy}
+                pdfLabel="Garder mon résumé PDF"
+              />
+            </div>
+          ) : null}
         </div>
       </CampagneToolShell>
     </div>

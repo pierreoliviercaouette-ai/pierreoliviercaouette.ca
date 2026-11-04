@@ -17,6 +17,7 @@ export function useCampagneToolPdf(eventItemId) {
         trackEvent('select_content', {
           content_type: 'tool_pdf',
           item_id: eventItemId,
+          ...(payload?.trackParams || {}),
         });
       }
       toast.success('PDF téléchargé.');

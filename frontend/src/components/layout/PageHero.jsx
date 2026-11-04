@@ -3,7 +3,31 @@ const HERO_GRID_PATTERN =
   'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")';
 
 /**
+ * Atmosphères CSS sujet (Vague 2) — pas de photo full-bleed.
+ * Même squelette ; teinte / grain / orbes varient.
+ */
+const ATMOSPHERE_CLASS = {
+  default: '',
+  foyer: 'hero-atmosphere-foyer',
+  hypo: 'hero-atmosphere-hypo',
+  mra: 'hero-atmosphere-mra',
+  capital: 'hero-atmosphere-capital',
+  compare: 'hero-atmosphere-compare',
+  filet: 'hero-atmosphere-filet',
+  invalidite: 'hero-atmosphere-invalidite',
+  retraite: 'hero-atmosphere-retraite',
+  reee: 'hero-atmosphere-reee',
+  celi: 'hero-atmosphere-celi',
+  score: 'hero-atmosphere-score',
+  livret: 'hero-atmosphere-livret',
+  autonome: 'hero-atmosphere-autonome',
+  plan: 'hero-atmosphere-plan',
+  succession: 'hero-atmosphere-succession',
+};
+
+/**
  * Héros marketing : même langage visuel qu'Accueil et À propos (gradient, halos, grille, vague).
+ * Prop `atmosphere` : teinte sujet CSS (catalogue campagnes Vague 2).
  */
 export function PageHero({
   badge,
@@ -13,15 +37,36 @@ export function PageHero({
   showWave = true,
   /** ex. min-h-[38vh] pour des pages plus compactes */
   minHeightClass = 'min-h-[42vh] md:min-h-[48vh]',
+  /** Clé atmosphère CSS (foyer, hypo, mra, …) — default = orbes classiques */
+  atmosphere = 'default',
+  /** Micro-signaux sujet sous la promesse (chips, kicker) — avant CTAs */
+  heroExtras = null,
 }) {
+  const atmosphereClass = ATMOSPHERE_CLASS[atmosphere] || '';
+
   return (
-    <section className={`relative ${minHeightClass} overflow-hidden`} aria-labelledby="page-hero-title">
+    <section
+      className={`relative ${minHeightClass} overflow-hidden ${atmosphereClass}`}
+      aria-labelledby="page-hero-title"
+      data-atmosphere={atmosphere}
+    >
       <div className="absolute inset-0 gradient-hero" />
+      <div className="hero-atmosphere-tint absolute inset-0 pointer-events-none" aria-hidden />
+      <div className="hero-atmosphere-grain absolute inset-0 pointer-events-none opacity-[0.04]" aria-hidden />
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] md:w-[600px] md:h-[600px] glow-orb" style={{ '--glow': 'var(--glow-secondary)' }} />
-        <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] md:w-[400px] md:h-[400px] glow-orb" style={{ '--glow': 'rgba(255, 255, 255, 0.14)' }} />
-        <div className="absolute top-1/2 right-0 w-[280px] h-[300px] glow-orb hidden sm:block" style={{ '--glow': 'var(--glow-primary)' }} />
+        <div
+          className="absolute top-1/4 right-1/4 w-[500px] h-[500px] md:w-[600px] md:h-[600px] glow-orb hero-orb-a"
+          style={{ '--glow': 'var(--glow-secondary)' }}
+        />
+        <div
+          className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] md:w-[400px] md:h-[400px] glow-orb hero-orb-b"
+          style={{ '--glow': 'rgba(255, 255, 255, 0.14)' }}
+        />
+        <div
+          className="absolute top-1/2 right-0 w-[280px] h-[300px] glow-orb hidden sm:block hero-orb-c"
+          style={{ '--glow': 'var(--glow-primary)' }}
+        />
       </div>
 
       <div
@@ -42,6 +87,7 @@ export function PageHero({
         {description ? (
           <p className="text-white/80 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">{description}</p>
         ) : null}
+        {heroExtras ? <div className="mt-4 flex flex-wrap items-center justify-center gap-2">{heroExtras}</div> : null}
         {children ? <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">{children}</div> : null}
       </div>
 

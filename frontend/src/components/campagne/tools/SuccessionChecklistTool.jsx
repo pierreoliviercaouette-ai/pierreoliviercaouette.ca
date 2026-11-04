@@ -1,9 +1,12 @@
 ﻿import { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AlertTriangle, Check, FileText, Scale } from 'lucide-react';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { trackRendezVousClick } from '../../../lib/analytics';
 import {
   CampagneToolShell,
-  ToolDownloadPdf,
+  ToolSoftClose,
 } from '../CampagneToolShell';
 
 /** Ordre = priorité campagne (liquidité → qui reçoit → cadre). */
@@ -79,7 +82,7 @@ const labelClass = 'mb-1.5 block text-xs font-medium text-prestige-taupe';
 
 function statusDetail(count, nextShort) {
   if (count >= 5) {
-    return 'Bonne base. Un notaire reste essentiel pour le cadre légal — télécharge ton résumé et garde-le à jour.';
+    return 'Bonne base. Tu peux valider liquidité & bénéficiaires en 15 min ; un notaire reste essentiel pour le cadre légal.';
   }
   if (count >= 3) {
     return nextShort
@@ -92,6 +95,62 @@ function statusDetail(count, nextShort) {
   return nextShort
     ? `C’est un début. Prochaine case utile : ${nextShort}.`
     : 'C’est un début. Continue — chaque case cochée clarifie ce qui arrive à ta famille.';
+}
+
+/** Next-step branché CSF vs notaire (fini « PDF + notaire »). */
+function nextStepFor(nextItem) {
+  if (!nextItem) {
+    return {
+      value: 'Valider · notaire',
+      detail:
+        'PDF à jour + notaire pour le légal ; option 15 min CSF pour valider liquidité / bénéficiaires.',
+      pdfValue: 'Valider · notaire (liquidité & bénéficiaires en 15 min)',
+    };
+  }
+  switch (nextItem.id) {
+    case 'liquidites':
+      return {
+        value: 'Liquidité',
+        detail: 'Argent accessible les premiers mois — souvent le 1er vrai trou.',
+        pdfValue: 'Liquidité — argent accessible les premiers mois',
+      };
+    case 'dettes-hypotheque':
+      return {
+        value: 'Revenu / dettes',
+        detail: 'Plan si le revenu disparaît (dettes, hypo).',
+        pdfValue: 'Revenu / dettes — plan si le revenu disparaît',
+      };
+    case 'beneficiaires':
+      return {
+        value: 'Bénéficiaires',
+        detail: 'Polices, REER, CELI à jour — qui reçoit vraiment.',
+        pdfValue: 'Bénéficiaires — polices, REER, CELI à jour',
+      };
+    case 'testament':
+      return {
+        value: 'Testament · notaire',
+        detail: 'Cadre légal chez le notaire ; 15 min pour préparer la conversation.',
+        pdfValue: 'Testament · notaire — préparer la conversation',
+      };
+    case 'inventaire':
+      return {
+        value: 'Inventaire',
+        detail: 'Liste simple maison / comptes / accès.',
+        pdfValue: 'Inventaire — maison, comptes, accès',
+      };
+    case 'discussion':
+      return {
+        value: 'Famille informée',
+        detail: 'Qui fait quoi — moins d’improvisation.',
+        pdfValue: 'Famille informée — qui fait quoi',
+      };
+    default:
+      return {
+        value: nextItem.short,
+        detail: nextItem.label,
+        pdfValue: nextItem.label,
+      };
+  }
 }
 
 function ResultCard({ label, value, detail, tone = 'default' }) {
@@ -122,9 +181,11 @@ function ResultCard({ label, value, detail, tone = 'default' }) {
 }
 
 export function SuccessionChecklistTool() {
+  const location = useLocation();
   const [checked, setChecked] = useState(INITIAL_CHECKED);
   const [notesLibres, setNotesLibres] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_succession-bases_pdf');
+  const rdvPath = buildCampagneRdvPath('succession-bases', location.search);
 
   const count = useMemo(
     () => ITEMS.reduce((sum, item) => sum + (checked[item.id] ? 1 : 0), 0),
@@ -137,6 +198,21 @@ export function SuccessionChecklistTool() {
   const progress = Math.round((count / total) * 100);
   const nextItem = missing[0] || null;
   const detail = statusDetail(count, nextItem?.short);
+  const nextStep = nextStepFor(nextItem);
+  const showPortrait = count >= 1;
+  const showSoftClose = count >= 1;
+  const dontLiquidite = nextItem?.id === 'liquidites' ? ' — dont la liquidité' : '';
+
+  const softCloseHeadline =
+    missingCount === 0
+      ? 'Belle base.'
+      : `T’as ${missingCount} case${missingCount > 1 ? 's' : ''} vide${missingCount > 1 ? 's' : ''}${dontLiquidite}.`;
+  const softCloseSubline =
+    missingCount === 0
+      ? 'On peut valider liquidité & bénéficiaires en 15 min ; le notaire garde le juridique.'
+      : 'En 15 minutes on relie ça à ta vie ; le notaire reste pour le testament. Clarifier, c’est pas acheter.';
+  const softCloseRdvLabel =
+    missingCount === 0 ? 'Valider ma base en 15 min' : 'Réserver 15 minutes';
 
   const pillarScores = GROUPS.map((group) => {
     const groupItems = ITEMS.filter((item) => item.group === group.id);
@@ -159,7 +235,7 @@ export function SuccessionChecklistTool() {
     count === 0
       ? 'Rien coché encore — commence par la liquidité si tu ne sais pas par où.'
       : missingCount === 0
-        ? 'Les six points sont cochés. Garde le PDF et valide le juridique avec un notaire.'
+        ? 'Les six points sont cochés. Tu peux valider liquidité & bénéficiaires en 15 min ; le notaire reste pour le légal.'
         : `${missingCount} point${missingCount > 1 ? 's' : ''} encore flou${missingCount > 1 ? 's' : ''}.`;
 
   const trousValue =
@@ -176,33 +252,28 @@ export function SuccessionChecklistTool() {
         ? `+ ${missingCount - 3} autre${missingCount - 3 > 1 ? 's' : ''}. Commence par la liquidité, puis qui reçoit quoi.`
         : 'Ce sont les cases encore vides — souvent là que ça coince le jour J.';
 
-  const nextValue = nextItem ? nextItem.short : 'PDF + notaire';
-  const nextDetail = nextItem
-    ? nextItem.label
-    : 'Télécharge ton résumé et prends rendez-vous chez un notaire si le testament n’est pas à jour.';
-
   const toggle = (id) => {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Resume — si tu manques',
+      title: 'Résumé — si tu manques',
       filename: 'resume-succession-bases.pdf',
       sections: [
         {
           heading: 'Checklist',
           rows: ITEMS.map((item) => ({
             label: item.label,
-            value: checked[item.id] ? 'Fait' : 'A faire',
+            value: checked[item.id] ? 'Fait' : 'À faire',
           })),
         },
         {
           heading: 'Portrait',
           rows: [
-            { label: 'Points clarifies', value: `${count}/${total}` },
+            { label: 'Points clarifiés', value: `${count}/${total}` },
             {
-              label: 'Piliers OK (liquidite / documents / clarte)',
+              label: 'Piliers OK (liquidité / documents / clarté)',
               value: `${pillarsOk}/3`,
             },
             {
@@ -213,8 +284,8 @@ export function SuccessionChecklistTool() {
                   : missing.map((item) => item.short).join(', '),
             },
             {
-              label: 'Prochaine etape',
-              value: nextItem ? nextItem.label : 'PDF + notaire',
+              label: 'Prochaine étape',
+              value: nextStep.pdfValue,
             },
             { label: 'Lecture', value: detail },
           ],
@@ -229,7 +300,7 @@ export function SuccessionChecklistTool() {
           : []),
       ],
       notes: [
-        `${count}/${total} points coches dans la checklist.`,
+        `${count}/${total} points cochés dans la checklist.`,
         'Ne remplace pas un notaire ni un avis juridique.',
       ],
     });
@@ -238,17 +309,12 @@ export function SuccessionChecklistTool() {
     <div data-testid="tool-succession-checklist">
       <CampagneToolShell
         title="Si tu manques — checklist"
-        intro="Liquidité, bénéficiaires, testament : coche seulement ce qui est vraiment en place. Ton portrait des trous se construit en direct."
+        intro="Liquidité, bénéficiaires, testament : coche seulement ce qui est vraiment en place. Ton portrait des trous se construit en direct. PDF en bonus, pas en destination."
         disclaimer="Contenu éducatif seulement — pas un conseil personnalisé. Ne remplace pas un notaire ni un avis juridique."
         footer={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          showSoftClose ? null : (
             <p className="text-sm leading-relaxed text-prestige-taupe">{detail}</p>
-            <ToolDownloadPdf
-              busy={busy}
-              onClick={handleDownload}
-              label="Télécharger mon résumé PDF"
-            />
-          </div>
+          )
         }
       >
         <div className="mb-6">
@@ -273,67 +339,93 @@ export function SuccessionChecklistTool() {
             />
           </div>
           <p className="mt-2 text-xs leading-relaxed text-prestige-taupe">
-            Chaque case cochée = un point de succession que tu ne laisses plus au hasard.
+            {nextItem?.id === 'liquidites' && showPortrait
+              ? 'Argent accessible ≠ maison sur papier — souvent le 1er vrai trou.'
+              : 'Chaque case cochée = un point de succession que tu ne laisses plus au hasard.'}
           </p>
         </div>
 
         <div className="mb-8">
-          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-                Ton portrait
-              </p>
-              <p className="mt-1 text-sm text-prestige-taupe">
-                Se remplit au fur et à mesure — rien à attendre à la fin.
-              </p>
-            </div>
-            <div className="shrink-0">
-              <ToolDownloadPdf
-                busy={busy}
-                onClick={handleDownload}
-                label="Télécharger mon résumé PDF"
-              />
-            </div>
+          <div className="mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+              Ton portrait
+            </p>
+            <p className="mt-1 text-sm text-prestige-taupe">
+              {showPortrait
+                ? 'Se remplit au fur et à mesure — rien à attendre à la fin.'
+                : 'Commence par cocher — le portrait des trous apparaît ensuite.'}
+            </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <ResultCard
-              label="État"
-              value={etatValue}
-              detail={etatDetail}
-              tone={etatTone}
-            />
-            <ResultCard
-              label="Trous prioritaires"
-              value={trousValue}
-              detail={trousDetail}
-              tone={missingCount === 0 ? 'ok' : 'warn'}
-            />
-            <ResultCard
-              label="Prochaine étape"
-              value={nextValue}
-              detail={nextDetail}
-              tone={nextItem ? 'default' : 'ok'}
-            />
-          </div>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {pillarScores.map((pillar, index) => (
-              <div
-                key={pillar.id}
-                className={`rounded-xl px-3 py-2.5 text-center ${
-                  pillar.complete
-                    ? 'bg-emerald-50 text-emerald-800'
-                    : 'bg-prestige-beige/50 text-prestige-taupe'
-                }`}
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-wide">
-                  {index + 1} · {pillar.title}
-                </p>
-                <p className="font-heading mt-0.5 text-sm font-bold tabular-nums text-dark">
-                  {pillar.done}/{pillar.total}
-                </p>
+
+          {showPortrait ? (
+            <div className="animate-fade-in space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <ResultCard
+                  label="État"
+                  value={etatValue}
+                  detail={etatDetail}
+                  tone={etatTone}
+                />
+                <ResultCard
+                  label="Trous prioritaires"
+                  value={trousValue}
+                  detail={trousDetail}
+                  tone={missingCount === 0 ? 'ok' : 'warn'}
+                />
+                <ResultCard
+                  label="Prochaine étape"
+                  value={nextStep.value}
+                  detail={nextStep.detail}
+                  tone={nextItem ? 'default' : 'ok'}
+                />
               </div>
-            ))}
-          </div>
+              <div className="grid grid-cols-3 gap-2">
+                {pillarScores.map((pillar, index) => (
+                  <div
+                    key={pillar.id}
+                    className={`rounded-xl px-3 py-2.5 text-center ${
+                      pillar.complete
+                        ? 'bg-emerald-50 text-emerald-800'
+                        : 'bg-prestige-beige/50 text-prestige-taupe'
+                    }`}
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-wide">
+                      {index + 1} · {pillar.title}
+                    </p>
+                    <p className="font-heading mt-0.5 text-sm font-bold tabular-nums text-dark">
+                      {pillar.done}/{pillar.total}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              {showSoftClose ? (
+                <div data-testid="succession-rdv-tool">
+                  <ToolSoftClose
+                    headline={softCloseHeadline}
+                    subline={softCloseSubline}
+                    rdvPath={rdvPath}
+                    rdvLabel={softCloseRdvLabel}
+                    onRdvClick={() =>
+                      trackRendezVousClick('campagne_succession-bases_rdv_tool')
+                    }
+                    onPdf={handleDownload}
+                    pdfBusy={busy}
+                    pdfLabel="Télécharger mon résumé PDF"
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-secondary/[0.05] px-4 py-4">
+              <p className="font-heading text-base font-semibold text-dark">
+                Commence par la liquidité
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">
+                Coche seulement ce qui est vrai aujourd’hui. Ton portrait des trous se construit en
+                direct — sans jugement à froid.
+              </p>
+            </div>
+          )}
         </div>
 
         <div

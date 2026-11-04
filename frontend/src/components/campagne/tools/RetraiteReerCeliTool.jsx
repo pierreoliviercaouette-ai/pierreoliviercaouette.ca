@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Check, AlertTriangle } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
-import { CampagneToolShell, ToolDownloadPdf } from '../CampagneToolShell';
+import { CampagneToolShell, ToolSoftClose } from '../CampagneToolShell';
 
 const TRANCHE_OPTIONS = [
   { value: 'faible', label: 'Faible', hint: '< 30 %' },
@@ -19,6 +22,12 @@ const HORIZON_OPTIONS = [
 const LIQUIDITE_OPTIONS = [
   { value: 'oui', label: 'Oui, accessible' },
   { value: 'non', label: 'Non, je peux attendre' },
+];
+
+const MATCHING_OPTIONS = [
+  { value: 'oui', label: 'Oui' },
+  { value: 'non', label: 'Non' },
+  { value: 'je_sais_pas', label: 'Je sais pas' },
 ];
 
 const TRANCHE_PDF = [
@@ -57,28 +66,43 @@ function parseMonthly(raw) {
  * Règles éducatives simples — pas un conseil personnalisé.
  * Priorité : liquidité / horizon court → CELI ; tranche élevée + horizon long → REER ;
  * sinon mixte avec répartition illustrative.
+ * Matching employeur : nuance éducative seulement — ne force jamais 100 % REER.
  */
-function buildSuggestion({ tranche, horizon, liquidite, monthly }) {
+function buildSuggestion({ tranche, horizon, liquidite, monthly, matching }) {
   const cotisationHint =
     monthly > 0
       ? `Avec ~${Math.round(monthly)} $ / mois, l’ordre guide où part le prochain dollar.`
       : 'Même un petit montant régulier aide : l’ordre guide où part le prochain dollar.';
 
+  const matchingRaisons = [];
+  if (matching === 'oui') {
+    matchingRaisons.push(
+      'Ton employeur matche souvent le REER : ce match-là se regarde souvent avant le débat perso CELI vs REER — on le chiffre en 15 minutes.'
+    );
+    if (liquidite === 'oui') {
+      matchingRaisons.push(
+        'Même avec un match, ton besoin d’accès peut justifier du CELI — on démêle ça en 15 min.'
+      );
+    }
+  }
+
   if (horizon === 'court' || liquidite === 'oui') {
-    const raisons = [
-      liquidite === 'oui'
-        ? 'Tu veux pouvoir ressortir l’argent sans te faire mal : le CELI est souvent plus souple pour ça.'
-        : 'Horizon court : tu risques d’avoir besoin de cet argent avant la retraite — le CELI colle souvent mieux.',
-      'Le REER, c’est puissant, mais un retrait trop tôt peut coûter cher en impôts.',
-      cotisationHint,
-    ];
     return {
       key: 'celi',
       value: 'CELI d’abord',
       short: 'CELI',
       tone: 'ok',
       split: { celi: 100, reer: 0 },
-      raisons,
+      leanLabel: null,
+      matchingNote: matching === 'oui',
+      raisons: [
+        ...matchingRaisons,
+        liquidite === 'oui'
+          ? 'Tu veux pouvoir ressortir l’argent sans te faire mal : le CELI est souvent plus souple pour ça.'
+          : 'Horizon court : tu risques d’avoir besoin de cet argent avant la retraite — le CELI colle souvent mieux.',
+        'Le REER, c’est puissant, mais un retrait trop tôt peut coûter cher en impôts.',
+        cotisationHint,
+      ],
     };
   }
 
@@ -89,7 +113,10 @@ function buildSuggestion({ tranche, horizon, liquidite, monthly }) {
       short: 'REER',
       tone: 'ok',
       split: { celi: 0, reer: 100 },
+      leanLabel: null,
+      matchingNote: matching === 'oui',
       raisons: [
+        ...matchingRaisons,
         'Tranche élevée + horizon long : le report d’impôt du REER a souvent plus de sens.',
         'Tu laisses le temps au compte de travailler avant d’avoir besoin de l’argent.',
         cotisationHint,
@@ -99,7 +126,7 @@ function buildSuggestion({ tranche, horizon, liquidite, monthly }) {
 
   // Mixte — répartition illustrative selon tranche / horizon
   let split = { celi: 50, reer: 50 };
-  let leanLabel = '50 / 50';
+  let leanLabel = '≈ 50 / 50';
   let leanDetail =
     'Un peu de CELI pour la flexibilité, un peu de REER pour le levier fiscal.';
 
@@ -124,13 +151,53 @@ function buildSuggestion({ tranche, horizon, liquidite, monthly }) {
     key: 'mixte',
     value: `Mixte — ${leanLabel}`,
     short: 'Mixte',
-    tone: 'warn',
+    tone: 'nuance',
     split,
+    leanLabel,
+    matchingNote: matching === 'oui',
     raisons: [
+      ...matchingRaisons,
       'Pas de gagnant automatique : ça dépend de tes projets, de ton revenu demain, et de ce que t’as déjà.',
       leanDetail,
       cotisationHint,
     ],
+  };
+}
+
+function softCloseCopy({ suggestion, monthly, celiAmt, reerAmt, pdfReady }) {
+  if (pdfReady) {
+    return {
+      headline: 'PDF prêt — 15 min pour le coller à ton dossier ?',
+      subline:
+        'Apporte ton résumé — matching employeur, plafonds, prochain dollar. Zéro pitch.',
+    };
+  }
+
+  if (suggestion.key === 'mixte') {
+    return {
+      headline:
+        monthly > 0
+          ? `Ton prioriseur dit Mixte — ~${formatCad(celiAmt)} CELI / ${formatCad(reerAmt)} REER`
+          : 'Ton prioriseur dit Mixte — à affiner',
+      subline:
+        monthly > 0
+          ? `Pas de gagnant automatique — on colle l’ordre (~${formatCad(celiAmt)} CELI / ${formatCad(reerAmt)} REER) à tes projets et ton matching en 15 min.`
+          : 'Pas de gagnant automatique — on colle l’ordre mixte à tes projets et ton matching en 15 min.',
+    };
+  }
+
+  if (suggestion.key === 'celi') {
+    return {
+      headline: 'Piste CELI d’abord',
+      subline:
+        'Piste CELI d’abord — en 15 min on vérifie avec tes plafonds, ton matching, et ce que t’as déjà.',
+    };
+  }
+
+  return {
+    headline: 'Piste REER d’abord',
+    subline:
+      'Piste REER d’abord — en 15 min on valide le levier fiscal avec ta vraie tranche et ton dossier.',
   };
 }
 
@@ -211,7 +278,7 @@ function Block({ step, title, subtitle, children, done }) {
   );
 }
 
-function ResultCard({ label, value, detail, tone = 'default' }) {
+function ResultCard({ label, value, detail, tone = 'default', className = '' }) {
   const toneClass =
     tone === 'warn'
       ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white'
@@ -227,12 +294,12 @@ function ResultCard({ label, value, detail, tone = 'default' }) {
     ) : null;
 
   return (
-    <div className={`rounded-2xl border px-4 py-3.5 ${toneClass}`}>
+    <div className={`rounded-2xl border px-4 py-3.5 ${toneClass} ${className}`}>
       <div className="flex items-center gap-1.5">
         {icon}
         <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">{label}</p>
       </div>
-      <p className="font-heading mt-1.5 text-xl font-bold text-dark sm:text-2xl">{value}</p>
+      <p className="font-heading mt-1.5 text-xl font-bold tabular-nums text-dark sm:text-2xl">{value}</p>
       {detail ? <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">{detail}</p> : null}
     </div>
   );
@@ -272,10 +339,13 @@ function SplitBar({ celiPct, reerPct }) {
 }
 
 export function RetraiteReerCeliTool() {
+  const location = useLocation();
   const [tranche, setTranche] = useState('moyenne');
   const [horizon, setHorizon] = useState('moyen');
   const [liquidite, setLiquidite] = useState('non');
+  const [matching, setMatching] = useState('je_sais_pas');
   const [cotisationMensuelle, setCotisationMensuelle] = useState('500');
+  const [pdfReady, setPdfReady] = useState(false);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_retraite-reer-celi_pdf');
 
   const monthly = parseMonthly(cotisationMensuelle);
@@ -284,6 +354,7 @@ export function RetraiteReerCeliTool() {
     horizon,
     liquidite,
     monthly,
+    matching,
   });
 
   const celiAmt = monthly > 0 ? Math.round((monthly * suggestion.split.celi) / 100) : 0;
@@ -292,27 +363,47 @@ export function RetraiteReerCeliTool() {
   const cotisationDisplay =
     monthly >= 0 && String(cotisationMensuelle).trim() !== ''
       ? formatCad(monthly)
-      : 'Non renseigne';
+      : 'Non renseigné';
 
   const isClear = suggestion.tone === 'ok';
+  const isNuance = suggestion.tone === 'nuance';
   const answered = Boolean(tranche && horizon && liquidite);
-
-  const statusDetail = isClear
-    ? 'Ordre illustratif — télécharge le PDF et garde-le sous la main.'
-    : 'Répartition illustrative — le PDF sert de base à clarifier en 15 minutes.';
 
   const splitDetail =
     monthly > 0
       ? `Sur ${formatCad(monthly)} / mois → CELI ${formatCad(celiAmt)}, REER ${formatCad(reerAmt)}.`
       : 'Indique un montant mensuel pour voir le partage en dollars.';
 
-  const handleDownload = () =>
-    downloadPdf({
-      title: 'Resume — REER ou CELI en premier',
+  const mixteWithDollars = suggestion.key === 'mixte' && monthly > 0;
+  const snapshotDominant = mixteWithDollars
+    ? `${formatCad(celiAmt)} / ${formatCad(reerAmt)}`
+    : suggestion.key === 'mixte'
+      ? suggestion.leanLabel || suggestion.short
+      : suggestion.short;
+  const snapshotSub =
+    mixteWithDollars
+      ? 'Mixte illustratif — CELI / REER'
+      : suggestion.key === 'mixte'
+        ? 'Mixte — à affiner'
+        : suggestion.value;
+
+  const { headline: softHeadline, subline: softSubline } = softCloseCopy({
+    suggestion,
+    monthly,
+    celiAmt,
+    reerAmt,
+    pdfReady,
+  });
+
+  const rdvPath = buildCampagneRdvPath('retraite-reer-celi', location.search);
+
+  const handleDownload = async () => {
+    await downloadPdf({
+      title: 'Résumé — REER ou CELI en premier',
       filename: 'resume-retraite-reer-celi.pdf',
       sections: [
         {
-          heading: 'Tes reponses',
+          heading: 'Tes réponses',
           rows: [
             {
               label: "Tranche d'imposition",
@@ -323,8 +414,12 @@ export function RetraiteReerCeliTool() {
               value: optionLabel(HORIZON_PDF, horizon),
             },
             {
-              label: 'Besoin de liquidite',
+              label: 'Besoin de liquidité',
               value: optionLabel(LIQUIDITE_PDF, liquidite),
+            },
+            {
+              label: 'Matching employeur',
+              value: optionLabel(MATCHING_OPTIONS, matching),
             },
             {
               label: 'Cotisation mensuelle possible',
@@ -335,9 +430,9 @@ export function RetraiteReerCeliTool() {
         {
           heading: 'Suggestion (illustration)',
           rows: [
-            { label: 'Ordre suggere', value: suggestion.value },
+            { label: 'Ordre suggéré', value: suggestion.value },
             {
-              label: 'Repartition illustrative',
+              label: 'Répartition illustrative',
               value: `CELI ${suggestion.split.celi} % / REER ${suggestion.split.reer} %`,
             },
             ...(monthly > 0
@@ -356,45 +451,90 @@ export function RetraiteReerCeliTool() {
         },
       ],
       notes: [
-        'Illustration educative seulement — pas un conseil personnalise.',
-        'Valide l’ordre avec ta vraie situation (projets, revenu, comptes deja ouverts).',
+        'Illustration éducative seulement — pas un conseil personnalisé.',
+        'Valide l’ordre avec ta vraie situation (projets, revenu, comptes déjà ouverts, règles du régime employeur).',
       ],
     });
+    setPdfReady(true);
+  };
+
+  const updateField = (setter) => (value) => {
+    setPdfReady(false);
+    setter(value);
+  };
+
+  const handleMatchingChange = (value) => {
+    setPdfReady(false);
+    setMatching(value);
+    if (value === 'oui') {
+      trackEvent('select_content', {
+        content_type: 'tool_climax',
+        item_id: 'campagne_retraite-reer-celi_matching_oui',
+      });
+    }
+  };
 
   return (
     <div data-testid="tool-retraite-reer-celi">
       <CampagneToolShell
         title="REER ou CELI en premier ?"
-        intro="Quatre réponses. On te propose un ordre illustratif — et un partage du prochain dollar."
+        intro="Réponds. On te propose un ordre illustratif — et un partage du prochain dollar."
         disclaimer="Illustration éducative seulement. Pas un conseil personnalisé."
         footer={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
-            <ToolDownloadPdf
-              busy={busy}
-              onClick={handleDownload}
-              label="Télécharger mon résumé PDF"
+          <div className="space-y-3">
+            <ToolSoftClose
+              headline={softHeadline}
+              subline={softSubline}
+              rdvPath={rdvPath}
+              rdvLabel="Réserver 15 min avec mon résumé"
+              onRdvClick={() =>
+                trackRendezVousClick('campagne_retraite-reer-celi_rdv_tool')
+              }
+              onPdf={handleDownload}
+              pdfBusy={busy}
+              pdfLabel="Télécharger mon résumé PDF"
             />
+            <p className="text-xs leading-relaxed text-prestige-taupe/80">
+              Prioriseur sans compte · PDF gratuit · 15 min soft · Illustration éducative. Pas un
+              conseil personnalisé. Titre : conseiller en sécurité financière.
+            </p>
           </div>
         }
       >
-        {/* Snapshot */}
+        {/* Snapshot — climax $ pour mixte */}
         <div className="mb-8">
           <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
                 Ordre illustratif
               </p>
-              <p className="font-heading mt-1 text-2xl font-bold tracking-tight text-dark">
-                {suggestion.short}
+              <p
+                className={`font-heading mt-1 font-bold tracking-tight tabular-nums text-dark ${
+                  mixteWithDollars ? 'text-3xl sm:text-4xl' : 'text-2xl'
+                }`}
+              >
+                {snapshotDominant}
               </p>
+              <p className="mt-1 text-sm text-prestige-taupe">{snapshotSub}</p>
+              {suggestion.matchingNote ? (
+                <span
+                  className="mt-2 inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                  data-testid="retraite-matching-chip"
+                >
+                  Match employeur noté
+                </span>
+              ) : null}
             </div>
-            <p className="max-w-xs text-right text-sm text-prestige-taupe">
-              {suggestion.value}
-            </p>
+            {!mixteWithDollars && suggestion.key !== 'mixte' ? (
+              <p className="max-w-xs text-right text-sm text-prestige-taupe">{suggestion.value}</p>
+            ) : null}
           </div>
-          <SplitBar celiPct={suggestion.split.celi} reerPct={suggestion.split.reer} />
-          {monthly > 0 ? (
+          <SplitBar
+            key={`${suggestion.split.celi}-${suggestion.split.reer}`}
+            celiPct={suggestion.split.celi}
+            reerPct={suggestion.split.reer}
+          />
+          {monthly > 0 && !mixteWithDollars ? (
             <p className="mt-2 text-xs text-prestige-taupe">{splitDetail}</p>
           ) : null}
         </div>
@@ -403,7 +543,7 @@ export function RetraiteReerCeliTool() {
           <Block
             step={1}
             title="Tes réponses"
-            subtitle="Tranche, horizon, liquidité, et ce que tu peux mettre de côté."
+            subtitle="Tranche, horizon, liquidité, matching, et ce que tu peux mettre de côté."
             done={answered}
           >
             <div className="space-y-5">
@@ -415,7 +555,7 @@ export function RetraiteReerCeliTool() {
                   name="Tranche d’imposition"
                   options={TRANCHE_OPTIONS}
                   value={tranche}
-                  onChange={setTranche}
+                  onChange={updateField(setTranche)}
                 />
               </Field>
 
@@ -427,7 +567,7 @@ export function RetraiteReerCeliTool() {
                   name="Horizon"
                   options={HORIZON_OPTIONS}
                   value={horizon}
-                  onChange={setHorizon}
+                  onChange={updateField(setHorizon)}
                 />
               </Field>
 
@@ -436,8 +576,21 @@ export function RetraiteReerCeliTool() {
                   name="Liquidité"
                   options={LIQUIDITE_OPTIONS}
                   value={liquidite}
-                  onChange={setLiquidite}
+                  onChange={updateField(setLiquidite)}
                   columns={2}
+                />
+              </Field>
+
+              <Field
+                label="Ton employeur matche ou cotise déjà à un REER ?"
+                hint="Si oui, ça peut changer l’ordre du prochain dollar — on le quantifie en 15 min."
+              >
+                <ChoiceGroup
+                  name="Matching employeur"
+                  options={MATCHING_OPTIONS}
+                  value={matching}
+                  onChange={handleMatchingChange}
+                  columns={3}
                 />
               </Field>
 
@@ -455,7 +608,10 @@ export function RetraiteReerCeliTool() {
                     step={25}
                     className={`${inputClass} pr-8`}
                     value={cotisationMensuelle}
-                    onChange={(e) => setCotisationMensuelle(e.target.value)}
+                    onChange={(e) => {
+                      setPdfReady(false);
+                      setCotisationMensuelle(e.target.value);
+                    }}
                     placeholder="500"
                   />
                   <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-prestige-taupe">
@@ -473,26 +629,55 @@ export function RetraiteReerCeliTool() {
             done={answered}
           >
             <div className="grid gap-3 sm:grid-cols-2">
-              <ResultCard
-                label="Ordre suggéré"
-                value={suggestion.value}
-                detail="À valider avec ta vraie situation — projets, revenu, comptes déjà ouverts."
-                tone={suggestion.tone}
-              />
-              <ResultCard
-                label="Partage du prochain dollar"
-                value={
-                  monthly > 0
-                    ? `${formatCad(celiAmt)} / ${formatCad(reerAmt)}`
-                    : `${suggestion.split.celi} % / ${suggestion.split.reer} %`
-                }
-                detail={
-                  monthly > 0
-                    ? `CELI ${formatCad(celiAmt)} · REER ${formatCad(reerAmt)} — illustration seulement.`
-                    : splitDetail
-                }
-                tone={suggestion.tone}
-              />
+              {suggestion.key === 'mixte' ? (
+                <>
+                  <ResultCard
+                    className="sm:col-span-2"
+                    label="Partage du prochain dollar"
+                    value={
+                      monthly > 0
+                        ? `${formatCad(celiAmt)} / ${formatCad(reerAmt)}`
+                        : `${suggestion.split.celi} % / ${suggestion.split.reer} %`
+                    }
+                    detail={
+                      monthly > 0
+                        ? `CELI ${formatCad(celiAmt)} · REER ${formatCad(reerAmt)} — illustration seulement.`
+                        : splitDetail
+                    }
+                    tone="nuance"
+                  />
+                  <ResultCard
+                    className="sm:col-span-2"
+                    label="Ordre suggéré"
+                    value={suggestion.value}
+                    detail="À valider avec ta vraie situation — projets, revenu, comptes déjà ouverts."
+                    tone="nuance"
+                  />
+                </>
+              ) : (
+                <>
+                  <ResultCard
+                    label="Ordre suggéré"
+                    value={suggestion.value}
+                    detail="À valider avec ta vraie situation — projets, revenu, comptes déjà ouverts."
+                    tone={suggestion.tone}
+                  />
+                  <ResultCard
+                    label="Partage du prochain dollar"
+                    value={
+                      monthly > 0
+                        ? `${formatCad(celiAmt)} / ${formatCad(reerAmt)}`
+                        : `${suggestion.split.celi} % / ${suggestion.split.reer} %`
+                    }
+                    detail={
+                      monthly > 0
+                        ? `CELI ${formatCad(celiAmt)} · REER ${formatCad(reerAmt)} — illustration seulement.`
+                        : splitDetail
+                    }
+                    tone={suggestion.tone}
+                  />
+                </>
+              )}
             </div>
 
             <ul className="mt-4 space-y-2.5">
@@ -500,7 +685,7 @@ export function RetraiteReerCeliTool() {
                 <li key={raison} className="flex gap-2.5 text-sm leading-relaxed text-prestige-taupe">
                   <span
                     className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
-                      isClear ? 'bg-primary' : 'bg-prestige-taupe/50'
+                      isClear || isNuance ? 'bg-primary' : 'bg-prestige-taupe/50'
                     }`}
                     aria-hidden
                   />

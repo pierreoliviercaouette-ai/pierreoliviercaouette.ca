@@ -74,7 +74,10 @@ function FormationsLegacyLessonRedirect() {
 function AppShell() {
   const location = useLocation();
   const isJemcee = location.pathname.startsWith('/jemcee');
-  const hidePortfolioBanner = isJemcee || location.pathname.startsWith('/admin/assurance-vie-actif');
+  const hidePortfolioBanner =
+    isJemcee ||
+    location.pathname.startsWith('/admin/assurance-vie-actif') ||
+    location.pathname.startsWith('/campagnes');
 
   // Landing jemcee : hors du flex shell pour ne pas casser le scroll/pin
   if (isJemcee) {

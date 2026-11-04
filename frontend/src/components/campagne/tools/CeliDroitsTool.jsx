@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Check, AlertTriangle } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
-import { CampagneToolShell, ToolDownloadPdf } from '../CampagneToolShell';
+import { CampagneToolShell, ToolSoftClose } from '../CampagneToolShell';
 
-/** Plafonds annuels illustratifs approximatifs (2009–2026). À revalider. */
+/** Plafonds annuels CELI (2009–2026). Validé ARC 2026-11 — revalider à chaque nouvel indice annuel. */
 const PLAFONDS_ANNUELS = {
   2009: 5000,
   2010: 5000,
@@ -29,6 +32,15 @@ const PLAFONDS_ANNUELS = {
 const ANNEE_COURANTE = 2026;
 const ANNEE_MIN_CELI = 2009;
 const PLAFOND_ANNUEL = PLAFONDS_ANNUELS[ANNEE_COURANTE] ?? 7000;
+
+const ARC_DOSSIER_URL =
+  'https://www.canada.ca/fr/agence-revenu/services/services-electroniques/services-electroniques-particuliers/dossier-particuliers.html';
+
+const USAGE_OPTIONS = [
+  { id: 'urgence', label: 'Fonds d’urgence', soft: 'fonds d’urgence' },
+  { id: 'projet', label: 'Projet court terme', soft: 'projet court terme' },
+  { id: 'long_terme', label: 'Long terme / retraite', soft: 'long terme / retraite' },
+];
 
 const A_RETENIR = [
   'Les droits inutilisés ne disparaissent pas au 31 décembre — ils s’accumulent.',
@@ -59,6 +71,23 @@ function droitsCumulesDepuis(annee18) {
     total += plafondPourAnnee(y);
   }
   return total;
+}
+
+function usageMeta(usage) {
+  return USAGE_OPTIONS.find((opt) => opt.id === usage) || null;
+}
+
+function ArcLink({ children = 'Mon Dossier ARC' }) {
+  return (
+    <a
+      href={ARC_DOSSIER_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline underline-offset-2 text-primary hover:text-dark"
+    >
+      {children}
+    </a>
+  );
 }
 
 function Field({ id, label, hint, children }) {
@@ -143,7 +172,7 @@ function ResultCard({ label, value, detail, tone = 'default' }) {
   );
 }
 
-function buildLecture(result) {
+function buildLecture(result, usage) {
   const {
     year18,
     cumules,
@@ -207,7 +236,19 @@ function buildLecture(result) {
     );
   }
 
-  if (placeRestante > plafondAnnuel * 2) {
+  if (usage === 'urgence' && placeRestante > 0) {
+    points.push(
+      `Avec ~${formatCad(placeRestante)} de place, un fonds d’urgence liquide dans le CELI peut précéder le « maxer pour maxer ».`
+    );
+  } else if (usage === 'projet' && placeRestante > 0) {
+    points.push(
+      `Place estimée ~${formatCad(placeRestante)} : utile pour un projet à horizon court — sans confondre solde et droits.`
+    );
+  } else if (usage === 'long_terme' && placeRestante > 0) {
+    points.push(
+      `~${formatCad(placeRestante)} de place : horizon long / retraite possible — l’ordre avec REER se regarde au cas par cas.`
+    );
+  } else if (placeRestante > plafondAnnuel * 2) {
     points.push(
       'Beaucoup de place qui dort : avant de « maxer », décide à quoi sert cet argent (urgence, projet, long terme).'
     );
@@ -235,11 +276,44 @@ function buildLecture(result) {
   };
 }
 
+function softCloseCopy(result, usage) {
+  const meta = usageMeta(usage);
+  const x = formatCad(result.placeRestante);
+
+  if (result.depassement || result.placeRestante <= 0) {
+    return {
+      headline: 'Chiffre à vérifier avec Mon Dossier ARC.',
+      subline:
+        '15 minutes pour comparer l’ordre de grandeur — sans cotiser dans le vide.',
+      rdvLabel: 'Vérifier avec quelqu’un — 15 min',
+    };
+  }
+
+  if (meta) {
+    return {
+      headline: `~${x} estimés · usage ${meta.soft}.`,
+      subline:
+        'Avant de maxer pour maxer — on colle ça à ton plan en 15 minutes. Soft. Zéro pression de cotiser demain.',
+      rdvLabel: 'Coller un usage — 15 min',
+    };
+  }
+
+  return {
+    headline: `T’as ~${x} de place estimée.`,
+    subline: 'Choisis un usage ci-dessus — ou on le tranche ensemble en 15 minutes.',
+    rdvLabel: 'Trancher l’usage — 15 min',
+  };
+}
+
 export function CeliDroitsTool() {
+  const location = useLocation();
   const [anneeNaissance, setAnneeNaissance] = useState('1992');
   const [dejaCotise, setDejaCotise] = useState('20000');
   const [cotisationAnnee, setCotisationAnnee] = useState('7000');
+  const [usage, setUsage] = useState(null);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_celi-droits_pdf');
+
+  const rdvPath = buildCampagneRdvPath('celi-droits', location.search);
 
   const result = useMemo(() => {
     const birthYear = Math.floor(toNumber(anneeNaissance, 1992));
@@ -275,7 +349,10 @@ export function CeliDroitsTool() {
     };
   }, [anneeNaissance, dejaCotise, cotisationAnnee]);
 
-  const lecture = useMemo(() => buildLecture(result), [result]);
+  const lecture = useMemo(() => buildLecture(result, usage), [result, usage]);
+  const soft = useMemo(() => softCloseCopy(result, usage), [result, usage]);
+  const showUsageChips = !result.depassement && result.placeRestante > 0;
+  const selectedUsage = usageMeta(usage);
 
   const milestones = useMemo(
     () => [
@@ -305,42 +382,56 @@ export function CeliDroitsTool() {
       : 0;
 
   const statusDetail = result.depassement
-    ? 'Écart vs l’estimation — vérifie Mon Dossier ARC, puis télécharge le PDF.'
+    ? 'Écart vs l’estimation — vérifie Mon Dossier ARC, ou réserve 15 min pour comparer.'
     : doneCount < 2
       ? 'Indique ton année de naissance et ce que tu as déjà cotisé.'
-      : 'Ton estimation est prête. Télécharge le PDF et compare avec Mon Dossier ARC.';
+      : selectedUsage
+        ? `~${formatCad(result.placeRestante)} estimés · usage ${selectedUsage.soft}. Compare avec ARC — ou colle le plan en 15 min.`
+        : 'Estimation prête. Choisis un usage, télécharge le PDF, ou réserve 15 min.';
+
+  const handleUsageSelect = (id) => {
+    setUsage(id);
+    trackEvent('select_content', {
+      content_type: 'tool_usage',
+      item_id: `campagne_celi-droits_usage_${id}`,
+    });
+  };
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Resume — place restante CELI',
+      title: 'Résumé — place restante CELI',
       filename: 'resume-celi-droits.pdf',
       sections: [
         {
-          heading: 'Tes entrees',
+          heading: 'Tes entrées',
           rows: [
-            { label: 'Annee de naissance', value: String(result.birthYear) },
+            { label: 'Année de naissance', value: String(result.birthYear) },
             {
-              label: 'Annee des 18 ans (calculee)',
+              label: 'Année des 18 ans (calculée)',
               value: `${result.rawYear18}${result.rawYear18 < ANNEE_MIN_CELI ? ` → droits depuis ${ANNEE_MIN_CELI}` : ''}`,
             },
-            { label: 'Deja cotise a vie (cotisations)', value: formatCad(result.deja) },
-            { label: 'Cotisation prevue cette annee', value: formatCad(result.prevu) },
+            { label: 'Déjà cotisé à vie (cotisations)', value: formatCad(result.deja) },
+            { label: 'Cotisation prévue cette année', value: formatCad(result.prevu) },
+            {
+              label: 'Usage choisi',
+              value: selectedUsage?.label || 'Non choisi',
+            },
           ],
         },
         {
           heading: 'Estimation',
           rows: [
-            { label: 'Droits cumules (estimes)', value: formatCad(result.cumules) },
+            { label: 'Droits cumulés (estimés)', value: formatCad(result.cumules) },
             { label: 'Place restante', value: formatCad(result.placeRestante) },
             {
               label: `Plafond annuel ${ANNEE_COURANTE} (illustratif)`,
               value: formatCad(result.plafondAnnuel),
             },
             {
-              label: 'Cotisation possible cette annee',
+              label: 'Cotisation possible cette année',
               value: formatCad(result.cotisationEffective),
             },
-            { label: 'Place apres cotisation', value: formatCad(result.placeApres) },
+            { label: 'Place après cotisation', value: formatCad(result.placeApres) },
           ],
         },
         {
@@ -351,7 +442,7 @@ export function CeliDroitsTool() {
           })),
         },
         {
-          heading: 'A retenir',
+          heading: 'À retenir',
           rows: A_RETENIR.map((point, i) => ({
             label: `${i + 1}`,
             value: point,
@@ -361,7 +452,9 @@ export function CeliDroitsTool() {
       notes: [
         'Estimation illustrative seulement — plafonds approximatifs.',
         'Le solde officiel est dans Mon Dossier ARC.',
-        'Cotisations a vie ≠ valeur du compte (les gains ne consomment pas de droits).',
+        'Cotisations à vie ≠ valeur du compte (les gains ne consomment pas de droits).',
+        'Retraits : droits souvent rétablis l’année suivante — non modélisés ici.',
+        'Clarifier l’usage en 15 min — soft. Pas une obligation de cotiser.',
       ],
     });
 
@@ -369,19 +462,23 @@ export function CeliDroitsTool() {
     <div data-testid="tool-celi-droits">
       <CampagneToolShell
         title="Combien de place te reste dans ton CELI ?"
-        intro="Les droits inutilisés s’accumulent. Entre ton année de naissance (on calcule l’année de tes 18 ans), ce que tu as déjà cotisé, et ce que tu vises cette année — on estime la place qui reste."
-        disclaimer="Illustration seulement. Plafonds approximatifs. Le vrai solde est dans Mon Dossier ARC. Pas un conseil personnalisé."
+        intro="Les droits inutilisés s’accumulent. Entre ton année de naissance, ce que tu as déjà cotisé (pas le solde), et ce que tu vises cette année — on estime la place. Ensuite, tu peux coller un usage."
+        disclaimer={
+          <>
+            Illustration seulement. Plafonds approximatifs. Le vrai solde est dans{' '}
+            <ArcLink />. Retraits non modélisés. Pas un conseil personnalisé.
+          </>
+        }
         footer={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
-            <ToolDownloadPdf
-              busy={busy}
-              onClick={handleDownload}
-              label="Télécharger mon résumé PDF"
-            />
-          </div>
+          <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
         }
       >
+        <div className="mb-3">
+          <span className="inline-flex rounded-full bg-prestige-beige/70 px-3 py-1 text-xs text-prestige-taupe">
+            Sans compte · sans formulaire · estimation
+          </span>
+        </div>
+
         <div className="mb-8">
           <div className="mb-2 flex items-end justify-between gap-3">
             <div>
@@ -519,17 +616,64 @@ export function CeliDroitsTool() {
                   : 'bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06]'
               }`}
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-                {result.depassement ? 'À vérifier' : 'Place restante'}
-              </p>
-              <p
-                className={`font-heading mt-1 text-3xl font-bold tracking-tight sm:text-4xl ${
-                  lecture.tone === 'warn' ? 'text-amber-700' : 'text-dark'
-                }`}
-              >
-                {formatCad(result.placeRestante)}
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{lecture.detail}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-dark/[0.06] bg-white/60 px-4 py-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">
+                    Plafond {ANNEE_COURANTE}
+                  </p>
+                  <p className="font-heading mt-1 text-lg font-semibold tabular-nums text-dark sm:text-xl">
+                    {formatCad(result.plafondAnnuel)}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-gradient-to-br from-primary/[0.06] to-secondary/[0.08] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                    {result.depassement ? 'À vérifier' : 'Place restante estimée'}
+                  </p>
+                  <p
+                    className={`font-heading mt-1 text-3xl font-bold tracking-tight tabular-nums sm:text-4xl ${
+                      lecture.tone === 'warn' ? 'text-amber-700' : 'text-dark'
+                    }`}
+                  >
+                    {formatCad(result.placeRestante)}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3 text-sm leading-relaxed text-prestige-taupe">{lecture.detail}</p>
+
+              {showUsageChips ? (
+                <div className="mt-4 border-t border-dark/[0.06] pt-4">
+                  <p className="text-sm font-medium text-dark">À quoi servirait cette place ?</p>
+                  <p className="mt-0.5 text-xs text-prestige-taupe">
+                    Une intention, pas un engagement à cotiser demain.
+                  </p>
+                  <div
+                    className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap"
+                    role="radiogroup"
+                    aria-label="Usage de la place CELI"
+                  >
+                    {USAGE_OPTIONS.map((opt) => {
+                      const selected = usage === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => handleUsageSelect(opt.id)}
+                          className={`min-h-11 flex-1 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${
+                            selected
+                              ? 'border-primary bg-primary text-white'
+                              : 'border-prestige-beige bg-white text-dark hover:border-primary/40'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
 
               {lecture.points.length > 0 ? (
                 <ul className="mt-4 space-y-2.5 border-t border-dark/[0.06] pt-4">
@@ -570,6 +714,19 @@ export function CeliDroitsTool() {
                     : 'Ce qui resterait encore disponible ensuite (estimé).'
                 }
                 tone={result.placeApres <= 0 ? 'warn' : 'default'}
+              />
+            </div>
+
+            <div className="mt-4">
+              <ToolSoftClose
+                headline={soft.headline}
+                subline={soft.subline}
+                rdvPath={rdvPath}
+                rdvLabel={soft.rdvLabel}
+                onRdvClick={() => trackRendezVousClick('campagne_celi-droits_rdv_outil')}
+                onPdf={handleDownload}
+                pdfBusy={busy}
+                pdfLabel="Garder mon résumé PDF"
               />
             </div>
 

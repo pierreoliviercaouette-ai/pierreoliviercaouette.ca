@@ -1,14 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabaseClient';
 import { trackEvent } from '../../lib/analytics';
 import { getMetaClickCookies } from '../../lib/metaCookies';
+const MRA_FIT_STORAGE_KEY = 'campagne_programme-mra_fit';
 
 const inputClass =
   'w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.08)] transition focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(6,77,217,0.45)]';
 
 const labelClass = 'mb-1.5 block text-xs font-medium text-prestige-taupe';
+
+function readFitBridge(storageKey) {
+  if (!storageKey || typeof sessionStorage === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(storageKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Formulaire lead embarqué sur une landing campagne (Meta Lead via generate_lead).
@@ -20,16 +33,57 @@ export function CampagneLeadForm({
   submitLabel = 'Envoyer ma demande',
   successTitle = 'Demande envoyée',
   successBody = 'Merci. Je te recontacte rapidement.',
+  title = 'Laisse tes coordonnées',
+  subline = 'Je te recontacte pour une présentation adaptée à ta PME. Sans engagement.',
+  requireCompany = false,
+  requireMessage = true,
+  companyLabel = 'Entreprise (approx. d’employés)',
+  companyPlaceholder = 'Ex. Atelier XYZ — ~12 employés',
+  messageLabel,
+  phoneHint,
+  trustLine = 'Tes infos servent uniquement à te recontacter. Contenu éducatif — pas un conseil personnalisé.',
+  initialMessage = '',
+  initialCompany = '',
+  teamSize: teamSizeProp,
+  fitStorageKey,
 }) {
+  const bridgeKey = fitStorageKey || (slug === 'programme-mra' ? MRA_FIT_STORAGE_KEY : null);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    company: '',
-    message: '',
+    company: initialCompany,
+    message: initialMessage,
+    teamSize: teamSizeProp != null ? String(teamSizeProp) : '',
   });
+  const [fitMeta, setFitMeta] = useState({ fitScore: null, teamSize: teamSizeProp ?? null });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  const applyBridge = () => {
+    const bridge = readFitBridge(bridgeKey);
+    if (!bridge) return;
+    setFitMeta({
+      fitScore: bridge.fitScore || null,
+      teamSize: bridge.teamSize ?? teamSizeProp ?? null,
+    });
+    setFormData((prev) => {
+      const next = { ...prev };
+      if (bridge.message && (!prev.message.trim() || prev.message.startsWith('Fit outil :'))) {
+        next.message = bridge.message;
+      }
+      if (bridge.teamSize != null && !prev.teamSize) {
+        next.teamSize = String(bridge.teamSize);
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    applyBridge();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount + slug bridge only
+  }, [bridgeKey]);
 
   const update = (key) => (e) =>
     setFormData((prev) => ({ ...prev, [key]: e.target.value }));
@@ -38,10 +92,26 @@ export function CampagneLeadForm({
     e.preventDefault();
     setLoading(true);
 
+    const bridge = readFitBridge(bridgeKey);
+    const fitScore = bridge?.fitScore || fitMeta.fitScore || null;
+    const teamSize =
+      formData.teamSize.trim() ||
+      (bridge?.teamSize != null ? String(bridge.teamSize) : '') ||
+      (fitMeta.teamSize != null ? String(fitMeta.teamSize) : '');
+
     const companyLine = formData.company.trim()
-      ? `Entreprise : ${formData.company.trim()}\n\n`
+      ? `Entreprise : ${formData.company.trim()}\n`
       : '';
-    const messageBody = `${companyLine}${formData.message.trim()}`.trim();
+    const sizeLine = teamSize ? `Taille équipe (approx.) : ~${teamSize}\n` : '';
+    const fitLine = fitScore ? `Score fit outil : ${fitScore}\n` : '';
+    const bridgeBlock = [companyLine, sizeLine, fitLine].filter(Boolean).join('');
+    let messageBody = formData.message.trim();
+    if (bridge?.message && !messageBody.includes('Fit outil :')) {
+      messageBody = messageBody
+        ? `${messageBody}\n\n${bridge.message}`
+        : bridge.message;
+    }
+    messageBody = `${bridgeBlock}${bridgeBlock && messageBody ? '\n' : ''}${messageBody}`.trim();
 
     try {
       const { fbp, fbc } = getMetaClickCookies();
@@ -50,7 +120,7 @@ export function CampagneLeadForm({
         p_email: formData.email.trim(),
         p_phone: formData.phone.trim() || null,
         p_subject: subjectDefault,
-        p_message: messageBody,
+        p_message: messageBody || '(sans message — lead campagne)',
         p_referral_code: null,
         p_meta_fbp: fbp,
         p_meta_fbc: fbc,
@@ -63,6 +133,8 @@ export function CampagneLeadForm({
         item_id: `campagne_${slug}`,
         has_phone: Boolean(formData.phone.trim()),
         has_company: Boolean(formData.company.trim()),
+        ...(fitScore ? { fit_score: fitScore } : {}),
+        ...(teamSize ? { team_size: Number(teamSize) || teamSize } : {}),
       });
       toast.success('Demande envoyée — je te recontacte bientôt.');
     } catch (err) {
@@ -93,26 +165,26 @@ export function CampagneLeadForm({
     );
   }
 
+  const resolvedMessageLabel =
+    messageLabel || (requireMessage ? 'Message *' : 'Message (optionnel)');
+
   return (
     <form
       id="demande"
       onSubmit={handleSubmit}
       className="scroll-mt-28 space-y-5 rounded-3xl border border-prestige-beige bg-white px-5 py-6 shadow-[0_8px_32px_rgba(1,35,63,0.06)] md:px-8 md:py-8"
       data-testid="campagne-lead-form"
-      onFocusCapture={() =>
+      onFocusCapture={() => {
+        applyBridge();
         trackEvent('select_content', {
           content_type: 'lead_form',
           item_id: `campagne_${slug}_form`,
-        })
-      }
+        });
+      }}
     >
       <div>
-        <h3 className="font-heading text-xl font-bold text-dark md:text-2xl">
-          Laisse tes coordonnées
-        </h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">
-          Je te recontacte pour une présentation adaptée à ta PME. Sans engagement.
-        </p>
+        <h3 className="font-heading text-xl font-bold text-dark md:text-2xl">{title}</h3>
+        <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">{subline}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -148,6 +220,9 @@ export function CampagneLeadForm({
         <div>
           <label htmlFor={`${slug}-phone`} className={labelClass}>
             Téléphone
+            {phoneHint ? (
+              <span className="ml-1 font-normal text-prestige-taupe/80">· {phoneHint}</span>
+            ) : null}
           </label>
           <input
             id={`${slug}-phone`}
@@ -161,30 +236,48 @@ export function CampagneLeadForm({
         </div>
         <div>
           <label htmlFor={`${slug}-company`} className={labelClass}>
-            Entreprise (approx. d’employés)
+            {requireCompany ? (companyLabel.includes('*') ? companyLabel : `${companyLabel} *`) : companyLabel}
           </label>
           <input
             id={`${slug}-company`}
+            required={requireCompany}
             autoComplete="organization"
             value={formData.company}
             onChange={update('company')}
             className={inputClass}
-            placeholder="Ex. Atelier XYZ — ~12 employés"
+            placeholder={companyPlaceholder}
           />
         </div>
+        {slug === 'programme-mra' || teamSizeProp != null || formData.teamSize ? (
+          <div className="sm:col-span-2">
+            <label htmlFor={`${slug}-team-size`} className={labelClass}>
+              Nombre d’employés (approx.)
+            </label>
+            <input
+              id={`${slug}-team-size`}
+              type="number"
+              min={1}
+              max={500}
+              value={formData.teamSize}
+              onChange={update('teamSize')}
+              className={inputClass}
+              placeholder="Ex. 8"
+            />
+          </div>
+        ) : null}
       </div>
 
       <div>
         <label htmlFor={`${slug}-message`} className={labelClass}>
-          Message *
+          {resolvedMessageLabel}
         </label>
         <textarea
           id={`${slug}-message`}
-          required
-          rows={4}
+          required={requireMessage}
+          rows={requireMessage ? 4 : 2}
           value={formData.message}
           onChange={update('message')}
-          className={`${inputClass} min-h-[6.5rem] resize-y`}
+          className={`${inputClass} ${requireMessage ? 'min-h-[6.5rem]' : 'min-h-[4rem]'} resize-y`}
           placeholder={messagePlaceholder}
         />
       </div>
@@ -199,10 +292,7 @@ export function CampagneLeadForm({
         <Send className="h-4 w-4" />
       </button>
 
-      <p className="text-xs leading-relaxed text-prestige-taupe/80">
-        Tes infos servent uniquement à te recontacter. Contenu éducatif — pas un conseil
-        personnalisé.
-      </p>
+      <p className="text-xs leading-relaxed text-prestige-taupe/80">{trustLine}</p>
     </form>
   );
 }

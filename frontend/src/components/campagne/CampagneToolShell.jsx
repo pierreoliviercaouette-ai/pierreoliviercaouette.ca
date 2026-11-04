@@ -1,4 +1,5 @@
-import { Download } from 'lucide-react';
+import { ArrowRight, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { formatCad } from '../tools/format';
 
 /**
@@ -13,7 +14,8 @@ export function CampagneToolShell({
 }) {
   return (
     <section
-      className="overflow-hidden rounded-3xl border border-prestige-beige/80 bg-white shadow-[0_12px_40px_rgba(1,35,63,0.06)]"
+      id="outil"
+      className="scroll-mt-28 overflow-hidden rounded-3xl border border-prestige-beige/80 bg-white shadow-[0_12px_40px_rgba(1,35,63,0.06)]"
       data-testid="campagne-ads-tool"
       aria-labelledby="campagne-tool-title"
     >
@@ -44,18 +46,110 @@ export function CampagneToolShell({
   );
 }
 
-export function ToolDownloadPdf({ onClick, busy = false, label = 'Télécharger mon résumé PDF' }) {
+export function ToolDownloadPdf({
+  onClick,
+  busy = false,
+  label = 'Télécharger mon résumé PDF',
+  variant = 'primary',
+}) {
+  const base =
+    'inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 sm:w-auto';
+  const styles =
+    variant === 'ghost'
+      ? 'border border-prestige-beige bg-white text-dark hover:border-primary/30 hover:text-primary'
+      : 'bg-primary text-white shadow-md hover:bg-dark';
+
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={busy}
       data-testid="campagne-tool-download-pdf"
-      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-colors hover:bg-dark disabled:cursor-wait disabled:opacity-70 sm:w-auto"
+      className={`${base} ${styles}`}
     >
       <Download className="h-4 w-4" aria-hidden />
       {busy ? 'Préparation du PDF…' : label}
     </button>
+  );
+}
+
+/**
+ * Soft close post-climax : RDV (ou form) primaire, PDF secondaire (ghost).
+ * `tone`: 'warn' (ambre) | 'ok' (émeraude) | 'default' (primary).
+ */
+export function ToolSoftClose({
+  headline,
+  subline,
+  rdvPath,
+  rdvLabel = 'Réserver 15 minutes',
+  onRdvClick,
+  formMode = false,
+  onFormClick,
+  formLabel = 'Demander une présentation',
+  onPdf,
+  pdfBusy = false,
+  pdfLabel = 'Garder mon résumé PDF',
+  tone = 'default',
+}) {
+  const toneClass =
+    tone === 'warn'
+      ? 'border-amber-200/80 bg-gradient-to-br from-amber-50/90 to-white'
+      : tone === 'ok'
+        ? 'border-emerald-200/80 bg-gradient-to-br from-emerald-50/90 to-white'
+        : 'border-primary/15 bg-gradient-to-br from-primary/[0.06] to-secondary/[0.05]';
+
+  return (
+    <div
+      className={`campagne-soft-close-enter space-y-4 rounded-2xl border px-4 py-4 md:px-5 ${toneClass}`}
+      data-testid="campagne-tool-soft-close"
+    >
+      {headline ? (
+        <p className="font-heading text-base font-semibold text-dark md:text-lg">{headline}</p>
+      ) : null}
+      {subline ? (
+        <p className="text-sm leading-relaxed text-prestige-taupe">{subline}</p>
+      ) : null}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+        {formMode ? (
+          <button
+            type="button"
+            onClick={onFormClick}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-colors hover:bg-dark sm:w-auto"
+            data-testid="campagne-tool-cta-form"
+          >
+            {formLabel}
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        ) : (
+          <Link
+            to={rdvPath}
+            onClick={onRdvClick}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-colors hover:bg-dark sm:w-auto"
+            data-testid="campagne-tool-cta-rdv"
+          >
+            {rdvLabel}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        )}
+        {onPdf ? (
+          <ToolDownloadPdf
+            onClick={onPdf}
+            busy={pdfBusy}
+            label={pdfLabel}
+            variant="ghost"
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** Reveal climax partagé (keyed remount côté parent) */
+export function ToolClimaxReveal({ children, className = '' }) {
+  return (
+    <div className={`campagne-climax-enter ${className}`} data-testid="campagne-tool-climax">
+      {children}
+    </div>
   );
 }
 

@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Check, AlertTriangle, LifeBuoy } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
-import { CampagneToolShell, ToolDownloadPdf } from '../CampagneToolShell';
+import { CampagneToolShell, ToolDownloadPdf, ToolSoftClose } from '../CampagneToolShell';
 
 const MOIS_OPTIONS = [
   { value: '3', label: '3 mois — revenu stable' },
@@ -125,7 +127,7 @@ function Metric({ label, value, detail, tone = 'default' }) {
   );
 }
 
-function buildLecture({ cible, ecart, manquant, surplus, moisPourCombler, epargneParMois, rythme12, mois }) {
+function buildLecture({ cible, manquant, surplus, moisPourCombler, epargneParMois, mois }) {
   if (cible <= 0) {
     return {
       headline: 'Il manque encore un chiffre',
@@ -160,11 +162,6 @@ function buildLecture({ cible, ecart, manquant, surplus, moisPourCombler, epargn
     points.push(
       `Au rythme de ${formatCad(epargneParMois)} / mois : environ ${formatDureeMois(moisPourCombler)}.`
     );
-    if (moisPourCombler > 12 && rythme12 > 0) {
-      points.push(
-        `Pour y arriver en ~12 mois : viser environ ${formatCad(rythme12)} / mois (illustration).`
-      );
-    }
   }
 
   points.push(
@@ -210,15 +207,13 @@ export function FondsUrgenceTool() {
     () =>
       buildLecture({
         cible,
-        ecart,
         manquant,
         surplus,
         moisPourCombler,
         epargneParMois,
-        rythme12,
         mois,
       }),
-    [cible, ecart, manquant, surplus, moisPourCombler, epargneParMois, rythme12, mois]
+    [cible, manquant, surplus, moisPourCombler, epargneParMois, mois]
   );
 
   const milestones = useMemo(
@@ -242,31 +237,66 @@ export function FondsUrgenceTool() {
   const statusDetail = !milestones[0].done
     ? 'Indique tes dépenses essentielles et combien de mois tu vises.'
     : atteint
-      ? 'Filet atteint dans ce scénario. Télécharge le PDF pour le garder.'
+      ? 'Filet OK — 15 min pour trancher le surplus, ou PDF.'
       : moisPourCombler == null
-        ? 'Ajoute un montant mensuel pour estimer le délai — puis télécharge le PDF.'
-        : 'Ajuste, regarde le délai, puis télécharge ton PDF.';
+        ? 'Ajoute un montant mensuel pour estimer le délai — puis 15 min ou PDF.'
+        : 'Délai vu — 15 min pour un palier, ou PDF à garder.';
 
   const dureeLabel = formatDureeMois(moisPourCombler);
   const moisPdfValue =
     moisPourCombler === null
-      ? 'Non estimable (epargne mensuelle = 0)'
+      ? 'Non estimable (épargne mensuelle = 0)'
       : dureeLabel || String(moisPourCombler);
+
+  const showRythme12SousManquant =
+    !atteint && moisPourCombler != null && moisPourCombler > 12 && rythme12 > 0;
+
+  const softClose = useMemo(() => {
+    if (cible <= 0) return null;
+    if (atteint || surplus > 0) {
+      return {
+        tone: 'ok',
+        headline: 'Filet OK dans ce scénario.',
+        subline: `Environ ${formatCad(surplus)} de surplus vs la cible illustrée. 15 min pour trancher le prochain dollar : dettes chères, CELI ou REER — selon ta situation.`,
+        rdvLabel: 'Trancher le prochain dollar — 15 min',
+      };
+    }
+    if (moisPourCombler != null && moisPourCombler > 24) {
+      return {
+        tone: 'warn',
+        headline: 'Pas besoin de tout remplir d’un coup.',
+        subline: `Il te manque ${formatCad(manquant)}${
+          dureeLabel ? ` (~${dureeLabel} à ton rythme)` : ''
+        }. 15 min pour un premier palier — souvent un mois de dépenses — et où le garer.`,
+        rdvLabel: 'Réserver 15 minutes',
+      };
+    }
+    return {
+      tone: 'warn',
+      headline: `Ton écart : ${formatCad(manquant)}.`,
+      subline: dureeLabel
+        ? `${dureeLabel} à ton rythme — 15 min pour fixer où garer le coussin et à quel rythme. Zéro pression.`
+        : '15 min pour fixer où garer le coussin et à quel rythme. Zéro pression.',
+      rdvLabel: 'Réserver 15 minutes',
+    };
+  }, [cible, atteint, surplus, moisPourCombler, manquant, dureeLabel]);
+
+  const rdvPath = buildCampagneRdvPath('fonds-urgence');
 
   const handleDownload = () =>
     downloadPdf({
-      title: "Resume — fonds d'urgence",
+      title: 'Résumé — fonds d’urgence',
       filename: 'resume-fonds-urgence.pdf',
       sections: [
         {
-          heading: 'Tes entrees',
+          heading: 'Tes entrées',
           rows: [
             {
-              label: 'Depenses essentielles / mois',
+              label: 'Dépenses essentielles / mois',
               value: formatCad(depenses),
             },
-            { label: 'Mois a couvrir', value: `${mois} mois` },
-            { label: 'Deja de cote', value: formatCad(epargneActuelle) },
+            { label: 'Mois à couvrir', value: `${mois} mois` },
+            { label: 'Déjà de côté', value: formatCad(epargneActuelle) },
             {
               label: 'Ajout possible / mois',
               value: formatCad(epargneParMois),
@@ -274,15 +304,15 @@ export function FondsUrgenceTool() {
           ],
         },
         {
-          heading: 'Resultats',
+          heading: 'Résultats',
           rows: [
-            { label: 'Montant a viser', value: formatCad(cible) },
+            { label: 'Montant à viser', value: formatCad(cible) },
             {
               label: atteint ? 'Surplus' : 'Il te manque',
               value: formatCad(atteint ? surplus : manquant),
             },
             { label: 'Progression', value: `${pctVersCible} %` },
-            { label: 'Delai au rythme actuel', value: moisPdfValue },
+            { label: 'Délai au rythme actuel', value: moisPdfValue },
             ...(rythme12 > 0 && !atteint
               ? [{ label: 'Rythme pour ~12 mois', value: `${formatCad(rythme12)} / mois` }]
               : []),
@@ -296,7 +326,7 @@ export function FondsUrgenceTool() {
           })),
         },
         {
-          heading: 'A retenir',
+          heading: 'À retenir',
           rows: A_RETENIR.map((point, i) => ({
             label: `${i + 1}`,
             value: point,
@@ -304,8 +334,8 @@ export function FondsUrgenceTool() {
         },
       ],
       notes: [
-        "Fonds d'urgence = argent accessible si tu perds ton job ou un gros imprevu.",
-        'Illustration educative seulement — pas un plan sur mesure.',
+        'Fonds d’urgence = argent accessible si tu perds ton job ou un gros imprévu.',
+        'Illustration éducative seulement — pas un plan sur mesure.',
       ],
     });
 
@@ -322,6 +352,7 @@ export function FondsUrgenceTool() {
               busy={busy}
               onClick={handleDownload}
               label="Télécharger mon résumé PDF"
+              variant="ghost"
             />
           </div>
         }
@@ -492,6 +523,11 @@ export function FondsUrgenceTool() {
               <p className="mt-1 text-sm font-medium text-dark">
                 {atteint ? 'de surplus vs la cible' : 'à combler'}
               </p>
+              {showRythme12SousManquant ? (
+                <p className="mt-1.5 text-sm font-bold text-dark">
+                  Soit ~{formatCad(rythme12)}/mois pour ~12 mois (illustration)
+                </p>
+              ) : null}
               <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{lecture.detail}</p>
 
               {lecture.points.length > 0 ? (
@@ -539,6 +575,24 @@ export function FondsUrgenceTool() {
                 tone={atteint ? 'ok' : 'default'}
               />
             </div>
+
+            {softClose ? (
+              <div className="mt-4">
+                <ToolSoftClose
+                  tone={softClose.tone}
+                  headline={softClose.headline}
+                  subline={softClose.subline}
+                  rdvPath={rdvPath}
+                  rdvLabel={softClose.rdvLabel}
+                  onRdvClick={() =>
+                    trackRendezVousClick('campagne_fonds-urgence_rdv_outil')
+                  }
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                  pdfLabel="Télécharger mon résumé PDF"
+                />
+              </div>
+            ) : null}
           </div>
         </div>
 

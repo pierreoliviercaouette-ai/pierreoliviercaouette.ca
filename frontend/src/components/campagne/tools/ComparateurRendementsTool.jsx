@@ -1,15 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
 import { useModelPortfolioReturns } from '../../../hooks/useModelPortfolioReturns';
 import {
   getBanqueAvgForProfil,
   PROFIL_RISQUE_LABELS,
 } from '../../../data/comparateurRendementsRates';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
 import {
   CampagneToolShell,
-  ToolDownloadPdf,
+  ToolClimaxReveal,
+  ToolSoftClose,
 } from '../CampagneToolShell';
 
 const PROFIL_OPTIONS = [
@@ -62,8 +66,13 @@ function Block({ step, title, subtitle, children, done, cols = 'sm:grid-cols-2' 
   );
 }
 
-function ResultCard({ label, value, detail, emphasize = false, valueFontScale = 1 }) {
-  const scale = Math.min(2, Math.max(1, Number(valueFontScale) || 1));
+function ResultCard({
+  label,
+  value,
+  detail,
+  emphasize = false,
+  valueClassName = 'text-2xl',
+}) {
   return (
     <div
       className={`rounded-2xl border px-4 py-3.5 ${
@@ -74,8 +83,7 @@ function ResultCard({ label, value, detail, emphasize = false, valueFontScale = 
     >
       <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">{label}</p>
       <p
-        className="font-heading mt-1.5 font-bold tabular-nums text-dark transition-[font-size] duration-500 ease-out"
-        style={{ fontSize: `${1.5 * scale}rem`, lineHeight: 1.15 }}
+        className={`font-heading mt-1.5 font-bold leading-tight tabular-nums text-dark ${valueClassName}`}
       >
         {value}
       </p>
@@ -84,16 +92,13 @@ function ResultCard({ label, value, detail, emphasize = false, valueFontScale = 
   );
 }
 
-/**
- * Police de base (échelle 1) à ±25 % d’écart vs banque.
- * +0,2 d’échelle par tranche de 5 % au-delà, plafonnée à 2×.
- */
-function ecartFontScale(ecartAbs, baseBanque) {
+/** Typo climax catalogue — intensité selon % d’écart vs banque. */
+function ecartValueClass(ecartAbs, baseBanque) {
   const denom = Math.max(Number(baseBanque) || 0, 1);
   const pctAbs = (Math.abs(Number(ecartAbs) || 0) / denom) * 100;
-  if (pctAbs <= 25) return 1;
-  const tranches = Math.floor((pctAbs - 25) / 5);
-  return Math.min(2, 1 + tranches * 0.2);
+  if (pctAbs <= 25) return 'text-3xl md:text-4xl';
+  if (pctAbs <= 45) return 'text-4xl md:text-5xl';
+  return 'text-5xl';
 }
 
 function formatPctFr(rate) {
@@ -145,6 +150,7 @@ function parsePctInput(raw, fallbackRate) {
 }
 
 export function ComparateurRendementsTool() {
+  const location = useLocation();
   const [montantInitial, setMontantInitial] = useState('10000');
   const [cotisationMensuelle, setCotisationMensuelle] = useState('200');
   const [annees, setAnnees] = useState('10');
@@ -155,6 +161,7 @@ export function ComparateurRendementsTool() {
   const [tauxBanqueManuel, setTauxBanqueManuel] = useState(false);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_comparateur-rendements_pdf');
   const { asOfLabel, getIaPct, ready: portfoliosReady } = useModelPortfolioReturns();
+  const resultTrackedRef = useRef(false);
 
   /** Moyenne 5 ans net des portefeuilles modèles (points de %) → décimal. */
   const modelePctPoints = getIaPct(profil);
@@ -165,6 +172,17 @@ export function ComparateurRendementsTool() {
     setProfil(value);
     setTauxBanquePct(pctToInput(getBanqueAvgForProfil(value) / 100));
     setTauxBanqueManuel(false);
+  };
+
+  const applyMythePreset = () => {
+    setMontantInitial('50000');
+    setCotisationMensuelle('0');
+    setAnnees('20');
+    applyProfil('equilibre');
+    trackEvent('select_content', {
+      content_type: 'tool_preset',
+      item_id: 'campagne_comparateur-rendements_preset_mythe',
+    });
   };
 
   const rateBanque = parsePctInput(tauxBanquePct, banquePresetPct);
@@ -179,9 +197,11 @@ export function ComparateurRendementsTool() {
   const totalModele = futureValueMonthly(principal, monthly, years, rateModele);
   const ecart = totalModele - totalBanque;
   const capitalVerse = principal + monthly * Math.round(years * 12);
-  const ecartScale = ecartFontScale(ecart, totalBanque);
+  const ecartTypo = ecartValueClass(ecart, totalBanque);
   const ecartPctAbs =
     totalBanque > 0 ? Math.round((Math.abs(ecart) / totalBanque) * 1000) / 10 : 0;
+  const showSoftClose = doneCount >= 3;
+  const showReleveInvite = showSoftClose && !tauxBanqueManuel;
 
   const milestones = useMemo(
     () => [
@@ -212,6 +232,16 @@ export function ComparateurRendementsTool() {
   const total = milestones.length;
   const progress = Math.round((doneCount / total) * 100);
 
+  useEffect(() => {
+    if (doneCount < 3 || resultTrackedRef.current) return;
+    resultTrackedRef.current = true;
+    trackEvent('select_content', {
+      content_type: 'tool_result',
+      item_id: 'campagne_comparateur-rendements_result',
+      value: Math.round(ecart),
+    });
+  }, [doneCount, ecart]);
+
   const maxTotal = Math.max(totalBanque, totalModele, 1);
   const banqueWidth = Math.round((totalBanque / maxTotal) * 100);
   const modeleWidth = Math.round((totalModele / maxTotal) * 100);
@@ -220,81 +250,86 @@ export function ComparateurRendementsTool() {
     years > 0 ? `${years.toLocaleString('fr-CA')} an${years > 1 ? 's' : ''}` : '…';
 
   const statusDetail =
-    doneCount >= 3
-      ? 'C’est prêt. Télécharge le PDF pour garder ton comparatif.'
-      : doneCount >= 2
-        ? 'Regarde l’écart — mêmes chiffres, même style des deux côtés.'
-        : 'Entre ton montant, ce que tu ajoutes chaque mois, et l’horizon.';
+    doneCount >= 2
+      ? 'Regarde l’écart — mêmes chiffres, même style des deux côtés.'
+      : 'Entre ton montant, ce que tu ajoutes chaque mois, et l’horizon.';
+
+  const softCloseHeadline = `T’as ~${formatCad(ecart)} d’écart illustratif après ${yearsLabel}, à profil égal. Ça chicotte ? On colle ça à ton relevé en 15 minutes — zéro pression.`;
+
+  const rdvPath = buildCampagneRdvPath('comparateur-rendements', location.search);
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Resume — banque vs modeles',
+      title: 'Résumé — banque vs modèles',
       filename: 'resume-comparateur-rendements.pdf',
       sections: [
         {
-          heading: 'Tes entrees',
+          heading: 'Tes entrées',
           rows: [
-            { label: 'Montant de depart', value: formatCad(principal) },
+            { label: 'Montant de départ', value: formatCad(principal) },
             { label: 'Ajoute chaque mois', value: formatCad(monthly) },
             {
-              label: 'Nombre d’annees',
+              label: 'Nombre d’années',
               value: `${years.toLocaleString('fr-CA')} an${years > 1 ? 's' : ''}`,
             },
             {
-              label: 'Profil a risque egal',
+              label: 'Profil à risque égal',
               value: `${profilOption.label} — ${profilOption.hint}`,
             },
             {
               label: 'Taux annuel banque',
-              value: `${formatPctFr(rateBanque)}${tauxBanqueManuel ? ' (saisi)' : ' (prereglage)'}`,
+              value: `${formatPctFr(rateBanque)}${tauxBanqueManuel ? ' (saisi)' : ' (préréglage)'}`,
             },
             {
-              label: 'Taux annuel modeles (5 ans net)',
-              value: `${formatPctFr(rateModele)} — portefeuilles modeles${asOfLabel ? ` (au ${asOfLabel})` : ''}`,
+              label: 'Taux annuel modèles (5 ans net)',
+              value: `${formatPctFr(rateModele)} — portefeuilles modèles${asOfLabel ? ` (au ${asOfLabel})` : ''}`,
             },
-            { label: 'Capital verse (approx.)', value: formatCad(capitalVerse) },
+            { label: 'Capital versé (approx.)', value: formatCad(capitalVerse) },
           ],
         },
         {
           heading: 'Projection (illustration)',
           rows: [
             {
-              label: `Cote banque (~${formatPctFr(rateBanque)} / an)`,
+              label: `Côté banque (~${formatPctFr(rateBanque)} / an)`,
               value: formatCad(totalBanque),
             },
             {
-              label: `Cote modeles (~${formatPctFr(rateModele)} / an)`,
+              label: `Côté modèles (~${formatPctFr(rateModele)} / an)`,
               value: formatCad(totalModele),
             },
-            { label: 'Ecart illustratif', value: formatCad(ecart) },
+            { label: 'Écart illustratif', value: formatCad(ecart) },
           ],
         },
       ],
       notes: [
-        'Illustration seulement — taux non garantis. Meme formule des deux cotes.',
-        'Cote modeles = moyenne 5 ans nette des portefeuilles modeles (serie Classique), selon le profil choisi.',
+        'Illustration seulement — taux non garantis. Même formule des deux côtés.',
+        'Côté modèles = moyenne 5 ans nette des portefeuilles modèles (série Classique 75/75), selon le profil choisi.',
+        asOfLabel ? `Date de référence modèles : ${asOfLabel}.` : null,
         tauxBanqueManuel
-          ? 'Taux banque saisi par le prospect — a valider avec ses releves.'
-          : 'Taux banque = prereglage illustratif pour le profil (modifiable).',
-        'Passes != futurs. Pas un conseil personnalise.',
-      ],
+          ? 'Taux banque saisi par le prospect — à valider avec ses relevés.'
+          : 'Taux banque = préréglage illustratif pour le profil (modifiable).',
+        'Produits différents (frais, structure, garanties). Passés ≠ futurs. Pas un conseil personnalisé.',
+      ].filter(Boolean),
     });
+
+  const mytheActive =
+    montantInitial === '50000' &&
+    cotisationMensuelle === '0' &&
+    annees === '20' &&
+    profil === 'equilibre' &&
+    !tauxBanqueManuel;
 
   return (
     <div data-testid="tool-comparateur-rendements">
       <CampagneToolShell
         title="Banque vs modèles — même départ"
-        intro="Même profil des deux côtés. Côté modèles : moyenne 5 ans nette de mes portefeuilles (mise à jour auto). Côté banque : préréglage ou ton taux saisi."
-        disclaimer="Illustration seulement. Les taux ne sont pas garantis. Passés ≠ futurs. Pas un conseil personnalisé."
+        intro="Même profil des deux côtés. Côté modèles : moyenne 5 ans nette de mes portefeuilles (mise à jour auto). Côté banque : préréglage ou le taux de ton relevé."
+        disclaimer="Illustration seulement. Côté modèles : moyenne 5 ans nette (série Classique 75/75). Produits différents. Passés ≠ futurs. Pas un conseil personnalisé."
         footer={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          showSoftClose ? null : (
             <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
-            <ToolDownloadPdf
-              busy={busy}
-              onClick={handleDownload}
-              label="Télécharger mon résumé PDF"
-            />
-          </div>
+          )
         }
       >
         <div className="mb-8">
@@ -303,7 +338,11 @@ export function ComparateurRendementsTool() {
               <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
                 Progression
               </p>
-              <p className="font-heading mt-1 text-2xl font-bold text-dark">
+              <p
+                className={`font-heading mt-1 font-bold text-dark ${
+                  doneCount >= 3 ? 'text-xl' : 'text-2xl'
+                }`}
+              >
                 {doneCount}
                 <span className="text-base font-medium text-prestige-taupe"> / {total}</span>
               </p>
@@ -401,6 +440,24 @@ export function ComparateurRendementsTool() {
                 </span>
               </div>
             </Field>
+            <div className="sm:col-span-3">
+              <button
+                type="button"
+                onClick={applyMythePreset}
+                aria-pressed={mytheActive}
+                data-testid="cmp-preset-mythe"
+                className={`inline-flex max-w-full items-center rounded-full px-3.5 py-1.5 text-left text-xs font-medium transition ${
+                  mytheActive
+                    ? 'bg-primary/10 text-primary shadow-[inset_0_0_0_1px_rgba(6,77,217,0.35)]'
+                    : 'bg-white text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)] hover:shadow-[inset_0_0_0_1px_rgba(1,35,63,0.22)]'
+                }`}
+              >
+                Essayer le scénario 50&nbsp;k$ · 20&nbsp;ans (mythe)
+              </button>
+              <p className="mt-1.5 text-xs text-prestige-taupe">
+                Même illustration que le post — one tap.
+              </p>
+            </div>
           </Block>
 
           <Block
@@ -463,7 +520,11 @@ export function ComparateurRendementsTool() {
                     id="cmp-taux-banque"
                     type="text"
                     inputMode="decimal"
-                    className={`${inputClass} pr-8`}
+                    className={`${inputClass} pr-8 ${
+                      showReleveInvite
+                        ? 'campagne-invite-pulse shadow-[inset_0_0_0_1.5px_rgba(6,77,217,0.35)]'
+                        : ''
+                    }`}
                     value={tauxBanquePct}
                     onChange={(e) => {
                       setTauxBanquePct(e.target.value);
@@ -476,6 +537,14 @@ export function ComparateurRendementsTool() {
                     %
                   </span>
                 </div>
+                {showReleveInvite ? (
+                  <p
+                    className="campagne-climax-enter mt-2 rounded-lg bg-primary/[0.06] px-2.5 py-1.5 text-xs font-medium leading-relaxed text-primary"
+                    data-testid="cmp-invite-releve"
+                  >
+                    Pour coller ça à toi : saisis le taux de ton relevé.
+                  </p>
+                ) : null}
               </Field>
               <div className="min-w-0">
                 <p className={labelClass}>Taux annuel — côté modèles</p>
@@ -524,20 +593,38 @@ export function ComparateurRendementsTool() {
             </div>
 
             <div className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ResultCard
-                  label="Côté banque"
-                  value={formatCad(totalBanque)}
-                  detail={`~${formatPctFr(rateBanque)} / an`}
-                />
-                <ResultCard
-                  label="Côté modèles"
-                  value={formatCad(totalModele)}
-                  detail={`~${formatPctFr(rateModele)} / an`}
-                />
-              </div>
+              <ToolClimaxReveal key={`ecart-${Math.round(ecart)}-${years}-${profil}`}>
+                <div className="campagne-climax-pulse">
+                  <ResultCard
+                    label="Écart illustratif"
+                    value={formatCad(ecart)}
+                    detail={`≈ ${String(ecartPctAbs).replace('.', ',')} % vs côté banque · après ${yearsLabel} · ~${formatCad(capitalVerse)} versés. Mêmes chiffres, même profil.`}
+                    emphasize
+                    valueClassName={ecartTypo}
+                  />
+                </div>
+              </ToolClimaxReveal>
 
-              <div className="space-y-2.5 rounded-2xl bg-prestige-beige/40 px-3.5 py-3" aria-hidden>
+              {showSoftClose ? (
+                <ToolSoftClose
+                  headline={softCloseHeadline}
+                  subline="Saisis le taux de ton relevé juste au-dessus si tu veux coller ça à toi."
+                  rdvPath={rdvPath}
+                  rdvLabel="Réserver 15 minutes"
+                  onRdvClick={() =>
+                    trackRendezVousClick('campagne_comparateur-rendements_rdv_outil')
+                  }
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                  pdfLabel="Garder mon résumé PDF"
+                />
+              ) : null}
+
+              <div
+                key={`bars-${profil}-${years}-${Math.round(ecart)}`}
+                className="space-y-2.5 rounded-2xl bg-prestige-beige/40 px-3.5 py-3"
+                aria-hidden
+              >
                 <div className="flex items-center gap-3">
                   <span className="w-[4.5rem] shrink-0 text-xs text-prestige-taupe">Banque</span>
                   <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/80">
@@ -566,13 +653,25 @@ export function ComparateurRendementsTool() {
                 </div>
               </div>
 
-              <ResultCard
-                label="Écart illustratif"
-                value={formatCad(ecart)}
-                detail={`≈ ${String(ecartPctAbs).replace('.', ',')} % vs côté banque · après ${yearsLabel} · ~${formatCad(capitalVerse)} versés. Mêmes chiffres, même profil.`}
-                emphasize
-                valueFontScale={ecartScale}
-              />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <ResultCard
+                  label="Côté banque"
+                  value={formatCad(totalBanque)}
+                  detail={`~${formatPctFr(rateBanque)} / an`}
+                />
+                <ResultCard
+                  label="Côté modèles"
+                  value={formatCad(totalModele)}
+                  detail={`~${formatPctFr(rateModele)} / an`}
+                />
+              </div>
+
+              {milestones[2].done ? (
+                <p className="text-sm leading-relaxed text-prestige-taupe">
+                  2–3 points de plus par année, ça a l’air d’un détail — jusqu’à ce que ça se
+                  compose. Ici, l’illustration montre ≈ {formatCad(ecart)} après {yearsLabel}.
+                </p>
+              ) : null}
             </div>
           </div>
         </div>

@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, Building2, Check, Home, Scale } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { AlertTriangle, Building2, Check, ChevronDown, Home, Scale } from 'lucide-react';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
-import { CampagneToolShell, ToolDownloadPdf } from '../CampagneToolShell';
+import { CampagneToolShell, ToolClimaxReveal, ToolSoftClose } from '../CampagneToolShell';
 
 const inputClass =
   'w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.08)] transition focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(6,77,217,0.45)]';
@@ -90,18 +93,22 @@ function NumberField({ id, label, value, onChange, min, max, step, suffix, hint 
   );
 }
 
-function ResultCard({ label, value, detail, tone = 'default' }) {
+function ResultCard({ label, value, detail, tone = 'default', size = 'md' }) {
   const toneClass =
     tone === 'warn'
       ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white'
       : tone === 'ok'
         ? 'border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white'
         : 'border-primary/15 bg-gradient-to-br from-primary/[0.04] to-secondary/[0.05]';
+  const valueClass =
+    size === 'lg'
+      ? 'font-heading mt-1.5 text-3xl font-bold tabular-nums text-dark md:text-4xl'
+      : 'font-heading mt-1.5 text-2xl font-bold tabular-nums text-dark';
 
   return (
     <div className={`rounded-2xl border px-4 py-3.5 ${toneClass}`}>
       <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">{label}</p>
-      <p className="font-heading mt-1.5 text-2xl font-bold tabular-nums text-dark">{value}</p>
+      <p className={valueClass}>{value}</p>
       {detail ? <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">{detail}</p> : null}
     </div>
   );
@@ -111,6 +118,7 @@ function ResultCard({ label, value, detail, tone = 'default' }) {
  * Banque/prêteur vs protection personnelle + estimateur capital famille.
  */
 export function AssuranceHypothecaireTool() {
+  const location = useLocation();
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_assurance-hypothecaire_pdf');
   const [solde, setSolde] = useState('350000');
   const [annees, setAnnees] = useState('20');
@@ -120,6 +128,8 @@ export function AssuranceHypothecaireTool() {
   const [moisRemplacement, setMoisRemplacement] = useState('24');
   const [coussin, setCoussin] = useState('15000');
   const [checked, setChecked] = useState({});
+
+  const rdvPath = buildCampagneRdvPath('hypotheque-assurance-vie', location.search);
 
   const calc = useMemo(() => {
     const balance = toNum(solde);
@@ -142,6 +152,10 @@ export function AssuranceHypothecaireTool() {
     const remplacementTotal = rempN * moisN;
     const auDelaDuPret = dettesN + remplacementTotal + coussinN;
     const capitalFamille = balance + auDelaDuPret;
+    const gapShare =
+      capitalFamille > 0 && auDelaDuPret > 0
+        ? Math.min(100, (auDelaDuPret / capitalFamille) * 100)
+        : 0;
 
     return {
       balance,
@@ -160,6 +174,7 @@ export function AssuranceHypothecaireTool() {
       remplacementTotal,
       auDelaDuPret,
       capitalFamille,
+      gapShare,
     };
   }, [solde, annees, primeMensuelle, autresDettes, remplacementMensuel, moisRemplacement, coussin]);
 
@@ -167,27 +182,25 @@ export function AssuranceHypothecaireTool() {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const checkedCount = COMPARISON_ROWS.filter((r) => checked[r.id]).length;
-
   const handlePdf = () =>
     downloadPdf({
-      title: 'Assurance hypothecaire — banque vs famille',
+      title: 'Assurance hypothécaire — banque vs famille',
       filename: 'resume-assurance-hypothecaire.pdf',
       sections: [
         {
-          heading: 'Comparaison creancier vs personnel',
+          heading: 'Comparaison créancier vs personnel',
           rows: [
             { label: 'Solde approximatif', value: formatCad(calc.balance) },
-            { label: 'Annees restantes', value: `${calc.years} ans` },
+            { label: 'Années restantes', value: `${calc.years} ans` },
             {
               label: 'Prime mensuelle (si saisie)',
               value: calc.premium > 0 ? formatCad(calc.premium) : 'Non saisie',
             },
             {
-              label: 'Cout relatif (illustration)',
+              label: 'Coût relatif (illustration)',
               value:
                 calc.ratio != null
-                  ? `Environ x${calc.ratio.toFixed(1)} a mi-parcours`
+                  ? `Environ ×${calc.ratio.toFixed(1)} à mi-parcours`
                   : 'Ajoute une prime pour illustrer',
             },
           ],
@@ -201,7 +214,11 @@ export function AssuranceHypothecaireTool() {
               label: 'Revenu de transition',
               value: `${formatCad(calc.remplacementTotal)} (${calc.moisN} mois)`,
             },
-            { label: 'Coussin imprevus', value: formatCad(calc.coussinN) },
+            { label: 'Coussin imprévus', value: formatCad(calc.coussinN) },
+            {
+              label: 'Écart au-delà du prêt',
+              value: formatCad(calc.auDelaDuPret),
+            },
             {
               label: 'Montant illustratif pour la famille',
               value: formatCad(calc.capitalFamille),
@@ -217,25 +234,18 @@ export function AssuranceHypothecaireTool() {
         },
       ],
       notes: [
-        'Illustration educative seulement — pas un amortissement exact ni un conseil personnalise.',
-        'L’assurance creancier et l’assurance vie personnelle ne sont pas interchangeables automatiquement.',
+        'Illustration éducative seulement — pas un amortissement exact ni un conseil personnalisé.',
+        'Le solde à mi-parcours est une illustration (≈ moitié), pas un calendrier d’amortissement exact.',
+        'L’assurance créancier et l’assurance vie personnelle ne sont pas interchangeables automatiquement.',
+        '* Selon le contrat et le prêteur. Conditions variables.',
       ],
     });
 
   return (
     <CampagneToolShell
-      title="Banque vs famille : compare, puis chiffre"
-      intro="L’assurance du prêteur et une protection personnelle, ce n’est pas le même produit. Compare les logiques, vois le coût relatif qui monte pendant que la couverture baisse — puis estime ce qu’il faudrait vraiment aux proches."
-      footer={
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-prestige-taupe">
-            {checkedCount > 0
-              ? `${checkedCount}/${COMPARISON_ROWS.length} points lus · capital illustratif ${formatCad(calc.capitalFamille)}`
-              : 'Compare d’abord, puis ajuste les chiffres pour la famille'}
-          </p>
-          <ToolDownloadPdf onClick={handlePdf} busy={busy} />
-        </div>
-      }
+      title="Banque vs famille : chiffre l’écart, puis compare"
+      intro="L’assurance du prêteur et une protection personnelle, ce n’est pas le même produit. Estime d’abord ce qu’il faudrait aux proches — au-delà du seul solde. Ensuite, compare les deux logiques."
+      disclaimer="Illustration éducative seulement — pas un amortissement exact ni un conseil personnalisé. L’assurance créancier et l’assurance vie personnelle ne sont pas interchangeables automatiquement. * Selon le contrat et le prêteur."
     >
       <div className="space-y-10">
         <div className="grid gap-3 sm:grid-cols-3">
@@ -283,7 +293,8 @@ export function AssuranceHypothecaireTool() {
               </p>
               <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">
                 Vers l’année {calc.midYears}, si le solde a diminué d’environ moitié, la couverture
-                liée au prêt suit souvent le solde — alors que la prime peut rester semblable.
+                liée au prêt suit souvent le solde — alors que la prime peut rester semblable ou être
+                revue au renouvellement*.
               </p>
               {calc.ratio != null ? (
                 <p className="mt-3 flex items-start gap-2 text-sm font-medium text-amber-900">
@@ -322,66 +333,8 @@ export function AssuranceHypothecaireTool() {
         ) : null}
 
         <div>
-          <div className="mb-3 flex items-center gap-2">
-            <Scale className="h-4 w-4 text-primary" aria-hidden />
-            <h3 className="font-heading text-base font-semibold text-dark">
-              1. Tableau comparatif (éducatif)
-            </h3>
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-prestige-beige">
-            <div className="hidden grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-0 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-prestige-taupe sm:grid">
-              <div className="px-3 py-2.5">Critère</div>
-              <div className="px-3 py-2.5">Prêteur / banque</div>
-              <div className="px-3 py-2.5">Protection personnelle</div>
-              <div className="px-3 py-2.5">Lu</div>
-            </div>
-            <ul className="divide-y divide-prestige-beige/80">
-              {COMPARISON_ROWS.map((row) => {
-                const on = Boolean(checked[row.id]);
-                return (
-                  <li key={row.id}>
-                    <button
-                      type="button"
-                      onClick={() => toggleRow(row.id)}
-                      className={`grid w-full grid-cols-1 gap-2 px-3 py-3.5 text-left transition sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start sm:gap-0 ${
-                        on ? 'bg-primary/[0.04]' : 'bg-white hover:bg-gray-50/80'
-                      }`}
-                      aria-pressed={on}
-                    >
-                      <p className="text-sm font-semibold text-dark sm:pr-2">{row.label}</p>
-                      <p className="text-sm leading-relaxed text-prestige-taupe sm:px-2">
-                        <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-wide text-amber-700/90 sm:hidden">
-                          Banque
-                        </span>
-                        {row.banque}
-                      </p>
-                      <p className="text-sm leading-relaxed text-prestige-taupe sm:px-2">
-                        <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-wide text-emerald-700/90 sm:hidden">
-                          Personnel
-                        </span>
-                        {row.privee}
-                      </p>
-                      <span
-                        className={`mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full sm:mt-0 sm:justify-self-center ${
-                          on
-                            ? 'bg-primary text-white'
-                            : 'bg-white text-prestige-taupe shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]'
-                        }`}
-                        aria-hidden
-                      >
-                        {on ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : null}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-
-        <div>
           <h3 className="font-heading mb-1 text-base font-semibold text-dark">
-            2. Combien pour la famille ? (au-delà du solde)
+            Combien pour la famille ? (au-delà du solde)
           </h3>
           <p className="mb-4 text-sm text-prestige-taupe">
             Même solde — on ajoute dettes, revenu de transition et imprévus pour illustrer un
@@ -466,20 +419,131 @@ export function AssuranceHypothecaireTool() {
             <ResultCard
               label="Montant illustratif pour la famille"
               value={formatCad(calc.capitalFamille)}
-              detail={
-                calc.auDelaDuPret > 0
-                  ? `Dont ${formatCad(calc.auDelaDuPret)} au-delà du prêt (dettes, revenu, imprévus).`
-                  : 'Maison + dettes + revenu + imprévus — illustration seulement.'
-              }
+              detail="Maison + dettes + revenu + imprévus — illustration seulement."
               tone={calc.auDelaDuPret > 0 ? 'warn' : 'ok'}
+              size="lg"
+            />
+          </div>
+
+          {calc.auDelaDuPret > 0 ? (
+            <ToolClimaxReveal
+              key={calc.auDelaDuPret}
+              className="mt-4"
+            >
+              <div
+                className="space-y-3 rounded-2xl border border-amber-300/70 bg-gradient-to-br from-amber-50 via-white to-amber-50/40 px-4 py-5 md:px-6"
+                data-testid="hypotheque-gap-banner"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-800/90">
+                  Écart illustratif au-delà du prêt
+                </p>
+                <p className="font-heading text-3xl font-bold tabular-nums text-dark md:text-4xl lg:text-5xl">
+                  +{formatCad(calc.auDelaDuPret)}
+                </p>
+                <p className="text-sm leading-relaxed text-prestige-taupe">
+                  C’est souvent ça qu’on clarifie en 15 minutes — sans pression.
+                </p>
+                <div
+                  className="h-3 overflow-hidden rounded-full bg-amber-100/90"
+                  role="presentation"
+                  aria-hidden
+                >
+                  <div
+                    key={calc.auDelaDuPret}
+                    className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-600 transition-[width] duration-700 ease-out"
+                    style={{ width: `${calc.gapShare}%` }}
+                  />
+                </div>
+              </div>
+            </ToolClimaxReveal>
+          ) : null}
+
+          <div className="mt-4">
+            <ToolSoftClose
+              headline={`Ton illustration : ${formatCad(calc.balance)} vs ${formatCad(calc.capitalFamille)}`}
+              subline="On clarifie banque vs perso en 15 min."
+              rdvPath={rdvPath}
+              rdvLabel="Clarifier banque vs famille (15 min)"
+              onRdvClick={() =>
+                trackRendezVousClick('campagne_hypotheque-assurance-vie_rdv_outil')
+              }
+              onPdf={handlePdf}
+              pdfBusy={busy}
+              pdfLabel="Télécharger mon résumé PDF"
+              tone={calc.auDelaDuPret > 0 ? 'warn' : 'default'}
             />
           </div>
         </div>
 
+        <details className="group overflow-hidden rounded-2xl border border-prestige-beige bg-white open:shadow-[0_8px_24px_rgba(1,35,63,0.04)]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-left marker:content-none [&::-webkit-details-marker]:hidden">
+            <span className="flex min-w-0 items-center gap-2">
+              <Scale className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+              <span className="font-heading text-sm font-semibold text-dark md:text-base">
+                Approfondir : banque vs protection personnelle
+              </span>
+            </span>
+            <ChevronDown
+              className="h-4 w-4 shrink-0 text-prestige-taupe transition-transform duration-200 group-open:rotate-180"
+              aria-hidden
+            />
+          </summary>
+          <div className="border-t border-prestige-beige/80">
+            <div className="hidden grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-0 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-prestige-taupe sm:grid">
+              <div className="px-3 py-2.5">Critère</div>
+              <div className="px-3 py-2.5">Prêteur / banque</div>
+              <div className="px-3 py-2.5">Protection personnelle</div>
+              <div className="px-3 py-2.5">Lu</div>
+            </div>
+            <ul className="divide-y divide-prestige-beige/80">
+              {COMPARISON_ROWS.map((row) => {
+                const on = Boolean(checked[row.id]);
+                return (
+                  <li key={row.id}>
+                    <button
+                      type="button"
+                      onClick={() => toggleRow(row.id)}
+                      className={`grid w-full grid-cols-1 gap-2 px-3 py-3.5 text-left transition sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start sm:gap-0 ${
+                        on ? 'bg-primary/[0.04]' : 'bg-white hover:bg-gray-50/80'
+                      }`}
+                      aria-pressed={on}
+                    >
+                      <p className="text-sm font-semibold text-dark sm:pr-2">{row.label}</p>
+                      <p className="text-sm leading-relaxed text-prestige-taupe sm:px-2">
+                        <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-wide text-amber-700/90 sm:hidden">
+                          Banque
+                        </span>
+                        {row.banque}
+                      </p>
+                      <p className="text-sm leading-relaxed text-prestige-taupe sm:px-2">
+                        <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-wide text-emerald-700/90 sm:hidden">
+                          Personnel
+                        </span>
+                        {row.privee}
+                      </p>
+                      <span
+                        className={`mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full sm:mt-0 sm:justify-self-center ${
+                          on
+                            ? 'bg-primary text-white'
+                            : 'bg-white text-prestige-taupe shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]'
+                        }`}
+                        aria-hidden
+                      >
+                        {on ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : null}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </details>
+
         <p className="rounded-xl bg-gray-50 px-4 py-3 text-xs leading-relaxed text-prestige-taupe">
-          Les contrats d’assurance créancier et d’assurance vie personnelle varient. Cette page ne
-          remplace pas la lecture de ta police ni un conseil personnalisé. Produits d’assurance de
-          iA Groupe financier le cas échéant — analyse au cas par cas.
+          Les contrats d’assurance créancier et d’assurance vie personnelle varient. Le solde à
+          mi-parcours est une illustration (≈ moitié), pas un calendrier d’amortissement exact.
+          Cette page ne remplace pas la lecture de ta police ni un conseil personnalisé. Produits
+          d’assurance de iA Groupe financier le cas échéant — analyse au cas par cas.
         </p>
       </div>
     </CampagneToolShell>

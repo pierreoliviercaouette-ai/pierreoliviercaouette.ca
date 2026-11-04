@@ -1,7 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Check, Clock, Settings2, Users } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
-import { CampagneToolShell, ToolDownloadPdf } from '../CampagneToolShell';
+import { trackEvent } from '../../../lib/analytics';
+import { CampagneToolShell, ToolSoftClose } from '../CampagneToolShell';
+
+export const MRA_FIT_STORAGE_KEY = 'campagne_programme-mra_fit';
 
 const inputClass =
   'w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.08)] transition focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(6,77,217,0.45)]';
@@ -9,17 +12,17 @@ const inputClass =
 const labelClass = 'mb-1.5 block text-xs font-medium text-prestige-taupe';
 
 const SITUATIONS = [
-  { id: 'aucune', label: 'Pas d’assurance collective en place' },
-  { id: 'couteuse', label: 'Collective trop chère / trop rigide' },
-  { id: 'choix', label: 'Les employés veulent plus de choix' },
-  { id: 'explorer', label: 'Je veux juste comparer les options' },
+  { id: 'aucune', label: 'Pas d’assurance collective en place', short: 'pas de collective' },
+  { id: 'couteuse', label: 'Collective trop chère / trop rigide', short: 'collective trop chère / rigide' },
+  { id: 'choix', label: 'Les employés veulent plus de choix', short: 'besoin de plus de choix' },
+  { id: 'explorer', label: 'Je veux juste comparer les options', short: 'en mode comparaison' },
 ];
 
 const CONTRIB = [
-  { id: 'zero', label: 'Sans cotiser (accès seulement)' },
-  { id: 'pct', label: 'Je pourrais cotiser un %' },
-  { id: 'plafond', label: 'Je préfère un plafond $ / personne' },
-  { id: 'indetermine', label: 'Pas encore décidé' },
+  { id: 'zero', label: 'Sans cotiser (accès seulement)', short: 'sans cotiser' },
+  { id: 'pct', label: 'Je pourrais cotiser un %', short: 'cotisation %' },
+  { id: 'plafond', label: 'Je préfère un plafond $ / personne', short: 'plafond $ / personne' },
+  { id: 'indetermine', label: 'Pas encore décidé', short: 'cotisation pas encore décidée' },
 ];
 
 const PILLARS = [
@@ -47,6 +50,12 @@ const PILLARS = [
   },
 ];
 
+const BADGE_STYLES = {
+  'Bon fit': 'bg-secondary/15 text-secondary',
+  'À explorer': 'bg-amber-100 text-amber-900',
+  'Moins prioritaire': 'bg-prestige-beige text-prestige-taupe',
+};
+
 function ChipGroup({ id, options, value, onChange }) {
   return (
     <div className="flex flex-wrap gap-2" role="group" aria-labelledby={id}>
@@ -72,15 +81,61 @@ function ChipGroup({ id, options, value, onChange }) {
   );
 }
 
+function scoreFit(n, situation) {
+  if (!n || n <= 0) {
+    return { badge: null, tone: 'default' };
+  }
+  if (n > 80) {
+    return { badge: 'Moins prioritaire', tone: 'muted' };
+  }
+  if (n >= 5 && n <= 40 && ['aucune', 'couteuse', 'choix'].includes(situation)) {
+    return { badge: 'Bon fit', tone: 'ok' };
+  }
+  return { badge: 'À explorer', tone: 'warn' };
+}
+
+function contribHook(contrib, badge) {
+  if (badge === 'Moins prioritaire') {
+    return 'On peut quand même clarifier si MRa (ou autre) a du sens pour ta taille.';
+  }
+  if (badge === 'À explorer') {
+    return 'Ça vaut une présentation pour comparer avec ce que tu as aujourd’hui.';
+  }
+  if (contrib === 'zero') {
+    return 'Surtout si tu veux offrir l’accès sans cotiser.';
+  }
+  if (contrib === 'pct' || contrib === 'plafond') {
+    return 'Surtout si tu veux un % ou un plafond sans gérer les plans.';
+  }
+  return 'Même si t’as pas encore décidé comment cotiser.';
+}
+
+function buildFitBlurb(n, situation, contrib, badge) {
+  if (!n || n <= 0) {
+    return 'Indique la taille de ton équipe pour personnaliser le résumé.';
+  }
+  const sit = SITUATIONS.find((s) => s.id === situation);
+  const situationCourte = sit?.short || 'ta situation';
+  const hook = contribHook(contrib, badge);
+  return `Pour ~${n} employés (${situationCourte}), t’as un ${badge}. ${hook}`;
+}
+
+function buildBridgeMessage(n, situation, contrib, badge) {
+  const sit = SITUATIONS.find((s) => s.id === situation);
+  const con = CONTRIB.find((c) => c.id === contrib);
+  return `Fit outil : ~${n} | ${sit?.short || situation} | ${con?.short || contrib} | score ${badge}`;
+}
+
 /**
  * Fit check PME — programme MRa vs logique collective traditionnelle.
+ * Soft close = Lead form (#demande), pas Bookings.
  */
 export function MraFitTool() {
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_programme-mra_pdf');
   const [employes, setEmployes] = useState('8');
   const [situation, setSituation] = useState('aucune');
   const [contrib, setContrib] = useState('indetermine');
-  const [checked, setChecked] = useState({ flex: true, simple: true, rapide: true });
+  const [checked, setChecked] = useState({ flex: false, simple: false, rapide: false });
 
   const nEmployes = useMemo(() => {
     const n = parseInt(String(employes).replace(/\D/g, ''), 10);
@@ -91,67 +146,122 @@ export function MraFitTool() {
   const contribLabel = CONTRIB.find((c) => c.id === contrib)?.label || '';
   const pillarsOn = PILLARS.filter((p) => checked[p.id]).length;
 
-  const fitBlurb = useMemo(() => {
-    if (nEmployes <= 0) return 'Indique la taille de ton équipe pour personnaliser le résumé.';
-    if (situation === 'aucune') {
-      return `Avec ~${nEmployes} personnes et pas de collective en place, MRa peut offrir un avantage salarié sans la lourdeur d’un régime traditionnel.`;
+  const fit = useMemo(() => scoreFit(nEmployes, situation), [nEmployes, situation]);
+  const badge = fit.badge;
+
+  const fitBlurb = useMemo(
+    () => buildFitBlurb(nEmployes, situation, contrib, badge || 'À explorer'),
+    [nEmployes, situation, contrib, badge]
+  );
+
+  const softHeadline = useMemo(() => {
+    if (!badge || !nEmployes) return 'Indique ta taille d’équipe pour voir ton fit.';
+    return `Pour ~${nEmployes} employés — ${badge}`;
+  }, [badge, nEmployes]);
+
+  const softSubline = useMemo(() => {
+    if (!badge || !nEmployes) return 'Je te rappelle — sans Bookings ni pression.';
+    const hook = contribHook(contrib, badge);
+    return `${hook} Laisse ton entreprise + ton cell — je te rappelle pour une présentation MRa.`;
+  }, [badge, nEmployes, contrib]);
+
+  useEffect(() => {
+    if (typeof sessionStorage === 'undefined' || !badge || !nEmployes) return;
+    const payload = {
+      message: buildBridgeMessage(nEmployes, situation, contrib, badge),
+      teamSize: nEmployes,
+      fitScore: badge,
+      situation,
+      contrib,
+      blurb: fitBlurb,
+      updatedAt: Date.now(),
+    };
+    try {
+      sessionStorage.setItem(MRA_FIT_STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      /* ignore quota / private mode */
     }
-    if (situation === 'couteuse') {
-      return `Si la collective actuelle est trop chère ou trop rigide, MRa laisse le choix aux employés et limite ton rôle (%, budget, catégories).`;
-    }
-    if (situation === 'choix') {
-      return `Tes gens veulent du sur-mesure : MRa repose sur des contrats individuels — chacun choisit ses protections avec un conseiller.`;
-    }
-    return `Compare calmement : flexibilité, simplicité et rapidité — puis une présentation gratuite si tu veux aller plus loin.`;
-  }, [nEmployes, situation]);
+  }, [nEmployes, situation, contrib, badge, fitBlurb]);
 
   const toggle = (id) => setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
 
+  const goToForm = () => {
+    if (badge && nEmployes) {
+      trackEvent('select_content', {
+        content_type: 'tool_to_form',
+        item_id: 'campagne_programme-mra_tool_to_form',
+        fit_score: badge,
+        team_size: nEmployes,
+      });
+    }
+    document.getElementById('demande')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const handlePdf = () =>
     downloadPdf({
-      title: 'Programme MRa — resume pour PME',
+      title: 'Programme MRa — résumé pour PME',
       filename: 'resume-programme-mra.pdf',
       sections: [
         {
           heading: 'Ta situation',
           rows: [
-            { label: 'Taille approx. de l’equipe', value: nEmployes ? `${nEmployes} personnes` : 'Non indique' },
-            { label: 'Contexte', value: situationLabel || 'Non indique' },
-            { label: 'Contribution employeur', value: contribLabel || 'Non indique' },
+            {
+              label: 'Taille approx. de l’équipe',
+              value: nEmployes ? `${nEmployes} personnes` : 'Non indiqué',
+            },
+            { label: 'Contexte', value: situationLabel || 'Non indiqué' },
+            { label: 'Contribution employeur', value: contribLabel || 'Non indiqué' },
+            { label: 'Score fit', value: badge || 'À préciser' },
           ],
         },
         {
           heading: 'Points retenus',
           rows: PILLARS.filter((p) => checked[p.id]).map((p) => ({
             label: p.title,
-            value: `Employeur: ${p.employeur} | Employe: ${p.employe}`,
+            value: `Employeur: ${p.employeur} | Employé: ${p.employe}`,
           })),
         },
         {
           heading: 'Lecture',
-          rows: [{ label: 'Resume', value: fitBlurb }],
+          rows: [{ label: 'Résumé', value: fitBlurb }],
         },
       ],
       notes: [
-        'Document educatif non contractuel. Le programme MRa repose sur des contrats individuels avec selection medicale.',
-        'Refus, exclusions ou surprimes possibles. Primes et garanties selon les contrats. Preuves d’assurabilite reduites selon conditions.',
-        'Prochaine etape typique : presentation gratuite / 2 rencontres entreprise, puis 30-45 min par employe interesse.',
+        'Document éducatif non contractuel. Le programme MRa repose sur des contrats individuels avec sélection médicale.',
+        'Refus, exclusions ou surprimes possibles. Primes et garanties selon les contrats. Preuves d’assurabilité réduites selon conditions.',
+        'Prochaine étape typique : je te rappelle pour une présentation — puis ~2 rencontres entreprise, 30-45 min par employé intéressé. Pas de calendrier Bookings imposé.',
       ],
+      trackParams: badge ? { fit_score: badge, team_size: nEmployes } : undefined,
     });
+
+  const softClose = (
+    <ToolSoftClose
+      formMode
+      headline={softHeadline}
+      subline={softSubline}
+      formLabel="Recevoir une présentation"
+      onFormClick={goToForm}
+      onPdf={handlePdf}
+      pdfBusy={busy}
+      pdfLabel="Télécharger mon résumé PDF"
+    />
+  );
 
   return (
     <CampagneToolShell
       title="MRa pour ta PME : est-ce que ça colle ?"
-      intro="Alternative à l’assurance collective traditionnelle : tu offres l’accès, ils choisissent leurs protections, on accompagne. Coche ce qui compte pour toi — télécharge un résumé PDF."
+      intro="Alternative à la collective traditionnelle : tu offres l’accès, ils choisissent, on accompagne. Indique ta taille et ta situation — tu obtiens une lecture fit, puis tu peux demander une présentation."
       footer={
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3">
           <p className="text-sm text-prestige-taupe">
-            {pillarsOn}/3 piliers cochés · {fitBlurb}
+            {pillarsOn}/3 piliers cochés
+            {badge ? ` · ${badge}` : ''}
+            {nEmployes ? ` · ~${nEmployes} employés` : ''}
           </p>
-          <ToolDownloadPdf onClick={handlePdf} busy={busy} label="Télécharger mon résumé PDF" />
+          {softClose}
         </div>
       }
-      disclaimer="Illustration éducative — pas une soumission. Contrats individuels, sélection médicale, garanties selon contrats. Preuves d’assurabilité réduites sous conditions."
+      disclaimer="Illustration éducative — pas une soumission. Contrats individuels, sélection médicale, garanties selon contrats. Preuves d’assurabilité réduites sous conditions. Le fit n’est pas une admissibilité assureur."
     >
       <div className="space-y-8">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -189,9 +299,30 @@ export function MraFitTool() {
           <ChipGroup id="mra-sit-label" options={SITUATIONS} value={situation} onChange={setSituation} />
         </div>
 
-        <div className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06] px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-secondary">Lecture rapide</p>
-          <p className="mt-1.5 text-sm leading-relaxed text-dark">{fitBlurb}</p>
+        <div className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06] px-4 py-5 md:px-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-secondary">Lecture fit</p>
+          {nEmployes > 0 && badge ? (
+            <>
+              <p className="font-heading mt-2 text-4xl font-bold tracking-tight text-dark md:text-5xl">
+                ~{nEmployes}
+              </p>
+              <span
+                className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${BADGE_STYLES[badge] || BADGE_STYLES['À explorer']}`}
+              >
+                {badge}
+              </span>
+              <p className="mt-3 text-base leading-relaxed text-dark">{fitBlurb}</p>
+            </>
+          ) : (
+            <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{fitBlurb}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          {softClose}
+          <p className="text-center text-xs text-prestige-taupe sm:text-left">
+            Je te rappelle — sans Bookings
+          </p>
         </div>
 
         <div>
@@ -240,9 +371,8 @@ export function MraFitTool() {
         </div>
 
         <p className="rounded-xl bg-gray-50 px-4 py-3 text-xs leading-relaxed text-prestige-taupe">
-          MRa = contrats individuels proposés via l’entreprise. Sélection médicale : refus, exclusions ou
-          surprimes possibles. Mise en place typique : ~2 rencontres entreprise + 30–45 min / employé
-          intéressé. Prochaine étape : formulaire ci-dessous — je te recontacte.
+          MRa = contrats individuels via l’entreprise. Sélection médicale possible. Prochaine étape :
+          je te rappelle pour une présentation — pas de calendrier imposé.
         </p>
       </div>
     </CampagneToolShell>

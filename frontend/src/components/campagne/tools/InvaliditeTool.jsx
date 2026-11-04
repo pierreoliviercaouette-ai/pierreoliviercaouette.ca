@@ -1,8 +1,13 @@
 ﻿import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Check, AlertTriangle } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
-import { CampagneToolShell, ToolDownloadPdf } from '../CampagneToolShell';
+import { CampagneToolShell, ToolSoftClose } from '../CampagneToolShell';
+
+const DELAI_CHIPS = [30, 90, 120];
 
 function parseNum(value) {
   const n = parseFloat(value);
@@ -100,12 +105,33 @@ function ResultCard({ label, value, detail, tone = 'default' }) {
   );
 }
 
+function SnapshotCell({ label, value, tone = 'default' }) {
+  const wrap =
+    tone === 'warn'
+      ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 to-white'
+      : tone === 'ok'
+        ? 'border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white'
+        : 'border-prestige-beige/90 bg-white';
+
+  return (
+    <div className={`rounded-2xl border px-4 py-3.5 ${wrap}`}>
+      <p className="text-xs font-semibold uppercase tracking-wide text-secondary">{label}</p>
+      <p className="font-heading mt-1.5 text-3xl font-bold tabular-nums text-dark md:text-4xl">
+        {value}
+      </p>
+    </div>
+  );
+}
+
 export function InvaliditeTool() {
+  const location = useLocation();
   const [revenuNet, setRevenuNet] = useState('4500');
   const [pctCollective, setPctCollective] = useState('60');
   const [delaiCarence, setDelaiCarence] = useState('90');
   const [depensesFixes, setDepensesFixes] = useState('3200');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_assurance-invalidite_pdf');
+
+  const rdvPath = buildCampagneRdvPath('assurance-invalidite', location.search);
 
   const revenu = Math.max(0, parseNum(revenuNet));
   const pct = Math.max(0, Math.min(100, parseNum(pctCollective)));
@@ -119,44 +145,53 @@ export function InvaliditeTool() {
 
   const hasInputs = revenu > 0 && pct > 0 && depenses > 0;
   const gapWarn = trouVsDepenses > 0;
+  const coussinWarn = jours > 0 && depenses > 0;
   const couverturePct =
     depenses > 0 ? Math.min(100, Math.round((montantCollective / depenses) * 100)) : 0;
 
-  const statusDetail = !hasInputs
+  const softHeadline = !hasInputs
+    ? null
+    : gapWarn
+      ? `~${formatCad(trouVsDepenses)} /mois à combler · ~${formatCad(coussin)} à tenir.`
+      : 'Les $ tiennent sur papier.';
+
+  const softSubline = !hasInputs
     ? 'Entre ton revenu, ce que ton assurance collective t’offre, et tes dépenses — le trou apparaît tout de suite.'
     : gapWarn
-      ? 'Y’a un trou vs tes dépenses. Télécharge le PDF et compare avec ton livret.'
-      : 'Sur papier, ce que ton assurance collective t’offre couvre tes dépenses. Garde le PDF avec ton livret.';
+      ? 'On ouvre ton livret en 15 min — %, délai, définition.'
+      : 'Reste la définition et la durée dans ton livret — c’est souvent ça qu’on clarifie en 15 min.';
+
+  const softTone = gapWarn || coussinWarn ? 'warn' : 'default';
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Resume — ton assurance collective (invalidite)',
+      title: 'Résumé — ton assurance collective (invalidité)',
       filename: 'resume-assurance-invalidite.pdf',
       sections: [
         {
-          heading: 'Tes entrees',
+          heading: 'Tes entrées',
           rows: [
             { label: 'Revenu net mensuel', value: formatCad(revenu) },
             {
-              label: 'Part remplacee par ton assurance collective',
+              label: 'Part remplacée par ton assurance collective',
               value: `${pct.toLocaleString('fr-CA')} %`,
             },
             {
-              label: 'Jours d’attente avant le premier cheque',
+              label: 'Jours d’attente avant le premier chèque',
               value: `${jours.toLocaleString('fr-CA')} jours`,
             },
-            { label: 'Depenses fixes mensuelles', value: formatCad(depenses) },
+            { label: 'Dépenses fixes mensuelles', value: formatCad(depenses) },
           ],
         },
         {
-          heading: 'Resultats',
+          heading: 'Résultats',
           rows: [
             {
               label: "Ce que ton assurance collective t'offre / mois",
               value: formatCad(montantCollective),
             },
             {
-              label: 'Trou vs depenses fixes',
+              label: 'Trou vs dépenses fixes',
               value: formatCad(trouVsDepenses),
             },
             {
@@ -164,16 +199,17 @@ export function InvaliditeTool() {
               value: formatCad(trouVsRevenu),
             },
             {
-              label: 'A avoir de cote pendant l’attente',
+              label: 'À avoir de côté pendant l’attente',
               value: formatCad(coussin),
             },
           ],
         },
       ],
       notes: [
-        'Illustration educative seulement — pas un conseil personnalise.',
-        'Le % et le delai, c’est une chose. La definition d’invalidite dans ton livret, c’en est une autre.',
-        'Revalide avec ton livret et ta situation reelle.',
+        'Illustration éducative seulement — pas un conseil personnalisé.',
+        'Le % et le délai, c’est une chose. La définition d’invalidité dans ton livret, c’en est une autre.',
+        'Prochaine étape : 15 min pour valider %, délai, définition. Aucun % promis comme garantie.',
+        'Revalide avec ton livret et ta situation réelle.',
       ],
     });
 
@@ -184,26 +220,24 @@ export function InvaliditeTool() {
         intro="Ton assurance collective remplace souvent seulement une partie du salaire — et le premier chèque arrive après un délai. Entre tes chiffres : tu vois ce qui manque chaque mois, et ce qu’il faut tenir pendant l’attente."
         disclaimer="Contenu éducatif seulement — pas un conseil personnalisé. Valide toujours avec ton livret."
         footer={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
-            <ToolDownloadPdf busy={busy} onClick={handleDownload} label="Télécharger mon résumé PDF" />
-          </div>
+          hasInputs ? null : (
+            <p className="text-sm leading-relaxed text-prestige-taupe">{softSubline}</p>
+          )
         }
       >
-        {/* Snapshot — trou (chiffre) + couverture des dépenses (barre) */}
+        {/* Snapshot duo — trou + coussin (climax) */}
         <div className="mb-8">
-          <div className="mb-2 flex items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-                {gapWarn ? 'Trou vs dépenses / mois' : 'Marge vs dépenses / mois'}
-              </p>
-              <p className="font-heading mt-1 text-2xl font-bold tabular-nums text-dark">
-                {formatCad(Math.abs(trouVsDepenses))}
-              </p>
-            </div>
-            <p className="max-w-[11rem] text-right text-sm leading-snug text-prestige-taupe">
-              {formatCad(montantCollective)} / mois via ton assurance collective
-            </p>
+          <div className="mb-3 grid gap-3 sm:grid-cols-2">
+            <SnapshotCell
+              label={gapWarn ? 'Trou vs dépenses / mois' : 'Marge vs dépenses / mois'}
+              value={formatCad(Math.abs(trouVsDepenses))}
+              tone={gapWarn ? 'warn' : hasInputs ? 'ok' : 'default'}
+            />
+            <SnapshotCell
+              label="Coussin d’attente"
+              value={formatCad(coussin)}
+              tone={coussinWarn ? 'warn' : 'default'}
+            />
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-prestige-beige/70">
             <div
@@ -227,6 +261,22 @@ export function InvaliditeTool() {
               ? ` · ${jours.toLocaleString('fr-CA')} j d’attente avant le premier chèque.`
               : '.'}
           </p>
+
+          {hasInputs ? (
+            <div className="mt-4" data-testid="invalidite-rdv-tool">
+              <ToolSoftClose
+                headline={softHeadline}
+                subline={softSubline}
+                rdvPath={rdvPath}
+                rdvLabel="Clarifier mon trou en 15 min"
+                onRdvClick={() => trackRendezVousClick('campagne_assurance-invalidite_rdv_tool')}
+                onPdf={handleDownload}
+                pdfBusy={busy}
+                pdfLabel="Télécharger mon résumé PDF"
+                tone={softTone}
+              />
+            </div>
+          ) : null}
         </div>
 
         <div className="relative space-y-8 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-prestige-beige">
@@ -258,17 +308,42 @@ export function InvaliditeTool() {
                 suffix="%"
                 hint="Ex. 60 % = 60 $ pour chaque 100 $ de revenu. C’est dans ton livret — souvent entre 50 et 70 %."
               />
-              <NumberField
-                id="invalidite-carence"
-                label="Jours d’attente avant le premier chèque"
-                value={delaiCarence}
-                onChange={setDelaiCarence}
-                min={0}
-                step="1"
-                suffix="jours"
-                suffixWidth="pr-14"
-                hint="Pendant ce temps, ton assurance collective ne paie rien. C’est à toi de tenir."
-              />
+              <div className="min-w-0">
+                <NumberField
+                  id="invalidite-carence"
+                  label="Jours d’attente avant le premier chèque"
+                  value={delaiCarence}
+                  onChange={setDelaiCarence}
+                  min={0}
+                  step="1"
+                  suffix="jours"
+                  suffixWidth="pr-14"
+                  hint="Pendant ce temps, ton assurance collective ne paie rien. C’est à toi de tenir."
+                />
+                <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Délais fréquents">
+                  {DELAI_CHIPS.map((n) => {
+                    const selected = String(n) === delaiCarence;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setDelaiCarence(String(n))}
+                        aria-pressed={selected}
+                        className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                          selected
+                            ? 'bg-primary text-white'
+                            : 'border border-prestige-beige bg-white text-dark hover:border-primary/40'
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-prestige-taupe">
+                  Pas le livret sous la main ? Pars de 60 % / 90 j — on ajuste en RDV.
+                </p>
+              </div>
               <NumberField
                 id="invalidite-depenses"
                 label="Tes dépenses fixes mensuelles"
@@ -302,14 +377,14 @@ export function InvaliditeTool() {
                     ? 'Tes dépenses dépassent ce que ton assurance collective t’offre. Cette différence, c’est toi qui la comble.'
                     : 'Ce que ton assurance collective t’offre couvre (ou dépasse) tes dépenses — sur papier.'
                 }
-                tone={trouVsDepenses > 0 ? 'warn' : 'ok'}
+                tone={trouVsDepenses > 0 ? 'warn' : hasInputs ? 'ok' : 'default'}
               />
               <div className="sm:col-span-2">
                 <ResultCard
                   label="À avoir de côté pendant l’attente"
                   value={formatCad(coussin)}
                   detail={`${jours.toLocaleString('fr-CA')} jours sans chèque × tes dépenses — le coussin à prévoir avant que ton assurance collective commence.`}
-                  tone={coussin > 0 ? 'warn' : 'default'}
+                  tone={coussinWarn ? 'warn' : 'default'}
                 />
               </div>
             </div>
@@ -319,6 +394,20 @@ export function InvaliditeTool() {
               <span className="font-medium text-dark">définition d’invalidité</span> dans ton
               livret (« ta job » vs « n’importe quelle job »), c’en est une autre — à vérifier
               avant de conclure que ton assurance collective te couvre « pour vrai ».
+              {hasInputs && !gapWarn ? (
+                <>
+                  {' '}
+                  <Link
+                    to={rdvPath}
+                    onClick={() =>
+                      trackRendezVousClick('campagne_assurance-invalidite_rdv_tool_definition')
+                    }
+                    className="font-medium text-primary underline-offset-2 hover:underline"
+                  >
+                    Clarifier définition &amp; durée en 15 min →
+                  </Link>
+                </>
+              ) : null}
             </p>
           </Block>
         </div>
