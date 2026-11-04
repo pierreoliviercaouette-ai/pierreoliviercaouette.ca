@@ -1,4 +1,4 @@
-BRIEF CAMPAGNE META ADS — CATALOGUE CBO — 14 ENSEMBLES
+BRIEF CAMPAGNE META ADS — CATALOGUE CBO — 15 ENSEMBLES
 Pierre-Olivier Caouette — conseiller en sécurité financière
 Document pour Holo : textes d'annonces prêts à coller. Visuels à créer de ton côté.
 
@@ -39,12 +39,12 @@ Exemple Ad1 CELIAPP :
 https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad1
 
 ========================================================================
-2. VUE D'ENSEMBLE DES 14 ENSEMBLES
+2. VUE D'ENSEMBLE DES 15 ENSEMBLES
 ========================================================================
 
  1. Comparateur | Mythe bancaire | Âge 30–60 | /campagnes/comparateur-rendements | UTM comparateur | Outil : Comparateur banque vs portefeuilles modèles (PDF export)
  2. CELIAPP | 1re propriété | Âge 20–40 | /campagnes/celiapp | UTM celiapp | Outil : Simulateur mise de fonds CELIAPP
- 3. Assurance hypothécaire | Banque vs famille | Âge 28–55 | /campagnes/hypotheque-assurance-vie | UTM hypotheque_vie | Outil : Comparateur créancier vs personnel + estimateur capital famille (alias : /campagnes/assurance-hypothecaire)
+ 3. Hypothèque + assurance vie | Âge 28–55 | /campagnes/hypotheque-assurance-vie | UTM hypotheque_vie | Outil : Estimateur capital / hypothèque + vie
  4. Assurance invalidité | Âge 25–55 | /campagnes/assurance-invalidite | UTM invalidite | Outil : Calculateur trou de revenu
  5. Retraite REER CELI | Âge 35–60 | /campagnes/retraite-reer-celi | UTM retraite | Outil : Prioriseur REER / CELI
  6. Maladie grave | Âge 30–55 | /campagnes/maladie-grave | UTM maladie_grave | Outil : Estimateur capital maladie grave
@@ -56,13 +56,14 @@ https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_mediu
 12. Travailleur autonome | Âge 25–55 | /campagnes/travailleur-autonome | UTM autonome | Outil : Checklist filet autonome
 13. Plan global | Âge 30–60 | /campagnes/plan-global | UTM plan_global | Outil : Ordre d’attaque (plan global)
 14. Succession | Bases | Âge 35–65 | /campagnes/succession-bases | UTM succession | Outil : Checklist liquidité succession
+15. Programme MRa | PME | Âge 28–60 | /campagnes/programme-mra | UTM mra | Outil : Fit check MRa vs collective (PME)
 
-Ciblage : audiences larges (Advantage+ ou intérêts légers). Ne pas empiler trop d’intérêts.
+Ciblage : audiences larges (Advantage+ ou intérêts légers). Ne pas empiler 15 intérêts.
 
 Notes visuels (à toi) : dark navy, contraste fort, typo bold ; mentionner outil gratuit ; feed 1:1 ou 4:5 + Stories 9:16 ; pas de promesses de rendement.
 
 ========================================================================
-ENSEMBLE 1/14 — Comparateur | Mythe bancaire
+ENSEMBLE 1/15 — Comparateur | Mythe bancaire
 ========================================================================
 Âge : 30–60
 Outil landing : Comparateur banque vs portefeuilles modèles (PDF export)
@@ -162,7 +163,7 @@ Illustration seulement. Produits différents (frais, structure, garanties). Pass
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/comparateur-rendements?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=comparateur_ad3
 
 ========================================================================
-ENSEMBLE 2/14 — CELIAPP | 1re propriété
+ENSEMBLE 2/15 — CELIAPP | 1re propriété
 ========================================================================
 Âge : 20–40
 Outil landing : Simulateur mise de fonds CELIAPP
@@ -267,22 +268,16 @@ Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil 
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celiapp?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celiapp_ad3
 
 ========================================================================
-ENSEMBLE 3/14 — Assurance hypothécaire | Banque vs famille (fusionné)
+ENSEMBLE 3/15 — Hypothèque + assurance vie
 ========================================================================
 Âge : 28–55
-Outil landing : Comparateur créancier vs personnel + estimateur capital famille
+Outil landing : Estimateur capital / hypothèque + vie
 Landing : https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie
-Alias : https://www.pierreoliviercaouette.ca/campagnes/assurance-hypothecaire
 UTM content : hypotheque_vie_ad1 / hypotheque_vie_ad2 / hypotheque_vie_ad3
 CTA bouton : En savoir plus
 
-Copies Ad1–Ad3 + disclaimer : emails/campagne-meta-catalog/assurance-hypothecaire.md
-
-URL destination (ex. ad1) :
-https://www.pierreoliviercaouette.ca/campagnes/hypotheque-assurance-vie?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=hypotheque_vie_ad1
-
 ========================================================================
-ENSEMBLE 4/14 — Assurance invalidité
+ENSEMBLE 4/15 — Assurance invalidité
 ========================================================================
 Âge : 25–55
 Outil landing : Calculateur trou de revenu
@@ -370,7 +365,7 @@ https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/assurance-invalidite?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=invalidite_ad3
 
 ========================================================================
-ENSEMBLE 5/14 — Retraite REER CELI
+ENSEMBLE 5/15 — Retraite REER CELI
 ========================================================================
 Âge : 35–60
 Outil landing : Prioriseur REER / CELI
@@ -459,7 +454,7 @@ Essaie d'abord. Ensuite, si tu veux coller ça à ta vraie vie, 15 minutes avec 
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/retraite-reer-celi?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=retraite_ad3
 
 ========================================================================
-ENSEMBLE 6/14 — Maladie grave
+ENSEMBLE 6/15 — Maladie grave
 ========================================================================
 Âge : 30–55
 Outil landing : Estimateur capital maladie grave
@@ -558,7 +553,7 @@ Contenu éducatif. Pas un conseil personnalisé. Titre : conseiller en sécurit�
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/maladie-grave?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=maladie_grave_ad3
 
 ========================================================================
-ENSEMBLE 7/14 — REEE
+ENSEMBLE 7/15 — REEE
 ========================================================================
 Âge : 25–50
 Outil landing : Simulateur subventions REEE
@@ -652,7 +647,7 @@ Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil 
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/reee?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=reee_ad3
 
 ========================================================================
-ENSEMBLE 8/14 — Fonds d’urgence
+ENSEMBLE 8/15 — Fonds d’urgence
 ========================================================================
 Âge : 22–50
 Outil landing : Calculateur filet d’urgence
@@ -759,7 +754,7 @@ Contenu éducatif. Titre : conseiller en sécurité financière. Pas un conseil 
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/fonds-urgence?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=fonds_urgence_ad3
 
 ========================================================================
-ENSEMBLE 9/14 — CELI | Droits inutilisés
+ENSEMBLE 9/15 — CELI | Droits inutilisés
 ========================================================================
 Âge : 25–55
 Outil landing : Estimateur droits CELI
@@ -851,7 +846,7 @@ Contenu éducatif. Estimation illustrée. Pas un conseil personnalisé. Titre : 
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/celi-droits?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=celi_droits_ad3
 
 ========================================================================
-ENSEMBLE 10/14 — Trop jeune pour m’assurer
+ENSEMBLE 10/15 — Trop jeune pour m’assurer
 ========================================================================
 Âge : 22–40
 Outil landing : Score besoin + capital (présent / futur)
@@ -943,7 +938,7 @@ Contenu éducatif. Pas un conseil personnalisé. Titre : conseiller en sécurit�
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/trop-jeune-assurance?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=trop_jeune_ad3
 
 ========================================================================
-ENSEMBLE 11/14 — Assurance collective
+ENSEMBLE 11/15 — Assurance collective
 ========================================================================
 Âge : 25–55
 Outil landing : Checklist assurance collective
@@ -1029,7 +1024,7 @@ https://www.pierreoliviercaouette.ca/campagnes/assurance-collective
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/assurance-collective?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=collective_ad3
 
 ========================================================================
-ENSEMBLE 12/14 — Travailleur autonome
+ENSEMBLE 12/15 — Travailleur autonome
 ========================================================================
 Âge : 25–55
 Outil landing : Checklist filet autonome
@@ -1127,7 +1122,7 @@ Contenu éducatif. Pas un conseil personnalisé. Titre : conseiller en sécurit�
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/travailleur-autonome?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=autonome_ad3
 
 ========================================================================
-ENSEMBLE 13/14 — Plan global
+ENSEMBLE 13/15 — Plan global
 ========================================================================
 Âge : 30–60
 Outil landing : Ordre d’attaque (plan global)
@@ -1216,7 +1211,7 @@ Essaie d'abord. Ensuite, si tu veux coller ça à ta vraie vie, 15 minutes avec 
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/plan-global?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=plan_global_ad3
 
 ========================================================================
-ENSEMBLE 14/14 — Succession | Bases
+ENSEMBLE 14/15 — Succession | Bases
 ========================================================================
 Âge : 35–65
 Outil landing : Checklist liquidité succession
@@ -1304,9 +1299,88 @@ https://www.pierreoliviercaouette.ca/campagnes/succession-bases
 URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/succession-bases?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=succession_ad3
 
 ========================================================================
+ENSEMBLE 15/15 — Programme MRa | PME
+========================================================================
+Âge : 28–60
+Outil landing : Fit check MRa vs collective (PME)
+Landing : https://www.pierreoliviercaouette.ca/campagnes/programme-mra
+UTM content : mra_ad1 / mra_ad2 / mra_ad3
+CTA bouton : En savoir plus
+
+DISCLAIMER / CONFORMITÉ :
+Contenu éducatif et général. Titre : conseiller en sécurité financière. Pas un conseil personnalisé. Le programme MRa repose sur des contrats individuels avec sélection médicale (refus, exclusions ou surprimes possibles). Preuves d'assurabilité réduites sous conditions. Garanties, facturation et admissibilité selon les contrats. Document non contractuel.
+
+------------------------------------------------------------------------
+Ad1 - Sans la complexité d'une collective
+------------------------------------------------------------------------
+Titre Meta : Assurance équipe - sans usine à gaz
+Description : Outil gratuit | je te recontacte
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Je pensais que pour offrir de l'assurance à mon équipe, fallait absolument une grosse collective.
+
+Comme beaucoup de PME.
+
+Sauf que la collective traditionnelle, c'est souvent lourd : régimes à choisir, gestion, peu de flexibilité pour les employés.
+
+Le programme MRa, c'est une autre logique : tu offres l'accès, ils choisissent leurs protections, on accompagne. Contrats individuels. Contribution facultative. Moins de complexité de ton côté.
+
+Sur la page : un outil gratuit pour voir si ça colle à ta PME. Ensuite, un formulaire court - je te recontacte pour une présentation, sans pression.
+
+Contenu éducatif. Pas un conseil personnalisé.
+https://www.pierreoliviercaouette.ca/campagnes/programme-mra
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/programme-mra?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=mra_ad1
+
+------------------------------------------------------------------------
+Ad2 - Flexibilité / simplicité / rapidité
+------------------------------------------------------------------------
+Titre Meta : PME : 3 raisons de regarder MRa
+Description : Flexibilité | simplicité | rapidité
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Tu veux un avantage pour tes employés… sans devenir gestionnaire d'assurances à temps plein.
+
+Trois idées du programme MRa :
+
+1) Flexibilité - tu peux cotiser ou non, fixer un %, créer des catégories. Eux choisissent leurs protections (invalidité, vie, individuel / famille…).
+2) Simplicité - tu ne construis pas un régime complexe. Preuves d'assurabilité réduites.
+3) Rapidité - ~2 rencontres pour l'entreprise, 30-45 min par personne intéressée.
+
+Regarde l'outil sur la page, télécharge ton résumé PDF, puis laisse tes coordonnées si tu veux qu'on en parle.
+
+Selon conditions. Contrats individuels - sélection médicale possible.
+https://www.pierreoliviercaouette.ca/campagnes/programme-mra
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/programme-mra?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=mra_ad2
+
+------------------------------------------------------------------------
+Ad3 - Soft close formulaire
+------------------------------------------------------------------------
+Titre Meta : Présentation MRa - laisse tes infos
+Description : Formulaire court | sans engagement
+
+TEXTE PRINCIPAL (copier-coller) :
+
+Alternative à l'assurance collective pour petite entreprise.
+
+Tu proposes le programme. Tes employés adhèrent librement et choisissent avec un conseiller. Toi : peu de gestion, contribution optionnelle, confidentialité médicale de ton côté.
+
+Mise en place typique : présentation → rencontres individuelles → entrée en vigueur selon acceptation du dossier.
+
+Sur la page : fit check en 2 minutes, puis un formulaire. Tu laisses ton nom / courriel - je te recontacte pour clarifier.
+
+Contenu éducatif. Titre : conseiller en sécurité financière.
+https://www.pierreoliviercaouette.ca/campagnes/programme-mra
+
+URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/programme-mra?utm_source=meta&utm_medium=paid&utm_campaign=cbo_catalog_2026&utm_content=mra_ad3
+
+========================================================================
 3. CHECKLIST AVANT DIFFUSION
 ========================================================================
-[ ] 14 ensembles créés + 2-3 annonces chacun
+[ ] 15 ensembles créés + 2-3 annonces chacun
 [ ] URLs avec UTM complets sur chaque annonce
 [ ] CTA En savoir plus partout
 [ ] Commentaire épinglé / disclaimer où requis
@@ -1316,7 +1390,7 @@ URL destination (avec UTM) : https://www.pierreoliviercaouette.ca/campagnes/succ
 [ ] Pixel / événements : view landing + RDV trackés
 
 Site : https://www.pierreoliviercaouette.ca
-RDV campagne : https://www.pierreoliviercaouette.ca/rendez-vous/campagne
+RDV : https://www.pierreoliviercaouette.ca/rendez-vous
 Landings : https://www.pierreoliviercaouette.ca/campagnes/{slug}
 
 Source : emails/campagne-meta-catalog/*.md

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
+import { CampagneLeadForm } from '../components/campagne/CampagneLeadForm';
 import { getCampagneAdsTool } from '../components/campagne/tools';
 import {
   buildCampagneRdvPath,
@@ -46,6 +47,15 @@ export function CampagneAdsLanding() {
 
   const rdvPath = buildCampagneRdvPath(item.slug, location.search);
   const ToolComponent = getCampagneAdsTool(item.slug);
+  const isFormCta = item.ctaType === 'form';
+
+  const scrollToForm = () => {
+    trackEvent('select_content', {
+      content_type: 'cta',
+      item_id: `campagne_${item.slug}_form_cta`,
+    });
+    document.getElementById('demande')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <main className="min-h-screen bg-white" data-testid="campagne-ads-landing">
@@ -55,15 +65,27 @@ export function CampagneAdsLanding() {
         description={item.promise}
         minHeightClass="min-h-[34vh] md:min-h-[40vh]"
       >
-        <Link
-          to={rdvPath}
-          onClick={() => trackRendezVousClick(`campagne_${item.slug}_rdv`)}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-primary shadow-lg transition-all duration-300 hover:bg-secondary hover:text-white"
-          data-testid="campagne-ads-cta-rdv"
-        >
-          {item.ctaLabel}
-          <ArrowRight className="h-5 w-5" />
-        </Link>
+        {isFormCta ? (
+          <button
+            type="button"
+            onClick={scrollToForm}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-primary shadow-lg transition-all duration-300 hover:bg-secondary hover:text-white"
+            data-testid="campagne-ads-cta-form"
+          >
+            {item.ctaLabel}
+            <ArrowRight className="h-5 w-5" />
+          </button>
+        ) : (
+          <Link
+            to={rdvPath}
+            onClick={() => trackRendezVousClick(`campagne_${item.slug}_rdv`)}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-primary shadow-lg transition-all duration-300 hover:bg-secondary hover:text-white"
+            data-testid="campagne-ads-cta-rdv"
+          >
+            {item.ctaLabel}
+            <ArrowRight className="h-5 w-5" />
+          </Link>
+        )}
       </PageHero>
 
       <section className="relative bg-gradient-to-b from-white via-gray-50/80 to-white">
@@ -115,37 +137,78 @@ export function CampagneAdsLanding() {
             </div>
           ) : null}
 
-          {/* CTA conversion */}
-          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-dark px-6 py-8 text-center text-white shadow-lg md:px-10 md:py-10">
-            <h2 className="font-heading text-2xl font-bold md:text-3xl">
-              Prêt à clarifier ta situation ?
-            </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/80 md:text-base">
-              15 minutes, sans pression. On regarde ton résumé ensemble si tu veux.
-            </p>
-            <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-              <Link
-                to={rdvPath}
-                onClick={() => trackRendezVousClick(`campagne_${item.slug}_rdv_mid`)}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-primary transition-colors hover:bg-secondary hover:text-white"
-              >
-                {item.ctaLabel}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to={item.apprendrePath}
-                onClick={() =>
-                  trackEvent('select_content', {
-                    content_type: 'cta',
-                    item_id: `campagne_${item.slug}_apprendre`,
-                  })
+          {/* CTA conversion : formulaire lead OU RDV */}
+          {isFormCta ? (
+            <div className="space-y-4">
+              <div className="text-center">
+                <h2 className="font-heading text-2xl font-bold text-dark md:text-3xl">
+                  {item.ctaHeadline || 'Prêt à aller plus loin ?'}
+                </h2>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-prestige-taupe md:text-base">
+                  {item.ctaSubline ||
+                    'Laisse tes coordonnées — je te recontacte pour clarifier sans pression.'}
+                </p>
+              </div>
+              <CampagneLeadForm
+                slug={item.slug}
+                subjectDefault={
+                  item.leadSubject || `Campagne ${item.slug} — demande d’info`
                 }
-                className="inline-flex items-center justify-center rounded-full border border-white/35 px-8 py-3 font-semibold text-white transition-colors hover:bg-white/10"
-              >
-                {item.apprendreLabel}
-              </Link>
+                messagePlaceholder={
+                  item.leadMessagePlaceholder ||
+                  'Parle-moi un peu de ta situation…'
+                }
+                submitLabel={item.ctaLabel}
+                successTitle="Demande reçue"
+                successBody="Merci. Je te recontacte rapidement pour la suite."
+              />
+              <div className="text-center">
+                <Link
+                  to={item.apprendrePath}
+                  onClick={() =>
+                    trackEvent('select_content', {
+                      content_type: 'cta',
+                      item_id: `campagne_${item.slug}_apprendre`,
+                    })
+                  }
+                  className="inline-flex items-center justify-center text-sm font-medium text-primary hover:underline"
+                >
+                  {item.apprendreLabel}
+                </Link>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-dark px-6 py-8 text-center text-white shadow-lg md:px-10 md:py-10">
+              <h2 className="font-heading text-2xl font-bold md:text-3xl">
+                Prêt à clarifier ta situation ?
+              </h2>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/80 md:text-base">
+                15 minutes, sans pression. On regarde ton résumé ensemble si tu veux.
+              </p>
+              <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                <Link
+                  to={rdvPath}
+                  onClick={() => trackRendezVousClick(`campagne_${item.slug}_rdv_mid`)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-primary transition-colors hover:bg-secondary hover:text-white"
+                >
+                  {item.ctaLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  to={item.apprendrePath}
+                  onClick={() =>
+                    trackEvent('select_content', {
+                      content_type: 'cta',
+                      item_id: `campagne_${item.slug}_apprendre`,
+                    })
+                  }
+                  className="inline-flex items-center justify-center rounded-full border border-white/35 px-8 py-3 font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  {item.apprendreLabel}
+                </Link>
+              </div>
+            </div>
+          )}
 
           {item.faq?.length > 0 ? (
             <div className="space-y-5">

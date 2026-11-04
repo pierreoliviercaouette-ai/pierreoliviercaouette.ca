@@ -144,6 +144,15 @@ ENSEMBLES = [
         "utm": "succession",
         "outil": "Checklist liquidité succession",
     },
+    {
+        "n": 15,
+        "nom": "Programme MRa | PME",
+        "age": "28–60",
+        "file": "programme-mra.md",
+        "slug": "programme-mra",
+        "utm": "mra",
+        "outil": "Fit check MRa vs collective (PME)",
+    },
 ]
 
 BASE = "https://www.pierreoliviercaouette.ca"
@@ -350,7 +359,7 @@ def build():
     pdf.set_text_color(15, 30, 60)
     pdf.multi_cell(0, 10, "Brief campagne Meta Ads", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("ArialUni", "B", 16)
-    pdf.multi_cell(0, 8, "Catalogue CBO - 14 ensembles", new_x="LMARGIN", new_y="NEXT")
+    pdf.multi_cell(0, 8, "Catalogue CBO - 15 ensembles", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(4)
     pdf.set_font("ArialUni", "", 12)
     pdf.set_text_color(40, 40, 50)
@@ -425,7 +434,7 @@ def build():
 
     # —— Table ensembles ——
     pdf.add_page()
-    pdf.h1("2. Les 14 ensembles (vue d’ensemble)")
+    pdf.h1("2. Les 15 ensembles (vue d’ensemble)")
     pdf.muted("Ciblage : audiences larges (Advantage+ ou intérêts légers). Ne pas empiler 15 intérêts.")
     pdf.ln(2)
 
@@ -475,7 +484,7 @@ def build():
         landing = f"{BASE}/campagnes/{e['slug']}"
 
         pdf.add_page()
-        pdf.h1(f"Ensemble {e['n']}/14 — {e['nom']}")
+        pdf.h1(f"Ensemble {e['n']}/{len(ENSEMBLES)} — {e['nom']}")
         pdf.label_value("Âge :", e["age"])
         pdf.label_value("Outil landing :", e["outil"])
         pdf.label_value("Landing :", landing)
@@ -507,7 +516,7 @@ def build():
     pdf.add_page()
     pdf.h1("3. Checklist avant diffusion")
     for item in [
-        "14 ensembles créés + 2–3 annonces chacun",
+        "15 ensembles créés + 2–3 annonces chacun",
         "URLs avec UTM complets sur chaque annonce",
         "CTA « En savoir plus » partout",
         "Commentaire épinglé / disclaimer où requis (surtout comparateur)",
@@ -539,7 +548,7 @@ def build_txt() -> None:
     lines: list[str] = []
     W = lines.append
 
-    W("BRIEF CAMPAGNE META ADS — CATALOGUE CBO — 14 ENSEMBLES")
+    W(f"BRIEF CAMPAGNE META ADS — CATALOGUE CBO — {len(ENSEMBLES)} ENSEMBLES")
     W("Pierre-Olivier Caouette — conseiller en sécurité financière")
     W("Document pour Holo : textes d'annonces prêts à coller. Visuels à créer de ton côté.")
     W("")
@@ -586,7 +595,7 @@ def build_txt() -> None:
     )
     W("")
     W("=" * 72)
-    W("2. VUE D'ENSEMBLE DES 14 ENSEMBLES")
+    W(f"2. VUE D'ENSEMBLE DES {len(ENSEMBLES)} ENSEMBLES")
     W("=" * 72)
     W("")
     for e in ENSEMBLES:
@@ -611,7 +620,7 @@ def build_txt() -> None:
         disc, ads = parse_ads(ROOT / e["file"])
         landing = f"{BASE_URL}/campagnes/{e['slug']}"
         W("=" * 72)
-        W(f"ENSEMBLE {e['n']}/14 — {e['nom']}")
+        W(f"ENSEMBLE {e['n']}/{len(ENSEMBLES)} — {e['nom']}")
         W("=" * 72)
         W(f"Âge : {e['age']}")
         W(f"Outil landing : {e['outil']}")
@@ -646,7 +655,7 @@ def build_txt() -> None:
     W("=" * 72)
     W("3. CHECKLIST AVANT DIFFUSION")
     W("=" * 72)
-    W("[ ] 14 ensembles créés + 2-3 annonces chacun")
+    W("[ ] 15 ensembles créés + 2-3 annonces chacun")
     W("[ ] URLs avec UTM complets sur chaque annonce")
     W("[ ] CTA En savoir plus partout")
     W("[ ] Commentaire épinglé / disclaimer où requis")

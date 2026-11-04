@@ -511,6 +511,55 @@ export const campagneAdsLandings = [
     apprendreLabel: 'Lire la capsule assurance vie temporaire',
     ctaLabel: 'Réserver 15 minutes',
   },
+  {
+    slug: 'programme-mra',
+    aliases: ['mra', 'assurance-mra', 'mra-pme', 'collective-alternative-pme'],
+    badge: 'Programme MRa',
+    title: 'Assurance pour ta PME — sans la complexité d’une collective',
+    seoTitle:
+      'Programme MRa | Alternative à l’assurance collective pour PME',
+    seoDescription:
+      'Offre à ton équipe des protections individuelles au choix, avec peu de gestion. Flexibilité, simplicité, rapidité. Conseiller en sécurité financière à Victoriaville.',
+    promise:
+      'Tu offres l’accès. Ils choisissent leurs protections. On accompagne. Une formule conçue pour les petites entreprises.',
+    bullets: [
+      'Flexibilité : cotise ou non, % ou plafond, catégories d’employés — eux choisissent leurs garanties',
+      'Simplicité : tu ne construis pas un régime complexe ; preuves d’assurabilité réduites*',
+      'Rapidité : ~2 rencontres entreprise + 30–45 min / personne intéressée',
+    ],
+    faq: [
+      {
+        question: 'C’est la même chose qu’une assurance collective ?',
+        answer:
+          'Non. MRa repose sur des contrats individuels proposés via l’entreprise. L’employé choisit ses protections avec un conseiller ; ton rôle reste surtout l’offre (et éventuellement une contribution).',
+      },
+      {
+        question: 'Est-ce que je dois cotiser obligatoirement ?',
+        answer:
+          'Non. La formule peut être offerte sans contribution de l’employeur. Tu peux aussi choisir un % ou un plafond par personne.',
+      },
+      {
+        question: 'C’est long à mettre en place ?',
+        answer:
+          'Typiquement environ 2 rencontres avec l’entreprise, puis 30 à 45 minutes par employé intéressé. Entrée en vigueur souvent le 1er du mois suivant — sous conditions et acceptation du dossier.',
+      },
+      {
+        question: 'Y a-t-il une sélection médicale ?',
+        answer:
+          'Oui. Ce sont des contrats individuels : refus, exclusions ou surprimes possibles. Des preuves d’assurabilité réduites peuvent s’appliquer selon les conditions. On t’explique ça clairement avant.',
+      },
+    ],
+    apprendrePath: '/apprendre/assurance-collective',
+    apprendreLabel: 'Lire la capsule assurance collective',
+    ctaType: 'form',
+    ctaLabel: 'Demander une présentation',
+    ctaHeadline: 'Demande une présentation MRa',
+    ctaSubline:
+      'Laisse tes coordonnées — je te recontacte pour une présentation adaptée à ta PME.',
+    leadSubject: 'Campagne MRa — présentation PME',
+    leadMessagePlaceholder:
+      'Ex. : on est ~10 employés, pas de collective / collective trop chère, je veux comprendre les options…',
+  },
 ];
 
 export function getCampagneAdsLanding(slug) {

@@ -12,6 +12,7 @@ import { AutonomeChecklistTool } from './AutonomeChecklistTool';
 import { PlanGlobalTool } from './PlanGlobalTool';
 import { SuccessionChecklistTool } from './SuccessionChecklistTool';
 import { AssuranceHypothecaireTool } from './AssuranceHypothecaireTool';
+import { MraFitTool } from './MraFitTool';
 
 /**
  * Mini-outils interactifs des landings /campagnes/:slug
@@ -32,6 +33,7 @@ export const campagneAdsTools = {
   'plan-global': PlanGlobalTool,
   'succession-bases': SuccessionChecklistTool,
   'assurance-hypothecaire': AssuranceHypothecaireTool,
+  'programme-mra': MraFitTool,
 };
 
 export function getCampagneAdsTool(slug) {
