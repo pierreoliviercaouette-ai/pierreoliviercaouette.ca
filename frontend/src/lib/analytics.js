@@ -12,6 +12,25 @@ const isFbqReady = () => hasWindow() && typeof window.fbq === 'function';
 
 let analyticsBootstrapped = false;
 
+/** Dernier PageView Meta (anti double StrictMode / init+tracker). */
+let lastMetaPageViewKey = '';
+let lastMetaPageViewAt = 0;
+
+/**
+ * ID unique partagé Pixel ↔ CAPI (Meta déduplique sur event_name + event_id).
+ * Toujours passer { eventID } à fbq et le même event_id côté CAPI.
+ */
+export const newMetaEventId = (prefix = 'evt') => {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return `${prefix}_${crypto.randomUUID()}`;
+    }
+  } catch {
+    // ignore
+  }
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+};
+
 const loadScript = (src, attrs = {}) =>
   new Promise((resolve, reject) => {
     if (!hasWindow()) {
@@ -108,7 +127,10 @@ const initPostHog = () => {
   window.__posthogInitialized = true;
 };
 
-/** Meta Pixel — same stub as Meta Events Manager snippet; only after consent. */
+/**
+ * Meta Pixel — stub Events Manager ; init seulement (pas de PageView ici).
+ * PageView = SPA via trackPageView → évite le double init + AnalyticsTracker.
+ */
 const initMetaPixel = () => {
   if (!hasWindow() || window.__metaPixelInitialized) return;
 
@@ -132,7 +154,7 @@ const initMetaPixel = () => {
   /* eslint-enable */
 
   window.fbq('init', META_PIXEL_ID);
-  window.fbq('track', 'PageView');
+  // Pas de PageView ici — trackPageView (AnalyticsTracker) est la seule source SPA.
 
   if (!document.getElementById('meta-pixel-noscript')) {
     const noscript = document.createElement('noscript');
@@ -153,84 +175,95 @@ const initMetaPixel = () => {
 const trackMetaFromAppEvent = (eventName, params = {}) => {
   if (!isFbqReady()) return;
 
-  // Conversion principale : formulaire de contact envoyé
+  const eventID = params.event_id || params.eventID || newMetaEventId(eventName);
+
+  // Conversion principale : formulaire de contact / lead campagne
   if (eventName === 'generate_lead') {
-    window.fbq('track', 'Lead', {
-      content_name: params.method || 'contact_form',
-      content_category: 'contact',
-    });
+    window.fbq(
+      'track',
+      'Lead',
+      {
+        content_name: params.method || 'contact_form',
+        content_category: 'contact',
+      },
+      { eventID }
+    );
     return;
   }
 
-  // Conversion : confirmation RDV (page /rendez-vous/merci — iframe Outlook non lisible)
+  // Conversion : confirmation RDV (/rendez-vous/merci)
+  // Si un webhook CAPI Schedule est encore actif sans le même event_id → double comptage.
+  // Source canonique actuelle = Pixel (merci). Désactiver CAPI Schedule si les deux tournent.
   if (eventName === 'schedule') {
-    window.fbq('track', 'Schedule', {
-      content_name: params.method || 'booking_self_confirm',
-      content_category: params.source || 'appointment',
-    });
+    window.fbq(
+      'track',
+      'Schedule',
+      {
+        content_name: params.method || 'booking_self_confirm',
+        content_category: params.source || 'appointment',
+      },
+      { eventID }
+    );
     return;
   }
 
   if (eventName === 'view_item') {
-    window.fbq('track', 'ViewContent', {
-      content_name: params.item_id || undefined,
-      content_category: params.item_category || undefined,
-      content_ids: params.item_id ? [String(params.item_id)] : undefined,
-      content_type: 'product',
-    });
+    window.fbq(
+      'track',
+      'ViewContent',
+      {
+        content_name: params.item_id || undefined,
+        content_category: params.item_category || undefined,
+        content_ids: params.item_id ? [String(params.item_id)] : undefined,
+        content_type: 'product',
+      },
+      { eventID }
+    );
     return;
   }
 
-  // Intention forte : clic « Prendre / Réserver rendez-vous »
+  // Intention forte : un seul chemin → begin_checkout (trackRendezVousClick).
+  // Ne PAS aussi mapper select_content *_rdv → InitiateCheckout (double).
   if (eventName === 'begin_checkout') {
-    window.fbq('track', 'InitiateCheckout', {
-      content_name: params.item_id || params.content_name || 'rendez_vous_cta',
-      content_category: params.content_type || 'cta',
-    });
-    return;
-  }
-
-  if (eventName === 'select_content') {
-    const itemId = String(params.item_id || '');
-    if (isRendezVousIntentId(itemId)) {
-      window.fbq('track', 'InitiateCheckout', {
-        content_name: itemId || undefined,
-        content_category: params.content_type || undefined,
-      });
-    }
+    window.fbq(
+      'track',
+      'InitiateCheckout',
+      {
+        content_name: params.item_id || params.content_name || 'rendez_vous_cta',
+        content_category: params.content_type || 'cta',
+      },
+      { eventID }
+    );
     return;
   }
 
   if (eventName === 'navigation_click') {
     const dest = String(params.destination || '');
     if (dest.includes('/rendez-vous')) {
-      window.fbq('track', 'InitiateCheckout', {
-        content_name: params.location || 'nav_rendez_vous',
-        content_category: 'navigation',
-      });
+      window.fbq(
+        'track',
+        'InitiateCheckout',
+        {
+          content_name: params.location || 'nav_rendez_vous',
+          content_category: 'navigation',
+        },
+        { eventID }
+      );
     }
     return;
   }
 
   if (eventName === 'contact_click') {
-    window.fbq('track', 'Contact', {
-      content_name: params.channel || undefined,
-      content_category: params.source || undefined,
-    });
+    window.fbq(
+      'track',
+      'Contact',
+      {
+        content_name: params.channel || undefined,
+        content_category: params.source || undefined,
+      },
+      { eventID }
+    );
   }
-};
-
-const isRendezVousIntentId = (itemId) => {
-  const id = String(itemId || '').toLowerCase();
-  return (
-    id.includes('_rdv') ||
-    id.includes('rendez_vous') ||
-    id.includes('booking') ||
-    id.includes('outlook') ||
-    id.includes('reserver') ||
-    id.endsWith('_depart') || // jemcee hero → calendrier
-    id.includes('outro_booking')
-  );
 };
 
 /**
@@ -260,21 +293,32 @@ export const trackPageView = (path, title = document?.title || '') => {
     });
   }
   if (isFbqReady()) {
-    window.fbq('track', 'PageView');
+    const key = String(path || '');
+    const now = Date.now();
+    // StrictMode remonte l’effet : 1 seul PageView Meta par path / 2 s
+    if (key === lastMetaPageViewKey && now - lastMetaPageViewAt < 2000) {
+      return;
+    }
+    lastMetaPageViewKey = key;
+    lastMetaPageViewAt = now;
+    window.fbq('track', 'PageView', undefined, { eventID: newMetaEventId('pv') });
   }
 };
 
 export const trackEvent = (eventName, params = {}) => {
   if (!hasAnalyticsConsent()) return;
+  const withId =
+    params.event_id || params.eventID
+      ? params
+      : { ...params, event_id: newMetaEventId(eventName) };
   if (isGtagReady()) {
-    window.gtag('event', eventName, params);
+    window.gtag('event', eventName, withId);
   }
-  trackMetaFromAppEvent(eventName, params);
+  trackMetaFromAppEvent(eventName, withId);
 };
 
 /**
- * Clic CTA « Prendre rendez-vous » / « Réserver… » → Meta InitiateCheckout.
- * À utiliser sur tous les liens vers /rendez-vous (intention forte).
+ * Clic CTA « Prendre rendez-vous » / « Réserver… » → Meta InitiateCheckout (unique).
  */
 export const trackRendezVousClick = (itemId, params = {}) => {
   trackEvent('begin_checkout', {

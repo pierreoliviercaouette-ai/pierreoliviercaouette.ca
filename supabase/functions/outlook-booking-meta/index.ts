@@ -1,9 +1,13 @@
 /**
  * Conversion Meta « Schedule » quand un RDV Outlook Bookings est créé.
  *
- * Pourquoi : l’iframe outlook.office.com est cross-origin — le site ne peut
- * PAS détecter la confirmation. On écoute plutôt un webhook externe
- * (Google Apps Script / Power Automate) et on envoie Schedule via CAPI.
+ * IMPORTANT — déduplication :
+ * Le site envoie déjà Schedule via Pixel sur /rendez-vous/merci (confirmation
+ * manuelle). Si ce webhook CAPI tourne EN PLUS sans le même event_id, Meta
+ * compte 2 Schedule. Choisir UNE source :
+ *   - Pixel merci (recommandé aujourd’hui) → désactiver ce webhook / iCal poll
+ *   - CAPI seulement → retirer trackEvent('schedule') de BookingThanks.jsx
+ * Pour dédupliquer Pixel+CAPI : même event_name + même event_id des deux côtés.
  *
  * Secrets (Supabase → Edge Functions → Secrets) :
  *   META_PIXEL_ID              — 1157851050245521

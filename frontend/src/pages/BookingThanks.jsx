@@ -1,14 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, CalendarCheck } from 'lucide-react';
-import { trackEvent } from '../lib/analytics';
+import { newMetaEventId, trackEvent } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 const SCHEDULE_SESSION_KEY = 'meta_schedule_tracked_v1';
+const SCHEDULE_EVENT_ID_KEY = 'meta_schedule_event_id_v1';
 
 /**
  * Confirmation explicite après réservation Outlook (iframe non lisible).
- * Déclenche l’événement Meta Schedule.
+ * Déclenche l’événement Meta Schedule (Pixel) avec event_id stable.
+ * Ne pas aussi envoyer Schedule via CAPI webhook sans le même event_id.
  */
 export const BookingThanks = () => {
   const [params] = useSearchParams();
@@ -26,10 +28,14 @@ export const BookingThanks = () => {
   useEffect(() => {
     if (fired.current) return;
     fired.current = true;
+    let eventId = newMetaEventId('schedule');
     try {
       if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(SCHEDULE_SESSION_KEY)) {
         return;
       }
+      const existingId = sessionStorage?.getItem(SCHEDULE_EVENT_ID_KEY);
+      if (existingId) eventId = existingId;
+      else sessionStorage?.setItem(SCHEDULE_EVENT_ID_KEY, eventId);
       sessionStorage?.setItem(SCHEDULE_SESSION_KEY, '1');
     } catch {
       // ignore
@@ -37,6 +43,7 @@ export const BookingThanks = () => {
     trackEvent('schedule', {
       method: 'booking_self_confirm',
       source,
+      event_id: eventId,
     });
   }, [source]);
 

@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Badge } from '../ui/badge';
-import { trackEvent } from '../../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../../lib/analytics';
 import { IA_GROUPE_FINANCIER_LOGO } from '../../lib/branding';
 
 const PARTICULIER_LINKS = [
@@ -127,7 +127,7 @@ export const Navbar = () => {
             <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
               <Link
                 to="/rendez-vous"
-                onClick={() => trackEvent('navigation_click', { location: 'navbar_desktop', destination: '/rendez-vous' })}
+                onClick={() => trackRendezVousClick('navbar_desktop_rendez_vous')}
                 className={`inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 xl:px-5 ${
                   isPrive ? 'rounded-none bg-dark hover:bg-zinc-800' : 'rounded-full bg-dark ring-2 ring-dark/10 hover:bg-dark/90'
                 }`}
@@ -300,7 +300,7 @@ export const Navbar = () => {
                 <Link
                   to="/rendez-vous"
                   onClick={() => {
-                    trackEvent('navigation_click', { location: 'navbar_mobile', destination: '/rendez-vous' });
+                    trackRendezVousClick('navbar_mobile_rendez_vous');
                     setIsOpen(false);
                   }}
                   className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-primary"
