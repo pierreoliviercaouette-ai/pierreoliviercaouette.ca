@@ -4,7 +4,7 @@ import { BookingScheduleConfirm } from '../booking/BookingScheduleConfirm';
 
 /** Outlook Bookings (même widget que /rendez-vous). */
 export const JEMCEE_OUTLOOK_BOOKING_URL =
-  'https://outlook.office.com/book/PierreOlivierCaouetteiAGroupefinancier@ia.ca/s/sHKjTMMLj0SBLVs0u-Mr5g2?ismsaljsauthenabled';
+  'https://bookings.cloud.microsoft/book/PierreOlivierCaouetteiAGroupefinancier@ia.ca/s/0drfXmMdmEyiJTIZAMypRw2?ismsaljsauthenabled';
 
 /**
  * Rencontre exploratoire embarquée dans la landing jemcee.
