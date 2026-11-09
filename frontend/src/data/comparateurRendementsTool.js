@@ -44,7 +44,7 @@ export const COMPARATEUR_RENDEMENTS_HTML = `
     <div class="form-row">
       <div class="form-group">
         <label for="rendement_perso">Mon rendement 5 ans annualisé (%)</label>
-        <input type="number" id="rendement_perso" placeholder="6.3" step="0.1" min="0" max="40">
+        <input type="number" id="rendement_perso" placeholder="5.7" step="0.1" min="0" max="40">
         <small>Si « Mon rendement personnel » est choisi</small>
       </div>
       <div class="form-group">

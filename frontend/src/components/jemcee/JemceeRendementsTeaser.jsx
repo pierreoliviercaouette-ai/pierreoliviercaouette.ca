@@ -14,8 +14,11 @@ import {
   PROFIL_RISQUE_LABELS,
   formatPctFr,
 } from '../../data/comparateurRendementsRates';
-import { DEFAULT_MODEL_PORTFOLIOS_AS_OF } from '../../data/modelPortfolios';
-import { useModelPortfolioReturns } from '../../hooks/useModelPortfolioReturns';
+import {
+  JEMCEE_IA_5Y_BY_PROFIL,
+  JEMCEE_PORTFOLIOS_AS_OF,
+  getJemceeIaPctForProfil,
+} from '../../data/jemceePortfolioReturns';
 
 /** Palette sombre rallye (jemcee), distincte du bleu corporate des outils clairs. */
 const COLORS = {
@@ -31,24 +34,23 @@ const PROFILS = Object.keys(PROFIL_RISQUE_LABELS);
 
 /**
  * Aperçu rendements 5 ans net (banque illustrative vs modèle iA), stylé pour la landing jemcee.
+ * iA = snapshot CSV au même as-of que les moyennes banques (30 sept. 2026).
  */
 export function JemceeRendementsTeaser({ onCta }) {
   const [profil, setProfil] = useState('equilibre');
-  const { asOfLabel, returnsByProfil, getIaPct } = useModelPortfolioReturns();
-  const dateLabel = asOfLabel || DEFAULT_MODEL_PORTFOLIOS_AS_OF;
 
   const chartData = useMemo(
     () =>
       PROFILS.map((key) => ({
         name: PROFIL_RISQUE_LABELS[key],
         banque: BANQUE_5Y_BY_PROFIL[key],
-        ia: returnsByProfil[key],
+        ia: JEMCEE_IA_5Y_BY_PROFIL[key],
         active: key === profil,
       })),
-    [profil, returnsByProfil]
+    [profil]
   );
 
-  const iaPct = getIaPct(profil);
+  const iaPct = getJemceeIaPctForProfil(profil);
   const banquePct = BANQUE_5Y_BY_PROFIL[profil];
   const ecart = Math.round((iaPct - banquePct) * 10) / 10;
 
@@ -68,7 +70,7 @@ export function JemceeRendementsTeaser({ onCta }) {
           Banque vs modèles iA
         </h2>
         <p className="mt-4 max-w-xl text-base text-white/70">
-          Rendements nets annualisés sur 5 ans (au {dateLabel}), à profil égal.
+          Rendements nets annualisés sur 5 ans (au {JEMCEE_PORTFOLIOS_AS_OF}), à profil égal.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Profil de risque">

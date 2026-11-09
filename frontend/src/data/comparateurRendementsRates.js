@@ -5,13 +5,16 @@ export {
   setLiveModelPortfolioReturns,
 } from '../lib/modelPortfolioReturns';
 
-/** Moyennes illustratives banques (succursale / wrap), 5 ans net — par profil. */
+/**
+ * Moyennes illustratives banques (succursale / wrap), 5 ans net — par profil.
+ * Source : emails/sources-rendements-institutions.md (compilation nov. 2026, as-of ~30 sept. 2026).
+ */
 export const BANQUE_5Y_BY_PROFIL = {
-  prudent: 4.0,
-  modere: 5.2,
-  equilibre: 6.3,
-  croissance: 8.6,
-  audacieux: 11.4,
+  prudent: 3.0,
+  modere: 4.4,
+  equilibre: 5.7,
+  croissance: 8.1,
+  audacieux: 10.9,
 };
 
 export const PROFIL_RISQUE_LABELS = {
