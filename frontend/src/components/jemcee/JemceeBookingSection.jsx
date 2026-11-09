@@ -6,6 +6,13 @@ import { BookingScheduleConfirm } from '../booking/BookingScheduleConfirm';
 export const JEMCEE_OUTLOOK_BOOKING_URL =
   'https://bookings.cloud.microsoft/book/PierreOlivierCaouetteiAGroupefinancier@ia.ca/s/0drfXmMdmEyiJTIZAMypRw2?ismsaljsauthenabled';
 
+export const JEMCEE_OPEN_BOOKING_EVENT = 'jemcee-open-booking';
+
+/** Déclenche l’affichage du calendrier + scroll vers le haut de l’iframe. */
+export function openJemceeBooking() {
+  window.dispatchEvent(new CustomEvent(JEMCEE_OPEN_BOOKING_EVENT));
+}
+
 /**
  * Rencontre exploratoire embarquée dans la landing jemcee.
  * Le calendrier ne se charge qu’au clic — évite le vol de scroll
@@ -13,6 +20,7 @@ export const JEMCEE_OUTLOOK_BOOKING_URL =
  */
 export function JemceeBookingSection() {
   const [showCalendar, setShowCalendar] = useState(false);
+  const [pendingScroll, setPendingScroll] = useState(false);
 
   useEffect(() => {
     trackEvent('view_item', {
@@ -20,6 +28,38 @@ export function JemceeBookingSection() {
       item_id: 'jemcee_booking_section',
     });
   }, []);
+
+  useEffect(() => {
+    const onOpen = () => {
+      setShowCalendar(true);
+      setPendingScroll(true);
+    };
+    window.addEventListener(JEMCEE_OPEN_BOOKING_EVENT, onOpen);
+    return () => window.removeEventListener(JEMCEE_OPEN_BOOKING_EVENT, onOpen);
+  }, []);
+
+  useEffect(() => {
+    if (!pendingScroll || !showCalendar) return;
+
+    const scrollToIframe = () => {
+      const el = document.getElementById('jemcee-calendrier');
+      if (!el) return false;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    };
+
+    // Attendre le montage de l’iframe avant de scroller.
+    let tries = 0;
+    const tick = () => {
+      if (scrollToIframe() || tries > 20) {
+        setPendingScroll(false);
+        return;
+      }
+      tries += 1;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [pendingScroll, showCalendar]);
 
   return (
     <section
@@ -45,6 +85,7 @@ export function JemceeBookingSection() {
               type="button"
               onClick={() => {
                 setShowCalendar(true);
+                setPendingScroll(true);
                 trackRendezVousClick('jemcee_booking_reveal');
               }}
               className="inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest transition hover:bg-secondary"
@@ -79,7 +120,8 @@ export function JemceeBookingSection() {
       {showCalendar ? (
         <>
           <div
-            className="mx-auto mt-10 w-full max-w-5xl overflow-hidden border border-white/10 bg-white"
+            id="jemcee-calendrier"
+            className="mx-auto mt-10 w-full max-w-5xl scroll-mt-20 overflow-hidden border border-white/10 bg-white"
             data-testid="jemcee-booking-calendar"
             style={{ overflowAnchor: 'none' }}
           >

@@ -1,13 +1,12 @@
-import { Link } from 'react-router-dom';
-import { JemceeBookingSection } from '../components/jemcee/JemceeBookingSection';
+import {
+  JemceeBookingSection,
+  openJemceeBooking,
+} from '../components/jemcee/JemceeBookingSection';
 import { JemceeRendementsTeaser } from '../components/jemcee/JemceeRendementsTeaser';
 import { AppleCinematicScroll } from '../components/jemcee/AppleCinematicScroll';
 import { JEMCEE_SEQUENCE } from '../data/jemceeSequence';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
-
-/** Réservation via la page dédiée (pas d’ancre #reservation pendant le scroll cinématique). */
-export const JEMCEE_BOOKING_URL = '/rendez-vous';
 
 const PHONE = '819 806-1164';
 const PHONE_LINK = 'tel:+18198061164';
@@ -184,14 +183,17 @@ export const JemceeLanding = () => {
               financière qui donne envie de prendre le départ maintenant.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
-              <Link
-                to={JEMCEE_BOOKING_URL}
-                onClick={() => trackCta('jemcee_hero_depart')}
+              <button
+                type="button"
+                onClick={() => {
+                  trackCta('jemcee_hero_depart');
+                  openJemceeBooking();
+                }}
                 className="pointer-events-auto inline-flex items-center px-8 py-4 font-heading text-lg tracking-widest shadow-[0_12px_40px_rgba(255,255,255,0.22)] transition hover:bg-secondary"
                 style={{ backgroundColor: '#ffffff', color: '#01233f', touchAction: 'manipulation' }}
               >
                 PRENDRE LE DÉPART
-              </Link>
+              </button>
               <a
                 href="#performance"
                 onClick={() => trackCta('jemcee_hero_capot')}
@@ -214,14 +216,17 @@ export const JemceeLanding = () => {
               patrimoine, et vous repartez avec une clarté que peu de gens ont.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                to={JEMCEE_BOOKING_URL}
-                onClick={() => trackCta('jemcee_outro_booking')}
+              <button
+                type="button"
+                onClick={() => {
+                  trackCta('jemcee_outro_booking');
+                  openJemceeBooking();
+                }}
                 className="jemcee-cta-solid pointer-events-auto inline-flex items-center px-10 py-5 font-heading text-lg tracking-widest shadow-[0_12px_40px_rgba(255,255,255,0.25)] transition hover:bg-secondary"
                 style={{ backgroundColor: '#ffffff', color: '#01233f', touchAction: 'manipulation' }}
               >
                 RÉSERVER MA RENCONTRE
-              </Link>
+              </button>
               <a
                 href={PHONE_LINK}
                 onClick={() => trackCta('jemcee_outro_phone')}
