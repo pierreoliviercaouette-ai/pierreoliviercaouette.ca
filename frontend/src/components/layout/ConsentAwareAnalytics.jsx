@@ -4,7 +4,8 @@ import { CONSENT_ACCEPTED, getConsent, subscribeConsent } from '../../lib/consen
 import { bootstrapAnalytics } from '../../lib/analytics';
 
 /**
- * Boots third-party analytics only after cookie consent is accepted.
+ * Vercel Web Analytics is cookieless → always on.
+ * GA / PostHog / Meta Pixel boot only after cookie consent.
  */
 export const ConsentAwareAnalytics = () => {
   const [allowed, setAllowed] = useState(() => getConsent() === CONSENT_ACCEPTED);
@@ -20,6 +21,5 @@ export const ConsentAwareAnalytics = () => {
     });
   }, [allowed]);
 
-  if (!allowed) return null;
   return <Analytics />;
 };

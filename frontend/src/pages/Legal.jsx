@@ -78,8 +78,8 @@ export const Privacy = () => {
                 <strong>Microsoft Outlook Bookings</strong> — prise de rendez-vous
               </li>
               <li>
-                <strong>Vercel</strong> — hébergement du site et analytique d&apos;audience (si
-                consentie)
+                <strong>Vercel</strong> — hébergement du site et analytique d&apos;audience
+                anonyme sans témoins (toujours active)
               </li>
               <li>
                 <strong>Google Analytics</strong> — mesure d&apos;audience (si consentie)
@@ -103,8 +103,9 @@ export const Privacy = () => {
             </h2>
             <p className="text-slate-600 mb-4">
               Un bandeau de consentement s&apos;affiche lors de votre première visite. Google
-              Analytics, PostHog, Meta Pixel et Vercel Analytics ne sont chargés que si vous
-              acceptez. Refuser n&apos;empêche pas d&apos;utiliser le site.
+              Analytics, PostHog et Meta Pixel ne sont chargés que si vous acceptez. Vercel
+              Analytics (mesure d&apos;audience anonyme, sans témoins) reste active même en cas
+              de refus. Refuser n&apos;empêche pas d&apos;utiliser le site.
             </p>
             <p className="text-slate-600 mb-4">
               Pour modifier votre choix, utilisez le bouton ci-dessous : le bandeau réapparaîtra
@@ -125,11 +126,12 @@ export const Privacy = () => {
               6. Transferts hors Québec
             </h2>
             <p className="text-slate-600 mb-6">
-              Si vous acceptez l&apos;analytique, PostHog peut traiter des données via des
-              infrastructures situées aux États-Unis. Google Analytics, Meta (Facebook) et
-              Vercel peuvent également traiter des données hors Québec. Ces traitements servent
-              à mesurer et améliorer le site, ainsi qu&apos;à mesurer l&apos;efficacité des
-              publicités.
+              Vercel peut traiter des données d&apos;audience anonymisées hors Québec dans le
+              cadre de l&apos;hébergement et de Vercel Analytics. Si vous acceptez
+              l&apos;analytique, PostHog, Google Analytics et Meta (Facebook) peuvent également
+              traiter des données via des infrastructures situées aux États-Unis. Ces
+              traitements servent à mesurer et améliorer le site, ainsi qu&apos;à mesurer
+              l&apos;efficacité des publicités.
             </p>
 
             <h2 className="font-heading text-2xl font-semibold text-dark mt-8 mb-4">
