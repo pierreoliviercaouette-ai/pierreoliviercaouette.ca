@@ -17,12 +17,14 @@ export const campagneAdsLandings = [
     seoDescription:
       'Simulateur gratuit CELIAPP : rythme, horizon, plafonds illustratifs. Ensuite 15 min pour admissibilité et prochain pas. Victoriaville.',
     promise:
-      'Projette ce que ton rythme donne — plafonds illustratifs, zéro rendement inventé. Ensuite, si ça chicotte, on démêle ton cas en 15 minutes.',
+      'Projette ce que ton rythme donne avec les plafonds illustratifs 2026. Gratuit, sans compte. Si ça chicotte ensuite, on peut en parler 15 minutes.',
     bullets: [
-      'Projeter ta mise de fonds avec les plafonds illustratifs (8 000 $ / an de nouveaux droits, 40 000 $ à vie — 2026)',
-      'Voir clair : CELIAPP ≠ CELI — objectifs, retraits et plafonds différents',
-      'Repérer ce qu’il faut vérifier avant d’ouvrir ou de cotiser (qui a le droit, retrait, ordre avec le CELI)',
+      'Projette ta mise de fonds avec les plafonds illustratifs : 8 000 $ de nouveaux droits par année, 40 000 $ à vie.',
+      'Le CELIAPP n’est pas le CELI : objectifs, retraits et plafonds sont différents.',
+      'Vérifie qui a le droit d’ouvrir un compte et comment les retraits fonctionnent avant de cotiser.',
     ],
+    legalNote:
+      'Ce contenu est informatif et ne constitue pas une opinion personnalisée. Les rendements ne sont pas garantis. Pierre-Olivier Caouette est conseiller en sécurité financière avec iA Groupe financier.',
     faq: [
       {
         question: 'Est-ce que le CELIAPP remplace le CELI ?',
@@ -52,12 +54,13 @@ export const campagneAdsLandings = [
     ],
     apprendrePath: '/apprendre/celiapp',
     apprendreLabel: 'Lire la capsule CELIAPP',
-    ctaLabel: 'Clarifier mon CELIAPP (15 min)',
+    ctaLabel: 'Réserver 15 minutes',
     heroToolLabel: 'Projeter ma mise de fonds',
-    ctaHeadline: 'T’as une projection. On valide le prochain vrai pas ?',
-    ctaSubline: 'Admissibilité, rythme, CELI vs CELIAPP — 15 min, zéro pression.',
-    toolIntro:
-      'Entre ton rythme et ton horizon — tu vois la projection. Le PDF, c’est en bonus.',
+    /** RDV une seule fois — section « Tu veux valider ton cas ? » plus bas. */
+    hideHeroRdv: true,
+    ctaHeadline: 'Tu veux valider ton cas ?',
+    ctaSubline: 'Un conseiller peut revoir ta situation avec toi en 15 minutes.',
+    toolIntro: '',
   },
   {
     slug: 'assurance-invalidite',
@@ -629,17 +632,20 @@ export const campagneAdsLandings = [
     /** Alias URL (ex. /campagnes/succession → même landing). */
     aliases: ['succession'],
     badge: 'Succession',
-    title: 'Plus tard, c’est souvent trop tard',
+    title: 'Ton portrait successoral gratuit, en 6 questions',
     seoTitle: 'Bases de la succession | Conseiller en sécurité financière',
     seoDescription:
       'Checklist liquidité et succession : trous à voir avant le « plus tard ». Contenu éducatif. Conseiller en sécurité financière à Victoriaville. Ne remplace pas un notaire.',
     promise:
-      'Checklist liquidité / succession : tu coches ce qui est vrai aujourd’hui. Sans compte. Le notaire reste essentiel pour le juridique.',
+      'Coche ce qui est vrai aujourd’hui. Tu vois tout de suite les trous à combler. Sans compte, sans rendez-vous. Le notaire reste essentiel pour le juridique.',
+    ctaMicro: 'Tu verras les trous en 2 minutes.',
     bullets: [
-      'Qui a besoin d’argent vite les premiers mois ? (liquidité ≠ maison ou REER sur papier)',
-      'Bénéficiaires à jour — polices, REER, CELI, collective',
-      'Testament et contrats : est-ce qu’ils se parlent ?',
+      'Qui a besoin d’argent vite les premiers mois ? La liquidité n’est pas la même chose qu’une maison ou un REER sur papier.',
+      'Les bénéficiaires sont-ils à jour ? Vérifie polices, REER, CELI et régime collectif.',
+      'Le testament et les contrats se parlent-ils ?',
     ],
+    legalNote:
+      'Ce contenu est informatif et ne constitue pas une opinion personnalisée. Les rendements ne sont pas garantis. Pierre-Olivier Caouette est conseiller en sécurité financière avec iA Groupe financier.',
     faq: [
       {
         question: 'Tu remplaces le notaire ?',
@@ -671,9 +677,10 @@ export const campagneAdsLandings = [
     apprendreLabel: 'Lire la capsule succession',
     ctaLabel: 'Réserver 15 minutes',
     heroToolLabel: 'Remplir la checklist',
-    ctaHeadline: 'Des cases vides te chicottent ?',
+    ctaHeadline: 'Tu veux valider ton cas ?',
     ctaSubline:
-      '15 min liquidité & bénéficiaires avec moi — notaire pour le testament. Zéro pression.',
+      'Un conseiller peut revoir ta situation avec toi en 15 minutes. Le notaire reste pour le juridique.',
+    toolIntro: '',
   },
   {
     slug: 'hypotheque-assurance-vie',

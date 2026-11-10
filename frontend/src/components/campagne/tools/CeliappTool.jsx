@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { Check, Home } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
-import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
-import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
+import { trackEvent } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
 import {
   CampagneToolShell,
-  ToolSoftClose,
+  ToolDownloadPdf,
 } from '../CampagneToolShell';
 
 /** Plafonds illustratifs 2026 — non indexés historiquement, à revalider. */
@@ -21,10 +19,9 @@ const labelClass = 'mb-1.5 block text-xs font-medium text-prestige-taupe';
 
 /** Points fixes — utiles même sans dossier. */
 const A_RETENIR = [
-  'CELIAPP = compte pour bâtir une mise de fonds (1re propriété admissible).',
-  'Ce n’est pas le CELI : plafonds, retraits et fiscalité sont différents.',
-  'Qui a le droit, jusqu’à quand, et comment retirer : à vérifier avant de cotiser.',
-  'Ici : juste tes cotisations — aucun rendement inventé.',
+  'Projette ta mise de fonds avec les plafonds illustratifs : 8 000 $ de nouveaux droits par année, 40 000 $ à vie.',
+  'Le CELIAPP n’est pas le CELI : objectifs, retraits et plafonds sont différents.',
+  'Vérifie qui a le droit d’ouvrir un compte et comment les retraits fonctionnent avant de cotiser.',
 ];
 
 function toNumber(value, fallback = 0) {
@@ -161,14 +158,11 @@ function buildLecture(result) {
 }
 
 export function CeliappTool() {
-  const location = useLocation();
   const [cotisationAnnuelle, setCotisationAnnuelle] = useState('4000');
   const [annees, setAnnees] = useState('4');
   const [dejaCotise, setDejaCotise] = useState('0');
   const [miseCible, setMiseCible] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_celiapp_pdf');
-
-  const rdvPath = buildCampagneRdvPath('celiapp', location.search);
 
   const result = useMemo(() => {
     const prevu = Math.max(0, toNumber(cotisationAnnuelle));
@@ -238,18 +232,6 @@ export function CeliappTool() {
         ? 'Max à vie dans ce scénario. 15 min pour valider la suite — PDF en bonus.'
         : 'Ta projection est prête. Clarifie le prochain vrai pas en 15 min — ou garde le PDF.';
 
-  const softCloseCopy = result.plafondAtteint
-    ? {
-        headline: `Dans ce scénario, tu touches le max à vie (${formatCad(PLAFOND_VIE)} illustratif).`,
-        subline:
-          'En 15 min, on regarde si le rythme tient, l’admissibilité, et quoi faire du surplus ailleurs — zéro pression.',
-      }
-    : {
-        headline: `T’as ~${formatCad(result.totalProjete)} de projetés (cotisations seulement) et encore ${formatCad(result.droitsRestantsApres)} de place.`,
-        subline:
-          'En 15 minutes : droit d’ouvrir, rythme, et si le CELI reste à côté — zéro pression.',
-      };
-
   const handleChipMax = () => {
     setCotisationAnnuelle('8000');
     setAnnees('5');
@@ -268,8 +250,6 @@ export function CeliappTool() {
       value: cible,
     });
   };
-
-  const handleRdvClick = () => trackRendezVousClick('campagne_celiapp_rdv_outil');
 
   const handleDownload = () =>
     downloadPdf({
@@ -332,38 +312,13 @@ export function CeliappTool() {
       ],
     });
 
-  const softCloseActions = (
-    <ToolSoftClose
-      headline={softCloseCopy.headline}
-      subline={softCloseCopy.subline}
-      rdvPath={rdvPath}
-      rdvLabel="Clarifier mon CELIAPP (15 min)"
-      onRdvClick={handleRdvClick}
-      onPdf={handleDownload}
-      pdfBusy={busy}
-      pdfLabel="Télécharger ma projection PDF"
-    />
-  );
-
   return (
     <div data-testid="tool-celiapp">
       <CampagneToolShell
         title="Combien pour ta mise de fonds ?"
-        intro="Le CELIAPP, c’est un compte pour bâtir une mise de fonds (1ʳᵉ propriété). Jusqu’à 8 000 $ de nouveaux droits / an et 40 000 $ à vie (illustratifs 2026). Entre ce que tu mets, ce que t’as déjà, et dans combien d’années tu vises d’acheter."
+        intro="Entre ce que tu mets par année, ce que t’as déjà dans ton CELIAPP et dans combien d’années tu vises à acheter."
         disclaimer="Illustration éducative seulement — pas un conseil personnalisé. Chiffres 2026 illustratifs (8 000 $ de nouveaux droits / année, 40 000 $ à vie ; les reports peuvent changer le max d’une année). Qui a le droit, les retraits et l’impôt : à revalider selon ta situation. Aucun rendement inventé."
-        footer={
-          <div className="flex flex-col gap-3">
-            <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
-            <ToolSoftClose
-              rdvPath={rdvPath}
-              rdvLabel="Clarifier mon CELIAPP (15 min)"
-              onRdvClick={handleRdvClick}
-              onPdf={handleDownload}
-              pdfBusy={busy}
-              pdfLabel="Télécharger ma projection PDF"
-            />
-          </div>
-        }
+        footer={<p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>}
       >
         <div className="mb-8">
           <div className="mb-2 flex items-end justify-between gap-3">
@@ -637,7 +592,15 @@ export function CeliappTool() {
                 </div>
               </div>
 
-              {milestones[2].done ? <div className="mt-5">{softCloseActions}</div> : null}
+              {milestones[2].done ? (
+                <div className="mt-5">
+                  <ToolDownloadPdf
+                    onClick={handleDownload}
+                    busy={busy}
+                    label="Télécharger ma projection PDF"
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="mt-4 rounded-2xl bg-prestige-beige/40 px-5 py-4">

@@ -75,10 +75,11 @@ export function CampagneAdsLanding() {
   const toolCtaLabel = item.heroToolLabel || 'Essayer l’outil gratuit';
   const heroRdvLabel = item.heroRdvLabel || item.ctaLabel;
   const toolIntro =
-    item.toolIntro ||
-    (isFormCta
-      ? 'Remplis l’outil — tu vois ton fit, puis tu demandes une présentation.'
-      : 'Remplis l’outil — tu repars avec un résumé clair. Ensuite, 15 minutes si tu veux coller ça à ta situation.');
+    item.toolIntro !== undefined
+      ? item.toolIntro
+      : isFormCta
+        ? 'Remplis l’outil — tu vois ton fit, puis tu demandes une présentation.'
+        : 'Remplis l’outil — tu repars avec un résumé clair. Ensuite, 15 minutes si tu veux coller ça à ta situation.';
   const midHeadline =
     item.ctaHeadline ||
     (isFormCta ? 'Prêt à aller plus loin ?' : 'On regarde ton résumé ensemble ?');
@@ -132,7 +133,7 @@ export function CampagneAdsLanding() {
               {item.ctaLabel}
               <ArrowRight className="h-5 w-5" />
             </button>
-          ) : (
+          ) : item.hideHeroRdv ? null : (
             <Link
               to={rdvPath}
               onClick={() => trackRendezVousClick(`campagne_${item.slug}_rdv`)}
@@ -198,9 +199,11 @@ export function CampagneAdsLanding() {
                   À toi de jouer
                 </p>
               </div>
-              <p className="mx-auto max-w-xl text-center text-sm leading-relaxed text-prestige-taupe md:text-base">
-                {toolIntro}
-              </p>
+              {toolIntro ? (
+                <p className="mx-auto max-w-xl text-center text-sm leading-relaxed text-prestige-taupe md:text-base">
+                  {toolIntro}
+                </p>
+              ) : null}
               <ToolComponent />
             </div>
           ) : null}
@@ -347,8 +350,8 @@ export function CampagneAdsLanding() {
           ) : null}
 
           <p className="text-center text-xs leading-relaxed text-prestige-taupe/80">
-            Contenu éducatif et général. Titre autorisé : conseiller en sécurité financière. Ne
-            constitue pas un conseil personnalisé. Chaque situation est unique.
+            {item.legalNote ||
+              'Contenu éducatif et général. Titre autorisé : conseiller en sécurité financière. Ne constitue pas un conseil personnalisé. Chaque situation est unique.'}
           </p>
         </div>
       </section>

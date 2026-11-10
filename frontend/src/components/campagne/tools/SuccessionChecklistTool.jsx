@@ -15,43 +15,43 @@ const ITEMS = [
     id: 'liquidites',
     group: 'liquidite',
     short: 'Liquidité',
-    label: 'Argent accessible pour la famille les premiers mois',
+    label: 'Argent accessible (liquidité)',
     hint: 'Comptes bloqués ≠ épicerie et hypothèque payées. Qui paie en attendant ?',
   },
   {
-    id: 'dettes-hypotheque',
+    id: 'besoins-rapides',
     group: 'liquidite',
-    short: 'Revenu / dettes',
-    label: 'Plan si ton revenu disparaît (dettes, hypothèque)',
-    hint: 'Assurance, coussin, ou autre — un plan clair pour ne pas laisser ça en suspens.',
+    short: 'Besoins rapides',
+    label: 'Ce dont la famille a besoin vite',
+    hint: 'Les premiers mois : revenu, dettes, hypothèque — un plan clair pour ne pas laisser ça en suspens.',
   },
   {
     id: 'beneficiaires',
     group: 'documents',
     short: 'Bénéficiaires',
-    label: 'Bénéficiaires à jour (assurance, REER, CELI)',
+    label: 'Polices, REER, CELI et régime collectif à jour (bénéficiaires)',
     hint: 'L’argent va à qui tu veux vraiment, pas à une ancienne version de ta vie.',
   },
   {
     id: 'testament',
     group: 'documents',
     short: 'Testament',
-    label: 'Testament écrit (ou rendez-vous notaire pris)',
+    label: 'Un testament existe et est à jour',
     hint: 'Qui reçoit quoi — pas juste « j’y penserai ».',
   },
   {
-    id: 'inventaire',
-    group: 'clarte',
-    short: 'Inventaire',
-    label: 'Liste simple de ce que tu as (maison, comptes…)',
-    hint: 'Où c’est, à qui c’est, et qui peut y accéder.',
+    id: 'coherence',
+    group: 'documents',
+    short: 'Cohérence',
+    label: 'Testament et contrats se parlent',
+    hint: 'Bénéficiaires, polices et testament : est-ce que ça colle ensemble ?',
   },
   {
-    id: 'discussion',
-    group: 'clarte',
-    short: 'Famille informée',
-    label: 'Ta famille sait qui fait quoi',
-    hint: 'Conjoint / proches : pour que personne ne découvre le plan le jour J.',
+    id: 'notaire',
+    group: 'cadre',
+    short: 'Notaire',
+    label: 'Le notaire a revu la situation',
+    hint: 'Le cadre légal reste chez le notaire — cette checklist ne le remplace pas.',
   },
 ];
 
@@ -64,12 +64,12 @@ const GROUPS = [
   {
     id: 'documents',
     title: 'Qui reçoit quoi',
-    subtitle: 'Bénéficiaires et testament : est-ce qu’ils se parlent ?',
+    subtitle: 'Bénéficiaires, testament et contrats : est-ce qu’ils se parlent ?',
   },
   {
-    id: 'clarte',
-    title: 'Qui sait',
-    subtitle: 'Inventaire simple + proches au courant — moins d’improvisation le jour J.',
+    id: 'cadre',
+    title: 'Cadre légal',
+    subtitle: 'Le notaire reste essentiel pour le juridique.',
   },
 ];
 
@@ -97,7 +97,7 @@ function statusDetail(count, nextShort) {
     : 'C’est un début. Continue — chaque case cochée clarifie ce qui arrive à ta famille.';
 }
 
-/** Next-step branché CSF vs notaire (fini « PDF + notaire »). */
+/** Next-step branché CSF vs notaire. */
 function nextStepFor(nextItem) {
   if (!nextItem) {
     return {
@@ -114,35 +114,35 @@ function nextStepFor(nextItem) {
         detail: 'Argent accessible les premiers mois — souvent le 1er vrai trou.',
         pdfValue: 'Liquidité — argent accessible les premiers mois',
       };
-    case 'dettes-hypotheque':
+    case 'besoins-rapides':
       return {
-        value: 'Revenu / dettes',
-        detail: 'Plan si le revenu disparaît (dettes, hypo).',
-        pdfValue: 'Revenu / dettes — plan si le revenu disparaît',
+        value: 'Besoins rapides',
+        detail: 'Ce dont la famille a besoin vite (revenu, dettes, hypo).',
+        pdfValue: 'Besoins rapides — ce dont la famille a besoin vite',
       };
     case 'beneficiaires':
       return {
         value: 'Bénéficiaires',
-        detail: 'Polices, REER, CELI à jour — qui reçoit vraiment.',
-        pdfValue: 'Bénéficiaires — polices, REER, CELI à jour',
+        detail: 'Polices, REER, CELI et régime collectif à jour.',
+        pdfValue: 'Bénéficiaires — polices, REER, CELI, régime collectif',
       };
     case 'testament':
       return {
-        value: 'Testament · notaire',
-        detail: 'Cadre légal chez le notaire ; 15 min pour préparer la conversation.',
-        pdfValue: 'Testament · notaire — préparer la conversation',
+        value: 'Testament',
+        detail: 'Un testament existe et est à jour.',
+        pdfValue: 'Testament — existe et est à jour',
       };
-    case 'inventaire':
+    case 'coherence':
       return {
-        value: 'Inventaire',
-        detail: 'Liste simple maison / comptes / accès.',
-        pdfValue: 'Inventaire — maison, comptes, accès',
+        value: 'Cohérence',
+        detail: 'Testament et contrats se parlent.',
+        pdfValue: 'Cohérence — testament et contrats se parlent',
       };
-    case 'discussion':
+    case 'notaire':
       return {
-        value: 'Famille informée',
-        detail: 'Qui fait quoi — moins d’improvisation.',
-        pdfValue: 'Famille informée — qui fait quoi',
+        value: 'Notaire',
+        detail: 'Le notaire a revu la situation — cadre légal.',
+        pdfValue: 'Notaire — a revu la situation',
       };
     default:
       return {
@@ -211,8 +211,6 @@ export function SuccessionChecklistTool() {
     missingCount === 0
       ? 'On peut valider liquidité & bénéficiaires en 15 min ; le notaire garde le juridique.'
       : 'En 15 minutes on relie ça à ta vie ; le notaire reste pour le testament. Clarifier, c’est pas acheter.';
-  const softCloseRdvLabel =
-    missingCount === 0 ? 'Valider ma base en 15 min' : 'Réserver 15 minutes';
 
   const pillarScores = GROUPS.map((group) => {
     const groupItems = ITEMS.filter((item) => item.group === group.id);
@@ -258,7 +256,7 @@ export function SuccessionChecklistTool() {
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Résumé — si tu manques',
+      title: 'Résumé — portrait successoral',
       filename: 'resume-succession-bases.pdf',
       sections: [
         {
@@ -269,11 +267,11 @@ export function SuccessionChecklistTool() {
           })),
         },
         {
-          heading: 'Portrait',
+          heading: 'Portrait des trous',
           rows: [
             { label: 'Points clarifiés', value: `${count}/${total}` },
             {
-              label: 'Piliers OK (liquidité / documents / clarté)',
+              label: 'Piliers OK (liquidité / documents / cadre)',
               value: `${pillarsOk}/3`,
             },
             {
@@ -308,8 +306,8 @@ export function SuccessionChecklistTool() {
   return (
     <div data-testid="tool-succession-checklist">
       <CampagneToolShell
-        title="Si tu manques — checklist"
-        intro="Liquidité, bénéficiaires, testament : coche seulement ce qui est vraiment en place. Ton portrait des trous se construit en direct. PDF en bonus, pas en destination."
+        title="Checklist — 6 questions"
+        intro="Coche ce qui est vrai aujourd’hui. Tu vois tout de suite les trous à combler."
         disclaimer="Contenu éducatif seulement — pas un conseil personnalisé. Ne remplace pas un notaire ni un avis juridique."
         footer={
           showSoftClose ? null : (
@@ -348,7 +346,7 @@ export function SuccessionChecklistTool() {
         <div className="mb-8">
           <div className="mb-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-              Ton portrait
+              Ton portrait des trous
             </p>
             <p className="mt-1 text-sm text-prestige-taupe">
               {showPortrait
@@ -404,7 +402,7 @@ export function SuccessionChecklistTool() {
                     headline={softCloseHeadline}
                     subline={softCloseSubline}
                     rdvPath={rdvPath}
-                    rdvLabel={softCloseRdvLabel}
+                    rdvLabel="Réserver 15 minutes"
                     onRdvClick={() =>
                       trackRendezVousClick('campagne_succession-bases_rdv_tool')
                     }
