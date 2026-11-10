@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useAudienceMode, AUDIENCE_PARTICULIER, AUDIENCE_PRIVE } from '../../context/AudienceModeContext';
-import { Menu, X, User, Bell, ChevronDown, LogOut, Settings, Briefcase, Gift, Calendar, Landmark, ArrowLeftRight } from 'lucide-react';
+import { Menu, X, User, Bell, ChevronDown, LogOut, Settings, Briefcase, Gift, Calendar, Landmark, ArrowLeftRight, LineChart } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -231,6 +231,12 @@ export const Navbar = () => {
                               Classe d’actif
                             </Link>
                           </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to="/admin/illustrateur-patrimonial" className="flex items-center gap-2">
+                              <LineChart className="h-4 w-4" />
+                              Illustrateur patrimonial
+                            </Link>
+                          </DropdownMenuItem>
                         </>
                       )}
                       <DropdownMenuSeparator />
@@ -341,6 +347,14 @@ export const Navbar = () => {
                           >
                             <Landmark className="h-5 w-5" />
                             Classe d’actif
+                          </Link>
+                          <Link
+                            to="/admin/illustrateur-patrimonial"
+                            onClick={() => setIsOpen(false)}
+                            className="flex min-h-[44px] items-center gap-2 py-2 font-medium text-dark"
+                          >
+                            <LineChart className="h-5 w-5" />
+                            Illustrateur patrimonial
                           </Link>
                         </>
                       )}

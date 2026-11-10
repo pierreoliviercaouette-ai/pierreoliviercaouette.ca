@@ -467,14 +467,24 @@ export const Admin = () => {
                 <p className="text-prestige-taupe">Gérez votre site et vos données</p>
               </div>
             </div>
-            <Link
-              to="/admin/assurance-vie-actif"
-              className="rounded-2xl border border-prestige-beige bg-light px-5 py-4 transition-colors hover:border-primary"
-            >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Présentation</p>
-              <p className="mt-1 font-heading text-lg text-dark">Assurance vie comme classe d’actif</p>
-              <p className="text-sm text-prestige-taupe">Dossier privé · scénarios 1, 3 et 4</p>
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/admin/illustrateur-patrimonial"
+                className="rounded-2xl border border-prestige-beige bg-light px-5 py-4 transition-colors hover:border-primary"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Illustrateur</p>
+                <p className="mt-1 font-heading text-lg text-dark">Illustrateur patrimonial</p>
+                <p className="text-sm text-prestige-taupe">Projection · fiscalité · assurance · scénarios</p>
+              </Link>
+              <Link
+                to="/admin/assurance-vie-actif"
+                className="rounded-2xl border border-prestige-beige bg-light px-5 py-4 transition-colors hover:border-primary"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Présentation</p>
+                <p className="mt-1 font-heading text-lg text-dark">Assurance vie comme classe d’actif</p>
+                <p className="text-sm text-prestige-taupe">Dossier privé · scénarios 1, 3 et 4</p>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

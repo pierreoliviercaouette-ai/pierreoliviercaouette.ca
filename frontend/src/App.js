@@ -37,6 +37,7 @@ import {
 } from "./pages/SeoLandingPages";
 import { JemceeLanding } from "./pages/JemceeLanding";
 import { AssuranceVieActif } from "./pages/AssuranceVieActif";
+import { IllustrateurPatrimonial } from "./pages/IllustrateurPatrimonial";
 import { PatrimoineHome } from "./pages/PatrimoineHome";
 import { Apprendre } from "./pages/Apprendre";
 import { ApprendreDetail } from "./pages/ApprendreDetail";
@@ -77,6 +78,7 @@ function AppShell() {
   const hidePortfolioBanner =
     isJemcee ||
     location.pathname.startsWith('/admin/assurance-vie-actif') ||
+    location.pathname.startsWith('/admin/illustrateur-patrimonial') ||
     location.pathname.startsWith('/campagnes');
 
   // Landing jemcee : hors du flex shell pour ne pas casser le scroll/pin
@@ -133,6 +135,7 @@ function AppShell() {
             <Route path="/profil" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/assurance-vie-actif" element={<AssuranceVieActif />} />
+            <Route path="/admin/illustrateur-patrimonial" element={<IllustrateurPatrimonial />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/rendez-vous" element={<Appointment />} />
             <Route path="/rendez-vous/campagne" element={<CampagneAppointment />} />
@@ -175,7 +178,8 @@ function AppShell() {
             <Route path="/conditions" element={<Terms />} />
           </Routes>
         </main>
-        {!location.pathname.startsWith('/admin/assurance-vie-actif') && <Footer />}
+        {!location.pathname.startsWith('/admin/assurance-vie-actif') &&
+          !location.pathname.startsWith('/admin/illustrateur-patrimonial') && <Footer />}
         <BackToTop />
         <CookieConsentBanner />
       </div>
