@@ -12,7 +12,6 @@ import { SectionCard, TextInput } from './Field';
 import { GapMetricBanner } from './GapsPrioritiesStep';
 import { ModuleOptionFields } from './ModuleOptionFields';
 import { usePlan } from './PlanContext';
-import { WorkflowNav } from './WorkflowRail';
 
 export function ModulesTab() {
   const {
@@ -140,17 +139,17 @@ export function ModulesTab() {
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => setWorkflowStep('lecture')}
+            onClick={() => setWorkflowStep('rapport')}
             className="rounded-full border border-prestige-beige px-4 py-2 text-sm font-semibold"
           >
-            Lecture simple
+            Rapport
           </button>
           <button
             type="button"
-            onClick={() => setWorkflowStep('dashboard')}
+            onClick={() => setWorkflowStep('recommandations')}
             className="rounded-full border border-prestige-beige px-4 py-2 text-sm font-semibold"
           >
-            Dashboard assemblé
+            Recommandations
           </button>
           {modulesBundle?.hasSelections && (
             <button
@@ -318,7 +317,6 @@ export function ModulesTab() {
         </p>
       </SectionCard>
 
-      <WorkflowNav />
     </div>
   );
 }

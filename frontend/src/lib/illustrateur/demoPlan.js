@@ -1,6 +1,15 @@
 import { DEFAULT_TAX_RATES } from './investmentPlanningService';
 import { newId } from './ids';
 import { createModuleOption, emptyModulesState } from './planningModules';
+import {
+  emptyContributionRoom,
+  emptyCriticalIllnessNeeds,
+  emptyDeathNeeds,
+  emptyDisabilityNeeds,
+  emptyEmergency,
+  emptyPerson,
+  emptyRetirement,
+} from './planDefaults';
 
 /** Dossier démo entrepreneur QC — illustration éducative. */
 export function createDemoPlan() {
@@ -202,6 +211,73 @@ export function createDemoPlan() {
     priorities: ['assurance_vie', 'placement'],
     nextStepsNotes:
       'Valider illustrations assureur, mettre en place les cotisations automatiques CELI/REER, suivi dans 90 jours.',
+    person: {
+      ...emptyPerson(),
+      firstName: 'Client',
+      lastName: 'Illustration',
+      birthDay: 15,
+      birthMonth: '6',
+      birthYear: 1985,
+      sex: 'M',
+      maritalStatus: 'conjoint',
+      province: 'QC',
+      tobacco: false,
+      language: 'fr',
+      planType: 'individuel',
+      children: [
+        { id: newId('ch'), name: 'Enfant 1', birthYear: 2015 },
+        { id: newId('ch'), name: 'Enfant 2', birthYear: 2018 },
+      ],
+    },
+    objectives: [
+      { categoryId: 'protections', objectiveId: 'rembourser_deces' },
+      { categoryId: 'protections', objectiveId: 'niveau_vie_invalidite' },
+      { categoryId: 'finances', objectiveId: 'fonds_urgence' },
+      { categoryId: 'retraite', objectiveId: 'niveau_vie' },
+    ],
+    contributionRoom: { ...emptyContributionRoom(), reer: 18000, celi: 45000 },
+    emergency: { ...emptyEmergency(), months: 3, monthlyAmount: 4500, creditLine: 8000, allocatedAssetIds: [bankId] },
+    deathNeeds: {
+      ...emptyDeathNeeds(),
+      policies: [
+        { id: newId('pol'), type: 'temporaire', insured: 'Client', amount: 500000, annualPremium: 720 },
+      ],
+      liquidateAssetIds: [reerId, celiId],
+      repayDebtIds: [mortgageId],
+      incomeReplacePct: 70,
+      incomeReplaceYears: 20,
+      discountRate: 3.4,
+    },
+    disabilityNeeds: {
+      ...emptyDisabilityNeeds(),
+      policies: [{ id: newId('di'), type: 'individuelle', amount: 3000, annualPremium: 900 }],
+      replacePct: 70,
+    },
+    criticalIllnessNeeds: {
+      ...emptyCriticalIllnessNeeds(),
+      policies: [{ id: newId('ci'), type: 'individuelle', amount: 50000, annualPremium: 400 }],
+      clientMonthlyIncome: 7500,
+      clientMonths: 12,
+    },
+    projects: [],
+    retirement: {
+      ...emptyRetirement(),
+      targetAge: 65,
+      replacePct: 70,
+      publicPensions: [
+        { id: newId('pen'), type: 'RRQ', annualAmount: 12000, frequency: 'annuel', indexed: true, startAge: 65 },
+        { id: newId('pen'), type: 'SV', annualAmount: 8000, frequency: 'annuel', indexed: true, startAge: 65 },
+      ],
+      decumulationAssetIds: [reerId, celiId],
+    },
+    recommendations: [
+      {
+        id: newId('rec'),
+        domain: 'death',
+        text: 'Ajuster la couverture vie temporaire pour combler le manque à gagner illustratif et sécuriser la famille.',
+      },
+    ],
+    savings: [{ id: newId('sav'), name: 'Épargne auto', monthlyAmount: 800, annualAmount: 9600 }],
     modules: (() => {
       const modules = emptyModulesState();
       const vieA = createModuleOption('assurance_vie', {
@@ -313,9 +389,20 @@ export function createEmptyPlan() {
       maladie_grave_cible: 50000,
     },
     scenarios: [],
-    workflow: { step: 'profil' },
+    workflow: { step: 'personnelles' },
     priorities: [],
     nextStepsNotes: '',
+    person: emptyPerson(),
+    objectives: [],
+    contributionRoom: emptyContributionRoom(),
+    emergency: emptyEmergency(),
+    deathNeeds: emptyDeathNeeds(),
+    disabilityNeeds: emptyDisabilityNeeds(),
+    criticalIllnessNeeds: emptyCriticalIllnessNeeds(),
+    projects: [],
+    retirement: emptyRetirement(),
+    recommendations: [],
+    savings: [],
     modules: emptyModulesState(),
   };
 }

@@ -59,6 +59,7 @@ export {
 export {
   WORKFLOW_PHASES,
   WORKFLOW_STEPS,
+  SIDEBAR_STEPS,
   defaultWorkflow,
   ensureWorkflow,
   ensurePriorities,
@@ -66,3 +67,15 @@ export {
   getStepMeta,
   adjacentStep,
 } from './workflow';
+export {
+  computeAllAttainments,
+  computeDeathAttainment,
+  computeDisabilityAttainment,
+  computeEmergencyAttainment,
+  computeCriticalIllnessAttainment,
+  computeRetirementAttainment,
+  presentValueIncomeGap,
+  ATTAINMENT_DOMAIN_LABELS,
+} from './attainment';
+export { OBJECTIVE_CATEGORIES } from './objectivesCatalog';
+export { ensureCollectFields } from './planDefaults';

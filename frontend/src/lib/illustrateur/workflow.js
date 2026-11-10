@@ -1,23 +1,29 @@
-/** Parcours SAAS local — 3 phases + sous-étapes. */
+/** Parcours collecte SAAS — sidebar d’étapes. */
 
 export const WORKFLOW_PHASES = [
-  { id: 1, label: 'Dossier', short: '1 · Dossier' },
-  { id: 2, label: 'Plan', short: '2 · Plan' },
-  { id: 3, label: 'Présenter', short: '3 · Présenter' },
+  { id: 1, label: 'Collecte', short: 'Collecte' },
+  { id: 2, label: 'Plan', short: 'Plan' },
+  { id: 3, label: 'Rapport', short: 'Rapport' },
 ];
 
 export const WORKFLOW_STEPS = [
-  { id: 'hub', phase: 0, label: 'Accueil', short: 'Accueil' },
-  { id: 'profil', phase: 1, label: 'Profil client', short: 'Profil' },
-  { id: 'bilan', phase: 1, label: 'Bilan', short: 'Bilan' },
-  { id: 'revenus', phase: 1, label: 'Revenus', short: 'Revenus' },
-  { id: 'evenements', phase: 1, label: 'Événements & horizon', short: 'Événements' },
-  { id: 'besoins', phase: 1, label: 'Besoins de protection', short: 'Besoins' },
-  { id: 'gaps', phase: 2, label: 'Gaps & priorités', short: 'Gaps' },
-  { id: 'modules', phase: 2, label: 'Options A-B-C', short: 'Options' },
-  { id: 'lecture', phase: 3, label: 'Lecture simple', short: 'Lecture' },
-  { id: 'dashboard', phase: 3, label: 'Dashboard chiffré', short: 'Dashboard' },
+  { id: 'hub', phase: 0, label: 'Accueil', short: 'Accueil', sidebar: false },
+  { id: 'personnelles', phase: 1, label: 'Informations personnelles', short: 'Infos perso', sidebar: true },
+  { id: 'objectifs', phase: 1, label: 'Objectifs', short: 'Objectifs', sidebar: true },
+  { id: 'bilan', phase: 1, label: 'Actifs et passifs', short: 'Actifs/passifs', sidebar: true },
+  { id: 'revenus', phase: 1, label: 'Revenu et épargne', short: 'Revenu/épargne', sidebar: true },
+  { id: 'urgence', phase: 1, label: 'Fonds d’urgence', short: 'Urgence', sidebar: true, attainment: 'emergency' },
+  { id: 'deces', phase: 1, label: 'Décès', short: 'Décès', sidebar: true, attainment: 'death' },
+  { id: 'invalidite', phase: 1, label: 'Invalidité', short: 'Invalidité', sidebar: true, attainment: 'disability' },
+  { id: 'maladie_grave', phase: 1, label: 'Maladie grave', short: 'Maladie grave', sidebar: true, attainment: 'criticalIllness' },
+  { id: 'projets', phase: 1, label: 'Projets', short: 'Projets', sidebar: true },
+  { id: 'retraite', phase: 1, label: 'Retraite', short: 'Retraite', sidebar: true, attainment: 'retirement' },
+  { id: 'recommandations', phase: 2, label: 'Recommandations', short: 'Recommandations', sidebar: true },
+  { id: 'modules', phase: 2, label: 'Options A-B-C', short: 'Options', sidebar: true },
+  { id: 'rapport', phase: 3, label: 'Rapport', short: 'Rapport', sidebar: true },
 ];
+
+export const SIDEBAR_STEPS = WORKFLOW_STEPS.filter((s) => s.sidebar);
 
 export function defaultWorkflow() {
   return { step: 'hub' };
@@ -25,9 +31,17 @@ export function defaultWorkflow() {
 
 export function ensureWorkflow(plan) {
   const step = plan?.workflow?.step;
-  if (WORKFLOW_STEPS.some((s) => s.id === step)) {
-    return { step };
-  }
+  if (WORKFLOW_STEPS.some((s) => s.id === step)) return { step };
+  // migrate legacy steps
+  const legacy = {
+    profil: 'personnelles',
+    besoins: 'deces',
+    gaps: 'recommandations',
+    lecture: 'rapport',
+    dashboard: 'rapport',
+    evenements: 'projets',
+  };
+  if (legacy[step]) return { step: legacy[step] };
   return defaultWorkflow();
 }
 
@@ -50,38 +64,36 @@ export function stepsForPhase(phaseId) {
   return WORKFLOW_STEPS.filter((s) => s.phase === phaseId);
 }
 
-/**
- * Checklist « dossier prêt » avant phase 2.
- */
 export function evaluateDossierReadiness(plan) {
   const hasEntity = (plan?.entities || []).length > 0;
   const hasAsset = (plan?.assets || []).some((a) => (parseFloat(a.currentBalance) || 0) > 0);
   const hasRevenue = (plan?.revenues || []).some(
-    (r) =>
-      (parseFloat(r.monthlyAmount) || 0) > 0 ||
-      (parseFloat(r.annualAmount) || parseFloat(r.amount) || 0) > 0,
+    (r) => (parseFloat(r.monthlyAmount) || 0) > 0 || (parseFloat(r.annualAmount) || 0) > 0,
   );
-  const hasIdentity = Boolean(plan?.meta?.clientLabel || plan?.meta?.name);
-  const needs = plan?.needs || {};
-  const hasProtectionInputs =
-    (parseFloat(needs.revenu_net) || 0) > 0 ||
-    (parseFloat(needs.invalidite_revenu) || 0) > 0 ||
-    (parseFloat(needs.hypotheque) || 0) > 0 ||
-    (parseFloat(needs.av_actuelle) || 0) > 0;
+  const person = plan?.person || {};
+  const hasIdentity = Boolean(
+    person.firstName || person.lastName || plan?.meta?.clientLabel || plan?.meta?.name,
+  );
+  const hasProtection =
+    (plan?.deathNeeds?.policies || []).length > 0 ||
+    (parseFloat(plan?.needs?.revenu_net) || 0) > 0 ||
+    (parseFloat(plan?.deathNeeds?.incomeReplacePct) || 0) > 0;
 
   const checks = [
     { id: 'identity', label: 'Identité du dossier', ok: hasIdentity },
     { id: 'entity', label: 'Au moins une entité', ok: hasEntity },
     { id: 'balance', label: 'Actif ou revenu renseigné', ok: hasAsset || hasRevenue },
-    { id: 'needs', label: 'Besoins de protection amorcés', ok: hasProtectionInputs },
+    { id: 'needs', label: 'Protection amorcée', ok: hasProtection || hasRevenue },
   ];
-
-  const ready = checks.every((c) => c.ok);
-  return { ready, checks };
+  return { ready: checks.every((c) => c.ok), checks };
 }
 
 export function ensurePriorities(plan) {
   const raw = plan?.priorities;
   if (!Array.isArray(raw)) return [];
   return raw.filter((id) => typeof id === 'string').slice(0, 3);
+}
+
+export function canAdvanceFromStep() {
+  return true;
 }

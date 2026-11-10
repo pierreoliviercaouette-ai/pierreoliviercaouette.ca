@@ -45,8 +45,8 @@ describe('planning gaps & workflow', () => {
   });
 
   test('adjacentStep and priorities helpers', () => {
-    expect(adjacentStep('profil', 1)).toBe('bilan');
-    expect(adjacentStep('dashboard', 1)).toBe('dashboard');
+    expect(adjacentStep('personnelles', 1)).toBe('objectifs');
+    expect(adjacentStep('rapport', 1)).toBe('rapport');
     expect(ensurePriorities({ priorities: ['a', 'b', 'c', 'd'] })).toEqual(['a', 'b', 'c']);
   });
 });

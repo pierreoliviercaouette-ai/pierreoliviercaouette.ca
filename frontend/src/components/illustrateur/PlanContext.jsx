@@ -20,12 +20,13 @@ import {
   ensureModules,
 } from '../../lib/illustrateur/planningModules';
 import { analyzePlanningGaps } from '../../lib/illustrateur/planningGaps';
+import { computeAllAttainments } from '../../lib/illustrateur/attainment';
+import { ensureCollectFields } from '../../lib/illustrateur/planDefaults';
 import {
   adjacentStep,
   defaultWorkflow,
   ensurePriorities,
   ensureWorkflow,
-  evaluateDossierReadiness,
   getStepMeta,
 } from '../../lib/illustrateur/workflow';
 
@@ -50,8 +51,10 @@ function runProjection(plan) {
 }
 
 function normalizePlan(raw) {
+  const collect = ensureCollectFields(raw);
   return {
     ...raw,
+    ...collect,
     modules: ensureModules(raw),
     workflow: ensureWorkflow(raw),
     priorities: ensurePriorities(raw),
@@ -99,13 +102,16 @@ export function PlanProvider({ children }) {
     setWorkflowStep(adjacentStep(workflowStep, -1));
   }, [setWorkflowStep, workflowStep]);
 
-  const canAdvanceFromStep = useCallback(
-    (stepId) => {
-      if (stepId !== 'besoins') return true;
-      return evaluateDossierReadiness(plan).ready;
-    },
-    [plan],
-  );
+  const canAdvanceFromStep = useCallback(() => true, []);
+
+  const attainment = useMemo(() => {
+    try {
+      return computeAllAttainments(plan);
+    } catch (err) {
+      console.error('[illustrateur] attainment', err);
+      return {};
+    }
+  }, [plan]);
 
   const setPriorities = useCallback(
     (priorities) => {
@@ -358,6 +364,7 @@ export function PlanProvider({ children }) {
       compareProjection,
       modulesBundle,
       gapsBundle,
+      attainment,
       workflowStep,
       setWorkflowStep,
       goWorkflowNext,
@@ -384,7 +391,7 @@ export function PlanProvider({ children }) {
       openProposalPresentation,
       proposalBundle: modulesBundle,
       loadDemo: () => resetTo(createDemoPlan, 'hub'),
-      loadEmpty: () => resetTo(createEmptyPlan, 'profil'),
+      loadEmpty: () => resetTo(createEmptyPlan, 'personnelles'),
       clearSession: () => {
         clearSessionPlan();
         resetTo(createEmptyPlan, 'hub');
@@ -437,6 +444,7 @@ export function PlanProvider({ children }) {
       compareProjection,
       modulesBundle,
       gapsBundle,
+      attainment,
       workflowStep,
       setWorkflowStep,
       goWorkflowNext,
