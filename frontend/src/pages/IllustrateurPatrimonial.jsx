@@ -1,30 +1,26 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { downloadCampagneToolPdf } from '../lib/campagneToolPdf';
 import { formatCad, formatPct, summarizeProjection } from '../lib/illustrateur';
+import { PLANNING_MODULES } from '../lib/illustrateur/planningModules';
 import { useSeoMeta } from '../lib/seo';
 import { AnalyseTab } from '../components/illustrateur/AnalyseTab';
 import { BilanTab } from '../components/illustrateur/BilanTab';
 import { DashboardTab } from '../components/illustrateur/DashboardTab';
+import { GapsPrioritiesStep } from '../components/illustrateur/GapsPrioritiesStep';
+import { HubStep } from '../components/illustrateur/HubStep';
+import { ModulesTab } from '../components/illustrateur/ModulesTab';
+import { NeedsStep } from '../components/illustrateur/NeedsStep';
 import { OptionsDashboard } from '../components/illustrateur/OptionsDashboard';
 import { PlanProvider, usePlan } from '../components/illustrateur/PlanContext';
 import { PlanificationTab } from '../components/illustrateur/PlanificationTab';
 import { PresentationView } from '../components/illustrateur/PresentationView';
+import { ProfilStep } from '../components/illustrateur/ProfilStep';
 import { RevenusTab } from '../components/illustrateur/RevenusTab';
-import { ModulesTab } from '../components/illustrateur/ModulesTab';
+import { WorkflowNav, WorkflowRail } from '../components/illustrateur/WorkflowRail';
 
 const PATH = '/admin/illustrateur-patrimonial';
-
-const TABS = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'options', label: 'Lecture simple' },
-  { id: 'scenarios', label: 'Modules' },
-  { id: 'bilan', label: 'Bilan' },
-  { id: 'revenus', label: 'Revenus' },
-  { id: 'plan', label: 'Événements' },
-  { id: 'analyse', label: 'Analyse' },
-];
 
 function AccessGate({ user }) {
   const location = useLocation();
@@ -52,11 +48,19 @@ function AccessGate({ user }) {
   );
 }
 
+function WithWorkflowNav({ children }) {
+  return (
+    <div className="space-y-6">
+      {children}
+      <WorkflowNav />
+    </div>
+  );
+}
+
 function IllustrateurShell() {
   const {
     plan,
-    tab,
-    setTab,
+    workflowStep,
     presentMode,
     setPresentMode,
     loadDemo,
@@ -66,13 +70,32 @@ function IllustrateurShell() {
     importFile,
     projection,
     modulesBundle,
+    gapsBundle,
     openProposalPresentation,
   } = usePlan();
   const fileRef = useRef(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const summary = useMemo(() => summarizeProjection(projection), [projection]);
   const hasOptions = modulesBundle?.hasSelections;
 
   const exportPdf = async () => {
+    const priorityLabels = (plan.priorities || [])
+      .map((id) => PLANNING_MODULES.find((m) => m.id === id)?.label || id)
+      .join(', ');
+    const optionRows = (modulesBundle?.sections || [])
+      .filter((s) => s.selected)
+      .map((s) => ({
+        label: `${s.label} (${s.selectedLetter})`,
+        value: s.selected?.name || '—',
+      }));
+    const gapRows = (gapsBundle?.ordered || [])
+      .filter((g) => g.hasGap)
+      .slice(0, 8)
+      .map((g) => ({
+        label: g.title,
+        value: g.metricLabel || '—',
+      }));
+
     await downloadCampagneToolPdf({
       title: plan.meta?.name || 'Illustrateur patrimonial',
       filename: 'illustrateur-patrimonial.pdf',
@@ -80,6 +103,7 @@ function IllustrateurShell() {
         {
           heading: 'Synthèse',
           rows: [
+            { label: 'Client', value: plan.meta?.clientLabel || plan.meta?.name || '—' },
             { label: 'Valeur nette actuelle', value: formatCad(summary.netWorthNow) },
             { label: 'Valeur nette horizon', value: formatCad(summary.netWorthEnd) },
             { label: 'Croissance', value: formatCad(summary.growthCad) },
@@ -90,6 +114,14 @@ function IllustrateurShell() {
             },
           ],
         },
+        ...(priorityLabels
+          ? [{ heading: 'Priorités RDV', rows: [{ label: 'Objectifs', value: priorityLabels }] }]
+          : []),
+        ...(gapRows.length ? [{ heading: 'Gaps illustratifs', rows: gapRows }] : []),
+        ...(optionRows.length ? [{ heading: 'Options retenues', rows: optionRows }] : []),
+        ...(plan.nextStepsNotes
+          ? [{ heading: 'Prochaines étapes', rows: [{ label: 'Notes', value: plan.nextStepsNotes }] }]
+          : []),
       ],
       notes: plan.meta?.notes ? [plan.meta.notes] : [],
       disclaimer:
@@ -115,13 +147,13 @@ function IllustrateurShell() {
                   Admin
                 </Link>
                 <span className="text-white/30">/</span>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-white/55">Illustrateur</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/55">Planification</p>
               </div>
               <h1 className="mt-2 font-heading text-2xl md:text-3xl">
                 {plan.meta?.clientLabel || plan.meta?.name || 'Illustrateur patrimonial'}
               </h1>
               <p className="mt-1 text-sm text-white/65">
-                Modules de planification · dashboard assemblé · session navigateur
+                Parcours local · données → gaps → présentation · session navigateur
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -144,40 +176,29 @@ function IllustrateurShell() {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <HeaderStat label="Valeur nette" value={formatCad(summary.netWorthNow)} />
-            <HeaderStat
-              label="Croissance horizon"
-              value={formatCad(summary.growthCad)}
-              sub={formatPct(summary.growthPct)}
-            />
-            <HeaderStat label="Cashflow an 0" value={formatCad(summary.cashflowYear0)} />
-            <HeaderStat
-              label="Endettement"
-              value={formatPct(summary.debtRatioNow)}
-              sub={`→ ${formatPct(summary.debtRatioEnd)}`}
-            />
-          </div>
+          {workflowStep !== 'hub' && (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <HeaderStat label="Valeur nette" value={formatCad(summary.netWorthNow)} />
+              <HeaderStat
+                label="Croissance horizon"
+                value={formatCad(summary.growthCad)}
+                sub={formatPct(summary.growthPct)}
+              />
+              <HeaderStat label="Cashflow an 0" value={formatCad(summary.cashflowYear0)} />
+              <HeaderStat
+                label="Endettement"
+                value={formatPct(summary.debtRatioNow)}
+                sub={`→ ${formatPct(summary.debtRatioEnd)}`}
+              />
+            </div>
+          )}
         </div>
       </header>
 
       <nav className="sticky top-20 z-40 border-b border-prestige-beige bg-[#f0ebe3]/95 backdrop-blur print:hidden">
-        <div className="container-max flex items-center gap-2 overflow-x-auto px-4 py-3 md:px-8">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
-                tab === t.id
-                  ? 'bg-dark text-white shadow-sm'
-                  : 'bg-white/70 text-dark/75 hover:bg-white hover:text-dark'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-          <div className="ml-auto flex shrink-0 flex-wrap gap-1.5">
+        <div className="container-max space-y-3 px-4 py-3 md:px-8">
+          <WorkflowRail />
+          <div className="flex flex-wrap gap-1.5">
             <ActionBtn onClick={loadDemo}>Démo</ActionBtn>
             <ActionBtn onClick={loadEmpty}>Nouveau</ActionBtn>
             <ActionBtn onClick={exportJson}>JSON</ActionBtn>
@@ -205,13 +226,52 @@ function IllustrateurShell() {
       </nav>
 
       <div className="container-max px-4 py-6 md:px-8 md:py-8">
-        {tab === 'dashboard' && <DashboardTab />}
-        {tab === 'options' && <OptionsDashboard />}
-        {tab === 'scenarios' && <ModulesTab />}
-        {tab === 'bilan' && <BilanTab />}
-        {tab === 'revenus' && <RevenusTab />}
-        {tab === 'plan' && <PlanificationTab />}
-        {tab === 'analyse' && <AnalyseTab />}
+        {workflowStep === 'hub' && (
+          <HubStep onImportClick={() => fileRef.current?.click()} />
+        )}
+        {workflowStep === 'profil' && <ProfilStep />}
+        {workflowStep === 'bilan' && (
+          <WithWorkflowNav>
+            <BilanTab />
+          </WithWorkflowNav>
+        )}
+        {workflowStep === 'revenus' && (
+          <WithWorkflowNav>
+            <RevenusTab />
+          </WithWorkflowNav>
+        )}
+        {workflowStep === 'evenements' && (
+          <WithWorkflowNav>
+            <PlanificationTab />
+          </WithWorkflowNav>
+        )}
+        {workflowStep === 'besoins' && <NeedsStep />}
+        {workflowStep === 'gaps' && <GapsPrioritiesStep />}
+        {workflowStep === 'modules' && <ModulesTab />}
+        {workflowStep === 'lecture' && (
+          <WithWorkflowNav>
+            <OptionsDashboard />
+          </WithWorkflowNav>
+        )}
+        {workflowStep === 'dashboard' && (
+          <WithWorkflowNav>
+            <DashboardTab />
+            <div className="rounded-2xl border border-dashed border-prestige-beige bg-white/60 p-4">
+              <button
+                type="button"
+                onClick={() => setShowAdvanced((v) => !v)}
+                className="text-sm font-semibold text-primary"
+              >
+                {showAdvanced ? 'Masquer l’analyse avancée' : 'Ouvrir l’analyse avancée (snapshots)'}
+              </button>
+              {showAdvanced && (
+                <div className="mt-4">
+                  <AnalyseTab />
+                </div>
+              )}
+            </div>
+          </WithWorkflowNav>
+        )}
       </div>
 
       <footer className="border-t border-prestige-beige bg-white/70 px-4 py-6 text-center text-xs text-prestige-taupe md:px-8">

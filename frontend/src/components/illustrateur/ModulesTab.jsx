@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   createModuleOption,
   ensureModules,
@@ -7,9 +7,12 @@ import {
   PLANNING_MODULES,
   summarizeOptionCard,
 } from '../../lib/illustrateur/planningModules';
+import { sortModulesByPriorities } from '../../lib/illustrateur/planningGaps';
 import { SectionCard, TextInput } from './Field';
+import { GapMetricBanner } from './GapsPrioritiesStep';
 import { ModuleOptionFields } from './ModuleOptionFields';
 import { usePlan } from './PlanContext';
+import { WorkflowNav } from './WorkflowRail';
 
 export function ModulesTab() {
   const {
@@ -20,12 +23,28 @@ export function ModulesTab() {
     selectModuleOption,
     removeModuleOption,
     setRecommendedModuleOption,
-    setTab,
+    setWorkflowStep,
     openProposalPresentation,
   } = usePlan();
 
   const modules = ensureModules(plan);
-  const [activeModuleId, setActiveModuleId] = useState(PLANNING_MODULES[0].id);
+  const priorities = useMemo(
+    () => (Array.isArray(plan.priorities) ? plan.priorities : []),
+    [plan.priorities],
+  );
+  const orderedModules = useMemo(
+    () => sortModulesByPriorities(PLANNING_MODULES, priorities),
+    [priorities],
+  );
+
+  const [activeModuleId, setActiveModuleId] = useState(
+    () => priorities[0] || orderedModules[0]?.id || PLANNING_MODULES[0].id,
+  );
+
+  useEffect(() => {
+    if (priorities[0] && !activeModuleId) setActiveModuleId(priorities[0]);
+  }, [priorities, activeModuleId]);
+
   const activeMeta = PLANNING_MODULES.find((m) => m.id === activeModuleId);
   const activeOptions = modules.byModule[activeModuleId]?.options || [];
   const selectedLetter = modules.selections[activeModuleId] || null;
@@ -36,7 +55,10 @@ export function ModulesTab() {
   const [draftData, setDraftData] = useState(() => createModuleOption(activeModuleId).data);
   const [editingId, setEditingId] = useState(null);
 
-  const sectionStats = useMemo(() => modulesBundle?.sections || [], [modulesBundle]);
+  const sectionStats = useMemo(() => {
+    const byId = new Map((modulesBundle?.sections || []).map((s) => [s.id, s]));
+    return orderedModules.map((m) => byId.get(m.id)).filter(Boolean);
+  }, [modulesBundle, orderedModules]);
 
   const switchModule = (id) => {
     setActiveModuleId(id);
@@ -77,42 +99,55 @@ export function ModulesTab() {
 
   return (
     <div className="space-y-6">
-      <SectionCard title="Planification par facette">
+      <SectionCard title="Options A-B-C par facette">
         <p className="mb-4 text-sm leading-relaxed text-prestige-taupe">
-          Chaque domaine (vie, placement, invalidité, etc.) a ses propres options A-B-C avec des champs
-          complets. Tu sélectionnes une option par module : le dashboard assemble automatiquement la
-          proposition globale.
+          Construisez manuellement les options pour couvrir les priorités retenues avec le client. Les
+          facettes prioritaires apparaissent en tête.
         </p>
+        {priorities.length > 0 && (
+          <p className="mb-3 text-xs font-semibold text-primary">
+            Priorités RDV :{' '}
+            {priorities
+              .map((id) => PLANNING_MODULES.find((m) => m.id === id)?.short || id)
+              .join(' · ')}
+          </p>
+        )}
         <div className="flex flex-wrap gap-2">
-          {sectionStats.map((sec) => (
-            <button
-              key={sec.id}
-              type="button"
-              onClick={() => switchModule(sec.id)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                activeModuleId === sec.id
-                  ? 'bg-dark text-white'
-                  : sec.selected
-                    ? 'border border-primary/40 bg-primary/10 text-dark'
-                    : 'border border-prestige-beige bg-white text-dark/80'
-              }`}
-            >
-              {sec.short}
-              {sec.selectedLetter ? ` · ${sec.selectedLetter}` : sec.hasOptions ? ` · ${sec.options.length}` : ''}
-            </button>
-          ))}
+          {sectionStats.map((sec) => {
+            const isPrio = priorities.includes(sec.id);
+            return (
+              <button
+                key={sec.id}
+                type="button"
+                onClick={() => switchModule(sec.id)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                  activeModuleId === sec.id
+                    ? 'bg-dark text-white'
+                    : isPrio
+                      ? 'border border-primary/50 bg-primary/10 text-dark'
+                      : sec.selected
+                        ? 'border border-primary/40 bg-white text-dark'
+                        : 'border border-prestige-beige bg-white text-dark/80'
+                }`}
+              >
+                {isPrio ? '★ ' : ''}
+                {sec.short}
+                {sec.selectedLetter ? ` · ${sec.selectedLetter}` : sec.hasOptions ? ` · ${sec.options.length}` : ''}
+              </button>
+            );
+          })}
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => setTab('options')}
+            onClick={() => setWorkflowStep('lecture')}
             className="rounded-full border border-prestige-beige px-4 py-2 text-sm font-semibold"
           >
             Lecture simple
           </button>
           <button
             type="button"
-            onClick={() => setTab('dashboard')}
+            onClick={() => setWorkflowStep('dashboard')}
             className="rounded-full border border-prestige-beige px-4 py-2 text-sm font-semibold"
           >
             Dashboard assemblé
@@ -131,6 +166,7 @@ export function ModulesTab() {
 
       <SectionCard title={activeMeta?.label || 'Module'}>
         <p className="mb-4 text-sm text-prestige-taupe">{activeMeta?.description}</p>
+        <GapMetricBanner moduleId={activeModuleId} />
 
         <div className="mb-4 grid gap-3 md:grid-cols-4">
           <label className="block text-xs">
@@ -281,6 +317,8 @@ export function ModulesTab() {
           Sélections actives : {modulesBundle?.selectedCount || 0} / {PLANNING_MODULES.length} modules
         </p>
       </SectionCard>
+
+      <WorkflowNav />
     </div>
   );
 }

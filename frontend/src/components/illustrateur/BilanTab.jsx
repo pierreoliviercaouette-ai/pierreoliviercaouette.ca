@@ -10,7 +10,7 @@ import { MoneyInput, SelectInput, TextInput, SectionCard } from './Field';
 import { usePlan } from './PlanContext';
 
 export function BilanTab() {
-  const { plan, setPlan, updateCollection, addToCollection, removeFromCollection } = usePlan();
+  const { plan, updateCollection, addToCollection, removeFromCollection } = usePlan();
   const entityOptions = (plan.entities || []).map((e) => ({ value: e.id, label: e.name }));
 
   const addEntity = () => {
@@ -323,20 +323,6 @@ export function BilanTab() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Métadonnées dossier">
-        <div className="grid gap-3 md:grid-cols-2">
-          <TextInput
-            label="Nom du dossier"
-            value={plan.meta?.name || ''}
-            onChange={(v) => setPlan((p) => ({ ...p, meta: { ...p.meta, name: v } }))}
-          />
-          <TextInput
-            label="Libellé client (écran seulement)"
-            value={plan.meta?.clientLabel || ''}
-            onChange={(v) => setPlan((p) => ({ ...p, meta: { ...p.meta, clientLabel: v } }))}
-          />
-        </div>
-      </SectionCard>
     </div>
   );
 }

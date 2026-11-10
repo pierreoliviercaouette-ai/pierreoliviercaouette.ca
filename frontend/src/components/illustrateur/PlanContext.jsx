@@ -11,6 +11,7 @@ import {
   saveSessionPlan,
   touchPlan,
   newId,
+  summarizeProjection,
 } from '../../lib/illustrateur';
 import {
   buildModulesBundle,
@@ -18,7 +19,15 @@ import {
   createModuleOption,
   ensureModules,
 } from '../../lib/illustrateur/planningModules';
-import { summarizeProjection } from '../../lib/illustrateur/metrics';
+import { analyzePlanningGaps } from '../../lib/illustrateur/planningGaps';
+import {
+  adjacentStep,
+  defaultWorkflow,
+  ensurePriorities,
+  ensureWorkflow,
+  evaluateDossierReadiness,
+  getStepMeta,
+} from '../../lib/illustrateur/workflow';
 
 const PlanContext = createContext(null);
 
@@ -40,32 +49,73 @@ function runProjection(plan) {
   );
 }
 
+function normalizePlan(raw) {
+  return {
+    ...raw,
+    modules: ensureModules(raw),
+    workflow: ensureWorkflow(raw),
+    priorities: ensurePriorities(raw),
+    nextStepsNotes: raw?.nextStepsNotes || '',
+  };
+}
+
 export function PlanProvider({ children }) {
   const [plan, setPlanState] = useState(() => {
     const loaded = loadSessionPlan() || createDemoPlan();
-    return {
-      ...loaded,
-      modules: ensureModules(loaded),
-    };
+    return normalizePlan(loaded);
   });
   const [comparePlan, setComparePlan] = useState(null);
-  const [tab, setTab] = useState('dashboard');
   const [presentMode, setPresentMode] = useState(false);
-  const [presentPage, setPresentPage] = useState('options');
+  const [presentPage, setPresentPage] = useState('ouverture');
 
   const setPlan = useCallback((updater) => {
     setPlanState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
-      return touchPlan({
-        ...next,
-        modules: ensureModules(next),
-      });
+      return touchPlan(normalizePlan(next));
     });
   }, []);
 
   useEffect(() => {
     saveSessionPlan(plan);
   }, [plan]);
+
+  const workflowStep = plan.workflow?.step || 'hub';
+
+  const setWorkflowStep = useCallback(
+    (step) => {
+      setPlan((prev) => ({
+        ...prev,
+        workflow: { ...(prev.workflow || defaultWorkflow()), step },
+      }));
+    },
+    [setPlan],
+  );
+
+  const goWorkflowNext = useCallback(() => {
+    setWorkflowStep(adjacentStep(workflowStep, 1));
+  }, [setWorkflowStep, workflowStep]);
+
+  const goWorkflowPrev = useCallback(() => {
+    setWorkflowStep(adjacentStep(workflowStep, -1));
+  }, [setWorkflowStep, workflowStep]);
+
+  const canAdvanceFromStep = useCallback(
+    (stepId) => {
+      if (stepId !== 'besoins') return true;
+      return evaluateDossierReadiness(plan).ready;
+    },
+    [plan],
+  );
+
+  const setPriorities = useCallback(
+    (priorities) => {
+      setPlan((prev) => ({
+        ...prev,
+        priorities: ensurePriorities({ priorities }),
+      }));
+    },
+    [setPlan],
+  );
 
   const modulesBundle = useMemo(() => {
     try {
@@ -83,6 +133,28 @@ export function PlanProvider({ children }) {
     }
   }, [plan]);
 
+  const baselineProjection = useMemo(() => {
+    try {
+      return runProjection(plan);
+    } catch (err) {
+      return { data: [], error: String(err?.message || err) };
+    }
+  }, [plan]);
+
+  const baselineSummary = useMemo(
+    () => summarizeProjection(baselineProjection),
+    [baselineProjection],
+  );
+
+  const gapsBundle = useMemo(() => {
+    try {
+      return analyzePlanningGaps(plan, baselineSummary);
+    } catch (err) {
+      console.error('[illustrateur] gaps', err);
+      return { gaps: [], ordered: [] };
+    }
+  }, [plan, baselineSummary]);
+
   const composedPlan = useMemo(() => {
     try {
       return modulesBundle.hasSelections ? modulesBundle.composed.plan : plan;
@@ -94,12 +166,12 @@ export function PlanProvider({ children }) {
   const projection = useMemo(() => {
     try {
       if (modulesBundle.hasSelections) return modulesBundle.composed.projection;
-      return runProjection(plan);
+      return baselineProjection;
     } catch (err) {
       console.error('[illustrateur] projection', err);
       return { data: [], deathSummary: null, error: String(err?.message || err) };
     }
-  }, [plan, modulesBundle]);
+  }, [baselineProjection, modulesBundle]);
 
   const compareProjection = useMemo(() => {
     if (!comparePlan) return null;
@@ -259,22 +331,43 @@ export function PlanProvider({ children }) {
   );
 
   const openProposalPresentation = useCallback(() => {
-    setPresentPage('options');
+    setPresentPage('ouverture');
     setPresentMode(true);
   }, []);
+
+  const resetTo = useCallback(
+    (factory, step = 'hub') => {
+      setComparePlan(null);
+      const next = normalizePlan(factory());
+      next.workflow = { step };
+      setPlan(next);
+    },
+    [setPlan],
+  );
 
   const value = useMemo(
     () => ({
       plan,
       setPlan,
       projection,
+      baselineProjection,
+      baselineSummary,
       composedPlan,
       comparePlan,
       setComparePlan,
       compareProjection,
       modulesBundle,
-      tab,
-      setTab,
+      gapsBundle,
+      workflowStep,
+      setWorkflowStep,
+      goWorkflowNext,
+      goWorkflowPrev,
+      canAdvanceFromStep,
+      stepMeta: getStepMeta(workflowStep),
+      setPriorities,
+      // legacy aliases
+      tab: workflowStep,
+      setTab: setWorkflowStep,
       presentMode,
       setPresentMode,
       presentPage,
@@ -289,29 +382,18 @@ export function PlanProvider({ children }) {
       removeModuleOption,
       setRecommendedModuleOption,
       openProposalPresentation,
-      // legacy aliases kept briefly for AnalyseTab remnants
       proposalBundle: modulesBundle,
-      loadDemo: () => {
-        setComparePlan(null);
-        setPlan(createDemoPlan());
-        setTab('dashboard');
-      },
-      loadEmpty: () => {
-        setComparePlan(null);
-        setPlan(createEmptyPlan());
-        setTab('dashboard');
-      },
+      loadDemo: () => resetTo(createDemoPlan, 'hub'),
+      loadEmpty: () => resetTo(createEmptyPlan, 'profil'),
       clearSession: () => {
         clearSessionPlan();
-        setComparePlan(null);
-        setPlan(createEmptyPlan());
-        setTab('dashboard');
+        resetTo(createEmptyPlan, 'hub');
       },
       exportJson: () => exportPlanJson(plan),
       importFile: async (file) => {
         const imported = await readPlanFile(file);
         setComparePlan(null);
-        setPlan({ ...imported, modules: ensureModules(imported) });
+        setPlan(normalizePlan(imported));
       },
       snapshotAsScenario: (name) => {
         const snap = clonePlan(plan);
@@ -333,9 +415,8 @@ export function PlanProvider({ children }) {
         if (!scn?.plan) return;
         const restored = clonePlan(scn.plan);
         setPlan({
-          ...restored,
+          ...normalizePlan(restored),
           scenarios: plan.scenarios,
-          modules: ensureModules(restored),
         });
       },
       setCompareFromScenario: (scenarioId) => {
@@ -349,11 +430,19 @@ export function PlanProvider({ children }) {
       plan,
       setPlan,
       projection,
+      baselineProjection,
+      baselineSummary,
       composedPlan,
       comparePlan,
       compareProjection,
       modulesBundle,
-      tab,
+      gapsBundle,
+      workflowStep,
+      setWorkflowStep,
+      goWorkflowNext,
+      goWorkflowPrev,
+      canAdvanceFromStep,
+      setPriorities,
       presentMode,
       presentPage,
       updateCollection,
@@ -366,6 +455,7 @@ export function PlanProvider({ children }) {
       removeModuleOption,
       setRecommendedModuleOption,
       openProposalPresentation,
+      resetTo,
     ],
   );
 

@@ -27,7 +27,7 @@ import { SectionCard } from './Field';
 import { usePlan } from './PlanContext';
 
 export function DashboardTab({ presentation = false } = {}) {
-  const { plan, projection, compareProjection, modulesBundle, setTab, setPresentPage } = usePlan();
+  const { plan, projection, compareProjection, modulesBundle, setWorkflowStep, setPresentPage } = usePlan();
 
   const summary = useMemo(() => summarizeProjection(projection), [projection]);
   const hasProposal = modulesBundle?.hasSelections;
@@ -110,7 +110,7 @@ export function DashboardTab({ presentation = false } = {}) {
               {!presentation && (
                 <button
                   type="button"
-                  onClick={() => setTab('options')}
+                  onClick={() => setWorkflowStep('lecture')}
                   className="rounded-full border border-prestige-beige px-3 py-1.5 text-xs font-semibold"
                 >
                   Lecture simple
@@ -220,9 +220,9 @@ export function DashboardTab({ presentation = false } = {}) {
                 <button
                   type="button"
                   className="text-xs font-semibold text-primary"
-                  onClick={() => setTab('analyse')}
+                  onClick={() => setWorkflowStep('gaps')}
                 >
-                  Analyse détaillée →
+                  Gaps & priorités →
                 </button>
               ) : null
             }
@@ -247,7 +247,7 @@ export function DashboardTab({ presentation = false } = {}) {
           {allocNow.length ? (
             <AllocationDonut data={allocNow} title="Actifs" height={280} />
           ) : (
-            <EmptyChart hint="Ajoutez des actifs dans Bilan." onAction={() => setTab('bilan')} />
+            <EmptyChart hint="Ajoutez des actifs dans Bilan." onAction={() => setWorkflowStep('bilan')} />
           )}
         </SectionCard>
       </div>
@@ -269,7 +269,7 @@ export function DashboardTab({ presentation = false } = {}) {
         {compositionKeys.length ? (
           <CompositionArea data={compositionData} keys={compositionKeys} height={300} />
         ) : (
-          <EmptyChart hint="Aucun actif à empiler." onAction={() => setTab('bilan')} />
+          <EmptyChart hint="Aucun actif à empiler." onAction={() => setWorkflowStep('bilan')} />
         )}
       </SectionCard>
 
@@ -278,19 +278,19 @@ export function DashboardTab({ presentation = false } = {}) {
           title="Assurance vie"
           value={formatCad(life.besoin_recommande || life.r_total)}
           detail="Besoin recommandé (illustratif)"
-          onClick={() => setTab('analyse')}
+          onClick={() => setWorkflowStep('besoins')}
         />
         <NeedCard
           title="Invalidité"
           value={formatCad(disability.trou_mensuel)}
           detail="Trou de revenu / mois"
-          onClick={() => setTab('analyse')}
+          onClick={() => setWorkflowStep('besoins')}
         />
         <NeedCard
           title="Maladie grave"
           value={formatCad(ci.capital_cible)}
           detail="Capital cible"
-          onClick={() => setTab('analyse')}
+          onClick={() => setWorkflowStep('besoins')}
         />
       </div>
 
@@ -303,14 +303,14 @@ export function DashboardTab({ presentation = false } = {}) {
         </Link>
         <button
           type="button"
-          onClick={() => setTab('plan')}
+          onClick={() => setWorkflowStep('evenements')}
           className="rounded-full border border-prestige-beige bg-white px-4 py-2 text-sm font-semibold hover:border-primary"
         >
           Ajuster la planification
         </button>
         <button
           type="button"
-          onClick={() => setTab('revenus')}
+          onClick={() => setWorkflowStep('revenus')}
           className="rounded-full border border-prestige-beige bg-white px-4 py-2 text-sm font-semibold hover:border-primary"
         >
           Revenus & cashflow

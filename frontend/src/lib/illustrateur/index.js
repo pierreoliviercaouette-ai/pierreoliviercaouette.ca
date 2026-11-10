@@ -51,3 +51,18 @@ export {
   summarizeOptionCard,
   getSelectedOption,
 } from './planningModules';
+export {
+  analyzePlanningGaps,
+  gapsForModule,
+  sortModulesByPriorities,
+} from './planningGaps';
+export {
+  WORKFLOW_PHASES,
+  WORKFLOW_STEPS,
+  defaultWorkflow,
+  ensureWorkflow,
+  ensurePriorities,
+  evaluateDossierReadiness,
+  getStepMeta,
+  adjacentStep,
+} from './workflow';

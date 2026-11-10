@@ -13,7 +13,7 @@ const LETTER_BADGE = {
  * Lecture client simple : une carte par module sélectionné (option A/B/C du module).
  */
 export function OptionsDashboard({ presentation = false }) {
-  const { modulesBundle, setTab, openProposalPresentation, setPresentPage } = usePlan();
+  const { modulesBundle, setWorkflowStep, openProposalPresentation, setPresentPage } = usePlan();
 
   const selectedSections = useMemo(
     () => (modulesBundle?.sections || []).filter((s) => s.selected),
@@ -34,7 +34,7 @@ export function OptionsDashboard({ presentation = false }) {
         </p>
         <button
           type="button"
-          onClick={() => setTab('scenarios')}
+          onClick={() => setWorkflowStep('modules')}
           className="mt-6 rounded-full bg-dark px-5 py-2.5 text-sm font-semibold text-white"
         >
           Ouvrir les modules
@@ -63,7 +63,7 @@ export function OptionsDashboard({ presentation = false }) {
           <div className="mt-5 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setTab('dashboard')}
+              onClick={() => setWorkflowStep('dashboard')}
               className="rounded-full bg-dark px-4 py-2 text-sm font-semibold text-white"
             >
               Ouvrir le dashboard chiffré

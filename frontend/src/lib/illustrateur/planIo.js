@@ -81,6 +81,9 @@ export function parseImportedPlan(text) {
     scenarios: plan.scenarios || [],
     modules: plan.modules || undefined,
     needs: plan.needs || {},
+    priorities: Array.isArray(plan.priorities) ? plan.priorities : [],
+    workflow: plan.workflow || { step: 'hub' },
+    nextStepsNotes: plan.nextStepsNotes || '',
     horizonYears: plan.horizonYears ?? 25,
     meta: plan.meta || { name: 'Import' },
   };

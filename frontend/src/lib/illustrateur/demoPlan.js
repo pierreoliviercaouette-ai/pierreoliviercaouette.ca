@@ -198,6 +198,10 @@ export function createDemoPlan() {
       maladie_grave_cible: 100000,
     },
     scenarios: [],
+    workflow: { step: 'hub' },
+    priorities: ['assurance_vie', 'placement'],
+    nextStepsNotes:
+      'Valider illustrations assureur, mettre en place les cotisations automatiques CELI/REER, suivi dans 90 jours.',
     modules: (() => {
       const modules = emptyModulesState();
       const vieA = createModuleOption('assurance_vie', {
@@ -309,6 +313,9 @@ export function createEmptyPlan() {
       maladie_grave_cible: 50000,
     },
     scenarios: [],
+    workflow: { step: 'profil' },
+    priorities: [],
+    nextStepsNotes: '',
     modules: emptyModulesState(),
   };
 }

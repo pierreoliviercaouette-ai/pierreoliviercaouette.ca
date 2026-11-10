@@ -1,24 +1,20 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   buildCashflowSeries,
   buildNetWorthSeries,
   compareScenarios,
-  computeCriticalIllnessGap,
-  computeDisabilityGap,
-  computeLifeNeeds,
   formatCad,
   formatPct,
   summarizeProjection,
 } from '../../lib/illustrateur';
 import { CashflowChart, NetWorthChart } from './DashboardCharts';
-import { MoneyInput, SectionCard } from './Field';
+import { SectionCard } from './Field';
 import { usePlan } from './PlanContext';
 
+/** Outil avancé hors parcours principal (snapshots mémoire / graphiques détaillés). */
 export function AnalyseTab() {
   const {
     plan,
-    setPlan,
     projection,
     compareProjection,
     comparePlan,
@@ -35,10 +31,6 @@ export function AnalyseTab() {
     [projection, compareProjection],
   );
 
-  const life = useMemo(() => computeLifeNeeds(plan.needs || {}), [plan.needs]);
-  const disability = useMemo(() => computeDisabilityGap(plan.needs || {}), [plan.needs]);
-  const ci = useMemo(() => computeCriticalIllnessGap(plan.needs || {}), [plan.needs]);
-
   const nwSeries = useMemo(() => {
     const base = buildNetWorthSeries(projection);
     if (!compareProjection?.data?.length) return base;
@@ -46,10 +38,6 @@ export function AnalyseTab() {
     return base.map((row) => ({ ...row, compareNetWorth: byYear.get(row.year) ?? null }));
   }, [projection, compareProjection]);
   const cfSeries = useMemo(() => buildCashflowSeries(projection), [projection]);
-
-  const setNeed = (key, value) => {
-    setPlan((p) => ({ ...p, needs: { ...(p.needs || {}), [key]: value } }));
-  };
 
   return (
     <div className="space-y-6">
@@ -70,11 +58,7 @@ export function AnalyseTab() {
       </div>
 
       <SectionCard title="Croissance de la valeur nette">
-        <NetWorthChart
-          data={nwSeries}
-          compareKey={comparePlan ? 'compareNetWorth' : null}
-          height={360}
-        />
+        <NetWorthChart data={nwSeries} compareKey={comparePlan ? 'compareNetWorth' : null} height={360} />
         <div className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
           <p className="tabular-nums">PFI (fin) : {formatCad(summary.pfiLoanEnd)}</p>
           <p className="tabular-nums">Capacité collatérale : {formatCad(summary.collateralCapacityEnd)}</p>
@@ -86,7 +70,10 @@ export function AnalyseTab() {
         <CashflowChart data={cfSeries} height={280} />
       </SectionCard>
 
-      <SectionCard title="Scénarios A / B">
+      <SectionCard title="Snapshots mémoire (avancé)">
+        <p className="mb-3 text-xs text-prestige-taupe">
+          Hors parcours principal. Pour les options client, utilisez les modules A-B-C (phase Plan).
+        </p>
         <div className="flex flex-wrap items-end gap-3">
           <label className="text-xs">
             <span className="text-prestige-taupe">Nom du snapshot</span>
@@ -105,14 +92,14 @@ export function AnalyseTab() {
               setScenarioName('');
             }}
           >
-            Enregistrer scénario (mémoire)
+            Enregistrer snapshot
           </button>
           <button
             type="button"
             className="rounded-full border border-prestige-beige px-4 py-2 text-sm font-semibold"
             onClick={() => captureCompareBaseline()}
           >
-            Fixer baseline A (état actuel)
+            Fixer baseline A
           </button>
           {comparePlan && (
             <button
@@ -147,7 +134,7 @@ export function AnalyseTab() {
             </li>
           ))}
           {!plan.scenarios?.length && (
-            <p className="text-sm text-prestige-taupe">Aucun scénario sauvegardé dans ce dossier session.</p>
+            <p className="text-sm text-prestige-taupe">Aucun snapshot dans ce dossier session.</p>
           )}
         </ul>
         {comparison && (
@@ -159,55 +146,9 @@ export function AnalyseTab() {
         )}
       </SectionCard>
 
-      <SectionCard title="Besoins assurance (illustratif)">
-        <div className="mb-4 flex flex-wrap gap-3">
-          <Link
-            to="/admin/assurance-vie-actif"
-            className="rounded-full border border-prestige-beige px-4 py-2 text-sm font-semibold text-dark hover:border-primary"
-          >
-            Ouvrir illustrateur vie / levier
-          </Link>
-        </div>
-        <div className="grid gap-3 md:grid-cols-4">
-          <MoneyInput label="Hypothèque $" value={plan.needs?.hypotheque} onChange={(v) => setNeed('hypotheque', v)} />
-          <MoneyInput label="Revenu net $/mois" value={plan.needs?.revenu_net} onChange={(v) => setNeed('revenu_net', v)} />
-          <MoneyInput label="% à remplacer" value={plan.needs?.pct_remplacer} onChange={(v) => setNeed('pct_remplacer', v)} />
-          <MoneyInput label="Années remplacement" value={plan.needs?.nb_annees} onChange={(v) => setNeed('nb_annees', v)} />
-          <MoneyInput label="AV personnelle $" value={plan.needs?.av_actuelle} onChange={(v) => setNeed('av_actuelle', v)} />
-          <MoneyInput label="AV collective $" value={plan.needs?.av_groupe} onChange={(v) => setNeed('av_groupe', v)} />
-          <MoneyInput label="Enfants" value={plan.needs?.nb_enfants} onChange={(v) => setNeed('nb_enfants', v)} />
-          <MoneyInput
-            label="Revenu invalidité $/mois"
-            value={plan.needs?.invalidite_revenu}
-            onChange={(v) => setNeed('invalidite_revenu', v)}
-          />
-          <MoneyInput
-            label="Cible invalidité %"
-            value={plan.needs?.invalidite_remplacement_pct}
-            onChange={(v) => setNeed('invalidite_remplacement_pct', v)}
-          />
-          <MoneyInput
-            label="Collective invalidité %"
-            value={plan.needs?.invalidite_collective_pct}
-            onChange={(v) => setNeed('invalidite_collective_pct', v)}
-          />
-          <MoneyInput
-            label="Cible maladie grave $"
-            value={plan.needs?.maladie_grave_cible}
-            onChange={(v) => setNeed('maladie_grave_cible', v)}
-          />
-        </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <Kpi label="Besoin vie net" value={formatCad(life.r_total)} />
-          <Kpi label="Trou invalidité / mois" value={formatCad(disability.trou_mensuel)} />
-          <Kpi label="Capital MG cible" value={formatCad(ci.capital_cible)} />
-        </div>
-        <p className="mt-3 text-xs text-prestige-taupe">{life.conseil?.replace(/^[^\wÀ-ÿ]+/, '')}</p>
-      </SectionCard>
-
       {projection?.deathSummary && (
         <SectionCard title="Sommaire au décès (illustration admin)">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+          <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <p>Impôt REER : {formatCad(projection.deathSummary.reerTax)}</p>
             <p>Impôt gains : {formatCad(projection.deathSummary.capitalGainsTax)}</p>
             <p>Capital décès : {formatCad(projection.deathSummary.deathBenefit)}</p>
