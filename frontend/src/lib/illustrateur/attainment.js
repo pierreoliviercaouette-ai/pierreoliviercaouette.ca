@@ -1,4 +1,5 @@
 import { ensureCollectFields } from './planDefaults';
+import { computePlanDeathTax } from './planningTax';
 
 function n(v) {
   const x = parseFloat(v);
@@ -102,7 +103,14 @@ export function computeDeathAttainment(plan) {
   const d = c.deathNeeds;
 
   const debts = sumDebts(plan, d.repayDebtIds.length ? d.repayDebtIds : (plan.debts || []).map((x) => x.id));
-  const expenses = (d.expenses || []).reduce((s, x) => s + n(x.amount), 0);
+  const deathTax = computePlanDeathTax({ ...plan, deathNeeds: d });
+  const expenseRows = d.expenses || [];
+  const hasAutoTax = expenseRows.some((x) => x.id === 'auto_impot_deces' || x.source === 'death_tax');
+  const manualExpenses = expenseRows
+    .filter((x) => x.id !== 'auto_impot_deces' && x.source !== 'death_tax')
+    .reduce((s, x) => s + n(x.amount), 0);
+  const taxAmount = n(deathTax.totalTaxAtDeath);
+  const expenses = manualExpenses + taxAmount;
 
   const annualGross = annualEmploymentIncome(plan);
   const targetPct = n(d.incomeReplacePct) / 100;
@@ -124,6 +132,10 @@ export function computeDeathAttainment(plan) {
   return pack(needs, available, {
     debts,
     expenses,
+    manualExpenses,
+    deathTax: taxAmount,
+    deathTaxDetail: deathTax,
+    hasAutoTaxExpense: hasAutoTax,
     incomeReplacePv: pv,
     annualGap,
     targetAnnual,

@@ -5,7 +5,15 @@ import {
   annualPremiumForAssuranceCashflow,
   rawAnnualPremiumForAssurance,
 } from './entityCashflow';
-import { computeDeathTaxSummary, NON_TAXABLE_AT_DEATH_TYPES } from './deathTax';
+import {
+  computeDeathTaxSummary,
+  computePlanDeathTax,
+  deathTaxOptionsFromPlan,
+  syncDeathTaxExpense,
+  DEATH_TAX_EXPENSE_ID,
+  isEligibleForSpousalRollover,
+  NON_TAXABLE_AT_DEATH_TYPES,
+} from './deathTax';
 import { growAssetsWithTax } from './growthTax';
 import { calcCapitalGainsTax, calcSaleTaxFromAsset } from './capitalGains';
 import { buildEntityMap, getAssetAcb, ensureAssetAcb } from './helpers';
@@ -53,6 +61,11 @@ export {
   NON_TAXABLE_AT_DEATH_TYPES,
   growAssetsWithTax,
   computeDeathTaxSummary,
+  computePlanDeathTax,
+  deathTaxOptionsFromPlan,
+  syncDeathTaxExpense,
+  DEATH_TAX_EXPENSE_ID,
+  isEligibleForSpousalRollover,
   computeEntityCashflows,
   annualPremiumForAssuranceCashflow,
   rawAnnualPremiumForAssurance,

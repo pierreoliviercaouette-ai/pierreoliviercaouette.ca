@@ -139,6 +139,7 @@ export function createDemoPlan() {
         monthlyContribution: 0,
         avgAnnualReturn: 3,
         _acb: 380000,
+        principalResidence: true,
       },
       {
         id: corpCashId,

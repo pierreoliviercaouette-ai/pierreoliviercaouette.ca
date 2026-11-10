@@ -1,4 +1,12 @@
+import { useEffect, useMemo } from 'react';
 import { formatCad, newId, planHasConjoint } from '../../lib/illustrateur';
+import {
+  computePlanDeathTax,
+  deathTaxOptionsFromPlan,
+  DEATH_TAX_EXPENSE_ID,
+  isEligibleForSpousalRollover,
+  syncDeathTaxExpense,
+} from '../../lib/illustrateur/planningTax';
 import { usePlan } from './PlanContext';
 import {
   AddRowButton,
@@ -115,6 +123,27 @@ export function EmergencyStep() {
 export function DeathNeedsStep() {
   const { plan, setPlan, goWorkflowNext, goWorkflowPrev, attainment } = usePlan();
   const d = plan.deathNeeds || {};
+  const withSpouse = planHasConjoint(plan);
+  const deathTaxOpts = useMemo(() => deathTaxOptionsFromPlan(plan), [plan]);
+  const deathTax = useMemo(() => computePlanDeathTax(plan), [plan]);
+
+  useEffect(() => {
+    setPlan((p) => {
+      const expenses = p.deathNeeds?.expenses || [];
+      const nextExpenses = syncDeathTaxExpense(expenses, deathTax.totalTaxAtDeath);
+      const currentAuto = expenses.find((e) => e.id === DEATH_TAX_EXPENSE_ID || e.source === 'death_tax');
+      const nextAuto = nextExpenses.find((e) => e.id === DEATH_TAX_EXPENSE_ID);
+      if (
+        currentAuto &&
+        nextAuto &&
+        Number(currentAuto.amount) === Number(nextAuto.amount) &&
+        expenses.length === nextExpenses.length
+      ) {
+        return p;
+      }
+      return { ...p, deathNeeds: { ...p.deathNeeds, expenses: nextExpenses } };
+    });
+  }, [deathTax.totalTaxAtDeath, setPlan]);
 
   const toggleId = (field, id) => {
     const set = new Set(d[field] || []);
@@ -122,6 +151,37 @@ export function DeathNeedsStep() {
     else set.add(id);
     patchSection(setPlan, 'deathNeeds', { [field]: [...set] });
   };
+
+  const togglePrincipalResidence = (assetId) => {
+    const current = Array.isArray(d.principalResidenceAssetIds)
+      ? d.principalResidenceAssetIds
+      : deathTaxOpts.principalResidenceAssetIds;
+    const set = new Set(current);
+    if (set.has(assetId)) set.delete(assetId);
+    else set.add(assetId);
+    patchSection(setPlan, 'deathNeeds', { principalResidenceAssetIds: [...set] });
+  };
+
+  const toggleNoRollover = (assetId) => {
+    const set = new Set(d.noRolloverAssetIds || []);
+    if (set.has(assetId)) set.delete(assetId);
+    else set.add(assetId);
+    patchSection(setPlan, 'deathNeeds', { noRolloverAssetIds: [...set] });
+  };
+
+  const entityById = useMemo(() => {
+    const map = {};
+    for (const e of plan.entities || []) map[e.id] = e;
+    return map;
+  }, [plan.entities]);
+
+  const principalResidenceIds = useMemo(
+    () =>
+      Array.isArray(d.principalResidenceAssetIds)
+        ? d.principalResidenceAssetIds
+        : deathTaxOpts.principalResidenceAssetIds || [],
+    [d.principalResidenceAssetIds, deathTaxOpts.principalResidenceAssetIds],
+  );
 
   return (
     <CollectShell
@@ -250,6 +310,118 @@ export function DeathNeedsStep() {
           ))}
         </CollectCard>
 
+        <CollectCard title="Impôt au décès (LIR / Québec)">
+          <p className="mb-3 text-sm text-[#5a6b7d]">
+            Disposition réputée des biens (gains en capital, inclusion REER). Calcul illustratif — pas un avis
+            fiscal. La ligne est ajoutée automatiquement aux dépenses prévues.
+          </p>
+
+          {withSpouse && (
+            <label className="mb-3 flex cursor-pointer items-start gap-3 rounded-lg border border-[#d7dee8] bg-white p-3">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 accent-[#0b4ea2]"
+                checked={deathTaxOpts.spousalRollover}
+                onChange={(e) =>
+                  patchSection(setPlan, 'deathNeeds', { spousalRollover: e.target.checked })
+                }
+              />
+              <span>
+                <span className="block text-sm font-semibold">Roullement au conjoint</span>
+                <span className="text-xs text-[#5a6b7d]">
+                  Art. 70(6) (biens en capital à l’ACB) et roullement REER (art. 146) — report d’impôt.
+                </span>
+              </span>
+            </label>
+          )}
+
+          {!withSpouse && (
+            <p className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              Aucun conjoint dans la portée du plan — disposition réputée sans roullement.
+            </p>
+          )}
+
+          <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg border border-[#d7dee8] bg-white p-3">
+              <p className="text-[11px] uppercase text-[#5a6b7d]">Gains en capital</p>
+              <p className="font-semibold tabular-nums">{formatCad(deathTax.capitalGainsTax)}</p>
+            </div>
+            <div className="rounded-lg border border-[#d7dee8] bg-white p-3">
+              <p className="text-[11px] uppercase text-[#5a6b7d]">REER</p>
+              <p className="font-semibold tabular-nums">{formatCad(deathTax.reerTax)}</p>
+            </div>
+            <div className="rounded-lg border border-[#d7dee8] bg-white p-3">
+              <p className="text-[11px] uppercase text-[#5a6b7d]">Corporatif</p>
+              <p className="font-semibold tabular-nums">{formatCad(deathTax.corpTax)}</p>
+            </div>
+            <div className="rounded-lg border border-[#0b4ea2]/30 bg-[#eaf2fb] p-3">
+              <p className="text-[11px] uppercase text-[#0b4ea2]">Total impôt estimé</p>
+              <p className="font-bold tabular-nums text-[#0b4ea2]">{formatCad(deathTax.totalTaxAtDeath)}</p>
+            </div>
+          </div>
+
+          {deathTaxOpts.spousalRollover && deathTax.rolledAssetCount > 0 && (
+            <p className="mb-3 text-xs text-emerald-700">
+              {deathTax.rolledAssetCount} bien(s) roulement conjoint — gain reporté illustratif{' '}
+              {formatCad(deathTax.deferredGain)}.
+            </p>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-xs uppercase text-[#5a6b7d]">
+                <tr>
+                  <th className="py-2 text-left">Actif</th>
+                  <th>JVM</th>
+                  <th>Gain / solde</th>
+                  <th>Impôt</th>
+                  <th className="text-left">Traitement</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {(deathTax.details || []).map((row) => {
+                  const asset = (plan.assets || []).find((a) => a.id === row.assetId);
+                  const entity = asset ? entityById[asset.entityId] : null;
+                  const canRoll = asset && isEligibleForSpousalRollover(asset, entity);
+                  const isRealEstate = row.type === 'immobilier';
+                  return (
+                    <tr key={row.assetId || row.name} className="border-t border-[#d7dee8] bg-white/70">
+                      <td className="py-2 font-medium">{row.name}</td>
+                      <td className="tabular-nums">{formatCad(row.fmv)}</td>
+                      <td className="tabular-nums">{formatCad(row.gain || 0)}</td>
+                      <td className="tabular-nums font-semibold">{formatCad(row.tax || 0)}</td>
+                      <td className="max-w-[220px] text-xs text-[#5a6b7d]">{row.treatment}</td>
+                      <td className="space-y-1 py-2 text-xs">
+                        {isRealEstate && (
+                          <label className="flex items-center gap-1 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={principalResidenceIds.includes(row.assetId)}
+                              onChange={() => togglePrincipalResidence(row.assetId)}
+                            />
+                            Rés. princ.
+                          </label>
+                        )}
+                        {withSpouse && deathTaxOpts.spousalRollover && canRoll && (
+                          <label className="flex items-center gap-1 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={!(d.noRolloverAssetIds || []).includes(row.assetId)}
+                              onChange={() => toggleNoRollover(row.assetId)}
+                            />
+                            Rouler
+                          </label>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CollectCard>
+
         <CollectCard
           title="Dépenses prévues"
           action={
@@ -257,8 +429,9 @@ export function DeathNeedsStep() {
               onClick={() =>
                 patchSection(setPlan, 'deathNeeds', {
                   expenses: [
-                    ...(d.expenses || []),
+                    ...(d.expenses || []).filter((e) => e.id !== DEATH_TAX_EXPENSE_ID && e.source !== 'death_tax'),
                     { id: newId('exp'), description: 'Dépense', amount: 0, indexed: false },
+                    ...(d.expenses || []).filter((e) => e.id === DEATH_TAX_EXPENSE_ID || e.source === 'death_tax'),
                   ],
                 })
               }
@@ -267,39 +440,48 @@ export function DeathNeedsStep() {
             </AddRowButton>
           }
         >
-          {(d.expenses || []).map((exp) => (
-            <div key={exp.id} className="mb-2 grid gap-2 md:grid-cols-3">
-              <TextField
-                value={exp.description}
-                onChange={(v) =>
-                  patchSection(setPlan, 'deathNeeds', {
-                    expenses: d.expenses.map((x) => (x.id === exp.id ? { ...x, description: v } : x)),
-                  })
-                }
-              />
-              <TextField
-                type="number"
-                value={exp.amount}
-                onChange={(v) =>
-                  patchSection(setPlan, 'deathNeeds', {
-                    expenses: d.expenses.map((x) => (x.id === exp.id ? { ...x, amount: v } : x)),
-                  })
-                }
-              />
-              <SegmentedToggle
-                value={exp.indexed ? 'oui' : 'non'}
-                onChange={(v) =>
-                  patchSection(setPlan, 'deathNeeds', {
-                    expenses: d.expenses.map((x) => (x.id === exp.id ? { ...x, indexed: v === 'oui' } : x)),
-                  })
-                }
-                options={[
-                  { value: 'oui', label: 'Indexé' },
-                  { value: 'non', label: 'Non' },
-                ]}
-              />
-            </div>
-          ))}
+          {(d.expenses || []).map((exp) => {
+            const isAutoTax = exp.id === DEATH_TAX_EXPENSE_ID || exp.source === 'death_tax';
+            return (
+              <div key={exp.id} className="mb-2 grid gap-2 md:grid-cols-3">
+                <TextField
+                  value={exp.description}
+                  onChange={(v) =>
+                    !isAutoTax &&
+                    patchSection(setPlan, 'deathNeeds', {
+                      expenses: d.expenses.map((x) => (x.id === exp.id ? { ...x, description: v } : x)),
+                    })
+                  }
+                />
+                <TextField
+                  type="number"
+                  value={exp.amount}
+                  onChange={(v) =>
+                    !isAutoTax &&
+                    patchSection(setPlan, 'deathNeeds', {
+                      expenses: d.expenses.map((x) => (x.id === exp.id ? { ...x, amount: v } : x)),
+                    })
+                  }
+                />
+                {isAutoTax ? (
+                  <p className="py-2 text-xs font-semibold text-[#0b4ea2]">Auto · LIR / QC</p>
+                ) : (
+                  <SegmentedToggle
+                    value={exp.indexed ? 'oui' : 'non'}
+                    onChange={(v) =>
+                      patchSection(setPlan, 'deathNeeds', {
+                        expenses: d.expenses.map((x) => (x.id === exp.id ? { ...x, indexed: v === 'oui' } : x)),
+                      })
+                    }
+                    options={[
+                      { value: 'oui', label: 'Indexé' },
+                      { value: 'non', label: 'Non' },
+                    ]}
+                  />
+                )}
+              </div>
+            );
+          })}
         </CollectCard>
 
         <CollectCard title="Remplacement du revenu">

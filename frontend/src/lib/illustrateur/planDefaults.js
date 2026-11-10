@@ -48,6 +48,10 @@ export function emptyDeathNeeds() {
     expenses: [
       { id: newId('exp'), description: 'Frais funéraires', amount: 15000, indexed: false },
     ],
+    /** null = suivre la portée conjoint du dossier */
+    spousalRollover: null,
+    principalResidenceAssetIds: null,
+    noRolloverAssetIds: [],
     incomeMode: 'individuel', // individuel | aucun
     incomeBasis: 'brut', // brut | net
     incomeFrequency: 'annuel',
@@ -140,6 +144,10 @@ export function ensureCollectFields(plan) {
       policies: plan?.deathNeeds?.policies || [],
       liquidateAssetIds: plan?.deathNeeds?.liquidateAssetIds || [],
       repayDebtIds: plan?.deathNeeds?.repayDebtIds || [],
+      noRolloverAssetIds: plan?.deathNeeds?.noRolloverAssetIds || [],
+      principalResidenceAssetIds: Array.isArray(plan?.deathNeeds?.principalResidenceAssetIds)
+        ? plan.deathNeeds.principalResidenceAssetIds
+        : emptyDeathNeeds().principalResidenceAssetIds,
     },
     disabilityNeeds: {
       ...emptyDisabilityNeeds(),
