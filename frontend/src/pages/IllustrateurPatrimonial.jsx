@@ -205,18 +205,22 @@ function IllustrateurShell() {
           <ActionBtn onClick={loadEmpty}>Nouveau</ActionBtn>
           <ActionBtn onClick={exportJson}>JSON</ActionBtn>
           <ActionBtn onClick={exportPdf}>PDF</ActionBtn>
-          <ActionBtn onClick={() => fileRef.current?.click()}>Import</ActionBtn>
+          <ActionBtn onClick={() => fileRef.current?.click()}>Import JSON/PDF</ActionBtn>
           <ActionBtn onClick={clearSession}>Effacer</ActionBtn>
           <input
             ref={fileRef}
             type="file"
-            accept="application/json,.json"
+            accept="application/json,.json,application/pdf,.pdf"
             className="hidden"
             onChange={async (e) => {
               const file = e.target.files?.[0];
               if (!file) return;
               try {
-                await importFile(file);
+                const result = await importFile(file);
+                const warnings = result?.warnings || [];
+                if (warnings.length) {
+                  window.alert(`Import OK avec avertissements :\n• ${warnings.join('\n• ')}`);
+                }
               } catch (err) {
                 window.alert(err?.message || 'Import impossible');
               }

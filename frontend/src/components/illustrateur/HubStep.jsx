@@ -119,7 +119,7 @@ export function HubStep({ onImportClick }) {
         <div className="flex flex-wrap gap-2">
           <Action onClick={loadDemo}>Charger démo</Action>
           <Action onClick={loadEmpty}>Nouveau dossier</Action>
-          <Action onClick={onImportClick}>Import JSON</Action>
+          <Action onClick={onImportClick}>Import JSON / PDF parcours</Action>
         </div>
       </CollectCard>
     </div>

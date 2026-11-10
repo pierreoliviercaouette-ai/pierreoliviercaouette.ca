@@ -97,3 +97,9 @@ export {
   computeDeathTaxSummary,
   DEATH_TAX_EXPENSE_ID,
 } from './planningTax';
+export {
+  parcoursTextToPlan,
+  importParcoursPdfFile,
+  wrapPlanExport,
+  parseMoney as parseParcoursMoney,
+} from './parcoursPdfImport';

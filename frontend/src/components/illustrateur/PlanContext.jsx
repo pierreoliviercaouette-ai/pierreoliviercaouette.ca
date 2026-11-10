@@ -407,9 +407,21 @@ export function PlanProvider({ children }) {
       },
       exportJson: () => exportPlanJson(plan),
       importFile: async (file) => {
-        const imported = await readPlanFile(file);
+        const name = String(file?.name || '').toLowerCase();
+        const isPdf = file?.type === 'application/pdf' || name.endsWith('.pdf');
+        let imported;
+        let warnings = [];
+        if (isPdf) {
+          const { importParcoursPdfFile } = await import('../../lib/illustrateur/parcoursPdfImport');
+          const result = await importParcoursPdfFile(file);
+          imported = result.plan;
+          warnings = result.warnings || [];
+        } else {
+          imported = await readPlanFile(file);
+        }
         setComparePlan(null);
         setPlan(normalizePlan(imported));
+        return { warnings };
       },
       snapshotAsScenario: (name) => {
         const snap = clonePlan(plan);
