@@ -21,14 +21,20 @@ import {
 import { emptyModulesState } from './planningModules';
 import { extractPdfText } from '../portfolioFicheParse';
 
-/** Parse montants FR : 24 112 $, 80 000 $, 210941$ */
+/** Capture d’un montant avant $ (espaces FR + glitch pdf.js « ? »). */
+const MONEY_CAP = String.raw`([\d\s\u00a0\u202f\u2009?.,]+)`;
+
+/** Parse montants FR : 24 112 $, 80 000 $, 80?000?$ (pdf.js), 210941$ */
 export function parseMoney(raw) {
   if (raw == null) return null;
   let s = String(raw).trim();
   if (!s || s === '-' || s === '—') return null;
+  // pdf.js remplace souvent l’espace fine / insécable par « ? »
+  s = s.replace(/\?(?=\d)/g, '').replace(/\?(?=\$)/g, '');
   s = s
     .replace(/\s/g, '')
-    .replace(/\u00a0/g, '')
+    .replace(/\u00a0|\u202f|\u2009/g, '')
+    .replace(/\?/g, '')
     .replace(/\$/g, '')
     .replace(/[^\d,.-]/g, '')
     .replace(/\.(?=\d{3}(?:\D|$))/g, '')
@@ -39,9 +45,16 @@ export function parseMoney(raw) {
 
 function norm(text) {
   return String(text || '')
-    .replace(/\u00a0/g, ' ')
+    .replace(/\u00a0|\u202f|\u2009/g, ' ')
     .replace(/\u2019|\u2018|\x92/g, "'")
+    // pdf.js : séparateur milliers rendu « ? » → espace (ex. 24?112?$ → 24 112 $)
+    .replace(/(\d)\?(?=\d)/g, '$1 ')
+    .replace(/\?(?=\s*\$)/g, ' ')
     .replace(/\s+/g, ' ');
+}
+
+function moneyRe(labelPattern, flags = 'i') {
+  return new RegExp(`${labelPattern}\\s*${MONEY_CAP}\\s*\\$`, flags);
 }
 
 function grab(text, re) {
@@ -113,10 +126,9 @@ function extractPersonal(text) {
     grab(text, /Monsieur\s+([A-ZÀ-Ü][A-ZÀ-Ü\s-]+?),\s*Monparcours/i) ||
     grab(text, /PIERRE-OLIVIER\s+CAOUETTE/);
 
-  // Prefer "Vos informations" block
-  const block = text.includes('Vosinformations')
-    ? text.slice(text.indexOf('Vosinformations'), text.indexOf('Vosinformations') + 900)
-    : text;
+  // Prefer "Vos informations" block (collé ou espacé)
+  const infoIdx = text.search(/Vos\s*informations/i);
+  const block = infoIdx >= 0 ? text.slice(infoIdx, infoIdx + 900) : text;
 
   const birthIso = grab(block, /Date de naissance\s*(\d{4}-\d{2}-\d{2})/i);
   const sex = grab(block, /Sexe\s+(Homme|Femme|M|F)/i);
@@ -127,7 +139,7 @@ function extractPersonal(text) {
   const province = /Province d'imposition\s*Qu[ée]bec/i.test(block) ? 'QC' : 'QC';
   const job = grab(block, /Emploi\s*(.+?)(?:Revenu annuel brut|Employeur)/i);
   const employer = grab(block, /Employeur\s*(.+?)(?:Autres d[ée]ductions|Date de l'emploi|$)/i);
-  const gross = grabMoney(block, /Revenu annuel brut\s*([\d\s\u00a0.,]+)\s*\$/);
+  const gross = grabMoney(block, moneyRe('Revenu annuel brut'));
 
   const name =
     (fullName || '')
@@ -156,17 +168,23 @@ function extractBilan(text) {
   const debts = [];
 
   // Page bilan résumé
-  const reer = grabMoney(text, /REER(?!\s*collectif)\s*([\d\s\u00a0.,]+)\s*\$/);
-  const reerColl = grabMoney(text, /REER collectif\s*([\d\s\u00a0.,]+)\s*\$/);
-  const home = grabMoney(text, /R[ée]sidence principale\s*([\d\s\u00a0.,]+)\s*\$/);
-  const mortgage = grabMoney(text, /Pr[êe]t hypoth[ée]caire\s*([\d\s\u00a0.,]+)\s*\$/);
+  const reer = grabMoney(text, moneyRe('REER(?!\\s*collectif)'));
+  const reerColl = grabMoney(text, moneyRe('REER collectif'));
+  const home = grabMoney(text, moneyRe('R[ée]sidence principale'));
+  const mortgage = grabMoney(text, moneyRe('Pr[êe]t hypoth[ée]caire'));
 
   // Détail placements (page inventaire)
-  const reerReturn = grab(text, /REER(?:REER)?1[^%]*?\(([\d.,]+)\s*%\)/i);
-  const reerCollReturn = grab(text, /REER collectif1[^%]*?\(([\d.,]+)\s*%\)/i);
-  const mortgageRate = grab(text, /Pr[êe]t hypoth[ée]caire1[^%]*?([\d.,]+)\s*%/i);
-  const mortgageAmort = grab(text, /([\d]+)\s*ans\s*([\d\s\u00a0.,]+)\s*\$\s*\/\s*aux deux/i);
-  const mortgagePayment = grabMoney(text, /ans\s*([\d\s\u00a0.,]+)\s*\$\s*\/\s*aux deux/i);
+  const reerReturn = grab(text, /REER(?:\s*REER)?\s*1[^%]*?\(([\d.,]+)\s*%\)/i);
+  const reerCollReturn = grab(text, /REER collectif\s*1[^%]*?\(([\d.,]+)\s*%\)/i);
+  const mortgageRate = grab(text, /Pr[êe]t hypoth[ée]caire\s*1[^%]*?([\d.,]+)\s*%/i);
+  const mortgageAmort = grab(
+    text,
+    new RegExp(String.raw`([\d]+)\s*ans\s*${MONEY_CAP}\s*\$\s*/\s*aux deux`, 'i'),
+  );
+  const mortgagePayment = grabMoney(
+    text,
+    new RegExp(String.raw`ans\s*${MONEY_CAP}\s*\$\s*/\s*aux deux`, 'i'),
+  );
 
   if (reer != null) {
     assets.push({
@@ -201,7 +219,7 @@ function extractBilan(text) {
   }
 
   // Credit line from emergency page
-  const creditLine = grabMoney(text, /Marge de cr[ée]dit\s*([\d\s\u00a0.,]+)\s*\$/);
+  const creditLine = grabMoney(text, moneyRe('Marge de cr[ée]dit'));
 
   if (mortgage != null) {
     const biweekly = mortgagePayment || 0;
@@ -227,9 +245,11 @@ function extractInsurance(text) {
   const disability = [];
   const ci = [];
 
-  // Temporaire / Entière collés : Temporaire1 …Beneva400 000 $600 $2023-05-18
-  const lifeRe =
-    /(Temporaire|Enti[eèé]re)\d*\s*[A-ZÀ-Ü][A-ZÀ-Ü\s-]*?(Beneva|Desjardins|Empire\s*Vie|iA|Sun\s*Life|Manuvie)[^\d]*([\d\s\u00a0.,]+)\s*\$\s*([\d\s\u00a0.,]+)\s*\$\s*(\d{4}-\d{2}-\d{2})/gi;
+  // Temporaire / Entière (collé pypdf ou espacé pdf.js)
+  const lifeRe = new RegExp(
+    String.raw`(Temporaire|Enti[eèé]re)\s*\d*\s*[A-ZÀ-Ü][A-ZÀ-Ü\s-]*?(Beneva|Desjardins|Empire\s*Vie|iA|Sun\s*Life|Manuvie)[^\d]*${MONEY_CAP}\s*\$\s*${MONEY_CAP}\s*\$\s*(\d{4}-\d{2}-\d{2})`,
+    'gi',
+  );
   let lifeMatch;
   while ((lifeMatch = lifeRe.exec(text)) !== null) {
     const kind = lifeMatch[1].toLowerCase();
@@ -242,11 +262,14 @@ function extractInsurance(text) {
     });
   }
 
-  // Fallback: "Assurance vie50 000 $" on death available (may be face from permanente only)
-  const lifeAvail = grabMoney(text, /Assurance vie\s*([\d\s\u00a0.,]+)\s*\$/);
+  // Fallback: "Assurance vie 50 000 $" on death available
+  const lifeAvail = grabMoney(text, moneyRe('Assurance vie'));
 
   const dis = text.match(
-    /Individuel[A-ZÀ-Ü\s-]*?(Beneva|Desjardins|Empire Vie|iA)[^\d]*([\d\s\u00a0.,]+)\s*\$\s*([\d\s\u00a0.,]+)\s*\$\s*(\d{4}-\d{2}-\d{2})\s*(\d+)\s*jours/i,
+    new RegExp(
+      String.raw`Individuel[A-ZÀ-Ü\s-]*?(Beneva|Desjardins|Empire\s*Vie|iA)[^\d]*${MONEY_CAP}\s*\$\s*${MONEY_CAP}\s*\$\s*(\d{4}-\d{2}-\d{2})\s*(\d+)\s*jours`,
+      'i',
+    ),
   );
   if (dis) {
     disability.push({
@@ -257,12 +280,15 @@ function extractInsurance(text) {
       waitingDays: Number(dis[5]) || 30,
     });
   } else {
-    const disAmt = grabMoney(text, /Assurance invalidit[ée] long terme\s*([\d\s\u00a0.,]+)\s*\$/);
+    const disAmt = grabMoney(text, moneyRe('Assurance invalidit[ée](?:\\s*long\\s*terme)?'));
     if (disAmt != null) disability.push({ amount: disAmt, annualPremium: 0, waitingDays: 30 });
   }
 
   const ciMatch = text.match(
-    /Assurancemaladiegrave[\s\S]*?Individuel[A-ZÀ-Ü\s-]*?(Beneva|Desjardins|Empire Vie|iA)[^\d]*([\d\s\u00a0.,]+)\s*\$\s*([\d\s\u00a0.,]+)\s*\$\s*(\d{4}-\d{2}-\d{2})/i,
+    new RegExp(
+      String.raw`Assurance\s*maladie\s*grave[\s\S]{0,280}?Individuel[A-ZÀ-Ü\s-]*?(Beneva|Desjardins|Empire\s*Vie|iA)[^\d]*${MONEY_CAP}\s*\$\s*${MONEY_CAP}\s*\$\s*(\d{4}-\d{2}-\d{2})`,
+      'i',
+    ),
   );
   if (ciMatch) {
     ci.push({
@@ -272,7 +298,7 @@ function extractInsurance(text) {
       issueDate: ciMatch[4],
     });
   } else {
-    const ciAmt = grabMoney(text, /Assurance maladie grave\s*([\d\s\u00a0.,]+)\s*\$/);
+    const ciAmt = grabMoney(text, moneyRe('Assurance maladie grave'));
     if (ciAmt != null) ci.push({ amount: ciAmt, annualPremium: 0 });
   }
 
@@ -280,17 +306,20 @@ function extractInsurance(text) {
 }
 
 function extractDeathNeeds(text) {
-  const expensesDeath = grabMoney(text, /Frais li[ée]s au d[ée]c[èe]s\s*([\d\s\u00a0.,]+)\s*\$/) || 15000;
-  const rrq = grabMoney(text, /Prestation de d[ée]c[èe]s RPC\/RRQ\s*([\d\s\u00a0.,]+)\s*\$/) || 2500;
+  const expensesDeath = grabMoney(text, moneyRe('Frais li[ée]s au d[ée]c[èe]s')) || 15000;
+  const rrq = grabMoney(text, moneyRe('Prestation de d[ée]c[èe]s RPC\\/RRQ')) || 2500;
   const replacePct = grabMoney(text, /Revenu cible\s*\((\d+)\s*%/) || 70;
-  const years = grabMoney(text, /Revenu manquantprojet[ée]\s+pendant\s+(\d+)\s+ans/i) || 25;
+  const years =
+    grabMoney(text, /Revenu manquant\s*projet[ée]\s+pendant\s+(\d+)\s+ans/i) ||
+    grabMoney(text, /pendant\s+(\d+)\s+ans/i) ||
+    25;
   const discount = grabMoney(text, /taux de rendement de\s*([\d.,]+)\s*%/i) || 3.4;
   return { expensesDeath, rrq, replacePct, years, discount };
 }
 
 function extractDisability(text) {
-  const needsMonthly = grabMoney(text, /Remplacement du revenu\s*([\d\s\u00a0.,]+)\s*\$/);
-  const available = grabMoney(text, /Assurance invalidit[ée] long terme\s*([\d\s\u00a0.,]+)\s*\$/);
+  const needsMonthly = grabMoney(text, moneyRe('Remplacement du revenu'));
+  const available = grabMoney(text, moneyRe('Assurance invalidit[ée](?:\\s*long\\s*terme)?'));
   return { needsMonthly, available };
 }
 
@@ -298,20 +327,23 @@ function extractCriticalIllness(text) {
   const clientMonths = /Remplacement du revenu de[^\d]*\((\d+)\s*mois\)/i.exec(text);
   const clientIncome = grabMoney(
     text,
-    /Remplacement du revenu de[^\d]*\(\d+\s*mois\)\s*([\d\s\u00a0.,]+)\s*\$/i,
+    new RegExp(String.raw`Remplacement du revenu de[^\d]*\(\d+\s*mois\)\s*${MONEY_CAP}\s*\$`, 'i'),
   );
-  const caregiver = grabMoney(
-    text,
-    /Remplacement du revenu de\s*l'aidant\s*\((\d+)\s*mois\)\s*([\d\s\u00a0.,]+)\s*\$/i,
+  const caregiverMatch = text.match(
+    new RegExp(
+      String.raw`Remplacement du revenu de\s*l'aidant\s*\((\d+)\s*mois\)\s*${MONEY_CAP}\s*\$`,
+      'i',
+    ),
   );
-  const caregiverMonths = grab(text, /aidant\s*\((\d+)\s*mois\)/i);
+  const caregiver = caregiverMatch ? parseMoney(caregiverMatch[2]) : null;
+  const caregiverMonths = caregiverMatch?.[1] || grab(text, /aidant\s*\((\d+)\s*mois\)/i);
   const monthlyExtra = grabMoney(
     text,
-    /D[ée]penses mensuelles li[ée]es[^\d]*\(\d+\s*mois\)\*?\s*([\d\s\u00a0.,]+)\s*\$/i,
+    new RegExp(String.raw`D[ée]penses mensuelles li[ée]es[^\d]*\(\d+\s*mois\)\*?\s*${MONEY_CAP}\s*\$`, 'i'),
   );
   const uniqueExtra = grabMoney(
     text,
-    /D[ée]penses uniques li[ée]es[^\d]*\*?\*?\s*([\d\s\u00a0.,]+)\s*\$/i,
+    new RegExp(String.raw`D[ée]penses uniques li[ée]es[^\d]*\*?\*?\s*${MONEY_CAP}\s*\$`, 'i'),
   );
   return {
     clientMonths: clientMonths ? Number(clientMonths[1]) : 12,
@@ -324,8 +356,8 @@ function extractCriticalIllness(text) {
 }
 
 function extractEmergency(text) {
-  const required = grabMoney(text, /3 mois de d[ée]penses mensuelles\s*([\d\s\u00a0.,]+)\s*\$/);
-  const credit = grabMoney(text, /Marge de cr[ée]dit\s*([\d\s\u00a0.,]+)\s*\$/);
+  const required = grabMoney(text, moneyRe('3 mois de d[ée]penses mensuelles'));
+  const credit = grabMoney(text, moneyRe('Marge de cr[ée]dit'));
   return {
     months: 3,
     monthlyAmount: required != null ? Math.round(required / 3) : 1500,
@@ -334,15 +366,32 @@ function extractEmergency(text) {
 }
 
 function extractRetirement(text) {
-  const targetNet = grabMoney(text, /Revenusannuelsnetsvis[ée]s\s*([\d\s\u00a0.,]+)\s*\$/);
-  const retireAge = grabMoney(text, /\((\d+)\s*ans\)\s*[ÂA]geactuel/i) || grabMoney(text, /Momentdelaretraite[^\d]*\((\d+)\s*ans\)/i);
-  const lifeExp = grabMoney(text, /Esp[ée]rancedevie\s*(\d+)\s*ans/i);
-  const reerRoom = grabMoney(text, /DroitsREER\/RPACinutilis[ée]s\s*([\d\s\u00a0.,]+)\s*\$/);
-  const celiRoom = grabMoney(text, /DroitsCELIinutilis[ée]s\s*([\d\s\u00a0.,]+)\s*\$/);
-  const celiappRoom = grabMoney(text, /DroitsCELIAPPinutilis[ée]s\s*([\d\s\u00a0.,]+)\s*\$/);
-  const rrq = grabMoney(text, /SourcesderevenuannuelRRQ\s*([\d\s\u00a0.,]+)\s*\$/);
-  const sv = grabMoney(text, /SV\s*([\d\s\u00a0.,]+)\s*\$\s*\d{1,2}-\d{4}/);
-  const profile = grab(text, /Avantlaretraite\s+([A-Za-zÉéèàùâêîôûç]+)\s*\(([\d.,]+)\s*%\)/i);
+  const targetNet =
+    grabMoney(text, moneyRe('Revenus\\s*annuels\\s*nets\\s*vis[ée]s')) ||
+    grabMoney(text, moneyRe('Revenusannuelsnetsvis[ée]s'));
+  const retireAge =
+    grabMoney(text, /\((\d+)\s*ans\)\s*[ÂA]ge\s*actuel/i) ||
+    grabMoney(text, /Moment\s*de\s*la\s*retraite[^\d]*\((\d+)\s*ans\)/i) ||
+    grabMoney(text, /Momentdelaretraite[^\d]*\((\d+)\s*ans\)/i);
+  const lifeExp =
+    grabMoney(text, /Esp[ée]rance\s*de\s*vie\s*(\d+)\s*ans/i) ||
+    grabMoney(text, /Esp[ée]rancedevie\s*(\d+)\s*ans/i);
+  const reerRoom =
+    grabMoney(text, moneyRe('Droits\\s*REER\\/RPAC\\s*inutilis[ée]s')) ||
+    grabMoney(text, moneyRe('DroitsREER\\/RPACinutilis[ée]s'));
+  const celiRoom =
+    grabMoney(text, moneyRe('Droits\\s*CELI\\s*inutilis[ée]s')) ||
+    grabMoney(text, moneyRe('DroitsCELIinutilis[ée]s'));
+  const celiappRoom =
+    grabMoney(text, moneyRe('Droits\\s*CELIAPP\\s*inutilis[ée]s')) ||
+    grabMoney(text, moneyRe('DroitsCELIAPPinutilis[ée]s'));
+  const rrq =
+    grabMoney(text, moneyRe('Sources\\s*de\\s*revenu\\s*annuel\\s*RRQ')) ||
+    grabMoney(text, moneyRe('SourcesderevenuannuelRRQ'));
+  const sv = grabMoney(text, new RegExp(String.raw`SV\s*${MONEY_CAP}\s*\$\s*\d{1,2}-\d{4}`, 'i'));
+  const profile =
+    grab(text, /Avant\s*la\s*retraite\s+([A-Za-zÉéèàùâêîôûç]+)\s*\(([\d.,]+)\s*%\)/i) ||
+    grab(text, /Avantlaretraite\s+([A-Za-zÉéèàùâêîôûç]+)\s*\(([\d.,]+)\s*%\)/i);
   const returnPct = profile ? parseFloat(String(profile[2]).replace(',', '.')) : 4.1;
   return {
     targetNet: targetNet || 0,
@@ -388,7 +437,7 @@ export function parcoursTextToPlan(rawText) {
   const text = norm(rawText);
   const warnings = [];
 
-  if (!/parcours|PIERRE-OLIVIER|Vosinformations|Date de naissance/i.test(text)) {
+  if (!/parcours|PIERRE-OLIVIER|Vos\s*informations|Date de naissance/i.test(text)) {
     warnings.push('Le PDF ne ressemble pas à un « Mon parcours financier » — import best-effort.');
   }
 

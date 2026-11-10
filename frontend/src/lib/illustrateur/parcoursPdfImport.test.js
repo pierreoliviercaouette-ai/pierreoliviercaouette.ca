@@ -8,10 +8,32 @@ const FIXTURE = path.resolve(
 );
 
 describe('parcoursPdfImport', () => {
-  test('parseMoney handles FR formatting', () => {
+  test('parseMoney handles FR formatting and pdf.js ? separators', () => {
     expect(parseMoney('24 112 $')).toBe(24112);
     expect(parseMoney('80\u00a0000\u00a0$')).toBe(80000);
+    expect(parseMoney('80?000?$')).toBe(80000);
+    expect(parseMoney('24?112?$')).toBe(24112);
     expect(parseMoney('-')).toBeNull();
+  });
+
+  test('maps pdf.js spaced extract with ? thousand separators', () => {
+    const pdfjsLike = `
+Votre profil Page 5 de 51 PIERRE-OLIVIER CAOUETTE Vos informations Date de naissance 1997-10-30 Sexe Homme État civil Conjoint de fait Usage du tabac Non Courriel personnel test@example.com Revenu annuel brut 80?000?$
+Actifs Valeur ($) REER 24?112?$ 1 REER collectif 11?490?$ 1 Résidence principale 290?000?$ Prêt hypothécaire 210?941?$ 1
+Assurance vie Temporaire 1 PIERRE-OLIVIER Beneva 400?000?$ 600?$ 2023-05-18 Conjoint Entière PIERRE-OLIVIER Empire Vie 50?000?$ 400?$ 2023-05-17 Conjoint
+Individuel PIERRE-OLIVIER Beneva 700?$ 150?$ 2023-05-17 30 jours
+Assurance maladie grave Individuel PIERRE-OLIVIER Beneva 50?000?$ 200?$ 2023-05-17
+Marge de crédit 8?000?$
+Revenus annuels nets visés 38?948?$ Moment de la retraite 11-2062 (65 ans) Droits CELI inutilisés 78?000?$ Sources de revenu annuel RRQ 25?958?$ 11-2062 (65 ans) SV 8?908?$ 11-2062 (65 ans)
+`;
+    const { plan, warnings } = parcoursTextToPlan(pdfjsLike);
+    expect(plan.revenues[0].monthlyAmount).toBeCloseTo(80000 / 12, 0);
+    expect(plan.assets.filter((a) => a.type === 'reer').reduce((s, a) => s + a.currentBalance, 0)).toBe(
+      24112 + 11490,
+    );
+    expect(plan.debts[0].currentBalance).toBe(210941);
+    expect(plan.deathNeeds.policies.reduce((s, p) => s + p.amount, 0)).toBe(450000);
+    expect(warnings.some((w) => /Aucun actif/i.test(w))).toBe(false);
   });
 
   test('maps sample Mon parcours financier extract', () => {

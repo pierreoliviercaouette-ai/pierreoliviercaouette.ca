@@ -39,11 +39,15 @@ def parse_money(raw):
     s = str(raw).strip()
     if not s or s in {"-", "—", "–"}:
         return None
+    # pdf.js remplace souvent l'espace fine par « ? »
+    s = re.sub(r"\?(?=\d)", "", s)
+    s = re.sub(r"\?(?=\s*\$)", "", s)
     s = (
         s.replace("\u00a0", "")
-        .replace(" ", "")
-        .replace("$", "")
         .replace("\u202f", "")
+        .replace(" ", "")
+        .replace("?", "")
+        .replace("$", "")
     )
     s = re.sub(r"[^\d,.\-]", "", s)
     s = s.replace(",", ".")
@@ -82,9 +86,13 @@ def split_name(full: str):
 def build_plan(text: str) -> dict:
     text_n = (
         text.replace("\u00a0", " ")
+        .replace("\u202f", " ")
         .replace("\u2019", "'")
         .replace("\x92", "'")
     )
+    text_n = re.sub(r"(\d)\?(?=\d)", r"\1 ", text_n)
+    text_n = re.sub(r"\?(?=\s*\$)", " ", text_n)
+    text_n = re.sub(r"\s+", " ", text_n)
     now = datetime.now(timezone.utc).isoformat()
 
     name = grab(text_n, r"intention de\s*:\s*([A-ZÀ-Ü][A-ZÀ-Ü\- ]+?)(?:\s+Votre|\s+Parcours)")
