@@ -200,8 +200,6 @@ export function ComparateurRendementsTool() {
   const ecartTypo = ecartValueClass(ecart, totalBanque);
   const ecartPctAbs =
     totalBanque > 0 ? Math.round((Math.abs(ecart) / totalBanque) * 1000) / 10 : 0;
-  const showSoftClose = doneCount >= 3;
-  const showReleveInvite = showSoftClose && !tauxBanqueManuel;
 
   const milestones = useMemo(
     () => [
@@ -231,6 +229,8 @@ export function ComparateurRendementsTool() {
   const doneCount = milestones.filter((m) => m.done).length;
   const total = milestones.length;
   const progress = Math.round((doneCount / total) * 100);
+  const showSoftClose = doneCount >= 3;
+  const showReleveInvite = showSoftClose && !tauxBanqueManuel;
 
   useEffect(() => {
     if (doneCount < 3 || resultTrackedRef.current) return;
