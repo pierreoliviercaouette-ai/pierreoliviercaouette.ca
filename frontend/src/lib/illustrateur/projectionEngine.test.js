@@ -20,6 +20,8 @@ describe('illustrateur patrimonial engine', () => {
     const summary = summarizeProjection(proj);
     expect(summary.netWorthNow).toBeGreaterThan(0);
     expect(summary.netWorthEnd).toBeGreaterThan(summary.netWorthNow - 50000);
+    expect(typeof summary.growthCad).toBe('number');
+    expect(typeof summary.debtRatioNow).toBe('number');
     expect(proj.deathSummary).toBeTruthy();
     expect(typeof proj.deathSummary.netEstate).toBe('number');
   });

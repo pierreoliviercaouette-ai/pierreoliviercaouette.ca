@@ -1,27 +1,19 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import {
+  buildCashflowSeries,
+  buildNetWorthSeries,
   compareScenarios,
   computeCriticalIllnessGap,
   computeDisabilityGap,
   computeLifeNeeds,
   formatCad,
+  formatPct,
   summarizeProjection,
 } from '../../lib/illustrateur';
+import { CashflowChart, NetWorthChart } from './DashboardCharts';
 import { MoneyInput, SectionCard } from './Field';
 import { usePlan } from './PlanContext';
-
-const CHART_COLORS = ['#064dd9', '#01233f', '#73c4ef', '#756b5f', '#9a3412', '#166534', '#7c3aed'];
 
 export function AnalyseTab() {
   const {
@@ -47,32 +39,13 @@ export function AnalyseTab() {
   const disability = useMemo(() => computeDisabilityGap(plan.needs || {}), [plan.needs]);
   const ci = useMemo(() => computeCriticalIllnessGap(plan.needs || {}), [plan.needs]);
 
-  const chartData = useMemo(() => {
-    const rows = projection?.data || [];
-    const assetKeys = (projection?.assetNames || []).slice(0, 8);
-    return rows.map((row) => {
-      const point = {
-        year: row.year,
-        netWorth: row.netWorth,
-        compareNetWorth: null,
-      };
-      for (const name of assetKeys) {
-        point[name] = row[name] || 0;
-      }
-      return point;
-    });
-  }, [projection]);
-
-  const chartWithCompare = useMemo(() => {
-    if (!compareProjection?.data?.length) return chartData;
+  const nwSeries = useMemo(() => {
+    const base = buildNetWorthSeries(projection);
+    if (!compareProjection?.data?.length) return base;
     const byYear = new Map(compareProjection.data.map((r) => [r.year, r.netWorth]));
-    return chartData.map((row) => ({
-      ...row,
-      compareNetWorth: byYear.get(row.year) ?? null,
-    }));
-  }, [chartData, compareProjection]);
-
-  const stackedKeys = (projection?.assetNames || []).slice(0, 6);
+    return base.map((row) => ({ ...row, compareNetWorth: byYear.get(row.year) ?? null }));
+  }, [projection, compareProjection]);
+  const cfSeries = useMemo(() => buildCashflowSeries(projection), [projection]);
 
   const setNeed = (key, value) => {
     setPlan((p) => ({ ...p, needs: { ...(p.needs || {}), [key]: value } }));
@@ -89,7 +62,7 @@ export function AnalyseTab() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Valeur nette actuelle" value={formatCad(summary.netWorthNow)} />
         <Kpi label="Valeur nette horizon" value={formatCad(summary.netWorthEnd)} />
-        <Kpi label="Cashflow an 0" value={formatCad(summary.cashflowYear0)} />
+        <Kpi label="Croissance" value={`${formatCad(summary.growthCad)} · ${formatPct(summary.growthPct)}`} />
         <Kpi
           label="Succession nette illustrée"
           value={summary.deathNetEstate != null ? formatCad(summary.deathNetEstate) : '—'}
@@ -97,64 +70,20 @@ export function AnalyseTab() {
       </div>
 
       <SectionCard title="Croissance de la valeur nette">
-        <div className="h-[360px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartWithCompare} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e8e0d4" />
-              <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#756b5f' }} />
-              <YAxis
-                tickFormatter={(v) =>
-                  new Intl.NumberFormat('fr-CA', { notation: 'compact', maximumFractionDigits: 1 }).format(v)
-                }
-                tick={{ fontSize: 11, fill: '#756b5f' }}
-                width={56}
-              />
-              <Tooltip
-                formatter={(value, name) => [formatCad(value), name]}
-                contentStyle={{ borderRadius: 12, borderColor: '#e8e0d4', fontSize: 12 }}
-              />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              {stackedKeys.map((key, i) => (
-                <Area
-                  key={key}
-                  type="monotone"
-                  dataKey={key}
-                  stackId="assets"
-                  stroke={CHART_COLORS[i % CHART_COLORS.length]}
-                  fill={CHART_COLORS[i % CHART_COLORS.length]}
-                  fillOpacity={0.35}
-                  isAnimationActive={false}
-                />
-              ))}
-              <Area
-                type="monotone"
-                dataKey="netWorth"
-                name="Valeur nette"
-                stroke="#01233f"
-                fill="transparent"
-                strokeWidth={2.5}
-                isAnimationActive={false}
-              />
-              {comparePlan && (
-                <Area
-                  type="monotone"
-                  dataKey="compareNetWorth"
-                  name="Scénario B"
-                  stroke="#9a3412"
-                  fill="transparent"
-                  strokeWidth={2}
-                  strokeDasharray="5 4"
-                  isAnimationActive={false}
-                />
-              )}
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <NetWorthChart
+          data={nwSeries}
+          compareKey={comparePlan ? 'compareNetWorth' : null}
+          height={360}
+        />
         <div className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
           <p className="tabular-nums">PFI (fin) : {formatCad(summary.pfiLoanEnd)}</p>
           <p className="tabular-nums">Capacité collatérale : {formatCad(summary.collateralCapacityEnd)}</p>
           <p className="tabular-nums">Capital décès polices : {formatCad(summary.assuranceDeathEnd)}</p>
         </div>
+      </SectionCard>
+
+      <SectionCard title="Cashflow après impôt">
+        <CashflowChart data={cfSeries} height={280} />
       </SectionCard>
 
       <SectionCard title="Scénarios A / B">

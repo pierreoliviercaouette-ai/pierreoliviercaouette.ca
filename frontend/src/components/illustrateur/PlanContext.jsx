@@ -36,7 +36,7 @@ function runProjection(plan) {
 export function PlanProvider({ children }) {
   const [plan, setPlanState] = useState(() => loadSessionPlan() || createDemoPlan());
   const [comparePlan, setComparePlan] = useState(null);
-  const [tab, setTab] = useState('bilan');
+  const [tab, setTab] = useState('dashboard');
   const [presentMode, setPresentMode] = useState(false);
 
   const setPlan = useCallback((updater) => {

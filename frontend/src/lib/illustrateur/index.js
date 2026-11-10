@@ -23,5 +23,17 @@ export {
   readPlanFile,
 } from './planIo';
 export { computeLifeNeeds, computeDisabilityGap, computeCriticalIllnessGap } from './needsAnalysis';
-export { formatCad, formatPct, summarizeProjection, compareScenarios } from './metrics';
+export {
+  formatCad,
+  formatCompactCad,
+  formatPct,
+  assetTypeLabel,
+  summarizeProjection,
+  buildNetWorthSeries,
+  buildCashflowSeries,
+  buildAllocationNow,
+  buildAllocationEnd,
+  buildSparkline,
+  compareScenarios,
+} from './metrics';
 export { newId } from './ids';
