@@ -1,6 +1,6 @@
 import { DEFAULT_TAX_RATES } from './investmentPlanningService';
 import { newId } from './ids';
-import { emptyProposal } from './scenarios';
+import { createModuleOption, emptyModulesState } from './planningModules';
 
 /** Dossier démo entrepreneur QC — illustration éducative. */
 export function createDemoPlan() {
@@ -198,7 +198,54 @@ export function createDemoPlan() {
       maladie_grave_cible: 100000,
     },
     scenarios: [],
-    proposal: emptyProposal(),
+    modules: (() => {
+      const modules = emptyModulesState();
+      const vieA = createModuleOption('assurance_vie', {
+        letter: 'A',
+        name: 'Temporaire 20 ans · 500 k$',
+        pitch: 'Couverture familiale pendant les années critiques, prime contenue.',
+        recommended: true,
+        data: {
+          productType: 'temporaire',
+          coverage: 500000,
+          termYears: 20,
+          annualPremium: 720,
+          ownerType: 'personnel',
+        },
+      });
+      const vieB = createModuleOption('assurance_vie', {
+        letter: 'B',
+        name: 'Participative Holdco',
+        pitch: 'Vie permanente en corporation avec valeur de rachat et collatéral possible.',
+        data: {
+          productType: 'participative',
+          coverage: 1000000,
+          annualPremium: 12000,
+          ownerType: 'corporation',
+          pfiEnabled: true,
+          pfiAnnualAdvanceAmount: 25000,
+        },
+      });
+      const placeA = createModuleOption('placement', {
+        letter: 'A',
+        name: 'Accélérer CELI + REER',
+        pitch: 'Hausse des cotisations automatiques sur les comptes enregistrés.',
+        recommended: true,
+        data: {
+          reerSolde: 180000,
+          reerCotisationMensuelle: 1000,
+          reerRendement: 6,
+          celiSolde: 65000,
+          celiCotisationMensuelle: 600,
+          celiRendement: 5.5,
+        },
+      });
+      modules.byModule.assurance_vie.options = [vieA, vieB];
+      modules.byModule.placement.options = [placeA];
+      modules.selections = { assurance_vie: 'A', placement: 'A' };
+      modules.title = 'Proposition démo';
+      return modules;
+    })(),
   };
 }
 
@@ -262,6 +309,6 @@ export function createEmptyPlan() {
       maladie_grave_cible: 50000,
     },
     scenarios: [],
-    proposal: emptyProposal(),
+    modules: emptyModulesState(),
   };
 }

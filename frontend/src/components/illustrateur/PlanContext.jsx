@@ -13,13 +13,11 @@ import {
   newId,
 } from '../../lib/illustrateur';
 import {
-  autoHighlights,
-  buildProposalBundle,
-  createOptionFromPlan,
-  ensureProposal,
-  nextLetter,
-  snapshotPlanForOption,
-} from '../../lib/illustrateur/scenarios';
+  buildModulesBundle,
+  composePlanFromModules,
+  createModuleOption,
+  ensureModules,
+} from '../../lib/illustrateur/planningModules';
 import { summarizeProjection } from '../../lib/illustrateur/metrics';
 
 const PlanContext = createContext(null);
@@ -47,20 +45,20 @@ export function PlanProvider({ children }) {
     const loaded = loadSessionPlan() || createDemoPlan();
     return {
       ...loaded,
-      proposal: ensureProposal(loaded),
+      modules: ensureModules(loaded),
     };
   });
   const [comparePlan, setComparePlan] = useState(null);
   const [tab, setTab] = useState('dashboard');
   const [presentMode, setPresentMode] = useState(false);
-  const [presentPage, setPresentPage] = useState('options'); // options | dashboard
+  const [presentPage, setPresentPage] = useState('options');
 
   const setPlan = useCallback((updater) => {
     setPlanState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
       return touchPlan({
         ...next,
-        proposal: ensureProposal(next),
+        modules: ensureModules(next),
       });
     });
   }, []);
@@ -69,14 +67,39 @@ export function PlanProvider({ children }) {
     saveSessionPlan(plan);
   }, [plan]);
 
+  const modulesBundle = useMemo(() => {
+    try {
+      return buildModulesBundle(plan);
+    } catch (err) {
+      console.error('[illustrateur] modules', err);
+      return {
+        title: 'Proposition',
+        sections: [],
+        selectedCount: 0,
+        hasSelections: false,
+        baseline: { summary: summarizeProjection(null), projection: { data: [] } },
+        composed: { summary: summarizeProjection(null), projection: { data: [] }, error: String(err) },
+      };
+    }
+  }, [plan]);
+
+  const composedPlan = useMemo(() => {
+    try {
+      return modulesBundle.hasSelections ? modulesBundle.composed.plan : plan;
+    } catch {
+      return plan;
+    }
+  }, [modulesBundle, plan]);
+
   const projection = useMemo(() => {
     try {
+      if (modulesBundle.hasSelections) return modulesBundle.composed.projection;
       return runProjection(plan);
     } catch (err) {
       console.error('[illustrateur] projection', err);
       return { data: [], deathSummary: null, error: String(err?.message || err) };
     }
-  }, [plan]);
+  }, [plan, modulesBundle]);
 
   const compareProjection = useMemo(() => {
     if (!comparePlan) return null;
@@ -87,21 +110,6 @@ export function PlanProvider({ children }) {
       return null;
     }
   }, [comparePlan]);
-
-  const proposalBundle = useMemo(() => {
-    try {
-      return buildProposalBundle(plan);
-    } catch (err) {
-      console.error('[illustrateur] proposal', err);
-      return {
-        title: 'Proposition',
-        baseline: { label: 'Situation actuelle', summary: summarizeProjection(projection), projection },
-        options: [],
-        hasOptions: false,
-        canCompare: false,
-      };
-    }
-  }, [plan, projection]);
 
   const updateCollection = useCallback(
     (key, id, updates) => {
@@ -133,128 +141,121 @@ export function PlanProvider({ children }) {
     [setPlan],
   );
 
-  const updateProposal = useCallback(
+  const updateModules = useCallback(
     (updater) => {
       setPlan((prev) => {
-        const current = ensureProposal(prev);
-        const nextProposal = typeof updater === 'function' ? updater(current) : updater;
-        return { ...prev, proposal: nextProposal };
+        const current = ensureModules(prev);
+        const next = typeof updater === 'function' ? updater(current) : updater;
+        return { ...prev, modules: next };
       });
     },
     [setPlan],
   );
 
-  const saveCurrentAsOption = useCallback(
-    ({ letter, name, pitch, recommended = false, openViews = true } = {}) => {
-      let createdLetter = null;
-      updateProposal((proposal) => {
-        const resolvedLetter = letter || nextLetter(proposal.options);
-        if (!resolvedLetter) return proposal;
-        createdLetter = resolvedLetter;
-        const option = createOptionFromPlan(plan, {
-          letter: resolvedLetter,
-          name,
-          pitch,
-          recommended,
-        });
-        try {
-          const proj = runProjection(option.plan);
-          option.highlights = autoHighlights(summarizeProjection(proj), summarizeProjection(projection));
-        } catch {
-          option.highlights = [];
+  const upsertModuleOption = useCallback(
+    (moduleId, { id, letter, name, pitch, data, recommended }) => {
+      updateModules((modules) => {
+        const currentOptions = modules.byModule[moduleId]?.options || [];
+        const resolvedLetter = letter || 'A';
+        let nextOptions;
+        if (id) {
+          nextOptions = currentOptions.map((o) =>
+            o.id === id
+              ? {
+                  ...o,
+                  name: name ?? o.name,
+                  pitch: pitch ?? o.pitch,
+                  data: data ?? o.data,
+                  recommended: recommended ?? o.recommended,
+                  savedAt: new Date().toISOString(),
+                }
+              : o,
+          );
+        } else {
+          const option = createModuleOption(moduleId, {
+            letter: resolvedLetter,
+            name,
+            pitch,
+            recommended,
+            data,
+          });
+          nextOptions = [
+            ...currentOptions.filter((o) => o.letter !== resolvedLetter),
+            option,
+          ].sort((a, b) => String(a.letter).localeCompare(String(b.letter)));
         }
-        const options = [
-          ...proposal.options.filter((o) => o.letter !== resolvedLetter),
-          option,
-        ].sort((a, b) => String(a.letter).localeCompare(String(b.letter)));
-        return { ...proposal, options };
+        return {
+          ...modules,
+          byModule: {
+            ...modules.byModule,
+            [moduleId]: { options: nextOptions },
+          },
+        };
       });
-      if (openViews) {
-        setTab('options');
-        setPresentPage('options');
-      }
-      return createdLetter;
     },
-    [plan, projection, updateProposal],
+    [updateModules],
   );
 
-  const updateOptionMeta = useCallback(
-    (optionId, updates) => {
-      updateProposal((proposal) => ({
-        ...proposal,
-        options: proposal.options.map((o) => (o.id === optionId ? { ...o, ...updates } : o)),
-      }));
-    },
-    [updateProposal],
-  );
-
-  const setRecommendedOption = useCallback(
-    (optionId) => {
-      updateProposal((proposal) => ({
-        ...proposal,
-        options: proposal.options.map((o) => ({
-          ...o,
-          recommended: o.id === optionId,
-        })),
-      }));
-    },
-    [updateProposal],
-  );
-
-  const removeOption = useCallback(
-    (optionId) => {
-      updateProposal((proposal) => ({
-        ...proposal,
-        options: proposal.options.filter((o) => o.id !== optionId),
-      }));
-    },
-    [updateProposal],
-  );
-
-  const loadOptionIntoEditor = useCallback(
-    (optionId) => {
-      const option = ensureProposal(plan).options.find((o) => o.id === optionId);
-      if (!option?.plan) return;
-      setPlan({
-        ...clonePlan(option.plan),
-        proposal: ensureProposal(plan),
-        scenarios: plan.scenarios || [],
-        meta: {
-          ...(option.plan.meta || {}),
-          name: option.name || option.plan.meta?.name,
-          clientLabel: plan.meta?.clientLabel,
+  const selectModuleOption = useCallback(
+    (moduleId, letter) => {
+      updateModules((modules) => ({
+        ...modules,
+        selections: {
+          ...modules.selections,
+          [moduleId]: letter,
         },
-      });
-      setTab('bilan');
-    },
-    [plan, setPlan],
-  );
-
-  const refreshOptionFromEditor = useCallback(
-    (optionId) => {
-      updateProposal((proposal) => ({
-        ...proposal,
-        options: proposal.options.map((o) => {
-          if (o.id !== optionId) return o;
-          const refreshed = {
-            ...o,
-            plan: snapshotPlanForOption(plan),
-            savedAt: new Date().toISOString(),
-          };
-          try {
-            const proj = runProjection(refreshed.plan);
-            refreshed.highlights = autoHighlights(
-              summarizeProjection(proj),
-              summarizeProjection(projection),
-            );
-          } catch {
-            /* keep old highlights */
-          }
-          return refreshed;
-        }),
       }));
     },
-    [plan, projection, updateProposal],
+    [updateModules],
+  );
+
+  const clearModuleSelection = useCallback(
+    (moduleId) => {
+      updateModules((modules) => {
+        const selections = { ...modules.selections };
+        delete selections[moduleId];
+        return { ...modules, selections };
+      });
+    },
+    [updateModules],
+  );
+
+  const removeModuleOption = useCallback(
+    (moduleId, optionId) => {
+      updateModules((modules) => {
+        const options = (modules.byModule[moduleId]?.options || []).filter((o) => o.id !== optionId);
+        const removed = (modules.byModule[moduleId]?.options || []).find((o) => o.id === optionId);
+        const selections = { ...modules.selections };
+        if (removed && selections[moduleId] === removed.letter) delete selections[moduleId];
+        return {
+          ...modules,
+          selections,
+          byModule: {
+            ...modules.byModule,
+            [moduleId]: { options },
+          },
+        };
+      });
+    },
+    [updateModules],
+  );
+
+  const setRecommendedModuleOption = useCallback(
+    (moduleId, optionId) => {
+      updateModules((modules) => ({
+        ...modules,
+        byModule: {
+          ...modules.byModule,
+          [moduleId]: {
+            options: (modules.byModule[moduleId]?.options || []).map((o) => ({
+              ...o,
+              recommended: o.id === optionId,
+            })),
+          },
+        },
+      }));
+    },
+    [updateModules],
   );
 
   const openProposalPresentation = useCallback(() => {
@@ -267,10 +268,11 @@ export function PlanProvider({ children }) {
       plan,
       setPlan,
       projection,
+      composedPlan,
       comparePlan,
       setComparePlan,
       compareProjection,
-      proposalBundle,
+      modulesBundle,
       tab,
       setTab,
       presentMode,
@@ -280,14 +282,15 @@ export function PlanProvider({ children }) {
       updateCollection,
       addToCollection,
       removeFromCollection,
-      updateProposal,
-      saveCurrentAsOption,
-      updateOptionMeta,
-      setRecommendedOption,
-      removeOption,
-      loadOptionIntoEditor,
-      refreshOptionFromEditor,
+      updateModules,
+      upsertModuleOption,
+      selectModuleOption,
+      clearModuleSelection,
+      removeModuleOption,
+      setRecommendedModuleOption,
       openProposalPresentation,
+      // legacy aliases kept briefly for AnalyseTab remnants
+      proposalBundle: modulesBundle,
       loadDemo: () => {
         setComparePlan(null);
         setPlan(createDemoPlan());
@@ -308,7 +311,7 @@ export function PlanProvider({ children }) {
       importFile: async (file) => {
         const imported = await readPlanFile(file);
         setComparePlan(null);
-        setPlan({ ...imported, proposal: ensureProposal(imported) });
+        setPlan({ ...imported, modules: ensureModules(imported) });
       },
       snapshotAsScenario: (name) => {
         const snap = clonePlan(plan);
@@ -328,10 +331,11 @@ export function PlanProvider({ children }) {
       loadScenario: (scenarioId) => {
         const scn = (plan.scenarios || []).find((s) => s.id === scenarioId);
         if (!scn?.plan) return;
+        const restored = clonePlan(scn.plan);
         setPlan({
-          ...clonePlan(scn.plan),
+          ...restored,
           scenarios: plan.scenarios,
-          proposal: ensureProposal(plan),
+          modules: ensureModules(restored),
         });
       },
       setCompareFromScenario: (scenarioId) => {
@@ -339,28 +343,28 @@ export function PlanProvider({ children }) {
         if (!scn?.plan) return;
         setComparePlan(clonePlan(scn.plan));
       },
-      captureCompareBaseline: () => setComparePlan(clonePlan(plan)),
+      captureCompareBaseline: () => setComparePlan(clonePlan(composePlanFromModules(plan))),
     }),
     [
       plan,
       setPlan,
       projection,
+      composedPlan,
       comparePlan,
       compareProjection,
-      proposalBundle,
+      modulesBundle,
       tab,
       presentMode,
       presentPage,
       updateCollection,
       addToCollection,
       removeFromCollection,
-      updateProposal,
-      saveCurrentAsOption,
-      updateOptionMeta,
-      setRecommendedOption,
-      removeOption,
-      loadOptionIntoEditor,
-      refreshOptionFromEditor,
+      updateModules,
+      upsertModuleOption,
+      selectModuleOption,
+      clearModuleSelection,
+      removeModuleOption,
+      setRecommendedModuleOption,
       openProposalPresentation,
     ],
   );

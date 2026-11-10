@@ -3,8 +3,8 @@ import { DashboardTab } from './DashboardTab';
 import { usePlan } from './PlanContext';
 
 export function PresentationView() {
-  const { plan, proposalBundle, presentPage, setPresentPage, setPresentMode } = usePlan();
-  const hasOptions = proposalBundle?.hasOptions;
+  const { plan, modulesBundle, presentPage, setPresentPage, setPresentMode } = usePlan();
+  const hasOptions = modulesBundle?.hasSelections;
 
   return (
     <div className="min-h-screen bg-[#f0ebe3] text-dark">
@@ -13,7 +13,7 @@ export function PresentationView() {
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-white/60">Présentation client</p>
             <h1 className="mt-1 font-heading text-2xl md:text-3xl">
-              {plan.meta?.clientLabel || plan.meta?.name || proposalBundle?.title || 'Proposition'}
+              {plan.meta?.clientLabel || plan.meta?.name || modulesBundle?.title || 'Proposition'}
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -26,7 +26,7 @@ export function PresentationView() {
                     presentPage === 'options' ? 'bg-white text-dark' : 'border border-white/30 text-white'
                   }`}
                 >
-                  1 · Options A-B-C
+                  1 · Lecture simple
                 </button>
                 <button
                   type="button"

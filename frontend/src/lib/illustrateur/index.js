@@ -38,16 +38,16 @@ export {
 } from './metrics';
 export { newId } from './ids';
 export {
+  PLANNING_MODULES,
   OPTION_LETTERS,
-  emptyProposal,
-  ensureProposal,
-  createOptionFromPlan,
-  buildProposalBundle,
-  buildCompareSeries,
-  buildOptionDeltas,
-  plainDelta,
-  optionHeadline,
-  autoHighlights,
+  emptyModulesState,
+  ensureModules,
+  createModuleOption,
+  defaultOptionData,
   nextLetter,
-  snapshotPlanForOption,
-} from './scenarios';
+  composePlanFromModules,
+  buildModulesBundle,
+  buildCompareSeriesFromBundle,
+  summarizeOptionCard,
+  getSelectedOption,
+} from './planningModules';

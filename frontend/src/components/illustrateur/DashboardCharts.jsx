@@ -225,8 +225,15 @@ const OPTION_LINE_COLORS = {
   baseline: DASH_COLORS.navy,
 };
 
-/** Multi-option net-worth comparison (baseline + A/B/C). */
-export function ScenarioCompareChart({ data, options = [], height = 340, showBaseline = true }) {
+/** Baseline vs proposition assemblée (et/ou options legacy). */
+export function ScenarioCompareChart({
+  data,
+  options = [],
+  height = 340,
+  showBaseline = true,
+  showComposed = false,
+  composedLabel = 'Proposition assemblée',
+}) {
   return (
     <div style={{ width: '100%', height }}>
       <ResponsiveContainer>
@@ -253,6 +260,18 @@ export function ScenarioCompareChart({ data, options = [], height = 340, showBas
               dot={false}
               isAnimationActive
               animationDuration={900}
+            />
+          )}
+          {showComposed && (
+            <Line
+              type="monotone"
+              dataKey="composed"
+              name={composedLabel}
+              stroke={DASH_COLORS.blue}
+              strokeWidth={3.5}
+              dot={false}
+              isAnimationActive
+              animationDuration={1100}
             />
           )}
           {options.map((opt) => (

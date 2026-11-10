@@ -13,7 +13,7 @@ import {
   formatPct,
   summarizeProjection,
 } from '../../lib/illustrateur';
-import { buildCompareSeries, buildOptionDeltas, plainDelta } from '../../lib/illustrateur/scenarios';
+import { buildCompareSeriesFromBundle } from '../../lib/illustrateur/planningModules';
 import {
   AllocationDonut,
   CashflowChart,
@@ -27,26 +27,33 @@ import { SectionCard } from './Field';
 import { usePlan } from './PlanContext';
 
 export function DashboardTab({ presentation = false } = {}) {
-  const { plan, projection, compareProjection, proposalBundle, setTab, setPresentPage } = usePlan();
+  const { plan, projection, compareProjection, modulesBundle, setTab, setPresentPage } = usePlan();
 
   const summary = useMemo(() => summarizeProjection(projection), [projection]);
-  const hasProposal = proposalBundle?.hasOptions;
+  const hasProposal = modulesBundle?.hasSelections;
   const compareSeries = useMemo(
-    () => (hasProposal ? buildCompareSeries(proposalBundle) : []),
-    [hasProposal, proposalBundle],
+    () => (hasProposal ? buildCompareSeriesFromBundle(modulesBundle) : []),
+    [hasProposal, modulesBundle],
   );
-  const optionDeltas = useMemo(
-    () => (hasProposal ? buildOptionDeltas(proposalBundle) : []),
-    [hasProposal, proposalBundle],
+  const selectedSections = useMemo(
+    () => (modulesBundle?.sections || []).filter((s) => s.selected),
+    [modulesBundle],
   );
   const nwSeries = useMemo(() => {
-    const base = buildNetWorthSeries(projection);
-    if (!compareProjection?.data?.length) return base;
-    const byYear = new Map(compareProjection.data.map((r) => [r.year, r.netWorth]));
-    return base.map((row) => ({ ...row, compareNetWorth: byYear.get(row.year) ?? null }));
-  }, [projection, compareProjection]);
+    const series = buildNetWorthSeries(projection);
+    const overlaySrc =
+      hasProposal && modulesBundle?.baseline?.projection?.data?.length
+        ? modulesBundle.baseline.projection
+        : compareProjection;
+    if (!overlaySrc?.data?.length) return series;
+    const byYear = new Map(overlaySrc.data.map((r) => [r.year, r.netWorth]));
+    return series.map((row) => ({ ...row, compareNetWorth: byYear.get(row.year) ?? null }));
+  }, [projection, compareProjection, hasProposal, modulesBundle]);
+  const nwCompareKey =
+    hasProposal || compareProjection ? 'compareNetWorth' : null;
   const cfSeries = useMemo(() => buildCashflowSeries(projection), [projection]);
-  const allocNow = useMemo(() => buildAllocationNow(plan), [plan]);
+  const allocSourcePlan = hasProposal ? modulesBundle?.composed?.plan || plan : plan;
+  const allocNow = useMemo(() => buildAllocationNow(allocSourcePlan), [allocSourcePlan]);
   const allocEnd = useMemo(() => buildAllocationEnd(projection), [projection]);
   const sparkNw = useMemo(() => buildSparkline(projection, 'netWorth'), [projection]);
   const sparkCf = useMemo(() => buildSparkline(projection, 'annualCashflowAfterTax'), [projection]);
@@ -69,9 +76,12 @@ export function DashboardTab({ presentation = false } = {}) {
     });
   }, [projection]);
 
-  const life = useMemo(() => computeLifeNeeds(plan.needs || {}), [plan.needs]);
-  const disability = useMemo(() => computeDisabilityGap(plan.needs || {}), [plan.needs]);
-  const ci = useMemo(() => computeCriticalIllnessGap(plan.needs || {}), [plan.needs]);
+  const needsSource = modulesBundle?.hasSelections
+    ? modulesBundle.composed?.plan?.needs
+    : plan.needs;
+  const life = useMemo(() => computeLifeNeeds(needsSource || {}), [needsSource]);
+  const disability = useMemo(() => computeDisabilityGap(needsSource || {}), [needsSource]);
+  const ci = useMemo(() => computeCriticalIllnessGap(needsSource || {}), [needsSource]);
   const growthPositive = summary.growthCad >= 0;
 
   return (
@@ -87,13 +97,13 @@ export function DashboardTab({ presentation = false } = {}) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
-                Dashboard chiffré · proposition
+                Dashboard chiffré · proposition assemblée
               </p>
               <h2 className="mt-1 font-heading text-2xl text-dark">
-                {proposalBundle.title || 'Comparaison A-B-C'}
+                {modulesBundle.title || 'Situation vs proposition'}
               </h2>
               <p className="mt-1 text-sm text-prestige-taupe">
-                Situation actuelle vs options enregistrées — graphiques et écarts.
+                Baseline du dossier vs assemblage des options sélectionnées par module.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -103,7 +113,7 @@ export function DashboardTab({ presentation = false } = {}) {
                   onClick={() => setTab('options')}
                   className="rounded-full border border-prestige-beige px-3 py-1.5 text-xs font-semibold"
                 >
-                  Lecture simple A-B-C
+                  Lecture simple
                 </button>
               )}
               {presentation && (
@@ -118,45 +128,39 @@ export function DashboardTab({ presentation = false } = {}) {
             </div>
           </div>
           <div className="mt-5">
-            <ScenarioCompareChart
-              data={compareSeries}
-              options={optionDeltas}
-              height={360}
-            />
+            <ScenarioCompareChart data={compareSeries} showComposed height={360} />
           </div>
-          <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-prestige-beige text-[11px] uppercase tracking-[0.12em] text-prestige-taupe">
-                  <th className="py-2 pr-4 font-semibold">Option</th>
-                  <th className="py-2 pr-4 font-semibold">VN horizon</th>
-                  <th className="py-2 pr-4 font-semibold">Δ VN</th>
-                  <th className="py-2 pr-4 font-semibold">Cashflow</th>
-                  <th className="py-2 font-semibold">Δ CF</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-prestige-beige/70">
-                  <td className="py-2.5 pr-4 font-medium">{proposalBundle.baseline.label}</td>
-                  <td className="py-2.5 pr-4 tabular-nums">{formatCad(proposalBundle.baseline.summary.netWorthEnd)}</td>
-                  <td className="py-2.5 pr-4 text-prestige-taupe">—</td>
-                  <td className="py-2.5 pr-4 tabular-nums">{formatCad(proposalBundle.baseline.summary.cashflowYear0)}</td>
-                  <td className="py-2.5 text-prestige-taupe">—</td>
-                </tr>
-                {optionDeltas.map((d) => (
-                  <tr key={d.letter} className="border-b border-prestige-beige/70">
-                    <td className="py-2.5 pr-4 font-medium">
-                      {d.letter} · {d.name}
-                      {d.recommended ? ' ★' : ''}
-                    </td>
-                    <td className="py-2.5 pr-4 tabular-nums">{formatCad(d.netWorthEnd)}</td>
-                    <td className="py-2.5 pr-4 tabular-nums font-semibold">{plainDelta(d.deltaNetWorthEnd)}</td>
-                    <td className="py-2.5 pr-4 tabular-nums">{formatCad(d.cashflowYear0)}</td>
-                    <td className="py-2.5 tabular-nums font-semibold">{plainDelta(d.deltaCashflow)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+            <p>
+              VN actuelle (assemblé) :{' '}
+              <span className="font-semibold tabular-nums">{formatCad(modulesBundle.composed.summary.netWorthNow)}</span>
+            </p>
+            <p>
+              VN horizon (assemblé) :{' '}
+              <span className="font-semibold tabular-nums">{formatCad(modulesBundle.composed.summary.netWorthEnd)}</span>
+            </p>
+            <p>
+              Δ VN vs baseline :{' '}
+              <span className="font-semibold tabular-nums">
+                {formatCad(
+                  (modulesBundle.composed.summary.netWorthEnd || 0) -
+                    (modulesBundle.baseline.summary.netWorthEnd || 0),
+                )}
+              </span>
+            </p>
+            <p>
+              Modules retenus : <span className="font-semibold">{selectedSections.length}</span>
+            </p>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {selectedSections.map((sec) => (
+              <span
+                key={sec.id}
+                className="rounded-full border border-prestige-beige bg-[#f8f5f0] px-3 py-1 text-xs font-semibold"
+              >
+                {sec.short} · {sec.selectedLetter}
+              </span>
+            ))}
           </div>
         </div>
       )}
@@ -206,7 +210,11 @@ export function DashboardTab({ presentation = false } = {}) {
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <SectionCard
-            title={hasProposal ? 'Dossier actif (éditeur)' : 'Trajectoire patrimoniale'}
+            title={
+              hasProposal
+                ? 'Trajectoire assemblée vs situation actuelle'
+                : 'Trajectoire patrimoniale'
+            }
             action={
               !presentation ? (
                 <button
@@ -219,11 +227,7 @@ export function DashboardTab({ presentation = false } = {}) {
               ) : null
             }
           >
-            <NetWorthChart
-              data={nwSeries}
-              compareKey={compareProjection ? 'compareNetWorth' : null}
-              height={360}
-            />
+            <NetWorthChart data={nwSeries} compareKey={nwCompareKey} height={360} />
             <div className="mt-3 grid gap-2 text-xs text-prestige-taupe sm:grid-cols-3">
               <p>
                 PFI fin : <span className="tabular-nums text-dark">{formatCad(summary.pfiLoanEnd)}</span>

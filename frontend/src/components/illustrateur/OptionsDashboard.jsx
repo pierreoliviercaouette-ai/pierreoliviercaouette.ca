@@ -1,17 +1,7 @@
 import { useMemo } from 'react';
-import {
-  buildOptionDeltas,
-  optionHeadline,
-  plainDelta,
-} from '../../lib/illustrateur/scenarios';
-import { formatCad } from '../../lib/illustrateur';
+import { formatCad, formatPct } from '../../lib/illustrateur';
+import { summarizeOptionCard } from '../../lib/illustrateur/planningModules';
 import { usePlan } from './PlanContext';
-
-const LETTER_STYLES = {
-  A: 'border-[#064dd9]/30 bg-[#064dd9]/[0.04]',
-  B: 'border-teal-700/30 bg-teal-700/[0.04]',
-  C: 'border-amber-700/30 bg-amber-700/[0.05]',
-};
 
 const LETTER_BADGE = {
   A: 'bg-[#064dd9] text-white',
@@ -20,45 +10,54 @@ const LETTER_BADGE = {
 };
 
 /**
- * Dashboard client simple : explique les options A-B-C sans surcharge de graphiques.
+ * Lecture client simple : une carte par module sélectionné (option A/B/C du module).
  */
 export function OptionsDashboard({ presentation = false }) {
-  const { proposalBundle, setTab, openProposalPresentation, setPresentPage } = usePlan();
-  const deltas = useMemo(() => buildOptionDeltas(proposalBundle), [proposalBundle]);
-  const baseline = proposalBundle.baseline;
+  const { modulesBundle, setTab, openProposalPresentation, setPresentPage } = usePlan();
 
-  if (!proposalBundle.hasOptions) {
+  const selectedSections = useMemo(
+    () => (modulesBundle?.sections || []).filter((s) => s.selected),
+    [modulesBundle],
+  );
+
+  const baseline = modulesBundle?.baseline;
+  const composed = modulesBundle?.composed;
+
+  if (!modulesBundle?.hasSelections) {
     return (
       <div className="rounded-2xl border border-dashed border-prestige-beige bg-white/70 px-6 py-16 text-center">
-        <p className="font-heading text-2xl text-dark">Aucune option A-B-C pour l’instant</p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-prestige-taupe">
-          Va dans l’onglet Scénarios, ajuste le dossier, puis enregistre une option. Les deux dashboards
-          (simple + chiffré) s’activent automatiquement.
+        <p className="font-heading text-2xl text-dark">Aucune option sélectionnée</p>
+        <p className="mx-auto mt-2 max-w-lg text-sm text-prestige-taupe">
+          Crée des options A-B-C dans chaque facette (assurance vie, placement, etc.), puis
+          sélectionne-en une par module. La lecture simple et le dashboard chiffré s’assemblent
+          automatiquement.
         </p>
         <button
           type="button"
           onClick={() => setTab('scenarios')}
           className="mt-6 rounded-full bg-dark px-5 py-2.5 text-sm font-semibold text-white"
         >
-          Créer des options
+          Ouvrir les modules
         </button>
       </div>
     );
   }
 
+  const deltaNw =
+    (composed?.summary?.netWorthEnd || 0) - (baseline?.summary?.netWorthEnd || 0);
+
   return (
     <div className="space-y-8">
       <header className={presentation ? '' : 'rounded-2xl border border-prestige-beige bg-white p-6 md:p-8'}>
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-prestige-taupe">
-          Lecture simple
+          Lecture simple · proposition assemblée
         </p>
         <h2 className="mt-2 font-heading text-3xl text-dark md:text-4xl">
-          {proposalBundle.title || 'Vos options'}
+          {modulesBundle.title || 'Votre planification'}
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-prestige-taupe md:text-base">
-          Voici {deltas.length === 1 ? 'une trajectoire' : `${deltas.length} trajectoires`} possible
-          {deltas.length > 1 ? 's' : ''} par rapport à votre {baseline.label?.toLowerCase() || 'situation actuelle'}.
-          On regarde d’abord l’essentiel — les chiffres détaillés sont dans le dashboard complet.
+          Voici les choix retenus par domaine. Chaque carte correspond à l’option A, B ou C sélectionnée
+          dans ce module — sans noyer le client dans tous les graphiques.
         </p>
         {!presentation && (
           <div className="mt-5 flex flex-wrap gap-2">
@@ -89,101 +88,83 @@ export function OptionsDashboard({ presentation = false }) {
         )}
       </header>
 
-      <section className="rounded-2xl border border-prestige-beige bg-[#01233f] px-5 py-5 text-white md:px-8">
-        <p className="text-[11px] uppercase tracking-[0.16em] text-white/55">{baseline.label}</p>
-        <div className="mt-3 grid gap-4 sm:grid-cols-3">
-          <BaselineStat label="Valeur nette horizon" value={formatCad(baseline.summary.netWorthEnd)} />
-          <BaselineStat label="Cashflow an 0" value={formatCad(baseline.summary.cashflowYear0)} />
-          <BaselineStat
-            label="Succession nette illustrée"
-            value={
-              baseline.summary.deathNetEstate != null
-                ? formatCad(baseline.summary.deathNetEstate)
-                : '—'
-            }
-          />
-        </div>
+      <section className="grid gap-4 sm:grid-cols-3">
+        <SummaryTile
+          label={baseline?.label || 'Situation actuelle'}
+          value={formatCad(baseline?.summary?.netWorthEnd)}
+          hint="VN horizon"
+        />
+        <SummaryTile
+          label="Proposition assemblée"
+          value={formatCad(composed?.summary?.netWorthEnd)}
+          hint="VN horizon"
+          emphasize
+        />
+        <SummaryTile
+          label="Écart"
+          value={`${deltaNw >= 0 ? '+' : ''}${formatCad(deltaNw)}`}
+          hint={`${formatPct(
+            baseline?.summary?.netWorthEnd
+              ? (deltaNw / Math.abs(baseline.summary.netWorthEnd)) * 100
+              : 0,
+          )}`}
+        />
       </section>
 
-      <div className={`grid gap-5 ${deltas.length >= 3 ? 'lg:grid-cols-3' : deltas.length === 2 ? 'lg:grid-cols-2' : ''}`}>
-        {deltas.map((delta) => (
-          <article
-            key={delta.letter}
-            className={`relative rounded-3xl border p-6 md:p-7 ${LETTER_STYLES[delta.letter] || 'border-prestige-beige bg-white'}`}
-          >
-            {delta.recommended && (
-              <span className="absolute right-4 top-4 rounded-full bg-dark px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
-                Recommandée
-              </span>
-            )}
-            <div className="flex items-center gap-3">
-              <span
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-full font-heading text-lg ${
-                  LETTER_BADGE[delta.letter] || 'bg-dark text-white'
-                }`}
-              >
-                {delta.letter}
-              </span>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.14em] text-prestige-taupe">Option {delta.letter}</p>
-                <h3 className="font-heading text-xl text-dark">{delta.name}</h3>
+      <div className="grid gap-5 lg:grid-cols-2">
+        {selectedSections.map((sec) => {
+          const bullets = summarizeOptionCard(sec.id, sec.selected);
+          return (
+            <article
+              key={sec.id}
+              className="rounded-3xl border border-prestige-beige bg-white p-6"
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-heading text-lg ${
+                    LETTER_BADGE[sec.selectedLetter] || 'bg-dark text-white'
+                  }`}
+                >
+                  {sec.selectedLetter}
+                </span>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-prestige-taupe">{sec.label}</p>
+                  <h3 className="font-heading text-xl text-dark">{sec.selected.name}</h3>
+                  {sec.selected.recommended && (
+                    <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+                      Recommandée
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-
-            <p className="mt-4 text-sm leading-relaxed text-dark/80">{delta.pitch}</p>
-            <p className="mt-3 text-xs font-medium text-prestige-taupe">{optionHeadline(delta)}</p>
-
-            <dl className="mt-5 space-y-3 border-t border-prestige-beige/80 pt-4">
-              <Row label="Valeur nette à l’horizon" value={formatCad(delta.netWorthEnd)} delta={plainDelta(delta.deltaNetWorthEnd)} />
-              <Row label="Croissance projetée" value={formatCad(delta.growthCad)} delta={plainDelta(delta.deltaGrowthCad)} />
-              <Row label="Cashflow an 0" value={formatCad(delta.cashflowYear0)} delta={plainDelta(delta.deltaCashflow)} />
-              {delta.deathNetEstate != null && (
-                <Row
-                  label="Succession nette illustrée"
-                  value={formatCad(delta.deathNetEstate)}
-                  delta={delta.deltaDeath != null ? plainDelta(delta.deltaDeath) : null}
-                />
-              )}
-            </dl>
-          </article>
-        ))}
+              <p className="mt-4 text-sm leading-relaxed text-dark/80">{sec.selected.pitch}</p>
+              <ul className="mt-4 space-y-1 text-sm text-prestige-taupe">
+                {bullets.map((b) => (
+                  <li key={b}>· {b}</li>
+                ))}
+              </ul>
+            </article>
+          );
+        })}
       </div>
 
       <p className="text-center text-xs text-prestige-taupe">
-        Illustration éducative — hypothèses non garanties. À valider avec votre conseiller en sécurité financière,
-        un fiscaliste ou un juriste selon le cas.
+        Illustration éducative — hypothèses non garanties. Conseiller en sécurité financière.
       </p>
     </div>
   );
 }
 
-function BaselineStat({ label, value }) {
+function SummaryTile({ label, value, hint, emphasize }) {
   return (
-    <div>
-      <p className="text-[10px] uppercase tracking-[0.14em] text-white/50">{label}</p>
-      <p className="mt-1 font-heading text-2xl tabular-nums">{value}</p>
-    </div>
-  );
-}
-
-function Row({ label, value, delta }) {
-  const positive = typeof delta === 'string' && delta.startsWith('+');
-  const negative = typeof delta === 'string' && delta.startsWith('-');
-  return (
-    <div className="flex items-end justify-between gap-3">
-      <div>
-        <dt className="text-[10px] uppercase tracking-[0.12em] text-prestige-taupe">{label}</dt>
-        <dd className="font-heading text-lg tabular-nums text-dark">{value}</dd>
-      </div>
-      {delta && delta !== '—' && (
-        <span
-          className={`text-sm font-semibold tabular-nums ${
-            positive ? 'text-emerald-700' : negative ? 'text-rose-700' : 'text-prestige-taupe'
-          }`}
-        >
-          {delta}
-        </span>
-      )}
+    <div
+      className={`rounded-2xl border px-5 py-4 ${
+        emphasize ? 'border-primary/30 bg-primary/[0.04]' : 'border-prestige-beige bg-white'
+      }`}
+    >
+      <p className="text-[10px] uppercase tracking-[0.14em] text-prestige-taupe">{label}</p>
+      <p className="mt-2 font-heading text-2xl tabular-nums text-dark">{value}</p>
+      {hint && <p className="mt-1 text-xs text-prestige-taupe">{hint}</p>}
     </div>
   );
 }
