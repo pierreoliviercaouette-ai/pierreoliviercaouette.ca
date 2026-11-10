@@ -13,21 +13,32 @@ import {
   formatPct,
   summarizeProjection,
 } from '../../lib/illustrateur';
+import { buildCompareSeries, buildOptionDeltas, plainDelta } from '../../lib/illustrateur/scenarios';
 import {
   AllocationDonut,
   CashflowChart,
   CompositionArea,
   DASH_COLORS,
   NetWorthChart,
+  ScenarioCompareChart,
   Sparkline,
 } from './DashboardCharts';
 import { SectionCard } from './Field';
 import { usePlan } from './PlanContext';
 
-export function DashboardTab() {
-  const { plan, projection, compareProjection, setTab } = usePlan();
+export function DashboardTab({ presentation = false } = {}) {
+  const { plan, projection, compareProjection, proposalBundle, setTab, setPresentPage } = usePlan();
 
   const summary = useMemo(() => summarizeProjection(projection), [projection]);
+  const hasProposal = proposalBundle?.hasOptions;
+  const compareSeries = useMemo(
+    () => (hasProposal ? buildCompareSeries(proposalBundle) : []),
+    [hasProposal, proposalBundle],
+  );
+  const optionDeltas = useMemo(
+    () => (hasProposal ? buildOptionDeltas(proposalBundle) : []),
+    [hasProposal, proposalBundle],
+  );
   const nwSeries = useMemo(() => {
     const base = buildNetWorthSeries(projection);
     if (!compareProjection?.data?.length) return base;
@@ -68,6 +79,85 @@ export function DashboardTab() {
       {projection?.error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           Erreur de projection : {projection.error}
+        </div>
+      )}
+
+      {hasProposal && (
+        <div className="rounded-2xl border border-primary/20 bg-white p-5 md:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+                Dashboard chiffré · proposition
+              </p>
+              <h2 className="mt-1 font-heading text-2xl text-dark">
+                {proposalBundle.title || 'Comparaison A-B-C'}
+              </h2>
+              <p className="mt-1 text-sm text-prestige-taupe">
+                Situation actuelle vs options enregistrées — graphiques et écarts.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {!presentation && (
+                <button
+                  type="button"
+                  onClick={() => setTab('options')}
+                  className="rounded-full border border-prestige-beige px-3 py-1.5 text-xs font-semibold"
+                >
+                  Lecture simple A-B-C
+                </button>
+              )}
+              {presentation && (
+                <button
+                  type="button"
+                  onClick={() => setPresentPage('options')}
+                  className="rounded-full border border-prestige-beige px-3 py-1.5 text-xs font-semibold print:hidden"
+                >
+                  ← Retour lecture simple
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="mt-5">
+            <ScenarioCompareChart
+              data={compareSeries}
+              options={optionDeltas}
+              height={360}
+            />
+          </div>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-prestige-beige text-[11px] uppercase tracking-[0.12em] text-prestige-taupe">
+                  <th className="py-2 pr-4 font-semibold">Option</th>
+                  <th className="py-2 pr-4 font-semibold">VN horizon</th>
+                  <th className="py-2 pr-4 font-semibold">Δ VN</th>
+                  <th className="py-2 pr-4 font-semibold">Cashflow</th>
+                  <th className="py-2 font-semibold">Δ CF</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-prestige-beige/70">
+                  <td className="py-2.5 pr-4 font-medium">{proposalBundle.baseline.label}</td>
+                  <td className="py-2.5 pr-4 tabular-nums">{formatCad(proposalBundle.baseline.summary.netWorthEnd)}</td>
+                  <td className="py-2.5 pr-4 text-prestige-taupe">—</td>
+                  <td className="py-2.5 pr-4 tabular-nums">{formatCad(proposalBundle.baseline.summary.cashflowYear0)}</td>
+                  <td className="py-2.5 text-prestige-taupe">—</td>
+                </tr>
+                {optionDeltas.map((d) => (
+                  <tr key={d.letter} className="border-b border-prestige-beige/70">
+                    <td className="py-2.5 pr-4 font-medium">
+                      {d.letter} · {d.name}
+                      {d.recommended ? ' ★' : ''}
+                    </td>
+                    <td className="py-2.5 pr-4 tabular-nums">{formatCad(d.netWorthEnd)}</td>
+                    <td className="py-2.5 pr-4 tabular-nums font-semibold">{plainDelta(d.deltaNetWorthEnd)}</td>
+                    <td className="py-2.5 pr-4 tabular-nums">{formatCad(d.cashflowYear0)}</td>
+                    <td className="py-2.5 tabular-nums font-semibold">{plainDelta(d.deltaCashflow)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -116,15 +206,17 @@ export function DashboardTab() {
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <SectionCard
-            title="Trajectoire patrimoniale"
+            title={hasProposal ? 'Dossier actif (éditeur)' : 'Trajectoire patrimoniale'}
             action={
-              <button
-                type="button"
-                className="text-xs font-semibold text-primary"
-                onClick={() => setTab('analyse')}
-              >
-                Analyse détaillée →
-              </button>
+              !presentation ? (
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-primary"
+                  onClick={() => setTab('analyse')}
+                >
+                  Analyse détaillée →
+                </button>
+              ) : null
             }
           >
             <NetWorthChart

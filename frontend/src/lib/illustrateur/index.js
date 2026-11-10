@@ -37,3 +37,17 @@ export {
   compareScenarios,
 } from './metrics';
 export { newId } from './ids';
+export {
+  OPTION_LETTERS,
+  emptyProposal,
+  ensureProposal,
+  createOptionFromPlan,
+  buildProposalBundle,
+  buildCompareSeries,
+  buildOptionDeltas,
+  plainDelta,
+  optionHeadline,
+  autoHighlights,
+  nextLetter,
+  snapshotPlanForOption,
+} from './scenarios';

@@ -218,6 +218,62 @@ export function AllocationDonut({ data, height = 260, title }) {
   );
 }
 
+const OPTION_LINE_COLORS = {
+  A: DASH_COLORS.blue,
+  B: DASH_COLORS.mint,
+  C: DASH_COLORS.amber,
+  baseline: DASH_COLORS.navy,
+};
+
+/** Multi-option net-worth comparison (baseline + A/B/C). */
+export function ScenarioCompareChart({ data, options = [], height = 340, showBaseline = true }) {
+  return (
+    <div style={{ width: '100%', height }}>
+      <ResponsiveContainer>
+        <ComposedChart data={data} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DASH_COLORS.beige} vertical={false} />
+          <XAxis dataKey="year" tick={{ fontSize: 11, fill: DASH_COLORS.taupe }} axisLine={false} tickLine={false} />
+          <YAxis
+            tickFormatter={formatCompactCad}
+            tick={{ fontSize: 11, fill: DASH_COLORS.taupe }}
+            axisLine={false}
+            tickLine={false}
+            width={52}
+          />
+          <Tooltip formatter={(v, name) => [formatCad(v), name]} contentStyle={tipStyle()} />
+          <Legend wrapperStyle={{ fontSize: 12 }} />
+          {showBaseline && (
+            <Line
+              type="monotone"
+              dataKey="baseline"
+              name="Situation actuelle"
+              stroke={OPTION_LINE_COLORS.baseline}
+              strokeWidth={2.5}
+              strokeDasharray="4 4"
+              dot={false}
+              isAnimationActive
+              animationDuration={900}
+            />
+          )}
+          {options.map((opt) => (
+            <Line
+              key={opt.letter}
+              type="monotone"
+              dataKey={`opt_${opt.letter}`}
+              name={`Option ${opt.letter}${opt.name ? ` · ${opt.name}` : ''}`}
+              stroke={OPTION_LINE_COLORS[opt.letter] || DASH_COLORS.sky}
+              strokeWidth={opt.recommended ? 3.5 : 2.5}
+              dot={false}
+              isAnimationActive
+              animationDuration={1100}
+            />
+          ))}
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export function CompositionArea({ data, keys, height = 280 }) {
   return (
     <div style={{ width: '100%', height }}>

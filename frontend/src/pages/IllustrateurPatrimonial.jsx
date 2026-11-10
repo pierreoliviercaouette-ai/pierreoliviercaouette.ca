@@ -7,15 +7,19 @@ import { useSeoMeta } from '../lib/seo';
 import { AnalyseTab } from '../components/illustrateur/AnalyseTab';
 import { BilanTab } from '../components/illustrateur/BilanTab';
 import { DashboardTab } from '../components/illustrateur/DashboardTab';
+import { OptionsDashboard } from '../components/illustrateur/OptionsDashboard';
 import { PlanProvider, usePlan } from '../components/illustrateur/PlanContext';
 import { PlanificationTab } from '../components/illustrateur/PlanificationTab';
 import { PresentationView } from '../components/illustrateur/PresentationView';
 import { RevenusTab } from '../components/illustrateur/RevenusTab';
+import { ScenariosTab } from '../components/illustrateur/ScenariosTab';
 
 const PATH = '/admin/illustrateur-patrimonial';
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard' },
+  { id: 'options', label: 'Options A-B-C' },
+  { id: 'scenarios', label: 'Scénarios' },
   { id: 'bilan', label: 'Bilan' },
   { id: 'revenus', label: 'Revenus' },
   { id: 'plan', label: 'Planification' },
@@ -61,9 +65,12 @@ function IllustrateurShell() {
     exportJson,
     importFile,
     projection,
+    proposalBundle,
+    openProposalPresentation,
   } = usePlan();
   const fileRef = useRef(null);
   const summary = useMemo(() => summarizeProjection(projection), [projection]);
+  const hasOptions = proposalBundle?.hasOptions;
 
   const exportPdf = async () => {
     await downloadCampagneToolPdf({
@@ -114,16 +121,27 @@ function IllustrateurShell() {
                 {plan.meta?.clientLabel || plan.meta?.name || 'Illustrateur patrimonial'}
               </h1>
               <p className="mt-1 text-sm text-white/65">
-                Dashboard live · session navigateur seulement · hypothèses non garanties
+                Proposition A-B-C · dashboard live · session navigateur seulement
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setPresentMode(true)}
-              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
-            >
-              Mode présentation
-            </button>
+            <div className="flex flex-wrap gap-2">
+              {hasOptions && (
+                <button
+                  type="button"
+                  onClick={openProposalPresentation}
+                  className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
+                >
+                  Présenter A-B-C
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setPresentMode(true)}
+                className="rounded-full border border-white/25 px-4 py-2 text-sm font-semibold text-white"
+              >
+                Mode présentation
+              </button>
+            </div>
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -188,6 +206,8 @@ function IllustrateurShell() {
 
       <div className="container-max px-4 py-6 md:px-8 md:py-8">
         {tab === 'dashboard' && <DashboardTab />}
+        {tab === 'options' && <OptionsDashboard />}
+        {tab === 'scenarios' && <ScenariosTab />}
         {tab === 'bilan' && <BilanTab />}
         {tab === 'revenus' && <RevenusTab />}
         {tab === 'plan' && <PlanificationTab />}

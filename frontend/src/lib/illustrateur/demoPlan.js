@@ -1,5 +1,6 @@
 import { DEFAULT_TAX_RATES } from './investmentPlanningService';
 import { newId } from './ids';
+import { emptyProposal } from './scenarios';
 
 /** Dossier démo entrepreneur QC — illustration éducative. */
 export function createDemoPlan() {
@@ -197,6 +198,7 @@ export function createDemoPlan() {
       maladie_grave_cible: 100000,
     },
     scenarios: [],
+    proposal: emptyProposal(),
   };
 }
 
@@ -260,5 +262,6 @@ export function createEmptyPlan() {
       maladie_grave_cible: 50000,
     },
     scenarios: [],
+    proposal: emptyProposal(),
   };
 }

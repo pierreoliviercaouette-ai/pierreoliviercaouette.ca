@@ -79,6 +79,7 @@ export function parseImportedPlan(text) {
     revenues: plan.revenues || [],
     events: plan.events || [],
     scenarios: plan.scenarios || [],
+    proposal: plan.proposal || { title: 'Proposition', baselineLabel: 'Situation actuelle', options: [] },
     needs: plan.needs || {},
     horizonYears: plan.horizonYears ?? 25,
     meta: plan.meta || { name: 'Import' },

@@ -12,6 +12,15 @@ import {
   touchPlan,
   newId,
 } from '../../lib/illustrateur';
+import {
+  autoHighlights,
+  buildProposalBundle,
+  createOptionFromPlan,
+  ensureProposal,
+  nextLetter,
+  snapshotPlanForOption,
+} from '../../lib/illustrateur/scenarios';
+import { summarizeProjection } from '../../lib/illustrateur/metrics';
 
 const PlanContext = createContext(null);
 
@@ -34,15 +43,25 @@ function runProjection(plan) {
 }
 
 export function PlanProvider({ children }) {
-  const [plan, setPlanState] = useState(() => loadSessionPlan() || createDemoPlan());
+  const [plan, setPlanState] = useState(() => {
+    const loaded = loadSessionPlan() || createDemoPlan();
+    return {
+      ...loaded,
+      proposal: ensureProposal(loaded),
+    };
+  });
   const [comparePlan, setComparePlan] = useState(null);
   const [tab, setTab] = useState('dashboard');
   const [presentMode, setPresentMode] = useState(false);
+  const [presentPage, setPresentPage] = useState('options'); // options | dashboard
 
   const setPlan = useCallback((updater) => {
     setPlanState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
-      return touchPlan(next);
+      return touchPlan({
+        ...next,
+        proposal: ensureProposal(next),
+      });
     });
   }, []);
 
@@ -68,6 +87,21 @@ export function PlanProvider({ children }) {
       return null;
     }
   }, [comparePlan]);
+
+  const proposalBundle = useMemo(() => {
+    try {
+      return buildProposalBundle(plan);
+    } catch (err) {
+      console.error('[illustrateur] proposal', err);
+      return {
+        title: 'Proposition',
+        baseline: { label: 'Situation actuelle', summary: summarizeProjection(projection), projection },
+        options: [],
+        hasOptions: false,
+        canCompare: false,
+      };
+    }
+  }, [plan, projection]);
 
   const updateCollection = useCallback(
     (key, id, updates) => {
@@ -99,6 +133,135 @@ export function PlanProvider({ children }) {
     [setPlan],
   );
 
+  const updateProposal = useCallback(
+    (updater) => {
+      setPlan((prev) => {
+        const current = ensureProposal(prev);
+        const nextProposal = typeof updater === 'function' ? updater(current) : updater;
+        return { ...prev, proposal: nextProposal };
+      });
+    },
+    [setPlan],
+  );
+
+  const saveCurrentAsOption = useCallback(
+    ({ letter, name, pitch, recommended = false, openViews = true } = {}) => {
+      let createdLetter = null;
+      updateProposal((proposal) => {
+        const resolvedLetter = letter || nextLetter(proposal.options);
+        if (!resolvedLetter) return proposal;
+        createdLetter = resolvedLetter;
+        const option = createOptionFromPlan(plan, {
+          letter: resolvedLetter,
+          name,
+          pitch,
+          recommended,
+        });
+        try {
+          const proj = runProjection(option.plan);
+          option.highlights = autoHighlights(summarizeProjection(proj), summarizeProjection(projection));
+        } catch {
+          option.highlights = [];
+        }
+        const options = [
+          ...proposal.options.filter((o) => o.letter !== resolvedLetter),
+          option,
+        ].sort((a, b) => String(a.letter).localeCompare(String(b.letter)));
+        return { ...proposal, options };
+      });
+      if (openViews) {
+        setTab('options');
+        setPresentPage('options');
+      }
+      return createdLetter;
+    },
+    [plan, projection, updateProposal],
+  );
+
+  const updateOptionMeta = useCallback(
+    (optionId, updates) => {
+      updateProposal((proposal) => ({
+        ...proposal,
+        options: proposal.options.map((o) => (o.id === optionId ? { ...o, ...updates } : o)),
+      }));
+    },
+    [updateProposal],
+  );
+
+  const setRecommendedOption = useCallback(
+    (optionId) => {
+      updateProposal((proposal) => ({
+        ...proposal,
+        options: proposal.options.map((o) => ({
+          ...o,
+          recommended: o.id === optionId,
+        })),
+      }));
+    },
+    [updateProposal],
+  );
+
+  const removeOption = useCallback(
+    (optionId) => {
+      updateProposal((proposal) => ({
+        ...proposal,
+        options: proposal.options.filter((o) => o.id !== optionId),
+      }));
+    },
+    [updateProposal],
+  );
+
+  const loadOptionIntoEditor = useCallback(
+    (optionId) => {
+      const option = ensureProposal(plan).options.find((o) => o.id === optionId);
+      if (!option?.plan) return;
+      setPlan({
+        ...clonePlan(option.plan),
+        proposal: ensureProposal(plan),
+        scenarios: plan.scenarios || [],
+        meta: {
+          ...(option.plan.meta || {}),
+          name: option.name || option.plan.meta?.name,
+          clientLabel: plan.meta?.clientLabel,
+        },
+      });
+      setTab('bilan');
+    },
+    [plan, setPlan],
+  );
+
+  const refreshOptionFromEditor = useCallback(
+    (optionId) => {
+      updateProposal((proposal) => ({
+        ...proposal,
+        options: proposal.options.map((o) => {
+          if (o.id !== optionId) return o;
+          const refreshed = {
+            ...o,
+            plan: snapshotPlanForOption(plan),
+            savedAt: new Date().toISOString(),
+          };
+          try {
+            const proj = runProjection(refreshed.plan);
+            refreshed.highlights = autoHighlights(
+              summarizeProjection(proj),
+              summarizeProjection(projection),
+            );
+          } catch {
+            /* keep old highlights */
+          }
+          return refreshed;
+        }),
+      }));
+    },
+    [plan, projection, updateProposal],
+  );
+
+  const openProposalPresentation = useCallback(() => {
+    setPresentPage('options');
+    setPresentMode(true);
+  }, []);
+
   const value = useMemo(
     () => ({
       plan,
@@ -107,31 +270,45 @@ export function PlanProvider({ children }) {
       comparePlan,
       setComparePlan,
       compareProjection,
+      proposalBundle,
       tab,
       setTab,
       presentMode,
       setPresentMode,
+      presentPage,
+      setPresentPage,
       updateCollection,
       addToCollection,
       removeFromCollection,
+      updateProposal,
+      saveCurrentAsOption,
+      updateOptionMeta,
+      setRecommendedOption,
+      removeOption,
+      loadOptionIntoEditor,
+      refreshOptionFromEditor,
+      openProposalPresentation,
       loadDemo: () => {
         setComparePlan(null);
         setPlan(createDemoPlan());
+        setTab('dashboard');
       },
       loadEmpty: () => {
         setComparePlan(null);
         setPlan(createEmptyPlan());
+        setTab('dashboard');
       },
       clearSession: () => {
         clearSessionPlan();
         setComparePlan(null);
         setPlan(createEmptyPlan());
+        setTab('dashboard');
       },
       exportJson: () => exportPlanJson(plan),
       importFile: async (file) => {
         const imported = await readPlanFile(file);
         setComparePlan(null);
-        setPlan(imported);
+        setPlan({ ...imported, proposal: ensureProposal(imported) });
       },
       snapshotAsScenario: (name) => {
         const snap = clonePlan(plan);
@@ -154,6 +331,7 @@ export function PlanProvider({ children }) {
         setPlan({
           ...clonePlan(scn.plan),
           scenarios: plan.scenarios,
+          proposal: ensureProposal(plan),
         });
       },
       setCompareFromScenario: (scenarioId) => {
@@ -169,11 +347,21 @@ export function PlanProvider({ children }) {
       projection,
       comparePlan,
       compareProjection,
+      proposalBundle,
       tab,
       presentMode,
+      presentPage,
       updateCollection,
       addToCollection,
       removeFromCollection,
+      updateProposal,
+      saveCurrentAsOption,
+      updateOptionMeta,
+      setRecommendedOption,
+      removeOption,
+      loadOptionIntoEditor,
+      refreshOptionFromEditor,
+      openProposalPresentation,
     ],
   );
 
