@@ -232,15 +232,6 @@ export function CeliappTool() {
         ? 'Max à vie dans ce scénario. 15 min pour valider la suite — PDF en bonus.'
         : 'Ta projection est prête. Clarifie le prochain vrai pas en 15 min — ou garde le PDF.';
 
-  const handleChipMax = () => {
-    setCotisationAnnuelle('8000');
-    setAnnees('5');
-    trackEvent('select_content', {
-      content_type: 'cta',
-      item_id: 'campagne_celiapp_chip_max',
-    });
-  };
-
   const trackCibleIfSet = (raw) => {
     const cible = Math.max(0, toNumber(raw));
     if (cible <= 0) return;
@@ -387,16 +378,6 @@ export function CeliappTool() {
                 placeholder="0"
               />
             </Field>
-            <div className="sm:col-span-2">
-              <button
-                type="button"
-                onClick={handleChipMax}
-                className="inline-flex items-center rounded-full border border-prestige-beige bg-white px-3.5 py-1.5 text-xs font-medium text-dark transition-colors hover:border-primary/30 hover:text-primary"
-                data-testid="celiapp-chip-max"
-              >
-                Viser le max 8 k $ × 5 ans
-              </button>
-            </div>
           </Block>
 
           <Block

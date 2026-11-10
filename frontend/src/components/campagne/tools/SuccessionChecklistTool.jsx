@@ -1,76 +1,57 @@
 ﻿import { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { AlertTriangle, Check, FileText, Scale } from 'lucide-react';
+import { AlertTriangle, Check, Scale } from 'lucide-react';
 import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
-import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
 import { trackRendezVousClick } from '../../../lib/analytics';
 import {
   CampagneToolShell,
   ToolSoftClose,
 } from '../CampagneToolShell';
 
-/** Ordre = priorité campagne (liquidité → qui reçoit → cadre). */
+/** Libellés validés — ordre checklist (6 questions). */
 const ITEMS = [
   {
     id: 'liquidites',
     group: 'liquidite',
     short: 'Liquidité',
     label: 'Argent accessible (liquidité)',
-    hint: 'Comptes bloqués ≠ épicerie et hypothèque payées. Qui paie en attendant ?',
   },
   {
     id: 'besoins-rapides',
     group: 'liquidite',
     short: 'Besoins rapides',
     label: 'Ce dont la famille a besoin vite',
-    hint: 'Les premiers mois : revenu, dettes, hypothèque — un plan clair pour ne pas laisser ça en suspens.',
   },
   {
     id: 'beneficiaires',
     group: 'documents',
     short: 'Bénéficiaires',
     label: 'Polices, REER, CELI et régime collectif à jour (bénéficiaires)',
-    hint: 'L’argent va à qui tu veux vraiment, pas à une ancienne version de ta vie.',
   },
   {
     id: 'testament',
     group: 'documents',
     short: 'Testament',
     label: 'Un testament existe et est à jour',
-    hint: 'Qui reçoit quoi — pas juste « j’y penserai ».',
   },
   {
     id: 'coherence',
     group: 'documents',
     short: 'Cohérence',
     label: 'Testament et contrats se parlent',
-    hint: 'Bénéficiaires, polices et testament : est-ce que ça colle ensemble ?',
   },
   {
     id: 'notaire',
     group: 'cadre',
     short: 'Notaire',
     label: 'Le notaire a revu la situation',
-    hint: 'Le cadre légal reste chez le notaire — cette checklist ne le remplace pas.',
   },
 ];
 
 const GROUPS = [
-  {
-    id: 'liquidite',
-    title: 'Argent accessible',
-    subtitle: 'Ce dont la famille a besoin vite — liquidité ≠ actifs sur papier.',
-  },
-  {
-    id: 'documents',
-    title: 'Qui reçoit quoi',
-    subtitle: 'Bénéficiaires, testament et contrats : est-ce qu’ils se parlent ?',
-  },
-  {
-    id: 'cadre',
-    title: 'Cadre légal',
-    subtitle: 'Le notaire reste essentiel pour le juridique.',
-  },
+  { id: 'liquidite', title: 'Liquidité' },
+  { id: 'documents', title: 'Documents' },
+  { id: 'cadre', title: 'Cadre' },
 ];
 
 const INITIAL_CHECKED = Object.fromEntries(ITEMS.map((item) => [item.id, false]));
@@ -184,7 +165,6 @@ export function SuccessionChecklistTool() {
   const location = useLocation();
   const [checked, setChecked] = useState(INITIAL_CHECKED);
   const [notesLibres, setNotesLibres] = useState('');
-  const { busy, downloadPdf } = useCampagneToolPdf('campagne_succession-bases_pdf');
   const rdvPath = buildCampagneRdvPath('succession-bases', location.search);
 
   const count = useMemo(
@@ -224,8 +204,6 @@ export function SuccessionChecklistTool() {
     };
   });
 
-  const pillarsOk = pillarScores.filter((p) => p.complete).length;
-
   const etatTone = count >= 5 ? 'ok' : count >= 1 ? 'warn' : 'default';
   const etatValue =
     count === 0 ? 'À démarrer' : missingCount === 0 ? 'Complet' : `${count}/${total} en place`;
@@ -253,55 +231,6 @@ export function SuccessionChecklistTool() {
   const toggle = (id) => {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
   };
-
-  const handleDownload = () =>
-    downloadPdf({
-      title: 'Résumé — portrait successoral',
-      filename: 'resume-succession-bases.pdf',
-      sections: [
-        {
-          heading: 'Checklist',
-          rows: ITEMS.map((item) => ({
-            label: item.label,
-            value: checked[item.id] ? 'Fait' : 'À faire',
-          })),
-        },
-        {
-          heading: 'Portrait des trous',
-          rows: [
-            { label: 'Points clarifiés', value: `${count}/${total}` },
-            {
-              label: 'Piliers OK (liquidité / documents / cadre)',
-              value: `${pillarsOk}/3`,
-            },
-            {
-              label: 'Trous prioritaires',
-              value:
-                missingCount === 0
-                  ? 'Aucun'
-                  : missing.map((item) => item.short).join(', '),
-            },
-            {
-              label: 'Prochaine étape',
-              value: nextStep.pdfValue,
-            },
-            { label: 'Lecture', value: detail },
-          ],
-        },
-        ...(notesLibres.trim()
-          ? [
-              {
-                heading: 'Notes personnelles',
-                rows: [{ label: 'Notes', value: notesLibres.trim() }],
-              },
-            ]
-          : []),
-      ],
-      notes: [
-        `${count}/${total} points cochés dans la checklist.`,
-        'Ne remplace pas un notaire ni un avis juridique.',
-      ],
-    });
 
   return (
     <div data-testid="tool-succession-checklist">
@@ -406,9 +335,6 @@ export function SuccessionChecklistTool() {
                     onRdvClick={() =>
                       trackRendezVousClick('campagne_succession-bases_rdv_tool')
                     }
-                    onPdf={handleDownload}
-                    pdfBusy={busy}
-                    pdfLabel="Télécharger mon résumé PDF"
                   />
                 </div>
               ) : null}
@@ -426,113 +352,73 @@ export function SuccessionChecklistTool() {
           )}
         </div>
 
-        <div
-          className="relative space-y-8 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-prestige-beige"
-          aria-label="Checklist succession"
-        >
-          {GROUPS.map((group, groupIndex) => {
-            const groupItems = ITEMS.filter((item) => item.group === group.id);
-            const groupDone = groupItems.every((item) => checked[item.id]);
+        <div className="space-y-3" aria-label="Checklist succession">
+          {ITEMS.map((item, index) => {
+            const done = Boolean(checked[item.id]);
+            const inputId = `succession-${item.id}`;
 
             return (
-              <div key={group.id} className="relative pl-11">
-                <div
-                  className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
-                    groupDone
+              <label
+                key={item.id}
+                htmlFor={inputId}
+                className={`flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3.5 transition-colors ${
+                  done
+                    ? 'bg-gradient-to-br from-primary/[0.06] to-secondary/[0.08]'
+                    : 'bg-white/60 hover:bg-white'
+                }`}
+              >
+                <span
+                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                    done
                       ? 'bg-primary text-white'
                       : 'bg-white text-prestige-taupe shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]'
                   }`}
                   aria-hidden
                 >
-                  {groupDone ? <Check className="h-4 w-4" strokeWidth={2.5} /> : groupIndex + 1}
-                </div>
-                <div className="mb-3">
-                  <h3 className="font-heading text-base font-semibold text-dark">{group.title}</h3>
-                  <p className="mt-0.5 text-sm leading-snug text-prestige-taupe">{group.subtitle}</p>
-                </div>
-                <div className="space-y-3">
-                  {groupItems.map((item) => {
-                    const done = Boolean(checked[item.id]);
-                    const inputId = `succession-${item.id}`;
-
-                    return (
-                      <label
-                        key={item.id}
-                        htmlFor={inputId}
-                        className={`flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3.5 transition-colors ${
-                          done
-                            ? 'bg-gradient-to-br from-primary/[0.06] to-secondary/[0.08]'
-                            : 'bg-white/60 hover:bg-white'
-                        }`}
-                      >
-                        <input
-                          id={inputId}
-                          type="checkbox"
-                          checked={done}
-                          onChange={() => toggle(item.id)}
-                          className="mt-1 h-4 w-4 shrink-0 rounded border-input text-primary focus:ring-primary"
-                        />
-                        <span className="min-w-0">
-                          <span className="block text-sm font-semibold text-dark">{item.label}</span>
-                          <span className="mt-0.5 block text-xs leading-relaxed text-prestige-taupe">
-                            {item.hint}
-                          </span>
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
+                  {done ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : index + 1}
+                </span>
+                <input
+                  id={inputId}
+                  type="checkbox"
+                  checked={done}
+                  onChange={() => toggle(item.id)}
+                  className="mt-1 h-4 w-4 shrink-0 rounded border-input text-primary focus:ring-primary"
+                />
+                <span className="min-w-0 pt-0.5 text-sm font-semibold leading-snug text-dark">
+                  {item.label}
+                </span>
+              </label>
             );
           })}
 
-          <div className="relative pl-11">
-            <div
-              className="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-white text-secondary shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]"
-              aria-hidden
-            >
-              <Scale className="h-3.5 w-3.5" />
-            </div>
-            <div className="rounded-2xl bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06] px-4 py-3.5">
-              <p className="text-sm font-semibold text-dark">Rappel — vois un notaire</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-prestige-taupe">
-                Cette liste aide à voir les trous de liquidité et de clarté. Elle ne remplace pas un
-                notaire pour le testament et le cadre légal.
-              </p>
+          <div className="rounded-2xl bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06] px-4 py-3.5">
+            <div className="flex items-start gap-2">
+              <Scale className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" aria-hidden />
+              <div>
+                <p className="text-sm font-semibold text-dark">Rappel — vois un notaire</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-prestige-taupe">
+                  Cette liste aide à voir les trous. Elle ne remplace pas un notaire pour le testament
+                  et le cadre légal.
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="relative pl-11">
-            <div
-              className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-                notesLibres.trim()
-                  ? 'bg-primary text-white'
-                  : 'bg-white text-prestige-taupe shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]'
-              }`}
-              aria-hidden
-            >
-              {notesLibres.trim() ? (
-                <Check className="h-4 w-4" strokeWidth={2.5} />
-              ) : (
-                <FileText className="h-3.5 w-3.5" />
-              )}
-            </div>
-            <div>
-              <h3 className="font-heading text-base font-semibold text-dark">Notes</h3>
-              <p className="mt-0.5 text-sm text-prestige-taupe">Optionnel</p>
-              <div className="mt-3">
-                <label htmlFor="succession-notes-libres" className={labelClass}>
-                  À retenir
-                </label>
-                <textarea
-                  id="succession-notes-libres"
-                  rows={2}
-                  className={`${inputClass} resize-y`}
-                  value={notesLibres}
-                  onChange={(e) => setNotesLibres(e.target.value)}
-                  placeholder="Ex. Nom du notaire, date du testament, qui a les accès…"
-                />
-              </div>
+          <div>
+            <h3 className="font-heading text-base font-semibold text-dark">Notes</h3>
+            <p className="mt-0.5 text-sm text-prestige-taupe">Optionnel</p>
+            <div className="mt-3">
+              <label htmlFor="succession-notes-libres" className={labelClass}>
+                À retenir
+              </label>
+              <textarea
+                id="succession-notes-libres"
+                rows={2}
+                className={`${inputClass} resize-y`}
+                value={notesLibres}
+                onChange={(e) => setNotesLibres(e.target.value)}
+                placeholder="Ex. Nom du notaire, date du testament, qui a les accès…"
+              />
             </div>
           </div>
         </div>

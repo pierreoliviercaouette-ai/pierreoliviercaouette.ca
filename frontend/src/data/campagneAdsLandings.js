@@ -677,9 +677,9 @@ export const campagneAdsLandings = [
     apprendreLabel: 'Lire la capsule succession',
     ctaLabel: 'Réserver 15 minutes',
     heroToolLabel: 'Remplir la checklist',
-    ctaHeadline: 'Tu veux valider ton cas ?',
-    ctaSubline:
-      'Un conseiller peut revoir ta situation avec toi en 15 minutes. Le notaire reste pour le juridique.',
+    /** RDV seulement après le résultat de la checklist. */
+    hideHeroRdv: true,
+    hideMidCta: true,
     toolIntro: '',
   },
   {

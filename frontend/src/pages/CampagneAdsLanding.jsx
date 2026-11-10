@@ -272,7 +272,7 @@ export function CampagneAdsLanding() {
                 )}
               </div>
             </div>
-          ) : (
+          ) : item.hideMidCta ? null : (
             <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-dark px-6 py-8 text-center text-white shadow-lg md:px-10 md:py-10">
               <h2 className="font-heading text-2xl font-bold md:text-3xl">{midHeadline}</h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/80 md:text-base">
