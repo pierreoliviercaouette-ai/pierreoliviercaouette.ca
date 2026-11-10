@@ -6,9 +6,13 @@ import { formatCad, formatPct, summarizeProjection } from '../lib/illustrateur';
 import { ATTAINMENT_DOMAIN_LABELS } from '../lib/illustrateur/attainment';
 import { PLANNING_MODULES } from '../lib/illustrateur/planningModules';
 import { useSeoMeta } from '../lib/seo';
+import { BudgetStep } from '../components/illustrateur/BudgetStep';
 import { CollectBilanStep } from '../components/illustrateur/CollectBilanStep';
 import { CollectRevenusStep } from '../components/illustrateur/CollectRevenusStep';
 import { CollectShell } from '../components/illustrateur/CollectShell';
+import { CorporatifStep } from '../components/illustrateur/CorporatifStep';
+import { FiscaliteStep } from '../components/illustrateur/FiscaliteStep';
+import { FluxTresorerieStep } from '../components/illustrateur/FluxTresorerieStep';
 import { HubStep } from '../components/illustrateur/HubStep';
 import { ModulesTab } from '../components/illustrateur/ModulesTab';
 import {
@@ -228,6 +232,10 @@ function IllustrateurShell() {
         {workflowStep === 'objectifs' && <ObjectivesStep />}
         {workflowStep === 'bilan' && <CollectBilanStep />}
         {workflowStep === 'revenus' && <CollectRevenusStep />}
+        {workflowStep === 'budget' && <BudgetStep />}
+        {workflowStep === 'corporatif' && <CorporatifStep />}
+        {workflowStep === 'fiscalite' && <FiscaliteStep />}
+        {workflowStep === 'flux' && <FluxTresorerieStep />}
         {workflowStep === 'urgence' && <EmergencyStep />}
         {workflowStep === 'deces' && <DeathNeedsStep />}
         {workflowStep === 'invalidite' && <DisabilityStep />}

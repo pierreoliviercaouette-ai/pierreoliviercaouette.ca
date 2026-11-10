@@ -1,6 +1,7 @@
 import { DEFAULT_TAX_RATES } from './investmentPlanningService';
 import { newId } from './ids';
 import { createModuleOption, emptyModulesState } from './planningModules';
+import { emptyBudgetState } from './budgetCatalog';
 import {
   emptyContributionRoom,
   emptyCriticalIllnessNeeds,
@@ -10,6 +11,36 @@ import {
   emptyPerson,
   emptyRetirement,
 } from './planDefaults';
+
+function demoBudget() {
+  const b = emptyBudgetState();
+  b.netIncomeAnnual = 90000;
+  b.mode = 'individuel';
+  const set = (id, amount, frequency = 'mensuel') => {
+    b.lines[id] = { ...b.lines[id], amount, frequency };
+  };
+  set('hypotheque_bail', 2100);
+  set('electricite', 180);
+  set('telecom', 145);
+  set('taxes_mun', 4200, 'annuel');
+  set('epicerie', 900);
+  set('garderie', 650);
+  set('vetements', 1200, 'annuel');
+  set('auto_paiement', 450);
+  set('essence', 220);
+  set('permis', 280, 'annuel');
+  set('ass_auto_hab', 185);
+  set('ass_vie', 95);
+  set('reer', 500);
+  set('epargne_placements', 300);
+  set('cartes', 150);
+  set('restaurant', 250);
+  set('abonnements', 65);
+  set('voyages', 3500, 'annuel');
+  set('cadeaux', 80);
+  set('imprevus', 100);
+  return b;
+}
 
 /** Dossier démo entrepreneur QC — illustration éducative. */
 export function createDemoPlan() {
@@ -326,6 +357,7 @@ export function createDemoPlan() {
       modules.title = 'Proposition démo';
       return modules;
     })(),
+    budget: demoBudget(),
   };
 }
 
@@ -404,5 +436,6 @@ export function createEmptyPlan() {
     recommendations: [],
     savings: [],
     modules: emptyModulesState(),
+    budget: emptyBudgetState(),
   };
 }

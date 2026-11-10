@@ -1,4 +1,5 @@
 import { newId } from './ids';
+import { emptyBudgetState } from './budgetCatalog';
 
 export function emptyPerson() {
   return {
@@ -155,5 +156,8 @@ export function ensureCollectFields(plan) {
     },
     recommendations: Array.isArray(plan?.recommendations) ? plan.recommendations : [],
     savings: Array.isArray(plan?.savings) ? plan.savings : [],
+    budget: plan?.budget
+      ? { ...emptyBudgetState(), ...plan.budget, lines: { ...emptyBudgetState().lines, ...(plan.budget.lines || {}) } }
+      : emptyBudgetState(),
   };
 }

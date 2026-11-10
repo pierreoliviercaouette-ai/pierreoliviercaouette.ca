@@ -79,3 +79,5 @@ export {
 } from './attainment';
 export { OBJECTIVE_CATEGORIES } from './objectivesCatalog';
 export { ensureCollectFields } from './planDefaults';
+export { BUDGET_CATEGORIES, BUDGET_FREQUENCIES, emptyBudgetState } from './budgetCatalog';
+export { ensureBudget, summarizeBudget, lineAnnual, lineMonthly, budgetMonthlyExpenses } from './budgetEngine';
