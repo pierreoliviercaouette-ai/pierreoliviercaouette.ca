@@ -235,8 +235,8 @@ export function analyzePlanningGaps(plan, projectionSummary = null) {
     });
   }
 
-  const hasCorp = (plan?.entities || []).some((e) => e.type === 'corporation');
-  if (hasCorp) {
+  const scopeCorp = Boolean(plan?.scope?.corporatif);
+  if (scopeCorp) {
     const corpCash = sumBy(plan?.assets, (a) => a.type === 'corporatif');
     gaps.push({
       id: 'gap_corpo',

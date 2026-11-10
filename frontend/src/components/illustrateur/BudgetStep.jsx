@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { formatCad } from '../../lib/illustrateur';
+import { formatCad, planHasConjoint } from '../../lib/illustrateur';
 import { BUDGET_CATEGORIES, BUDGET_FREQUENCIES } from '../../lib/illustrateur/budgetCatalog';
 import { ensureBudget, summarizeBudget } from '../../lib/illustrateur/budgetEngine';
 import { CollectShell } from './CollectShell';
@@ -15,6 +15,7 @@ import { usePlan } from './PlanContext';
 
 export function BudgetStep() {
   const { plan, setPlan, goWorkflowNext, goWorkflowPrev } = usePlan();
+  const withSpouse = planHasConjoint(plan);
   const budget = ensureBudget(plan);
   const summary = useMemo(() => summarizeBudget(budget), [budget]);
   const [tab, setTab] = useState(BUDGET_CATEGORIES[0].id);
@@ -106,16 +107,22 @@ export function BudgetStep() {
               onChange={(v) => patchBudget({ netIncomeAnnual: v })}
             />
           </FieldLabel>
-          <FieldLabel label="Type de budget">
-            <SegmentedToggle
-              value={budget.mode || 'individuel'}
-              onChange={(v) => patchBudget({ mode: v })}
-              options={[
-                { value: 'individuel', label: 'Individuel' },
-                { value: 'communs', label: 'Communs' },
-              ]}
-            />
-          </FieldLabel>
+          {withSpouse ? (
+            <FieldLabel label="Type de budget">
+              <SegmentedToggle
+                value={budget.mode || 'individuel'}
+                onChange={(v) => patchBudget({ mode: v })}
+                options={[
+                  { value: 'individuel', label: 'Individuel' },
+                  { value: 'communs', label: 'Communs' },
+                ]}
+              />
+            </FieldLabel>
+          ) : (
+            <FieldLabel label="Type de budget">
+              <p className="py-2 text-sm text-[#5a6b7d]">Individuel</p>
+            </FieldLabel>
+          )}
           <FieldLabel label="Affichage totaux">
             <SegmentedToggle
               value={budget.viewFrequency || 'mensuel'}

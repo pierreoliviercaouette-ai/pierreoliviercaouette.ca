@@ -1,4 +1,4 @@
-import { formatCad, newId } from '../../lib/illustrateur';
+import { formatCad, newId, planHasConjoint } from '../../lib/illustrateur';
 import { usePlan } from './PlanContext';
 import {
   AddRowButton,
@@ -345,14 +345,16 @@ export function DeathNeedsStep() {
             />
             %
           </p>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <FieldLabel label="Rente conjoint survivant">
-              <TextField
-                type="number"
-                value={d.survivorPension}
-                onChange={(v) => patchSection(setPlan, 'deathNeeds', { survivorPension: v })}
-              />
-            </FieldLabel>
+          <div className={`mt-3 grid gap-3 ${planHasConjoint(plan) ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+            {planHasConjoint(plan) && (
+              <FieldLabel label="Rente conjoint survivant">
+                <TextField
+                  type="number"
+                  value={d.survivorPension}
+                  onChange={(v) => patchSection(setPlan, 'deathNeeds', { survivorPension: v })}
+                />
+              </FieldLabel>
+            )}
             <FieldLabel label="Rente d’orphelin">
               <TextField
                 type="number"

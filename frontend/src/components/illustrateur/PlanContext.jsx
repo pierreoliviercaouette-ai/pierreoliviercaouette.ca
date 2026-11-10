@@ -23,11 +23,12 @@ import { analyzePlanningGaps } from '../../lib/illustrateur/planningGaps';
 import { computeAllAttainments } from '../../lib/illustrateur/attainment';
 import { ensureCollectFields } from '../../lib/illustrateur/planDefaults';
 import {
-  adjacentStep,
+  adjacentVisibleStep,
   defaultWorkflow,
   ensurePriorities,
   ensureWorkflow,
   getStepMeta,
+  isStepVisible,
 } from '../../lib/illustrateur/workflow';
 
 const PlanContext = createContext(null);
@@ -95,12 +96,20 @@ export function PlanProvider({ children }) {
   );
 
   const goWorkflowNext = useCallback(() => {
-    setWorkflowStep(adjacentStep(workflowStep, 1));
-  }, [setWorkflowStep, workflowStep]);
+    setWorkflowStep(adjacentVisibleStep(plan, workflowStep, 1));
+  }, [plan, setWorkflowStep, workflowStep]);
 
   const goWorkflowPrev = useCallback(() => {
-    setWorkflowStep(adjacentStep(workflowStep, -1));
-  }, [setWorkflowStep, workflowStep]);
+    setWorkflowStep(adjacentVisibleStep(plan, workflowStep, -1));
+  }, [plan, setWorkflowStep, workflowStep]);
+
+  useEffect(() => {
+    const meta = getStepMeta(workflowStep);
+    if (workflowStep === 'hub') return;
+    if (!isStepVisible(meta, plan)) {
+      setWorkflowStep(adjacentVisibleStep(plan, workflowStep, 1));
+    }
+  }, [plan, workflowStep, setWorkflowStep]);
 
   const canAdvanceFromStep = useCallback(() => true, []);
 

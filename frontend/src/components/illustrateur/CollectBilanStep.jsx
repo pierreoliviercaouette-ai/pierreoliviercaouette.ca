@@ -1,4 +1,4 @@
-import { ASSET_TYPES, DEBT_TYPES, formatCad, newId } from '../../lib/illustrateur';
+import { ASSET_TYPES, DEBT_TYPES, formatCad, newId, planHasCorporate } from '../../lib/illustrateur';
 import { usePlan } from './PlanContext';
 import { AddRowButton, CollectCard, NetWorthPanel, StepFooter, StepTitle } from './collectUi';
 import { CollectShell } from './CollectShell';
@@ -11,6 +11,9 @@ export function CollectBilanStep() {
     [plan.person?.firstName, plan.person?.lastName].filter(Boolean).join(' ') ||
     plan.meta?.clientLabel ||
     'Client';
+  const assetTypes = planHasCorporate(plan)
+    ? ASSET_TYPES
+    : ASSET_TYPES.filter((t) => t.value !== 'corporatif');
 
   const addAsset = (kind) => {
     addToCollection('assets', {
@@ -77,7 +80,7 @@ export function CollectBilanStep() {
                       value={a.type}
                       onChange={(e) => updateCollection('assets', a.id, { type: e.target.value })}
                     >
-                      {ASSET_TYPES.map((t) => (
+                      {assetTypes.map((t) => (
                         <option key={t.value} value={t.value}>
                           {t.label}
                         </option>

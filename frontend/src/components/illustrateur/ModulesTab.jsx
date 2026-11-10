@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { planHasCorporate } from '../../lib/illustrateur';
 import {
   createModuleOption,
   ensureModules,
@@ -27,24 +28,31 @@ export function ModulesTab() {
   } = usePlan();
 
   const modules = ensureModules(plan);
+  const withCorp = planHasCorporate(plan);
   const priorities = useMemo(
     () => (Array.isArray(plan.priorities) ? plan.priorities : []),
     [plan.priorities],
   );
+  const availableModules = useMemo(
+    () => PLANNING_MODULES.filter((m) => withCorp || m.id !== 'corporatif'),
+    [withCorp],
+  );
   const orderedModules = useMemo(
-    () => sortModulesByPriorities(PLANNING_MODULES, priorities),
-    [priorities],
+    () => sortModulesByPriorities(availableModules, priorities),
+    [availableModules, priorities],
   );
 
   const [activeModuleId, setActiveModuleId] = useState(
-    () => priorities[0] || orderedModules[0]?.id || PLANNING_MODULES[0].id,
+    () => priorities[0] || orderedModules[0]?.id || availableModules[0]?.id,
   );
 
   useEffect(() => {
-    if (priorities[0] && !activeModuleId) setActiveModuleId(priorities[0]);
-  }, [priorities, activeModuleId]);
+    if (!orderedModules.some((m) => m.id === activeModuleId)) {
+      setActiveModuleId(priorities[0] || orderedModules[0]?.id);
+    }
+  }, [orderedModules, activeModuleId, priorities]);
 
-  const activeMeta = PLANNING_MODULES.find((m) => m.id === activeModuleId);
+  const activeMeta = availableModules.find((m) => m.id === activeModuleId);
   const activeOptions = modules.byModule[activeModuleId]?.options || [];
   const selectedLetter = modules.selections[activeModuleId] || null;
 
@@ -313,7 +321,7 @@ export function ModulesTab() {
           />
         </div>
         <p className="mt-3 text-xs text-prestige-taupe">
-          Sélections actives : {modulesBundle?.selectedCount || 0} / {PLANNING_MODULES.length} modules
+          Sélections actives : {modulesBundle?.selectedCount || 0} / {availableModules.length} modules
         </p>
       </SectionCard>
 

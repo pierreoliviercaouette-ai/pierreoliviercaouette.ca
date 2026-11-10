@@ -1,4 +1,4 @@
-import { formatCad, newId } from '../../lib/illustrateur';
+import { formatCad, newId, planHasCorporate } from '../../lib/illustrateur';
 import { CollectShell } from './CollectShell';
 import {
   AddRowButton,
@@ -16,9 +16,10 @@ function getRoutingEvent(plan) {
 
 export function FluxTresorerieStep() {
   const { plan, setPlan, goWorkflowNext, goWorkflowPrev } = usePlan();
+  const withCorp = planHasCorporate(plan);
   const event = getRoutingEvent(plan);
   const routing = event?.details?.routingBySource || {};
-  const entities = plan.entities || [];
+  const entities = (plan.entities || []).filter((e) => withCorp || e.type !== 'corporation');
   const assets = plan.assets || [];
 
   const ensureEvent = (mutator) => {
@@ -77,16 +78,18 @@ export function FluxTresorerieStep() {
                     {ent.name}
                     <span className="ml-2 text-xs font-normal text-[#5a6b7d]">{ent.type}</span>
                   </p>
-                  <FieldLabel label="Mode impôt dividende (si corpo→perso)">
-                    <select
-                      className="rounded-md border border-[#d7dee8] bg-white px-2 py-1.5 text-sm"
-                      value={route.dividendTaxMode || 'personnel'}
-                      onChange={(e) => setEntityRouting(ent.id, { dividendTaxMode: e.target.value })}
-                    >
-                      <option value="personnel">Personnel</option>
-                      <option value="corporatif">Corporatif</option>
-                    </select>
-                  </FieldLabel>
+                  {withCorp && ent.type === 'corporation' && (
+                    <FieldLabel label="Mode impôt dividende (si corpo→perso)">
+                      <select
+                        className="rounded-md border border-[#d7dee8] bg-white px-2 py-1.5 text-sm"
+                        value={route.dividendTaxMode || 'personnel'}
+                        onChange={(e) => setEntityRouting(ent.id, { dividendTaxMode: e.target.value })}
+                      >
+                        <option value="personnel">Personnel</option>
+                        <option value="corporatif">Corporatif</option>
+                      </select>
+                    </FieldLabel>
+                  )}
                 </div>
 
                 <div className="mt-3 space-y-2">

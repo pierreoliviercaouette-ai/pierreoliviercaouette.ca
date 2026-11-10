@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatCad } from '../../lib/illustrateur';
+import { formatCad, planHasCorporate } from '../../lib/illustrateur';
 import { computeYearTaxSnapshot } from '../../lib/illustrateur/planningTax';
 import { CollectShell } from './CollectShell';
 import { CollectCard, FieldLabel, StepFooter, StepTitle, TextField } from './collectUi';
@@ -7,6 +7,12 @@ import { usePlan } from './PlanContext';
 
 export function FiscaliteStep() {
   const { plan, updateCollection, goWorkflowNext, goWorkflowPrev } = usePlan();
+  const withCorp = planHasCorporate(plan);
+  const entities = useMemo(
+    () =>
+      (plan.entities || []).filter((e) => withCorp || e.type !== 'corporation'),
+    [plan.entities, withCorp],
+  );
 
   const snapshot = useMemo(() => {
     try {
@@ -35,7 +41,7 @@ export function FiscaliteStep() {
 
       <CollectCard title="Taux par entité">
         <div className="space-y-3">
-          {(plan.entities || []).map((ent) => (
+          {entities.map((ent) => (
             <div key={ent.id} className="grid gap-3 rounded-lg border border-[#d7dee8] bg-white p-3 md:grid-cols-4">
               <p className="text-sm font-semibold">
                 {ent.name}
@@ -76,7 +82,7 @@ export function FiscaliteStep() {
               </tr>
             </thead>
             <tbody>
-              {(plan.entities || []).map((ent) => {
+              {entities.map((ent) => {
                 const cf = cashflows[ent.id] || {};
                 return (
                   <tr key={ent.id} className="border-t border-[#d7dee8] bg-white/70">

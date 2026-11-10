@@ -1,5 +1,6 @@
 import { newId } from './ids';
 import { emptyBudgetState } from './budgetCatalog';
+import { emptyScope, emptySpouse, ensureScope } from './planScope';
 
 export function emptyPerson() {
   return {
@@ -16,10 +17,13 @@ export function emptyPerson() {
     tobacco: false,
     language: 'fr',
     planType: 'individuel',
+    spouse: emptySpouse(),
     children: [],
     legalNotes: [],
   };
 }
+
+export { emptyScope, emptySpouse, ensureScope };
 
 export function emptyContributionRoom() {
   return { reer: 0, celi: 0, celiapp: 0 };
@@ -117,8 +121,15 @@ export function emptyRetirement() {
 }
 
 export function ensureCollectFields(plan) {
+  const scope = ensureScope(plan);
   return {
-    person: { ...emptyPerson(), ...(plan?.person || {}) },
+    scope,
+    person: {
+      ...emptyPerson(),
+      ...(plan?.person || {}),
+      spouse: { ...emptySpouse(), ...(plan?.person?.spouse || {}) },
+      planType: scope.conjoint ? 'conjoint' : 'individuel',
+    },
     objectives: Array.isArray(plan?.objectives) ? plan.objectives : [],
     contributionRoom: { ...emptyContributionRoom(), ...(plan?.contributionRoom || {}) },
     emergency: { ...emptyEmergency(), ...(plan?.emergency || {}) },

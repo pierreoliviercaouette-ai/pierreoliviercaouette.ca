@@ -66,7 +66,18 @@ export {
   evaluateDossierReadiness,
   getStepMeta,
   adjacentStep,
+  adjacentVisibleStep,
+  isStepVisible,
+  visibleSidebarSteps,
+  visibleWorkflowSteps,
 } from './workflow';
+export {
+  emptyScope,
+  emptySpouse,
+  ensureScope,
+  planHasConjoint,
+  planHasCorporate,
+} from './planScope';
 export {
   computeAllAttainments,
   computeDeathAttainment,

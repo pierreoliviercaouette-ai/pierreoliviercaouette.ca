@@ -1,8 +1,9 @@
-import { SIDEBAR_STEPS } from '../../lib/illustrateur/workflow';
+import { visibleSidebarSteps } from '../../lib/illustrateur/workflow';
 import { usePlan } from './PlanContext';
 
 export function CollectShell({ title, right, children }) {
-  const { workflowStep, setWorkflowStep } = usePlan();
+  const { plan, workflowStep, setWorkflowStep } = usePlan();
+  const steps = visibleSidebarSteps(plan);
 
   return (
     <div className="min-h-[70vh]">
@@ -19,7 +20,7 @@ export function CollectShell({ title, right, children }) {
       <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_280px]">
         <nav className="rounded-xl border border-[#d7dee8] bg-white py-3 shadow-sm">
           <ul className="space-y-0.5">
-            {SIDEBAR_STEPS.map((step) => {
+            {steps.map((step) => {
               const active = workflowStep === step.id;
               return (
                 <li key={step.id}>

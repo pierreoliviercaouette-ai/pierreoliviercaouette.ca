@@ -1,5 +1,7 @@
 /** Parcours collecte SAAS — sidebar d’étapes. */
 
+import { ensureScope, scopeMatchesRequires } from './planScope';
+
 export const WORKFLOW_PHASES = [
   { id: 1, label: 'Collecte', short: 'Collecte' },
   { id: 2, label: 'Plan', short: 'Plan' },
@@ -13,9 +15,9 @@ export const WORKFLOW_STEPS = [
   { id: 'bilan', phase: 1, label: 'Actifs et passifs', short: 'Actifs/passifs', sidebar: true },
   { id: 'revenus', phase: 1, label: 'Revenu et épargne', short: 'Revenu/épargne', sidebar: true },
   { id: 'budget', phase: 1, label: 'Budget complet', short: 'Budget', sidebar: true },
-  { id: 'corporatif', phase: 1, label: 'Corporatif', short: 'Corporatif', sidebar: true },
-  { id: 'fiscalite', phase: 1, label: 'Fiscalité', short: 'Fiscalité', sidebar: true },
-  { id: 'flux', phase: 1, label: 'Flux / trésorerie', short: 'Flux', sidebar: true },
+  { id: 'corporatif', phase: 1, label: 'Corporatif', short: 'Corporatif', sidebar: true, requires: ['corporatif'] },
+  { id: 'fiscalite', phase: 1, label: 'Fiscalité', short: 'Fiscalité', sidebar: true, requires: ['corporatif'] },
+  { id: 'flux', phase: 1, label: 'Flux / trésorerie', short: 'Flux', sidebar: true, requires: ['corporatif'] },
   { id: 'urgence', phase: 1, label: 'Fonds d’urgence', short: 'Urgence', sidebar: true, attainment: 'emergency' },
   { id: 'deces', phase: 1, label: 'Décès', short: 'Décès', sidebar: true, attainment: 'death' },
   { id: 'invalidite', phase: 1, label: 'Invalidité', short: 'Invalidité', sidebar: true, attainment: 'disability' },
@@ -28,6 +30,19 @@ export const WORKFLOW_STEPS = [
 ];
 
 export const SIDEBAR_STEPS = WORKFLOW_STEPS.filter((s) => s.sidebar);
+
+export function isStepVisible(step, plan) {
+  if (!step) return false;
+  return scopeMatchesRequires(ensureScope(plan), step.requires);
+}
+
+export function visibleWorkflowSteps(plan) {
+  return WORKFLOW_STEPS.filter((s) => isStepVisible(s, plan));
+}
+
+export function visibleSidebarSteps(plan) {
+  return visibleWorkflowSteps(plan).filter((s) => s.sidebar);
+}
 
 export function defaultWorkflow() {
   return { step: 'hub' };
@@ -61,6 +76,24 @@ export function adjacentStep(stepId, delta) {
   const idx = getStepIndex(stepId);
   if (idx < 0) return 'hub';
   const next = WORKFLOW_STEPS[idx + delta];
+  return next ? next.id : stepId;
+}
+
+/** Navigation qui saute les étapes masquées par la portée du plan. */
+export function adjacentVisibleStep(plan, stepId, delta) {
+  const visible = visibleWorkflowSteps(plan);
+  let idx = visible.findIndex((s) => s.id === stepId);
+  if (idx < 0) {
+    const allIdx = getStepIndex(stepId);
+    if (allIdx < 0) return 'hub';
+    if (delta >= 0) {
+      const next = WORKFLOW_STEPS.slice(allIdx + 1).find((s) => isStepVisible(s, plan));
+      return next?.id || visible[visible.length - 1]?.id || 'hub';
+    }
+    const prev = [...WORKFLOW_STEPS.slice(0, allIdx)].reverse().find((s) => isStepVisible(s, plan));
+    return prev?.id || visible[0]?.id || 'hub';
+  }
+  const next = visible[idx + delta];
   return next ? next.id : stepId;
 }
 

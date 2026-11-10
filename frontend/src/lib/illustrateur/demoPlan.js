@@ -10,6 +10,8 @@ import {
   emptyEmergency,
   emptyPerson,
   emptyRetirement,
+  emptyScope,
+  emptySpouse,
 } from './planDefaults';
 
 function demoBudget() {
@@ -239,6 +241,7 @@ export function createDemoPlan() {
     },
     scenarios: [],
     workflow: { step: 'hub' },
+    scope: { ...emptyScope(), conjoint: true, corporatif: true },
     priorities: ['assurance_vie', 'placement'],
     nextStepsNotes:
       'Valider illustrations assureur, mettre en place les cotisations automatiques CELI/REER, suivi dans 90 jours.',
@@ -254,7 +257,14 @@ export function createDemoPlan() {
       province: 'QC',
       tobacco: false,
       language: 'fr',
-      planType: 'individuel',
+      planType: 'conjoint',
+      spouse: {
+        ...emptySpouse(),
+        firstName: 'Conjointe',
+        lastName: 'Illustration',
+        birthYear: 1987,
+        sex: 'F',
+      },
       children: [
         { id: newId('ch'), name: 'Enfant 1', birthYear: 2015 },
         { id: newId('ch'), name: 'Enfant 2', birthYear: 2018 },
@@ -422,6 +432,7 @@ export function createEmptyPlan() {
     },
     scenarios: [],
     workflow: { step: 'personnelles' },
+    scope: emptyScope(),
     priorities: [],
     nextStepsNotes: '',
     person: emptyPerson(),

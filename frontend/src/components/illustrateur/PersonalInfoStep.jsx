@@ -10,7 +10,7 @@ import {
   TextField,
 } from './collectUi';
 import { CollectShell } from './CollectShell';
-import { newId } from '../../lib/illustrateur';
+import { ensureScope, newId } from '../../lib/illustrateur';
 
 const MONTHS = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -20,6 +20,8 @@ const MONTHS = [
 export function PersonalInfoStep() {
   const { plan, setPlan, goWorkflowNext, goWorkflowPrev } = usePlan();
   const person = plan.person || {};
+  const scope = ensureScope(plan);
+  const spouse = person.spouse || {};
 
   const patch = (updates) => {
     setPlan((p) => {
@@ -35,6 +37,24 @@ export function PersonalInfoStep() {
         },
       };
     });
+  };
+
+  const patchScope = (updates) => {
+    setPlan((p) => {
+      const nextScope = { ...ensureScope(p), ...updates };
+      return {
+        ...p,
+        scope: nextScope,
+        person: {
+          ...p.person,
+          planType: nextScope.conjoint ? 'conjoint' : 'individuel',
+        },
+      };
+    });
+  };
+
+  const patchSpouse = (updates) => {
+    patch({ spouse: { ...spouse, ...updates } });
   };
 
   return (
@@ -127,16 +147,71 @@ export function PersonalInfoStep() {
           </div>
         </CollectCard>
 
-        <CollectCard title="Type de plan">
-          <SegmentedToggle
-            value={person.planType || 'individuel'}
-            onChange={(v) => patch({ planType: v })}
-            options={[
-              { value: 'individuel', label: 'Individuel' },
-              { value: 'conjoint', label: 'Conjoint' },
-            ]}
-          />
+        <CollectCard title="Portée du plan">
+          <p className="mb-3 text-sm text-[#5a6b7d]">
+            Cochez uniquement ce qui s’applique — les onglets et questions liés restent masqués sinon.
+          </p>
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#d7dee8] bg-white p-4">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 accent-[#0b4ea2]"
+                checked={scope.conjoint}
+                onChange={(e) => patchScope({ conjoint: e.target.checked })}
+              />
+              <span>
+                <span className="block text-sm font-semibold text-[#12263a]">Plan avec conjoint</span>
+                <span className="mt-0.5 block text-xs text-[#5a6b7d]">
+                  Infos conjoint, budget commun, rente survivant.
+                </span>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#d7dee8] bg-white p-4">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 accent-[#0b4ea2]"
+                checked={scope.corporatif}
+                onChange={(e) => patchScope({ corporatif: e.target.checked })}
+              />
+              <span>
+                <span className="block text-sm font-semibold text-[#12263a]">Plan corporatif</span>
+                <span className="mt-0.5 block text-xs text-[#5a6b7d]">
+                  Holdco, fiscalité corporative et flux de trésorerie.
+                </span>
+              </span>
+            </label>
+          </div>
         </CollectCard>
+
+        {scope.conjoint && (
+          <CollectCard title="Conjoint(e)">
+            <div className="grid gap-3 md:grid-cols-2">
+              <FieldLabel label="Prénom">
+                <TextField value={spouse.firstName} onChange={(v) => patchSpouse({ firstName: v })} />
+              </FieldLabel>
+              <FieldLabel label="Nom">
+                <TextField value={spouse.lastName} onChange={(v) => patchSpouse({ lastName: v })} />
+              </FieldLabel>
+              <FieldLabel label="Année de naissance">
+                <TextField
+                  type="number"
+                  value={spouse.birthYear}
+                  onChange={(v) => patchSpouse({ birthYear: v })}
+                />
+              </FieldLabel>
+              <FieldLabel label="Sexe">
+                <SegmentedToggle
+                  value={spouse.sex || 'F'}
+                  onChange={(v) => patchSpouse({ sex: v })}
+                  options={[
+                    { value: 'M', label: 'Masculin' },
+                    { value: 'F', label: 'Féminin' },
+                  ]}
+                />
+              </FieldLabel>
+            </div>
+          </CollectCard>
+        )}
 
         <CollectCard
           title="Enfant(s) et personne(s) à charge"

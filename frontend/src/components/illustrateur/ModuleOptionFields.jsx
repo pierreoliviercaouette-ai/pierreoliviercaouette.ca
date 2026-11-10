@@ -1,7 +1,10 @@
 import { MoneyInput, SelectInput, TextInput } from './Field';
-import { parseInsuranceCsv } from '../../lib/illustrateur';
+import { parseInsuranceCsv, planHasCorporate } from '../../lib/illustrateur';
+import { usePlan } from './PlanContext';
 
 export function ModuleOptionFields({ moduleId, data, onChange }) {
+  const { plan } = usePlan();
+  const withCorp = planHasCorporate(plan);
   const set = (key, value) => onChange({ ...data, [key]: value });
 
   const onCsv = async (file) => {
@@ -43,15 +46,17 @@ export function ModuleOptionFields({ moduleId, data, onChange }) {
               <MoneyInput label="Terme (ans)" value={data.termYears} onChange={(v) => set('termYears', v)} />
             )}
             <MoneyInput label="Âge d’émission" value={data.issueAge} onChange={(v) => set('issueAge', v)} />
-            <SelectInput
-              label="Propriétaire"
-              value={data.ownerType}
-              options={[
-                { value: 'personnel', label: 'Personnel' },
-                { value: 'corporation', label: 'Corporation' },
-              ]}
-              onChange={(v) => set('ownerType', v)}
-            />
+            {withCorp ? (
+              <SelectInput
+                label="Propriétaire"
+                value={data.ownerType}
+                options={[
+                  { value: 'personnel', label: 'Personnel' },
+                  { value: 'corporation', label: 'Corporation' },
+                ]}
+                onChange={(v) => set('ownerType', v)}
+              />
+            ) : null}
           </div>
           <div className="grid gap-3 md:grid-cols-3">
             <label className="flex items-end gap-2 text-xs text-prestige-taupe">
