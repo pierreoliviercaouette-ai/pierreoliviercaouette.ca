@@ -1,15 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
 import { BookingScheduleConfirm } from '../components/booking/BookingScheduleConfirm';
 import { CampagneLeadForm } from '../components/campagne/CampagneLeadForm';
 import { CAMPAGNE_BOOKING_URL, CAMPAGNE_RDV_PATH } from '../lib/booking';
+import { useBookingsEmbedGate } from '../hooks/useBookingsEmbedGate';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
-
-/** Bookings Microsoft : si l’iframe ne charge pas, bascule vers le formulaire. */
-const IFRAME_LOAD_TIMEOUT_MS = 30_000;
 
 function campagneSlugFromSearch(search) {
   const params = new URLSearchParams(
@@ -22,15 +20,28 @@ function campagneSlugFromSearch(search) {
 
 /**
  * Page RDV dédiée aux landings Meta Ads : iframe Bookings campagne.
- * Timeout 30 s → formulaire de contact si Microsoft ne répond pas.
+ * Probe réseau + timeout 30 s → formulaire si Microsoft refuse / ne répond pas.
+ * (onLoad seul est insuffisant : ERR_CONNECTION_REFUSED charge une page d’erreur.)
  */
 export function CampagneAppointment() {
   const location = useLocation();
-  const [iframeStatus, setIframeStatus] = useState('loading'); // loading | ready | timedout
-
   const slug = useMemo(
     () => campagneSlugFromSearch(location.search),
     [location.search]
+  );
+
+  const { isLoading, showFallback, forceFallback } = useBookingsEmbedGate(
+    CAMPAGNE_BOOKING_URL,
+    {
+      onTimeout: (reason) => {
+        trackEvent('select_content', {
+          content_type: 'booking_fallback',
+          item_id: 'campagne_booking_iframe_timeout',
+          item_variant: slug,
+          method: reason || 'timeout',
+        });
+      },
+    }
   );
 
   useSeoMeta({
@@ -47,28 +58,6 @@ export function CampagneAppointment() {
     });
   }, []);
 
-  useEffect(() => {
-    if (iframeStatus !== 'loading') return undefined;
-    const timer = window.setTimeout(() => {
-      setIframeStatus((prev) => {
-        if (prev !== 'loading') return prev;
-        trackEvent('select_content', {
-          content_type: 'booking_fallback',
-          item_id: 'campagne_booking_iframe_timeout',
-          item_variant: slug,
-        });
-        return 'timedout';
-      });
-    }, IFRAME_LOAD_TIMEOUT_MS);
-    return () => window.clearTimeout(timer);
-  }, [iframeStatus, slug]);
-
-  const handleIframeLoad = () => {
-    setIframeStatus((prev) => (prev === 'loading' ? 'ready' : prev));
-  };
-
-  const showFallback = iframeStatus === 'timedout';
-
   return (
     <main className="min-h-screen bg-light" data-testid="campagne-appointment-page">
       <PageHero
@@ -76,7 +65,7 @@ export function CampagneAppointment() {
         title="Réserver 15 minutes"
         description={
           showFallback
-            ? 'Le calendrier Microsoft met trop de temps à charger. Laisse tes coordonnées — je te rappelle pour caler le créneau.'
+            ? 'Le calendrier Microsoft est inaccessible. Laisse tes coordonnées — je te rappelle pour caler le créneau.'
             : 'Consultation gratuite et sans engagement. Choisissez le moment qui vous convient.'
         }
         minHeightClass="min-h-[28vh] md:min-h-[32vh]"
@@ -97,7 +86,7 @@ export function CampagneAppointment() {
                 onClick={() => trackRendezVousClick('campagne_booking_external_fallback')}
                 className="font-medium text-primary underline-offset-2 hover:underline"
               >
-                ouvrir le calendrier dans un nouvel onglet
+                réessayer le calendrier dans un nouvel onglet
               </a>
               .
             </p>
@@ -129,14 +118,25 @@ export function CampagneAppointment() {
                 Ouvrir dans un nouvel onglet
                 <ArrowRight className="h-4 w-4" />
               </a>
-              {iframeStatus === 'loading' ? (
+              {isLoading ? (
                 <p
                   className="mt-3 text-xs text-prestige-taupe"
                   data-testid="campagne-booking-loading-hint"
                 >
-                  Chargement du calendrier…
+                  Vérification du calendrier Microsoft…
                 </p>
               ) : null}
+              <p className="mt-3 text-xs text-prestige-taupe">
+                Le calendrier ne charge pas ?{' '}
+                <button
+                  type="button"
+                  onClick={forceFallback}
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                  data-testid="campagne-booking-force-fallback"
+                >
+                  Laisse tes coordonnées
+                </button>
+              </p>
             </div>
 
             <div
@@ -152,7 +152,6 @@ export function CampagneAppointment() {
                 scrolling="no"
                 referrerPolicy="no-referrer-when-downgrade"
                 allow="fullscreen"
-                onLoad={handleIframeLoad}
               />
             </div>
 
