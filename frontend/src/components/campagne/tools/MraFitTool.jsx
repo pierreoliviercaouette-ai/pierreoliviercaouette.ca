@@ -3,6 +3,17 @@ import { Check, Clock, Settings2, Users } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
 import { trackEvent } from '../../../lib/analytics';
 import { CampagneToolShell, ToolSoftClose } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
+
+const MRA_STEP_IDS = ['equipe', 'situation', 'contrib', 'piliers', 'result'];
 
 export const MRA_FIT_STORAGE_KEY = 'campagne_programme-mra_fit';
 
@@ -130,12 +141,29 @@ function buildBridgeMessage(n, situation, contrib, badge) {
  * Fit check PME — programme MRa vs logique collective traditionnelle.
  * Soft close = Lead form (#demande), pas Bookings.
  */
-export function MraFitTool() {
+export function MraFitTool({ immersive = false } = {}) {
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_programme-mra_pdf');
   const [employes, setEmployes] = useState('8');
   const [situation, setSituation] = useState('aucune');
   const [contrib, setContrib] = useState('indetermine');
   const [checked, setChecked] = useState({ flex: false, simple: false, rapide: false });
+
+  const {
+    stepIndex,
+    currentStepId,
+    isResult,
+    questionCount,
+    progress: wizardProgress,
+    selectAndAdvance,
+    advanceFrom,
+    goBack,
+  } = useCampagneWizard(MRA_STEP_IDS, {
+    onReachResult: () =>
+      trackEvent('select_content', {
+        content_type: 'tool_result',
+        item_id: 'campagne_programme-mra_result',
+      }),
+  });
 
   const nEmployes = useMemo(() => {
     const n = parseInt(String(employes).replace(/\D/g, ''), 10);
@@ -247,8 +275,145 @@ export function MraFitTool() {
     />
   );
 
+  if (immersive) {
+    return (
+      <div data-testid="tool-mra-fit">
+        <CampagneToolShell
+          immersive
+          titleAs="h1"
+          eyebrow="Programme MRa"
+          title="MRa pour ta PME : est-ce que ça colle ?"
+          intro="Une question à la fois. À la fin, tu peux demander une présentation."
+          disclaimer="Illustration éducative — pas une soumission."
+          footer={null}
+        >
+          <WizardProgress
+            stepIndex={stepIndex}
+            questionCount={questionCount}
+            isResult={isResult}
+            resultLabel="Ton fit"
+            progress={wizardProgress}
+          />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+
+          {currentStepId === 'equipe' ? (
+            <WizardStep id="equipe">
+              <WizardStepHeading
+                title="Combien de personnes dans l’équipe ?"
+                hint="Ordre de grandeur — approx."
+              />
+              <input
+                id="mra-wiz-employes"
+                type="number"
+                min={1}
+                max={500}
+                value={employes}
+                onChange={(e) => setEmployes(e.target.value)}
+                className={inputClass}
+              />
+              <WizardContinueButton
+                disabled={!nEmployes}
+                onClick={() => advanceFrom('equipe')}
+              />
+            </WizardStep>
+          ) : null}
+
+          {currentStepId === 'situation' ? (
+            <WizardStep id="situation">
+              <WizardStepHeading title="Ta situation aujourd’hui ?" />
+              <WizardChoiceList
+                name="situation"
+                value={situation}
+                options={SITUATIONS.map((s) => ({ value: s.id, label: s.label }))}
+                onSelect={(v) => selectAndAdvance('situation', () => setSituation(v))}
+              />
+            </WizardStep>
+          ) : null}
+
+          {currentStepId === 'contrib' ? (
+            <WizardStep id="contrib">
+              <WizardStepHeading title="Contribution employeur (idée) ?" />
+              <WizardChoiceList
+                name="contrib"
+                value={contrib}
+                options={CONTRIB.map((c) => ({ value: c.id, label: c.label }))}
+                onSelect={(v) => selectAndAdvance('contrib', () => setContrib(v))}
+              />
+            </WizardStep>
+          ) : null}
+
+          {currentStepId === 'piliers' ? (
+            <WizardStep id="piliers">
+              <WizardStepHeading
+                title="Qu’est-ce qui te parle ?"
+                hint="Coche les piliers — optionnel."
+              />
+              <ul className="space-y-2.5">
+                {PILLARS.map((p) => (
+                  <li key={p.id}>
+                    <button
+                      type="button"
+                      onClick={() => toggle(p.id)}
+                      aria-pressed={Boolean(checked[p.id])}
+                      className={`flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-left ${
+                        checked[p.id]
+                          ? 'bg-gradient-to-br from-primary/[0.08] to-secondary/[0.1] shadow-[inset_0_0_0_2px_rgba(6,77,217,0.35)]'
+                          : 'bg-white shadow-[inset_0_0_0_1px_rgba(1,35,63,0.1)]'
+                      }`}
+                    >
+                      <span className="text-sm font-semibold text-dark">{p.title}</span>
+                      <Check
+                        className={`h-4 w-4 ${checked[p.id] ? 'text-primary' : 'text-transparent'}`}
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <WizardContinueButton
+                onClick={() => advanceFrom('piliers')}
+                label="Voir mon fit"
+              />
+            </WizardStep>
+          ) : null}
+
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                Lecture fit
+              </p>
+              {nEmployes > 0 && badge ? (
+                <>
+                  <p className="font-heading mt-2 text-4xl font-bold text-dark">
+                    ~{nEmployes}
+                  </p>
+                  <span
+                    className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                      BADGE_STYLES[badge] || BADGE_STYLES['À explorer']
+                    }`}
+                  >
+                    {badge}
+                  </span>
+                  <p className="mt-3 text-base leading-relaxed text-dark">{fitBlurb}</p>
+                </>
+              ) : (
+                <p className="mt-2 text-sm text-prestige-taupe">{fitBlurb}</p>
+              )}
+              <div className="mt-5">{softClose}</div>
+              <p className="mt-2 text-center text-xs text-prestige-taupe">
+                Je te rappelle — sans Bookings
+              </p>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
+
   return (
     <CampagneToolShell
+      immersive={false}
+      titleAs="h2"
+      eyebrow="Outil interactif"
       title="MRa pour ta PME : est-ce que ça colle ?"
       intro="Alternative à la collective traditionnelle : tu offres l’accès, ils choisissent, on accompagne. Indique ta taille et ta situation — tu obtiens une lecture fit, puis tu peux demander une présentation."
       footer={

@@ -2,11 +2,20 @@
 import { useLocation } from 'react-router-dom';
 import { AlertTriangle, Check, Scale } from 'lucide-react';
 import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
-import { trackRendezVousClick } from '../../../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import {
   CampagneToolShell,
   ToolSoftClose,
 } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
 /** Libellés validés — ordre checklist (6 questions). */
 const ITEMS = [
@@ -161,11 +170,21 @@ function ResultCard({ label, value, detail, tone = 'default' }) {
   );
 }
 
-export function SuccessionChecklistTool() {
+const SUCCESSION_STEP_IDS = [...ITEMS.map((i) => i.id), 'result'];
+
+export function SuccessionChecklistTool({ immersive = false } = {}) {
   const location = useLocation();
   const [checked, setChecked] = useState(INITIAL_CHECKED);
+  const [wizardPick, setWizardPick] = useState({});
   const [notesLibres, setNotesLibres] = useState('');
   const rdvPath = buildCampagneRdvPath('succession-bases', location.search);
+  const {
+    stepIndex, currentStepId, isResult, questionCount, progress: wizardProgress,
+    selectAndAdvance, advanceFrom, goBack,
+  } = useCampagneWizard(SUCCESSION_STEP_IDS, {
+    onReachResult: () => trackEvent('select_content', { content_type: 'tool_result', item_id: 'campagne_succession-bases_result' }),
+  });
+  const currentItem = ITEMS.find((i) => i.id === currentStepId) || null;
 
   const count = useMemo(
     () => ITEMS.reduce((sum, item) => sum + (checked[item.id] ? 1 : 0), 0),
@@ -232,6 +251,48 @@ export function SuccessionChecklistTool() {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+
+  /* immersive-wizard */
+  if (immersive) {
+    return (
+      <div data-testid="tool-succession-checklist">
+        <CampagneToolShell immersive titleAs="h1" eyebrow="Succession" title="Checklist succession — bases" intro="Une question à la fois. À la fin, on valide en 15 minutes." disclaimer="Illustration éducative seulement." footer={null}>
+          <WizardProgress stepIndex={stepIndex} questionCount={questionCount} isResult={isResult} resultLabel="Résultat" progress={wizardProgress} />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+          {currentItem ? (
+            <WizardStep id={currentItem.id}>
+              <WizardStepHeading title={currentItem.label} hint={currentItem.hint || currentItem.next || undefined} />
+              <WizardChoiceList
+                name={currentItem.id}
+                value={wizardPick[currentItem.id] || ''}
+                options={[{ value: 'oui', label: 'Oui / déjà en place' }, { value: 'non', label: 'Non / pas encore' }]}
+                onSelect={(v) =>
+                  selectAndAdvance(currentItem.id, () => {
+                    setWizardPick((prev) => ({ ...prev, [currentItem.id]: v }));
+                    setChecked((prev) => ({ ...prev, [currentItem.id]: v === 'oui' }));
+                  })
+                }
+              />
+            </WizardStep>
+          ) : null}
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="font-heading text-2xl font-bold text-dark">{count}/{total} cases</p>
+              <p className="mt-2 text-sm text-prestige-taupe">{detail}</p>
+              <div className="mt-5"><ToolSoftClose
+                  headline={softCloseHeadline}
+                  subline={softCloseSubline}
+                  rdvPath={rdvPath}
+                  rdvLabel="Clarifier en 15 min"
+                  onRdvClick={() => trackRendezVousClick('campagne_succession-bases_rdv_outil')}
+                /></div>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
+
   return (
     <div data-testid="tool-succession-checklist">
       <CampagneToolShell
@@ -267,7 +328,7 @@ export function SuccessionChecklistTool() {
           </div>
           <p className="mt-2 text-xs leading-relaxed text-prestige-taupe">
             {nextItem?.id === 'liquidites' && showPortrait
-              ? 'Argent accessible ≠ maison sur papier — souvent le 1er vrai trou.'
+              ? 'Argent accessible ? maison sur papier — souvent le 1er vrai trou.'
               : 'Chaque case cochée = un point de succession que tu ne laisses plus au hasard.'}
           </p>
         </div>

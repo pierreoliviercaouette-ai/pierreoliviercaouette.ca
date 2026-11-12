@@ -1,11 +1,22 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AlertTriangle, Check } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
-import { trackRendezVousClick } from '../../../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
 import { formatCad } from '../../tools/format';
 import { CampagneToolShell, ToolClimaxReveal, ToolSoftClose } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
+
+const MALADIE_STEP_IDS = ['conjoint', 'soins', 'surplus', 'couvert', 'result'];
 
 /**
  * Moyenne illustrative — Société canadienne du cancer, rapport spécial 2024 :
@@ -84,7 +95,7 @@ function BreakdownRow({ label, value, muted }) {
  * Capital maladie grave illustratif :
  * remplacement revenu conjoint + soins non couverts + surplus qualité de vie.
  */
-export function MaladieGraveTool() {
+export function MaladieGraveTool({ immersive = false } = {}) {
   const location = useLocation();
   const rdvPath = buildCampagneRdvPath('maladie-grave', location.search);
 
@@ -95,6 +106,23 @@ export function MaladieGraveTool() {
   const [qualiteVie, setQualiteVie] = useState('15000');
   const [dejaCouvert, setDejaCouvert] = useState('0');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_maladie-grave_pdf');
+
+  const {
+    stepIndex,
+    currentStepId,
+    isResult,
+    questionCount,
+    progress: wizardProgress,
+    selectAndAdvance,
+    advanceFrom,
+    goBack,
+  } = useCampagneWizard(MALADIE_STEP_IDS, {
+    onReachResult: () =>
+      trackEvent('select_content', {
+        content_type: 'tool_result',
+        item_id: 'campagne_maladie-grave_result',
+      }),
+  });
 
   const revenu = pasDeConjoint ? 0 : toNum(revenuConjoint);
   const mois = toNum(moisRemplacement) || 12;
@@ -125,8 +153,8 @@ export function MaladieGraveTool() {
       : 'Sur papier t’es couvert pour ce besoin. Un RDV sert à valider le contrat, pas à te vendre.';
 
   const softCloseSubline = gapWarn
-    ? `Écart illustratif ~${formatCad(ecart)}. En 15 min on ouvre ta brochure — ce que la collective couvre vraiment, les exclusions, si un capital a du sens. Clarifier ≠ acheter.`
-    : 'Sur papier, ton besoin illustré est couvert. En 15 min on valide quand même maladies, délais et exclusions du contrat — Clarifier ≠ acheter.';
+    ? `Écart illustratif ~${formatCad(ecart)}. En 15 min on ouvre ta brochure — ce que la collective couvre vraiment, les exclusions, si un capital a du sens. Clarifier ? acheter.`
+    : 'Sur papier, ton besoin illustré est couvert. En 15 min on valide quand même maladies, délais et exclusions du contrat — Clarifier ? acheter.';
 
   const softCloseRdvLabel = gapWarn
     ? 'Clarifier cet écart en 15 min'
@@ -195,9 +223,173 @@ export function MaladieGraveTool() {
       ],
     });
 
+  if (immersive) {
+    return (
+      <div data-testid="tool-maladie-grave">
+        <CampagneToolShell
+          immersive
+          titleAs="h1"
+          eyebrow="Maladie grave"
+          title="Combien viser en cas de maladie grave ?"
+          intro="Une question à la fois. À la fin, on lit l’écart avec ta brochure en 15 minutes."
+          disclaimer="Illustration éducative seulement. Pas un conseil personnalisé."
+          footer={null}
+        >
+          <WizardProgress
+            stepIndex={stepIndex}
+            questionCount={questionCount}
+            isResult={isResult}
+            resultLabel="Ton capital"
+            progress={wizardProgress}
+          />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+
+          {currentStepId === 'conjoint' ? (
+            <WizardStep id="conjoint">
+              <WizardStepHeading
+                title="Y a-t-il un conjoint dont le revenu serait à remplacer ?"
+                hint="Si non, on saute ce bloc."
+              />
+              <WizardChoiceList
+                name="conjoint"
+                value={pasDeConjoint ? 'non' : 'oui'}
+                options={[
+                  { value: 'oui', label: 'Oui, remplacer un revenu conjoint' },
+                  { value: 'non', label: 'Pas de conjoint à remplacer' },
+                ]}
+                onSelect={(v) => {
+                  const solo = v === 'non';
+                  setPasDeConjoint(solo);
+                  if (solo) setRevenuConjoint('0');
+                  else if (toNum(revenuConjoint) === 0) setRevenuConjoint('3500');
+                  if (solo) {
+                    selectAndAdvance('conjoint', () => {});
+                  }
+                }}
+              />
+              {!pasDeConjoint ? (
+                <div className="space-y-3">
+                  <Field id="mg-wiz-revenu" label="Revenu mensuel net du/de la conjoint(e)">
+                    <MoneyInput
+                      id="mg-wiz-revenu"
+                      value={revenuConjoint}
+                      onChange={setRevenuConjoint}
+                      step="100"
+                    />
+                  </Field>
+                  <Field id="mg-wiz-mois" label="Mois de remplacement">
+                    <select
+                      id="mg-wiz-mois"
+                      className={inputClass}
+                      value={moisRemplacement}
+                      onChange={(e) => setMoisRemplacement(e.target.value)}
+                    >
+                      {MOIS_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <WizardContinueButton onClick={() => advanceFrom('conjoint')} />
+                </div>
+              ) : null}
+            </WizardStep>
+          ) : null}
+
+          {currentStepId === 'soins' ? (
+            <WizardStep id="soins">
+              <WizardStepHeading title="Soins non couverts (estimé) ?" hint={SOINS_STAT_NOTE} />
+              <MoneyInput
+                id="mg-wiz-soins"
+                value={soinsNonCouverts}
+                onChange={setSoinsNonCouverts}
+                step="1000"
+              />
+              <WizardContinueButton onClick={() => advanceFrom('soins')} />
+            </WizardStep>
+          ) : null}
+
+          {currentStepId === 'surplus' ? (
+            <WizardStep id="surplus">
+              <WizardStepHeading
+                title="Surplus qualité de vie ?"
+                hint="Voyage, aide à la maison, petits luxes qui aident pendant l’épreuve."
+              />
+              <MoneyInput
+                id="mg-wiz-qualite"
+                value={qualiteVie}
+                onChange={setQualiteVie}
+                step="1000"
+              />
+              <WizardContinueButton onClick={() => advanceFrom('surplus')} />
+            </WizardStep>
+          ) : null}
+
+          {currentStepId === 'couvert' ? (
+            <WizardStep id="couvert">
+              <WizardStepHeading
+                title="Déjà couvert (collectif ou individuel) ?"
+                hint="0 $ si tu ne sais pas."
+              />
+              <MoneyInput
+                id="mg-wiz-couvert"
+                value={dejaCouvert}
+                onChange={setDejaCouvert}
+                step="5000"
+              />
+              <button
+                type="button"
+                onClick={() => setDejaCouvert('0')}
+                className="text-sm font-medium text-primary underline-offset-2 hover:underline"
+              >
+                Je ne sais pas ? 0 $
+              </button>
+              <WizardContinueButton onClick={() => advanceFrom('couvert')} />
+            </WizardStep>
+          ) : null}
+
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                Capital illustratif à viser
+              </p>
+              <p className="font-heading mt-2 text-3xl font-bold tracking-tight text-dark">
+                {formatCad(capital)}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">
+                {phraseCeQueCaPaie}
+              </p>
+              <p className="mt-4 font-heading text-2xl font-bold text-dark">
+                Écart : {formatCad(ecart)}
+              </p>
+              {hasCapital ? (
+                <div className="mt-5" data-testid="mg-rdv-tool">
+                  <ToolSoftClose
+                    subline={softCloseSubline}
+                    rdvPath={rdvPath}
+                    rdvLabel={softCloseRdvLabel}
+                    onRdvClick={() => trackRendezVousClick('campagne_maladie-grave_rdv_tool')}
+                    onPdf={handleDownload}
+                    pdfBusy={busy}
+                    pdfLabel="Télécharger mon résumé PDF"
+                    tone={gapWarn ? 'warn' : 'ok'}
+                  />
+                </div>
+              ) : null}
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
+
   return (
     <div data-testid="tool-maladie-grave">
       <CampagneToolShell
+        immersive={false}
+        titleAs="h2"
+        eyebrow="Outil interactif"
         title="Combien viser en cas de maladie grave ?"
         intro="Trois blocs : remplacer le revenu du conjoint un moment (si applicable), payer les soins non couverts, garder un surplus pour la qualité de vie. Ça complète l’invalidité — ça la remplace pas."
         disclaimer="Illustration éducative seulement. Les maladies couvertes, délais de survie, montants et exclusions dépendent du contrat. Pas un conseil personnalisé. Les montants (incl. ~33 000 $ SCC) sont des ordres de grandeur — pas ce que « tu vas recevoir »."
@@ -251,7 +443,7 @@ export function MaladieGraveTool() {
             ) : null}
             <BreakdownRow label="Soins non couverts" value={soins} muted />
             <BreakdownRow label="Surplus qualité de vie" value={surplus} muted />
-            {couvert > 0 ? <BreakdownRow label="Déjà couvert (−)" value={couvert} muted /> : null}
+            {couvert > 0 ? <BreakdownRow label="Déjà couvert (-)" value={couvert} muted /> : null}
           </div>
 
           {hasCapital ? (
@@ -416,7 +608,7 @@ export function MaladieGraveTool() {
                     : 'border-prestige-beige bg-white text-prestige-taupe hover:border-primary/30 hover:text-dark'
                 }`}
               >
-                Je ne sais pas → 0 $
+                Je ne sais pas ? 0 $
               </button>
               {couvert === 0 ? (
                 <p className="text-xs leading-relaxed text-prestige-taupe">

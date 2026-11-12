@@ -9,6 +9,15 @@ import {
   CampagneToolShell,
   ToolSoftClose,
 } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
 /** Illustration SCEE (fédérale) — ~20 % sur les premiers 2 500 $ / an. */
 const SCEE_TAUX = 0.2;
@@ -202,7 +211,9 @@ function buildLecture(result) {
   };
 }
 
-export function ReeeTool() {
+const REEE_STEP_IDS = ['enfant', 'epargne', 'result'];
+
+export function ReeeTool({ immersive = false } = {}) {
   const location = useLocation();
   const [age, setAge] = useState('5');
   const [cotisationAnnuelle, setCotisationAnnuelle] = useState('2500');
@@ -210,6 +221,12 @@ export function ReeeTool() {
   const [sceeDejaRecues, setSceeDejaRecues] = useState('0');
   const [avecRendement, setAvecRendement] = useState(false);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_reee_pdf');
+  const {
+    stepIndex, currentStepId, isResult, questionCount, progress: wizardProgress,
+    selectAndAdvance, advanceFrom, goBack,
+  } = useCampagneWizard(REEE_STEP_IDS, {
+    onReachResult: () => trackEvent('select_content', { content_type: 'tool_result', item_id: 'campagne_reee_result' }),
+  });
   const climaxTracked = useRef(false);
   const sousMaxTracked = useRef(false);
   const sceeDejaTracked = useRef(false);
@@ -380,9 +397,67 @@ export function ReeeTool() {
 
   const rdvPath = buildCampagneRdvPath('reee', location.search);
 
+
+  /* immersive-wizard */
+  if (immersive) {
+    return (
+      <div data-testid="tool-reee">
+        <CampagneToolShell immersive titleAs="h1" eyebrow="REEE" title="Combien pour les études ?" intro="Une question à la fois. À la fin, on clarifie ton REEE en 15 minutes." disclaimer="Illustration éducative seulement." footer={null}>
+          <WizardProgress stepIndex={stepIndex} questionCount={questionCount} isResult={isResult} resultLabel="Ton REEE" progress={wizardProgress} />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+          {currentStepId === 'enfant' ? (
+            <WizardStep id="enfant">
+              <WizardStepHeading title="Âge de ton enfant ?" hint="On calcule les années jusqu’à 17 ans — tu peux ajuster." />
+              <Field id="reee-wiz-age" label="Âge de ton enfant">
+                <input id="reee-wiz-age" type="number" min={0} max={17} value={age} onChange={(e) => handleAgeChange(e.target.value)} className={inputClass} />
+              </Field>
+              <WizardContinueButton onClick={() => advanceFrom('enfant')} />
+            </WizardStep>
+          ) : null}
+          {currentStepId === 'epargne' ? (
+            <WizardStep id="epargne">
+              <WizardStepHeading title="Ton épargne REEE" hint="Cotisation annuelle, années restantes, SCEE déjà reçues." />
+              <Field id="reee-wiz-cot" label="Cotisation annuelle visée">
+                <input id="reee-wiz-cot" type="number" min={0} value={cotisationAnnuelle} onChange={(e) => setCotisationAnnuelle(e.target.value)} className={inputClass} />
+              </Field>
+              <Field id="reee-wiz-ans" label="Années de cotisation restantes">
+                <input id="reee-wiz-ans" type="number" min={0} value={anneesRestantes} onChange={(e) => setAnneesRestantes(e.target.value)} className={inputClass} />
+              </Field>
+              <Field id="reee-wiz-scee" label="SCEE déjà reçues (approx.)">
+                <input id="reee-wiz-scee" type="number" min={0} value={sceeDejaRecues} onChange={(e) => setSceeDejaRecues(e.target.value)} className={inputClass} />
+              </Field>
+              <WizardContinueButton onClick={() => advanceFrom('epargne')} />
+            </WizardStep>
+          ) : null}
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">Projection</p>
+              <p className="font-heading mt-1 text-3xl font-bold text-dark">{formatCad(result.totalIllustratif)}</p>
+              <p className="mt-2 text-sm text-prestige-taupe">{lecture.headline}</p>
+              <div className="mt-5">
+                <ToolSoftClose
+                  headline={softCloseHeadline}
+                  subline={softCloseSubline}
+                  rdvPath={rdvPath}
+                  rdvLabel={softCloseRdvLabel}
+                  onRdvClick={() => trackRendezVousClick('campagne_reee_rdv_outil')}
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                />
+              </div>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
+
   return (
     <div data-testid="tool-reee">
       <CampagneToolShell
+        immersive={false}
+        titleAs="h2"
+        eyebrow="Outil interactif"
         title="Combien pour les études ?"
         intro="REEE = compte. SCEE = ~20 ¢ / $. Entre l’âge et ton rythme — subventions, total, et ce qui reste avant ~7 200 $."
         disclaimer="Illustration seulement — pas un conseil. Chiffre principal = SCEE fédérale de base (~20 % sur les premiers ~2 500 $/an, max ~500 $/an, plafond à vie illustratif ~7 200 $). Autres aides (IQEE, etc.) : hors total — à revalider. Le rendement 4 % est optionnel et non garanti."

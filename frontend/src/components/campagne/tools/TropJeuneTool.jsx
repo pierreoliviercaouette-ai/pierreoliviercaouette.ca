@@ -1,5 +1,5 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
 import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
@@ -11,6 +11,15 @@ import {
   ToolDownloadPdf,
   ToolSoftClose,
 } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
 function toNum(value) {
   const n = Number(value);
@@ -146,10 +155,13 @@ function BreakdownGroup({ title, children }) {
 }
 
 /**
- * Score illustratif — besoin actuel ET besoins futurs déjà connus
- * (hypothèque prévue, famille prévue), pas seulement « aujourd’hui ».
+ * Score illustratif â€” besoin actuel ET besoins futurs dÃ©jÃ  connus
+ * (hypothÃ¨que prÃ©vue, famille prÃ©vue), pas seulement Â« aujourdâ€™hui Â».
  */
-export function TropJeuneTool() {
+const TROP_JEUNE_STEP_IDS = ['present', 'projets', 'result'];
+
+export function TropJeuneTool({ immersive = false } = {}) {
+  const location = useLocation();
   const [age, setAge] = useState('28');
   const [soldeMaison, setSoldeMaison] = useState('0');
   const [enfants, setEnfants] = useState('0');
@@ -165,7 +177,13 @@ export function TropJeuneTool() {
   const futurToggleTracked = useRef(false);
   const dualRevealTracked = useRef(false);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_trop-jeune-assurance_pdf');
-  const rdvPath = buildCampagneRdvPath('trop-jeune-assurance');
+  const {
+    stepIndex, currentStepId, isResult, questionCount, progress: wizardProgress,
+    selectAndAdvance, advanceFrom, goBack,
+  } = useCampagneWizard(TROP_JEUNE_STEP_IDS, {
+    onReachResult: () => trackEvent('select_content', { content_type: 'tool_result', item_id: 'campagne_trop-jeune-assurance_result' }),
+  });
+  const rdvPath = buildCampagneRdvPath('trop-jeune-assurance', location.search);
 
   const maisonActuelle = toNum(soldeMaison);
   const nbEnfants = Math.floor(toNum(enfants));
@@ -186,7 +204,7 @@ export function TropJeuneTool() {
   const ptsConjoint = conjointOui ? 20 : 0;
   const ptsDettes = Math.min(8, (dettes / 50000) * 8);
 
-  // Besoins futurs déjà connus (pondérés — plus proche = plus de poids)
+  // Besoins futurs dÃ©jÃ  connus (pondÃ©rÃ©s â€” plus proche = plus de poids)
   const poidsHypoFuture =
     hypoFutureOui && montantHypoPrevue > 0
       ? Math.min(22, (montantHypoPrevue / 450000) * 22 * (anneesHypo <= 5 ? 1 : 0.7))
@@ -222,30 +240,30 @@ export function TropJeuneTool() {
 
   const lectureScore = scoreEleve
     ? aDuFutur && !aDuPresent
-      ? 'Même sans gros besoin aujourd’hui, tes projets connus (maison, famille) changent déjà la donne.'
-      : '« Trop jeune » tient pas vraiment — entre le présent et ce qui s’en vient.'
+      ? 'MÃªme sans gros besoin aujourdâ€™hui, tes projets connus (maison, famille) changent dÃ©jÃ  la donne.'
+      : 'Â« Trop jeune Â» tient pas vraiment â€” entre le prÃ©sent et ce qui sâ€™en vient.'
     : scoreMoyen
-      ? 'Y’a déjà des raisons de regarder — aujourd’hui ou dans les prochaines années.'
-      : 'Besoin plus léger pour l’instant. Ajoute tes projets connus (hypothèque, famille) si tu les as en tête.';
+      ? 'Yâ€™a dÃ©jÃ  des raisons de regarder â€” aujourdâ€™hui ou dans les prochaines annÃ©es.'
+      : 'Besoin plus lÃ©ger pour lâ€™instant. Ajoute tes projets connus (hypothÃ¨que, famille) si tu les as en tÃªte.';
 
   const softCloseCopy = scoreEleve
     ? {
-        headline: `Score ${score}/100 · ~${formatCad(capital)} illustratifs`,
+        headline: `Score ${score}/100 Â· ~${formatCad(capital)} illustratifs`,
         subline:
           capitalProjets > capitalAujourdhui
-            ? 'Surtout tes projets connus. 15 min pour lire ça ensemble — clarifier ≠ acheter.'
-            : 'Présent + projets connus. 15 min pour lire ça ensemble — clarifier ≠ acheter.',
+            ? 'Surtout tes projets connus. 15 min pour lire Ã§a ensemble â€” clarifier ? acheter.'
+            : 'PrÃ©sent + projets connus. 15 min pour lire Ã§a ensemble â€” clarifier ? acheter.',
         rdvLabel: 'Lire mon score en 15 min',
       }
     : scoreMoyen
       ? {
-          headline: `Score ${score}/100 · y’a déjà de quoi regarder`,
-          subline: '15 min pour clarifier présent + projets — sans pression.',
-          rdvLabel: 'Clarifier mon score · 15 min',
+          headline: `Score ${score}/100 Â· yâ€™a dÃ©jÃ  de quoi regarder`,
+          subline: '15 min pour clarifier prÃ©sent + projets â€” sans pression.',
+          rdvLabel: 'Clarifier mon score Â· 15 min',
         }
       : {
-          headline: 'Besoin plus léger pour l’instant',
-          subline: 'Garde le PDF — ou 15 min si tu veux valider que t’oublies rien.',
+          headline: 'Besoin plus lÃ©ger pour lâ€™instant',
+          subline: 'Garde le PDF â€” ou 15 min si tu veux valider que tâ€™oublies rien.',
           rdvLabel: 'Ou 15 min avec un conseiller',
         };
 
@@ -270,15 +288,15 @@ export function TropJeuneTool() {
   const contribs = [
     { id: 'maison', label: 'Maison actuelle', pts: Math.round(ptsMaison), color: 'bg-primary' },
     { id: 'enfants', label: 'Enfants', pts: Math.round(ptsEnfants), color: 'bg-secondary' },
-    { id: 'conjoint', label: 'Proche dépend de toi', pts: Math.round(ptsConjoint), color: 'bg-amber-500' },
+    { id: 'conjoint', label: 'Proche dÃ©pend de toi', pts: Math.round(ptsConjoint), color: 'bg-amber-500' },
     { id: 'dettes', label: 'Dettes', pts: Math.round(ptsDettes), color: 'bg-prestige-taupe' },
-    { id: 'hypo-futur', label: 'Hypothèque prévue', pts: Math.round(poidsHypoFuture), color: 'bg-primary/70' },
-    { id: 'famille-futur', label: 'Famille prévue', pts: Math.round(poidsFamilleFuture), color: 'bg-secondary/70' },
+    { id: 'hypo-futur', label: 'HypothÃ¨que prÃ©vue', pts: Math.round(poidsHypoFuture), color: 'bg-primary/70' },
+    { id: 'famille-futur', label: 'Famille prÃ©vue', pts: Math.round(poidsFamilleFuture), color: 'bg-secondary/70' },
   ].filter((c) => c.pts > 0);
 
   const statusDetail = scoreEleve
-    ? 'Apporte ce résumé en RDV — on le lit ensemble.'
-    : 'Ajuste tes projets (maison, famille) — souvent c’est ça qui change le portrait.';
+    ? 'Apporte ce rÃ©sumÃ© en RDV â€” on le lit ensemble.'
+    : 'Ajuste tes projets (maison, famille) â€” souvent câ€™est Ã§a qui change le portrait.';
 
   const trackFuturToggle = (nextValue) => {
     if (nextValue === 'oui' && !futurToggleTracked.current) {
@@ -304,17 +322,17 @@ export function TropJeuneTool() {
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Résumé — trop jeune pour s’assurer ?',
+      title: 'RÃ©sumÃ© â€” trop jeune pour sâ€™assurer ?',
       filename: 'resume-trop-jeune-assurance.pdf',
       sections: [
         {
-          heading: 'Aujourd’hui',
+          heading: 'Aujourdâ€™hui',
           rows: [
-            { label: 'Âge (contexte)', value: `${ageN} ans` },
+            { label: 'Ã‚ge (contexte)', value: `${ageN} ans` },
             { label: 'Solde maison actuel', value: formatCad(maisonActuelle) },
             { label: 'Enfants', value: String(nbEnfants) },
             {
-              label: 'Quelqu’un compte sur ton salaire',
+              label: 'Quelquâ€™un compte sur ton salaire',
               value: conjointOui ? 'Oui' : 'Non',
             },
             { label: 'Autres dettes', value: formatCad(dettes) },
@@ -322,44 +340,119 @@ export function TropJeuneTool() {
           ],
         },
         {
-          heading: 'Besoins futurs déjà connus',
+          heading: 'Besoins futurs dÃ©jÃ  connus',
           rows: [
             {
-              label: 'Hypothèque prévue',
+              label: 'HypothÃ¨que prÃ©vue',
               value: hypoFutureOui
-                ? `Oui — dans ~${anneesHypo} an(s), ~${formatCad(montantHypoPrevue)}`
+                ? `Oui â€” dans ~${anneesHypo} an(s), ~${formatCad(montantHypoPrevue)}`
                 : 'Non',
             },
             {
-              label: 'Famille / enfants prévus',
-              value: familleFutureOui ? `Oui — d’ici ~${anneesFam} an(s)` : 'Non',
+              label: 'Famille / enfants prÃ©vus',
+              value: familleFutureOui ? `Oui â€” dâ€™ici ~${anneesFam} an(s)` : 'Non',
             },
           ],
         },
         {
-          heading: 'Résultats',
+          heading: 'RÃ©sultats',
           rows: [
-            { label: 'Score (présent + futur)', value: `${score} / 100` },
-            { label: 'Aujourd’hui (illustratif)', value: formatCad(capitalAujourdhui) },
+            { label: 'Score (prÃ©sent + futur)', value: `${score} / 100` },
+            { label: 'Aujourdâ€™hui (illustratif)', value: formatCad(capitalAujourdhui) },
             { label: 'Projets connus (illustratif)', value: formatCad(capitalProjets) },
-            { label: 'Montant illustratif à viser', value: formatCad(capital) },
+            { label: 'Montant illustratif Ã  viser', value: formatCad(capital) },
           ],
         },
       ],
       notes: [
         lectureScore,
-        'On regarde aussi les besoins futurs déjà connus — pas seulement aujourd’hui.',
-        'Apporte ce PDF — 15 min pour le lire ensemble.',
-        'Illustration éducative seulement — pas une soumission ni un conseil personnalisé.',
+        'On regarde aussi les besoins futurs dÃ©jÃ  connus â€” pas seulement aujourdâ€™hui.',
+        'Apporte ce PDF â€” 15 min pour le lire ensemble.',
+        'Illustration Ã©ducative seulement â€” pas une soumission ni un conseil personnalisÃ©.',
       ],
     });
+
+
+  /* immersive-wizard */
+  if (immersive) {
+    return (
+      <div data-testid="tool-trop-jeune">
+        <CampagneToolShell immersive titleAs="h1" eyebrow="Assurance vie" title="Trop jeune pour tâ€™assurer ?" intro="Une question Ã  la fois. Ã€ la fin, on lit ton score en 15 minutes." disclaimer="Illustration Ã©ducative seulement." footer={null}>
+          <WizardProgress stepIndex={stepIndex} questionCount={questionCount} isResult={isResult} resultLabel="Ton score" progress={wizardProgress} />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+          {currentStepId === 'present' ? (
+            <WizardStep id="present">
+              <WizardStepHeading title="Aujourdâ€™hui" hint="Maison, proches, dettes." />
+              <Field id="tj-wiz-age" label="Ton Ã¢ge">
+                <input id="tj-wiz-age" type="number" value={age} onChange={(e) => setAge(e.target.value)} className={inputClass} />
+              </Field>
+              <Field id="tj-wiz-solde" label="Solde hypothÃ¨que (0 si aucune)">
+                <input id="tj-wiz-solde" type="number" value={soldeMaison} onChange={(e) => setSoldeMaison(e.target.value)} className={inputClass} />
+              </Field>
+              <Field id="tj-wiz-enfants" label="Nombre dâ€™enfants">
+                <input id="tj-wiz-enfants" type="number" value={enfants} onChange={(e) => setEnfants(e.target.value)} className={inputClass} />
+              </Field>
+              <WizardChoiceList
+                name="conjoint"
+                value={conjointDepend}
+                options={[{ value: 'oui', label: 'Conjoint qui dÃ©pend de mon revenu' }, { value: 'non', label: 'Non' }]}
+                onSelect={(v) => setConjointDepend(v)}
+              />
+              <Field id="tj-wiz-dettes" label="Autres dettes">
+                <input id="tj-wiz-dettes" type="number" value={autresDettes} onChange={(e) => setAutresDettes(e.target.value)} className={inputClass} />
+              </Field>
+              <Field id="tj-wiz-revenu" label="Revenu mensuel net">
+                <input id="tj-wiz-revenu" type="number" value={revenuMensuel} onChange={(e) => setRevenuMensuel(e.target.value)} className={inputClass} />
+              </Field>
+              <WizardContinueButton onClick={() => advanceFrom('present')} />
+            </WizardStep>
+          ) : null}
+          {currentStepId === 'projets' ? (
+            <WizardStep id="projets">
+              <WizardStepHeading title="Ce qui sâ€™en vient" hint="HypothÃ¨que ou famille prÃ©vues." />
+              <WizardChoiceList
+                name="hypo"
+                value={projetHypotheque}
+                options={[{ value: 'oui', label: 'HypothÃ¨que prÃ©vue' }, { value: 'non', label: 'Pas dâ€™hypothÃ¨que prÃ©vue' }]}
+                onSelect={(v) => handleProjetHypotheque(v)}
+              />
+              <WizardChoiceList
+                name="famille"
+                value={projetFamille}
+                options={[{ value: 'oui', label: 'Projet famille prÃ©vu' }, { value: 'non', label: 'Pas de projet famille' }]}
+                onSelect={(v) => handleProjetFamille(v)}
+              />
+              <WizardContinueButton onClick={() => advanceFrom('projets')} />
+            </WizardStep>
+          ) : null}
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="font-heading text-3xl font-bold text-dark">{score}/100</p>
+              <p className="mt-2 text-sm text-prestige-taupe">{lectureScore}</p>
+              <div className="mt-5">
+                <ToolSoftClose
+                  headline={softCloseCopy.headline}
+                  subline={softCloseCopy.subline}
+                  rdvPath={rdvPath}
+                  rdvLabel={softCloseCopy.rdvLabel}
+                  onRdvClick={handleRdvOutil}
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                />
+              </div>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="tool-trop-jeune">
       <CampagneToolShell
-        title="Trop jeune pour t’assurer ?"
-        intro="Pas juste « aujourd’hui ». Si tu sais déjà qu’une hypothèque ou une famille s’en vient, ça compte dans le score — l’âge seul, non."
-        disclaimer="Illustration éducative seulement — pas une soumission ni un conseil personnalisé."
+        title="Trop jeune pour tâ€™assurer ?"
+        intro="Pas juste Â« aujourdâ€™hui Â». Si tu sais dÃ©jÃ  quâ€™une hypothÃ¨que ou une famille sâ€™en vient, Ã§a compte dans le score â€” lâ€™Ã¢ge seul, non."
+        disclaimer="Illustration Ã©ducative seulement â€” pas une soumission ni un conseil personnalisÃ©."
         footer={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
@@ -367,11 +460,11 @@ export function TropJeuneTool() {
               <ToolDownloadPdf
                 busy={busy}
                 onClick={handleDownload}
-                label="Garder mon résumé PDF"
+                label="Garder mon rÃ©sumÃ© PDF"
                 variant="ghost"
               />
             ) : (
-              <ToolDownloadPdf busy={busy} onClick={handleDownload} label="Télécharger mon résumé PDF" />
+              <ToolDownloadPdf busy={busy} onClick={handleDownload} label="TÃ©lÃ©charger mon rÃ©sumÃ© PDF" />
             )}
           </div>
         }
@@ -421,7 +514,7 @@ export function TropJeuneTool() {
                   className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs text-prestige-taupe shadow-[inset_0_0_0_1px_rgba(1,35,63,0.08)]"
                 >
                   <span className={`h-2 w-2 rounded-full ${c.color}`} aria-hidden />
-                  {c.label} · {c.pts}
+                  {c.label} Â· {c.pts}
                 </li>
               ))}
             </ul>
@@ -431,24 +524,24 @@ export function TropJeuneTool() {
         <div className="relative space-y-8 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-prestige-beige">
           <Block
             step={1}
-            title="Aujourd’hui"
-            subtitle="Ce qui existe déjà — maison, proches, dettes."
+            title="Aujourdâ€™hui"
+            subtitle="Ce qui existe dÃ©jÃ  â€” maison, proches, dettes."
             done={milestones[0].done}
           >
             <div className="grid gap-3 sm:grid-cols-2">
               <NumberField
                 id="tj-age"
-                label="Quel âge as-tu ?"
+                label="Quel Ã¢ge as-tu ?"
                 value={age}
                 onChange={setAge}
                 min={18}
                 max={65}
                 step="1"
-                hint="Contexte seulement — n’entre pas dans le score."
+                hint="Contexte seulement â€” nâ€™entre pas dans le score."
               />
               <NumberField
                 id="tj-enfants"
-                label="Combien d’enfants ?"
+                label="Combien dâ€™enfants ?"
                 value={enfants}
                 onChange={setEnfants}
                 min={0}
@@ -458,7 +551,7 @@ export function TropJeuneTool() {
               <div className="sm:col-span-2">
                 <YesNo
                   id="tj-conjoint"
-                  label="Quelqu’un compte déjà sur ton salaire ?"
+                  label="Quelquâ€™un compte dÃ©jÃ  sur ton salaire ?"
                   value={conjointDepend}
                   onChange={setConjointDepend}
                 />
@@ -478,17 +571,17 @@ export function TropJeuneTool() {
               ) : null}
               <NumberField
                 id="tj-hypotheque"
-                label="Combien reste à payer sur ta maison ?"
+                label="Combien reste Ã  payer sur ta maison ?"
                 value={soldeMaison}
                 onChange={setSoldeMaison}
                 min={0}
                 step="1000"
                 suffix="$"
-                hint="0 $ si tu loues ou si tu n’as pas encore de maison."
+                hint="0 $ si tu loues ou si tu nâ€™as pas encore de maison."
               />
               <NumberField
                 id="tj-dettes"
-                label="Autres dettes (auto, carte, prêt…) ?"
+                label="Autres dettes (auto, carte, prÃªtâ€¦) ?"
                 value={autresDettes}
                 onChange={setAutresDettes}
                 min={0}
@@ -500,28 +593,28 @@ export function TropJeuneTool() {
 
           <Block
             step={2}
-            title="Ce qui s’en vient (déjà connu)"
-            subtitle="Hypothèque ou famille prévues — même si ce n’est pas encore arrivé."
+            title="Ce qui sâ€™en vient (dÃ©jÃ  connu)"
+            subtitle="HypothÃ¨que ou famille prÃ©vues â€” mÃªme si ce nâ€™est pas encore arrivÃ©."
             done={milestones[1].done}
           >
             <p className="mb-4 rounded-xl bg-secondary/[0.08] px-3.5 py-2.5 text-sm leading-relaxed text-dark">
-              Coche tes projets connus — c’est souvent ça qui fait bouger le score.
+              Coche tes projets connus â€” câ€™est souvent Ã§a qui fait bouger le score.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <YesNo
                   id="tj-projet-hypo"
-                  label="Tu prévois une hypothèque / un achat dans les prochaines années ?"
+                  label="Tu prÃ©vois une hypothÃ¨que / un achat dans les prochaines annÃ©es ?"
                   value={projetHypotheque}
                   onChange={handleProjetHypotheque}
-                  hint="Même si tu n’as pas encore acheté — un projet clair compte."
+                  hint="MÃªme si tu nâ€™as pas encore achetÃ© â€” un projet clair compte."
                 />
               </div>
               {hypoFutureOui ? (
                 <>
                   <NumberField
                     id="tj-annees-hypo"
-                    label="Dans environ combien d’années ?"
+                    label="Dans environ combien dâ€™annÃ©es ?"
                     value={anneesHypotheque}
                     onChange={setAnneesHypotheque}
                     min={1}
@@ -532,7 +625,7 @@ export function TropJeuneTool() {
                   />
                   <NumberField
                     id="tj-montant-hypo"
-                    label="Montant d’hypothèque prévu (ordre de grandeur)"
+                    label="Montant dâ€™hypothÃ¨que prÃ©vu (ordre de grandeur)"
                     value={montantHypothequePrevue}
                     onChange={setMontantHypothequePrevue}
                     min={0}
@@ -544,7 +637,7 @@ export function TropJeuneTool() {
               <div className="sm:col-span-2">
                 <YesNo
                   id="tj-projet-famille"
-                  label="Tu prévois fonder / agrandir une famille d’ici quelques années ?"
+                  label="Tu prÃ©vois fonder / agrandir une famille dâ€™ici quelques annÃ©es ?"
                   value={projetFamille}
                   onChange={handleProjetFamille}
                 />
@@ -552,7 +645,7 @@ export function TropJeuneTool() {
               {familleFutureOui ? (
                 <NumberField
                   id="tj-annees-famille"
-                  label="D’ici environ combien d’années ?"
+                  label="Dâ€™ici environ combien dâ€™annÃ©es ?"
                   value={anneesFamille}
                   onChange={setAnneesFamille}
                   min={1}
@@ -568,7 +661,7 @@ export function TropJeuneTool() {
           <Block
             step={3}
             title="Lecture"
-            subtitle="Score présent + futur — montant illustratif, pas une soumission."
+            subtitle="Score prÃ©sent + futur â€” montant illustratif, pas une soumission."
             done={milestones[2].done}
           >
             <ToolClimaxReveal key={aDuFutur ? 'futur-on' : 'futur-off'}>
@@ -578,7 +671,7 @@ export function TropJeuneTool() {
               >
                 <div className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-white px-4 py-3.5">
                   <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">
-                    Aujourd’hui
+                    Aujourdâ€™hui
                   </p>
                   <p className="font-heading mt-1.5 text-3xl font-bold tabular-nums text-dark md:text-4xl">
                     {formatCad(capitalAujourdhui)}
@@ -603,7 +696,7 @@ export function TropJeuneTool() {
                   </p>
                   {projetsPlusLourds ? (
                     <p className="mt-1.5 text-xs text-prestige-taupe">
-                      C’est souvent ici que le mythe tombe.
+                      Câ€™est souvent ici que le mythe tombe.
                     </p>
                   ) : null}
                 </div>
@@ -620,42 +713,42 @@ export function TropJeuneTool() {
 
             <div className="mt-3 rounded-2xl bg-prestige-beige/25 px-4 py-3.5">
               <p className="text-xs font-medium uppercase tracking-wide text-secondary">
-                D’où vient le montant
+                Dâ€™oÃ¹ vient le montant
               </p>
               <div className="mt-2.5 space-y-3.5">
-                <BreakdownGroup title="Présent">
+                <BreakdownGroup title="PrÃ©sent">
                   <BreakdownRow label="Maison actuelle" value={formatCad(maisonActuelle)} muted />
                   <BreakdownRow label="Autres dettes" value={formatCad(dettes)} muted />
                   {capitalEnfants > 0 ? (
-                    <BreakdownRow label="Enfants (aujourd’hui)" value={formatCad(capitalEnfants)} muted />
+                    <BreakdownRow label="Enfants (aujourdâ€™hui)" value={formatCad(capitalEnfants)} muted />
                   ) : null}
                   {capitalConjoint > 0 ? (
                     <BreakdownRow
-                      label={`24 mois × ${formatCad(revenu)}`}
+                      label={`24 mois Ã— ${formatCad(revenu)}`}
                       value={formatCad(capitalConjoint)}
                       muted
                     />
                   ) : null}
-                  <BreakdownRow label="Sous-total aujourd’hui" value={formatCad(capitalAujourdhui)} />
+                  <BreakdownRow label="Sous-total aujourdâ€™hui" value={formatCad(capitalAujourdhui)} />
                 </BreakdownGroup>
                 <BreakdownGroup title="Projets connus">
                   {capitalFutureHypo > 0 ? (
                     <BreakdownRow
-                      label={`Hypothèque prévue (~${anneesHypo} an${anneesHypo > 1 ? 's' : ''})`}
+                      label={`HypothÃ¨que prÃ©vue (~${anneesHypo} an${anneesHypo > 1 ? 's' : ''})`}
                       value={formatCad(capitalFutureHypo)}
                       muted
                     />
                   ) : (
-                    <BreakdownRow label="Hypothèque prévue" value={formatCad(0)} muted />
+                    <BreakdownRow label="HypothÃ¨que prÃ©vue" value={formatCad(0)} muted />
                   )}
                   {capitalFutureFamille > 0 ? (
                     <BreakdownRow
-                      label="Famille prévue (ordre de grandeur)"
+                      label="Famille prÃ©vue (ordre de grandeur)"
                       value={formatCad(capitalFutureFamille)}
                       muted
                     />
                   ) : (
-                    <BreakdownRow label="Famille prévue" value={formatCad(0)} muted />
+                    <BreakdownRow label="Famille prÃ©vue" value={formatCad(0)} muted />
                   )}
                   <BreakdownRow label="Sous-total projets" value={formatCad(capitalProjets)} />
                 </BreakdownGroup>
@@ -675,7 +768,7 @@ export function TropJeuneTool() {
                   onRdvClick={handleRdvOutil}
                   onPdf={handleDownload}
                   pdfBusy={busy}
-                  pdfLabel="Garder mon résumé PDF"
+                  pdfLabel="Garder mon rÃ©sumÃ© PDF"
                 />
               ) : (
                 <div
@@ -690,7 +783,7 @@ export function TropJeuneTool() {
                     <ToolDownloadPdf
                       onClick={handleDownload}
                       busy={busy}
-                      label="Télécharger mon résumé PDF"
+                      label="TÃ©lÃ©charger mon rÃ©sumÃ© PDF"
                     />
                     <Link
                       to={rdvPath}

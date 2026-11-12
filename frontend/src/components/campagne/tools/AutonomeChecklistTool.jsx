@@ -8,10 +8,19 @@ import {
   CampagneToolShell,
   ToolSoftClose,
 } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
 /**
  * Ordre du filet minimal (ads + bullets) :
- * liquidité → revenu → proches / hypothèque → structure / reste.
+ * liquidité ? revenu ? proches / hypothèque ? structure / reste.
  */
 const ITEMS = [
   {
@@ -149,14 +158,14 @@ function softCloseCopy(filetValue, nextItem, missingCount) {
     return {
       headline: 'Bonne base.',
       subline:
-        'Garde le PDF à jour — ou 15 min si une case te chicotte encore. Clarifier ≠ acheter · sans pression.',
+        'Garde le PDF à jour — ou 15 min si une case te chicotte encore. Clarifier ? acheter · sans pression.',
       rdvLabel: 'Clarifier en 15 min',
     };
   }
   if (filetValue === 'En cours' && nextItem) {
     return {
       headline: `Du progrès — il reste ${missingCount} trou${missingCount > 1 ? 's' : ''}. Prochaine case : ${nextItem.short}.`,
-      subline: 'On priorise ensemble en 15 min si tu veux. Clarifier ≠ acheter · sans pression.',
+      subline: 'On priorise ensemble en 15 min si tu veux. Clarifier ? acheter · sans pression.',
       rdvLabel: `Clarifier : ${nextItem.short} en 15 min`,
     };
   }
@@ -164,13 +173,13 @@ function softCloseCopy(filetValue, nextItem, missingCount) {
     return {
       headline: `Ton filet est mince — prochaine case : ${nextItem.short}.`,
       subline:
-        '15 min pour décider si tu commences par la liquidité ou le revenu qui stoppe. Clarifier ≠ acheter · sans pression.',
+        '15 min pour décider si tu commences par la liquidité ou le revenu qui stoppe. Clarifier ? acheter · sans pression.',
       rdvLabel: `Clarifier : ${nextItem.short} en 15 min`,
     };
   }
   return {
     headline: 'Ton filet se construit.',
-    subline: '15 min pour prioriser tes prochaines cases. Clarifier ≠ acheter · sans pression.',
+    subline: '15 min pour prioriser tes prochaines cases. Clarifier ? acheter · sans pression.',
     rdvLabel: 'Clarifier en 15 min',
   };
 }
@@ -181,11 +190,21 @@ function pillarTone(done, total) {
   return 'default';
 }
 
-export function AutonomeChecklistTool() {
+const AUTONOME_STEP_IDS = [...ITEMS.map((i) => i.id), 'result'];
+
+export function AutonomeChecklistTool({ immersive = false } = {}) {
   const location = useLocation();
   const [checked, setChecked] = useState(INITIAL_CHECKED);
+  const [wizardPick, setWizardPick] = useState({});
   const [notesLibres, setNotesLibres] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_travailleur-autonome_pdf');
+  const {
+    stepIndex, currentStepId, isResult, questionCount, progress: wizardProgress,
+    selectAndAdvance, advanceFrom, goBack,
+  } = useCampagneWizard(AUTONOME_STEP_IDS, {
+    onReachResult: () => trackEvent('select_content', { content_type: 'tool_result', item_id: 'campagne_travailleur-autonome_result' }),
+  });
+  const currentItem = ITEMS.find((i) => i.id === currentStepId) || null;
   const progressSent = useRef(new Set());
   const filetMinceSent = useRef(false);
 
@@ -315,9 +334,61 @@ export function AutonomeChecklistTool() {
         `${doneCount}/${total} points cochés.`,
         'Pas d’assurance collective fournie — chaque case non cochée, c’est toi qui assumes.',
         'Contenu éducatif seulement — pas un conseil personnalisé.',
-        'Apporte ce résumé aux 15 min si tu veux — Clarifier ≠ acheter.',
+        'Apporte ce résumé aux 15 min si tu veux — Clarifier ? acheter.',
       ],
     });
+
+
+  /* immersive-wizard */
+  if (immersive) {
+    return (
+      <div data-testid="tool-autonome-checklist">
+        <CampagneToolShell immersive titleAs="h1" eyebrow="Autonome" title="Checklist : ton filet d’autonome" intro="Une question à la fois. À la fin, on valide en 15 minutes." disclaimer="Illustration éducative seulement." footer={null}>
+          <WizardProgress stepIndex={stepIndex} questionCount={questionCount} isResult={isResult} resultLabel="Résultat" progress={wizardProgress} />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+          {currentItem ? (
+            <WizardStep id={currentItem.id}>
+              <WizardStepHeading title={currentItem.label} hint={currentItem.hint || currentItem.next || undefined} />
+              <WizardChoiceList
+                name={currentItem.id}
+                value={wizardPick[currentItem.id] || ''}
+                options={[{ value: 'oui', label: 'Oui / déjà en place' }, { value: 'non', label: 'Non / pas encore' }]}
+                onSelect={(v) =>
+                  selectAndAdvance(currentItem.id, () => {
+                    setWizardPick((prev) => ({ ...prev, [currentItem.id]: v }));
+                    setChecked((prev) => ({ ...prev, [currentItem.id]: v === 'oui' }));
+                  })
+                }
+              />
+            </WizardStep>
+          ) : null}
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="font-heading text-2xl font-bold text-dark">{filetValue}</p>
+              <p className="mt-2 text-sm text-prestige-taupe">{detail}</p>
+              <div className="mt-5">
+                <ToolSoftClose
+                  headline={soft?.headline || `Filet : ${filetValue}`}
+                  subline={
+                    soft?.subline ||
+                    '15 min pour clarifier le prochain vrai trou — zéro pression.'
+                  }
+                  rdvPath={rdvPath}
+                  rdvLabel={soft?.rdvLabel || 'Clarifier en 15 min'}
+                  onRdvClick={() =>
+                    trackRendezVousClick('campagne_travailleur-autonome_rdv_tool')
+                  }
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                  tone={filetTone}
+                />
+              </div>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="tool-autonome-checklist">
@@ -353,7 +424,7 @@ export function AutonomeChecklistTool() {
             />
           </div>
           <p className="mt-2 text-xs leading-relaxed text-prestige-taupe">
-            Ordre : liquidité → revenu → proches / hypothèque → structure.
+            Ordre : liquidité ? revenu ? proches / hypothèque ? structure.
           </p>
         </div>
 

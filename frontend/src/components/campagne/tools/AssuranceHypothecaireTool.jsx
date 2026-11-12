@@ -3,9 +3,18 @@ import { useLocation } from 'react-router-dom';
 import { AlertTriangle, Building2, Check, ChevronDown, Home, Scale } from 'lucide-react';
 import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
-import { trackRendezVousClick } from '../../../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
 import { CampagneToolShell, ToolClimaxReveal, ToolSoftClose } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
 const inputClass =
   'w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.08)] transition focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(6,77,217,0.45)]';
@@ -21,33 +30,33 @@ const MOIS_PRESETS = [
 const COMPARISON_ROWS = [
   {
     id: 'beneficiaire',
-    label: 'Qui est protégé ?',
-    banque: 'Souvent le prêteur (la banque) en premier',
-    privee: 'Tes bénéficiaires — la famille / ton choix',
+    label: 'Qui est protÃ©gÃ© ?',
+    banque: 'Souvent le prÃªteur (la banque) en premier',
+    privee: 'Tes bÃ©nÃ©ficiaires â€” la famille / ton choix',
   },
   {
     id: 'couverture',
     label: 'Montant de couverture',
-    banque: 'Suit en général le solde qui baisse',
-    privee: 'Capital choisi — peut rester stable',
+    banque: 'Suit en gÃ©nÃ©ral le solde qui baisse',
+    privee: 'Capital choisi â€” peut rester stable',
   },
   {
     id: 'cout',
-    label: 'Coût dans le temps',
-    banque: 'Prime souvent stable pendant que la couverture diminue → coût « par $ » qui monte',
-    privee: 'Tarif fixé à la souscription (selon le produit) — plus prévisible à long terme',
+    label: 'CoÃ»t dans le temps',
+    banque: 'Prime souvent stable pendant que la couverture diminue â†’ coÃ»t Â« par $ Â» qui monte',
+    privee: 'Tarif fixÃ© Ã  la souscription (selon le produit) â€” plus prÃ©visible Ã  long terme',
   },
   {
     id: 'flexibilite',
-    label: 'Flexibilité',
-    banque: 'Souvent liée au prêt ; peut changer si tu refinances ou vends',
-    privee: 'Portable : tu peux la garder après l’hypothèque',
+    label: 'FlexibilitÃ©',
+    banque: 'Souvent liÃ©e au prÃªt ; peut changer si tu refinances ou vends',
+    privee: 'Portable : tu peux la garder aprÃ¨s lâ€™hypothÃ¨que',
   },
   {
     id: 'controle',
-    label: 'Contrôle',
-    banque: 'Conditions du créancier ; peu de levier pour la famille',
-    privee: 'Tu choisis montant, durée, bénéficiaires',
+    label: 'ContrÃ´le',
+    banque: 'Conditions du crÃ©ancier ; peu de levier pour la famille',
+    privee: 'Tu choisis montant, durÃ©e, bÃ©nÃ©ficiaires',
   },
 ];
 
@@ -115,11 +124,19 @@ function ResultCard({ label, value, detail, tone = 'default', size = 'md' }) {
 }
 
 /**
- * Banque/prêteur vs protection personnelle + estimateur capital famille.
+ * Banque/prÃªteur vs protection personnelle + estimateur capital famille.
  */
-export function AssuranceHypothecaireTool() {
+const HYPO_STEP_IDS = ['pret', 'famille', 'comparaison', 'result'];
+
+export function AssuranceHypothecaireTool({ immersive = false } = {}) {
   const location = useLocation();
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_assurance-hypothecaire_pdf');
+  const {
+    stepIndex, currentStepId, isResult, questionCount, progress: wizardProgress,
+    selectAndAdvance, advanceFrom, goBack,
+  } = useCampagneWizard(HYPO_STEP_IDS, {
+    onReachResult: () => trackEvent('select_content', { content_type: 'tool_result', item_id: 'campagne_hypotheque-assurance-vie_result' }),
+  });
   const [solde, setSolde] = useState('350000');
   const [annees, setAnnees] = useState('20');
   const [primeMensuelle, setPrimeMensuelle] = useState('45');
@@ -184,23 +201,23 @@ export function AssuranceHypothecaireTool() {
 
   const handlePdf = () =>
     downloadPdf({
-      title: 'Assurance hypothécaire — banque vs famille',
+      title: 'Assurance hypothÃ©caire â€” banque vs famille',
       filename: 'resume-assurance-hypothecaire.pdf',
       sections: [
         {
-          heading: 'Comparaison créancier vs personnel',
+          heading: 'Comparaison crÃ©ancier vs personnel',
           rows: [
             { label: 'Solde approximatif', value: formatCad(calc.balance) },
-            { label: 'Années restantes', value: `${calc.years} ans` },
+            { label: 'AnnÃ©es restantes', value: `${calc.years} ans` },
             {
               label: 'Prime mensuelle (si saisie)',
               value: calc.premium > 0 ? formatCad(calc.premium) : 'Non saisie',
             },
             {
-              label: 'Coût relatif (illustration)',
+              label: 'CoÃ»t relatif (illustration)',
               value:
                 calc.ratio != null
-                  ? `Environ ×${calc.ratio.toFixed(1)} à mi-parcours`
+                  ? `Environ Ã—${calc.ratio.toFixed(1)} Ã  mi-parcours`
                   : 'Ajoute une prime pour illustrer',
             },
           ],
@@ -214,9 +231,9 @@ export function AssuranceHypothecaireTool() {
               label: 'Revenu de transition',
               value: `${formatCad(calc.remplacementTotal)} (${calc.moisN} mois)`,
             },
-            { label: 'Coussin imprévus', value: formatCad(calc.coussinN) },
+            { label: 'Coussin imprÃ©vus', value: formatCad(calc.coussinN) },
             {
-              label: 'Écart au-delà du prêt',
+              label: 'Ã‰cart au-delÃ  du prÃªt',
               value: formatCad(calc.auDelaDuPret),
             },
             {
@@ -234,34 +251,99 @@ export function AssuranceHypothecaireTool() {
         },
       ],
       notes: [
-        'Illustration éducative seulement — pas un amortissement exact ni un conseil personnalisé.',
-        'Le solde à mi-parcours est une illustration (≈ moitié), pas un calendrier d’amortissement exact.',
-        'L’assurance créancier et l’assurance vie personnelle ne sont pas interchangeables automatiquement.',
-        '* Selon le contrat et le prêteur. Conditions variables.',
+        'Illustration Ã©ducative seulement â€” pas un amortissement exact ni un conseil personnalisÃ©.',
+        'Le solde Ã  mi-parcours est une illustration (â‰ˆ moitiÃ©), pas un calendrier dâ€™amortissement exact.',
+        'Lâ€™assurance crÃ©ancier et lâ€™assurance vie personnelle ne sont pas interchangeables automatiquement.',
+        '* Selon le contrat et le prÃªteur. Conditions variables.',
       ],
     });
 
+
+  /* immersive-wizard */
+  if (immersive) {
+    return (
+      <div data-testid="tool-assurance-hypothecaire">
+        <CampagneToolShell immersive titleAs="h1" eyebrow="HypothÃ¨que" title="Banque vs famille : chiffre lâ€™Ã©cart" intro="Une question Ã  la fois. Ã€ la fin, on compare les deux logiques en 15 minutes." disclaimer="Illustration Ã©ducative seulement." footer={null}>
+          <WizardProgress stepIndex={stepIndex} questionCount={questionCount} isResult={isResult} resultLabel="Lâ€™Ã©cart" progress={wizardProgress} />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+          {currentStepId === 'pret' ? (
+            <WizardStep id="pret">
+              <WizardStepHeading title="Ton prÃªt" hint="Solde, annÃ©es restantes, prime si tu lâ€™as." />
+              <NumberField id="hypo-wiz-solde" label="Solde dâ€™hypothÃ¨que" value={solde} onChange={setSolde} min={0} step={1000} suffix="$" />
+              <NumberField id="hypo-wiz-annees" label="AnnÃ©es restantes" value={annees} onChange={setAnnees} min={1} max={40} step={1} suffix="ans" />
+              <NumberField id="hypo-wiz-prime" label="Prime mensuelle (optionnel)" value={primeMensuelle} onChange={setPrimeMensuelle} min={0} step={5} suffix="$" />
+              <WizardContinueButton onClick={() => advanceFrom('pret')} />
+            </WizardStep>
+          ) : null}
+          {currentStepId === 'famille' ? (
+            <WizardStep id="famille">
+              <WizardStepHeading title="Besoin famille au-delÃ  du solde" hint="Dettes, revenu de transition, coussin." />
+              <NumberField id="hypo-wiz-dettes" label="Autres dettes" value={autresDettes} onChange={setAutresDettes} min={0} step={500} suffix="$" />
+              <NumberField id="hypo-wiz-remp" label="Remplacement mensuel" value={remplacementMensuel} onChange={setRemplacementMensuel} min={0} step={100} suffix="$" />
+              <NumberField id="hypo-wiz-mois" label="Pendant combien de mois" value={moisRemplacement} onChange={setMoisRemplacement} min={0} step={1} suffix="mois" />
+              <NumberField id="hypo-wiz-coussin" label="Coussin imprÃ©vus" value={coussin} onChange={setCoussin} min={0} step={500} suffix="$" />
+              <WizardContinueButton onClick={() => advanceFrom('famille')} />
+            </WizardStep>
+          ) : null}
+          {currentStepId === 'comparaison' ? (
+            <WizardStep id="comparaison">
+              <WizardStepHeading title="Points de comparaison" hint="Coche ce qui te parle â€” optionnel." />
+              <ul className="space-y-2">
+                {COMPARISON_ROWS.map((row) => (
+                  <li key={row.id}>
+                    <button type="button" onClick={() => toggleRow(row.id)} className={`w-full rounded-2xl px-4 py-3 text-left text-sm ${checked[row.id] ? 'bg-primary/10' : 'bg-white shadow-[inset_0_0_0_1px_rgba(1,35,63,0.1)]'}`}>
+                      <span className="font-semibold text-dark">{row.label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <WizardContinueButton onClick={() => advanceFrom('comparaison')} label="Voir le rÃ©sultat" />
+            </WizardStep>
+          ) : null}
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">Capital famille illustratif</p>
+              <p className="font-heading mt-1 text-3xl font-bold text-dark">{formatCad(calc.capitalFamille)}</p>
+              <p className="mt-2 text-sm text-prestige-taupe">Dont ~{formatCad(calc.auDelaDuPret)} au-delÃ  du seul solde.</p>
+              <div className="mt-5">
+                <ToolSoftClose
+                  headline="Banque â‰  famille"
+                  subline="15 min pour comparer crÃ©ancier vs protection personnelle â€” sans pression."
+                  rdvPath={rdvPath}
+                  rdvLabel="Comparer en 15 min"
+                  onRdvClick={() => trackRendezVousClick('campagne_hypotheque-assurance-vie_rdv_outil')}
+                  onPdf={handlePdf}
+                  pdfBusy={busy}
+                />
+              </div>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
+
   return (
     <CampagneToolShell
-      title="Banque vs famille : chiffre l’écart, puis compare"
-      intro="L’assurance du prêteur et une protection personnelle, ce n’est pas le même produit. Estime d’abord ce qu’il faudrait aux proches — au-delà du seul solde. Ensuite, compare les deux logiques."
-      disclaimer="Illustration éducative seulement — pas un amortissement exact ni un conseil personnalisé. L’assurance créancier et l’assurance vie personnelle ne sont pas interchangeables automatiquement. * Selon le contrat et le prêteur."
+      title="Banque vs famille : chiffre lâ€™Ã©cart, puis compare"
+      intro="Lâ€™assurance du prÃªteur et une protection personnelle, ce nâ€™est pas le mÃªme produit. Estime dâ€™abord ce quâ€™il faudrait aux proches â€” au-delÃ  du seul solde. Ensuite, compare les deux logiques."
+      disclaimer="Illustration Ã©ducative seulement â€” pas un amortissement exact ni un conseil personnalisÃ©. Lâ€™assurance crÃ©ancier et lâ€™assurance vie personnelle ne sont pas interchangeables automatiquement. * Selon le contrat et le prÃªteur."
     >
       <div className="space-y-10">
         <div className="grid gap-3 sm:grid-cols-3">
           <NumberField
             id="hypo-solde"
-            label="Solde d’hypothèque (approx.)"
+            label="Solde dâ€™hypothÃ¨que (approx.)"
             value={solde}
             onChange={setSolde}
             min={0}
             step={1000}
             suffix="$"
-            hint="Sert aux deux parties de l’outil"
+            hint="Sert aux deux parties de lâ€™outil"
           />
           <NumberField
             id="hypo-annees"
-            label="Années restantes (approx.)"
+            label="AnnÃ©es restantes (approx.)"
             value={annees}
             onChange={setAnnees}
             min={1}
@@ -271,13 +353,13 @@ export function AssuranceHypothecaireTool() {
           />
           <NumberField
             id="hypo-prime"
-            label="Prime mensuelle (si tu l’as)"
+            label="Prime mensuelle (si tu lâ€™as)"
             value={primeMensuelle}
             onChange={setPrimeMensuelle}
             min={0}
             step={1}
             suffix="$"
-            hint="Optionnel — illustration du coût relatif"
+            hint="Optionnel â€” illustration du coÃ»t relatif"
           />
         </div>
 
@@ -286,28 +368,28 @@ export function AssuranceHypothecaireTool() {
             <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white px-4 py-4">
               <div className="flex items-center gap-2 text-amber-800">
                 <Building2 className="h-4 w-4 shrink-0" aria-hidden />
-                <p className="text-xs font-semibold uppercase tracking-wide">Côté prêteur</p>
+                <p className="text-xs font-semibold uppercase tracking-wide">CÃ´tÃ© prÃªteur</p>
               </div>
               <p className="mt-2 font-heading text-lg font-bold text-dark">
-                Couverture ≈ {formatCad(calc.balance)} → ~{formatCad(calc.balanceMid)}
+                Couverture â‰ˆ {formatCad(calc.balance)} â†’ ~{formatCad(calc.balanceMid)}
               </p>
               <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">
-                Vers l’année {calc.midYears}, si le solde a diminué d’environ moitié, la couverture
-                liée au prêt suit souvent le solde — alors que la prime peut rester semblable ou être
+                Vers lâ€™annÃ©e {calc.midYears}, si le solde a diminuÃ© dâ€™environ moitiÃ©, la couverture
+                liÃ©e au prÃªt suit souvent le solde â€” alors que la prime peut rester semblable ou Ãªtre
                 revue au renouvellement*.
               </p>
               {calc.ratio != null ? (
                 <p className="mt-3 flex items-start gap-2 text-sm font-medium text-amber-900">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                  Coût relatif ≈ ×{calc.ratio.toFixed(1)} à mi-parcours
+                  CoÃ»t relatif â‰ˆ Ã—{calc.ratio.toFixed(1)} Ã  mi-parcours
                   {calc.costPer1kStart != null && calc.costPer1kMid != null
-                    ? ` (${calc.costPer1kStart.toFixed(1)} → ${calc.costPer1kMid.toFixed(1)} $/an pour 1 000 $)`
+                    ? ` (${calc.costPer1kStart.toFixed(1)} â†’ ${calc.costPer1kMid.toFixed(1)} $/an pour 1 000 $)`
                     : ''}
                   .
                 </p>
               ) : (
                 <p className="mt-3 text-sm text-prestige-taupe">
-                  Ajoute une prime mensuelle approximative pour voir le « prix » relatif monter.
+                  Ajoute une prime mensuelle approximative pour voir le Â« prix Â» relatif monter.
                 </p>
               )}
             </div>
@@ -315,18 +397,18 @@ export function AssuranceHypothecaireTool() {
             <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white px-4 py-4">
               <div className="flex items-center gap-2 text-emerald-800">
                 <Home className="h-4 w-4 shrink-0" aria-hidden />
-                <p className="text-xs font-semibold uppercase tracking-wide">Côté personnel</p>
+                <p className="text-xs font-semibold uppercase tracking-wide">CÃ´tÃ© personnel</p>
               </div>
               <p className="mt-2 font-heading text-lg font-bold text-dark">
                 Capital pour la famille
               </p>
               <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">
-                Bénéficiaires choisis, montant et durée que tu contrôles, souvent portable après le
-                prêt — d’où la flexibilité à long terme.
+                BÃ©nÃ©ficiaires choisis, montant et durÃ©e que tu contrÃ´les, souvent portable aprÃ¨s le
+                prÃªt â€” dâ€™oÃ¹ la flexibilitÃ© Ã  long terme.
               </p>
               <p className="mt-3 flex items-start gap-2 text-sm font-medium text-emerald-900">
                 <Check className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.5} aria-hidden />
-                Banque = prêt. Personnel = famille + options dans le temps.
+                Banque = prÃªt. Personnel = famille + options dans le temps.
               </p>
             </div>
           </div>
@@ -334,26 +416,26 @@ export function AssuranceHypothecaireTool() {
 
         <div>
           <h3 className="font-heading mb-1 text-base font-semibold text-dark">
-            Combien pour la famille ? (au-delà du solde)
+            Combien pour la famille ? (au-delÃ  du solde)
           </h3>
           <p className="mb-4 text-sm text-prestige-taupe">
-            Même solde — on ajoute dettes, revenu de transition et imprévus pour illustrer un
-            montant pensé pour les proches, pas seulement pour le prêt.
+            MÃªme solde â€” on ajoute dettes, revenu de transition et imprÃ©vus pour illustrer un
+            montant pensÃ© pour les proches, pas seulement pour le prÃªt.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <NumberField
               id="hypo-dettes"
-              label="Autres dettes à régler"
+              label="Autres dettes Ã  rÃ©gler"
               value={autresDettes}
               onChange={setAutresDettes}
               min={0}
               step={500}
               suffix="$"
-              hint="Auto, cartes, marge…"
+              hint="Auto, cartes, margeâ€¦"
             />
             <NumberField
               id="hypo-coussin"
-              label="Coussin imprévus"
+              label="Coussin imprÃ©vus"
               value={coussin}
               onChange={setCoussin}
               min={0}
@@ -362,16 +444,16 @@ export function AssuranceHypothecaireTool() {
             />
             <NumberField
               id="hypo-revenu"
-              label="Revenu mensuel à remplacer"
+              label="Revenu mensuel Ã  remplacer"
               value={remplacementMensuel}
               onChange={setRemplacementMensuel}
               min={0}
               step={100}
               suffix="$"
             />
-            <Field id="hypo-mois" label="Pendant combien de mois" hint="Souvent 12 à 36 mois">
+            <Field id="hypo-mois" label="Pendant combien de mois" hint="Souvent 12 Ã  36 mois">
               <div className="space-y-2">
-                <div className="flex flex-wrap gap-2" role="group" aria-label="Durée suggérée">
+                <div className="flex flex-wrap gap-2" role="group" aria-label="DurÃ©e suggÃ©rÃ©e">
                   {MOIS_PRESETS.map((opt) => {
                     const active = moisRemplacement === opt.value;
                     return (
@@ -414,12 +496,12 @@ export function AssuranceHypothecaireTool() {
             <ResultCard
               label="Si on couvre seulement le solde"
               value={formatCad(calc.balance)}
-              detail="Logique proche de l’assurance créancier : surtout le prêt."
+              detail="Logique proche de lâ€™assurance crÃ©ancier : surtout le prÃªt."
             />
             <ResultCard
               label="Montant illustratif pour la famille"
               value={formatCad(calc.capitalFamille)}
-              detail="Maison + dettes + revenu + imprévus — illustration seulement."
+              detail="Maison + dettes + revenu + imprÃ©vus â€” illustration seulement."
               tone={calc.auDelaDuPret > 0 ? 'warn' : 'ok'}
               size="lg"
             />
@@ -435,13 +517,13 @@ export function AssuranceHypothecaireTool() {
                 data-testid="hypotheque-gap-banner"
               >
                 <p className="text-xs font-semibold uppercase tracking-wide text-amber-800/90">
-                  Écart illustratif au-delà du prêt
+                  Ã‰cart illustratif au-delÃ  du prÃªt
                 </p>
                 <p className="font-heading text-3xl font-bold tabular-nums text-dark md:text-4xl lg:text-5xl">
                   +{formatCad(calc.auDelaDuPret)}
                 </p>
                 <p className="text-sm leading-relaxed text-prestige-taupe">
-                  C’est souvent ça qu’on clarifie en 15 minutes — sans pression.
+                  Câ€™est souvent Ã§a quâ€™on clarifie en 15 minutes â€” sans pression.
                 </p>
                 <div
                   className="h-3 overflow-hidden rounded-full bg-amber-100/90"
@@ -469,7 +551,7 @@ export function AssuranceHypothecaireTool() {
               }
               onPdf={handlePdf}
               pdfBusy={busy}
-              pdfLabel="Télécharger mon résumé PDF"
+              pdfLabel="TÃ©lÃ©charger mon rÃ©sumÃ© PDF"
               tone={calc.auDelaDuPret > 0 ? 'warn' : 'default'}
             />
           </div>
@@ -490,8 +572,8 @@ export function AssuranceHypothecaireTool() {
           </summary>
           <div className="border-t border-prestige-beige/80">
             <div className="hidden grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-0 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-prestige-taupe sm:grid">
-              <div className="px-3 py-2.5">Critère</div>
-              <div className="px-3 py-2.5">Prêteur / banque</div>
+              <div className="px-3 py-2.5">CritÃ¨re</div>
+              <div className="px-3 py-2.5">PrÃªteur / banque</div>
               <div className="px-3 py-2.5">Protection personnelle</div>
               <div className="px-3 py-2.5">Lu</div>
             </div>
@@ -540,10 +622,10 @@ export function AssuranceHypothecaireTool() {
         </details>
 
         <p className="rounded-xl bg-gray-50 px-4 py-3 text-xs leading-relaxed text-prestige-taupe">
-          Les contrats d’assurance créancier et d’assurance vie personnelle varient. Le solde à
-          mi-parcours est une illustration (≈ moitié), pas un calendrier d’amortissement exact.
-          Cette page ne remplace pas la lecture de ta police ni un conseil personnalisé. Produits
-          d’assurance de iA Groupe financier le cas échéant — analyse au cas par cas.
+          Les contrats dâ€™assurance crÃ©ancier et dâ€™assurance vie personnelle varient. Le solde Ã 
+          mi-parcours est une illustration (â‰ˆ moitiÃ©), pas un calendrier dâ€™amortissement exact.
+          Cette page ne remplace pas la lecture de ta police ni un conseil personnalisÃ©. Produits
+          dâ€™assurance de iA Groupe financier le cas Ã©chÃ©ant â€” analyse au cas par cas.
         </p>
       </div>
     </CampagneToolShell>

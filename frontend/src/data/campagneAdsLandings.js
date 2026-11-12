@@ -125,14 +125,16 @@ export const campagneAdsLandings = [
     title: 'REER ou CELI : où va le prochain dollar ?',
     seoTitle: 'REER et CELI pour la retraite | Conseiller en sécurité financière',
     seoDescription:
-      'Clarifier l’ordre REER / CELI selon impôts, horizon et liquidité. Outil illustratif + PDF. Conseiller en sécurité financière à Victoriaville.',
+      'Clarifier l’ordre REER / CELI selon impôts, horizon et liquidité. Outil illustratif. Conseiller en sécurité financière à Victoriaville.',
     promise:
-      'Quatre réponses. Une piste d’ordre REER / CELI — et un PDF à apporter en 15 minutes. Sans compte.',
+      'En quelques réponses, tu vois où part ton prochain dollar entre REER et CELI. Gratuit, sans compte. Ensuite 15 min si tu veux coller ça à ton matching.',
     bullets: [
-      'REER = déduction maintenant, impôt plus tard · CELI = cotise après impôt, retire sans impôt — deux jobs, pas un mythe.',
-      'Horizon court ou besoin d’accès → souvent CELI d’abord · tranche élevée + long terme → souvent REER · sinon un mix illustratif.',
-      'Tu sors avec un ordre + un partage du prochain dollar en PDF — base claire pour coller ça à ton matching employeur en 15 minutes.',
+      'Tu sors avec un ordre illustratif REER / CELI — et le partage de ton prochain dollar.',
+      'Un match employeur peut tout changer : on le chiffre souvent avant le débat perso.',
+      'En 15 minutes, on colle l’ordre à tes plafonds, ton matching et ce que t’as déjà.',
     ],
+    legalNote:
+      'Ce contenu est informatif et ne constitue pas une opinion personnalisée. Les rendements ne sont pas garantis. Pierre-Olivier Caouette est conseiller en sécurité financière avec iA Groupe financier.',
     faq: [
       {
         question: 'Faut-il toujours maximiser le REER en premier ?',
@@ -142,7 +144,7 @@ export const campagneAdsLandings = [
       {
         question: 'Et si mon employeur matche mon REER ?',
         answer:
-          'Un match employeur, c’est souvent de l’argent « gratuit » sur la portion cotisée — ça peut peser lourd dans l’ordre du prochain dollar. L’outil ne calcule pas ton % de match : en 15 minutes, on regarde les règles de ton régime et on colle ça à ton PDF. Illustration seulement — pas un conseil sur mesure.',
+          'Un match employeur, c’est souvent de l’argent « gratuit » sur la portion cotisée — ça peut peser lourd dans l’ordre du prochain dollar. L’outil ne calcule pas ton % de match : en 15 minutes, on regarde les règles de ton régime. Illustration seulement — pas un conseil sur mesure.',
       },
       {
         question: 'CELI et CELIAPP, c’est la même chose ?',
@@ -158,10 +160,16 @@ export const campagneAdsLandings = [
     apprendrePath: '/apprendre/reer-ferr',
     apprendreLabel: 'Capsules REER · CELI',
     ctaLabel: 'Réserver 15 minutes',
-    heroToolLabel: 'Essayer le prioriseur',
-    ctaHeadline: 'Ton ordre REER / CELI, on le valide en 15 minutes',
+    heroToolLabel: 'Voir où va mon prochain dollar',
+    /** RDV seulement après le résultat de l’outil. */
+    hideHeroRdv: true,
+    hideMidCta: true,
+    /** Mobile : pas de landing — wizard direct + CTA à la fin. */
+    mobileToolFirst: true,
+    ctaHeadline: 'Tu veux valider ton ordre ?',
     ctaSubline:
-      'Apporte ton PDF — matching employeur, plafonds, prochain dollar. Zéro pitch.',
+      'Un conseiller colle ton ordre à ton matching et tes plafonds en 15 minutes.',
+    toolIntro: '',
   },
   {
     slug: 'maladie-grave',

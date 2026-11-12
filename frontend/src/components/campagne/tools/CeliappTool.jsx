@@ -1,12 +1,23 @@
 import { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Check, Home } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
-import { trackEvent } from '../../../lib/analytics';
+import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
 import {
   CampagneToolShell,
   ToolDownloadPdf,
+  ToolSoftClose,
 } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
 /** Plafonds illustratifs 2026 — non indexés historiquement, à revalider. */
 const PLAFOND_ANNUEL = 8000;
@@ -157,12 +168,32 @@ function buildLecture(result) {
   };
 }
 
-export function CeliappTool() {
+const CELIAPP_STEP_IDS = ['cotisation', 'horizon', 'cible', 'result'];
+
+export function CeliappTool({ immersive = false } = {}) {
+  const location = useLocation();
   const [cotisationAnnuelle, setCotisationAnnuelle] = useState('4000');
   const [annees, setAnnees] = useState('4');
   const [dejaCotise, setDejaCotise] = useState('0');
   const [miseCible, setMiseCible] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_celiapp_pdf');
+  const rdvPath = buildCampagneRdvPath('celiapp', location.search);
+
+  const {
+    stepIndex,
+    currentStepId,
+    isResult,
+    questionCount,
+    progress: wizardProgress,
+    advanceFrom,
+    goBack,
+  } = useCampagneWizard(CELIAPP_STEP_IDS, {
+    onReachResult: () =>
+      trackEvent('select_content', {
+        content_type: 'tool_result',
+        item_id: 'campagne_celiapp_result',
+      }),
+  });
 
   const result = useMemo(() => {
     const prevu = Math.max(0, toNumber(cotisationAnnuelle));
@@ -303,14 +334,333 @@ export function CeliappTool() {
       ],
     });
 
+  const showSoftCloseClassic = doneCount >= 2;
+  const softClose = (
+    <ToolSoftClose
+      headline={
+        result.plafondAtteint
+          ? 'Max à vie dans ce scénario'
+          : `Environ ${formatCad(result.totalProjete)} pour ta mise de fonds`
+      }
+      subline={
+        result.plafondAtteint
+          ? '15 min pour valider la suite — PDF en bonus.'
+          : 'Ta projection est prête. Clarifie le prochain vrai pas en 15 min — ou garde le PDF.'
+      }
+      rdvPath={rdvPath}
+      rdvLabel="Clarifier ma mise de fonds en 15 min"
+      onRdvClick={() => trackRendezVousClick('campagne_celiapp_rdv_outil')}
+      onPdf={handleDownload}
+      pdfBusy={busy}
+      pdfLabel="Télécharger ma projection PDF"
+      tone={result.plafondAtteint ? 'warn' : 'default'}
+    />
+  );
+
+  const resultPanel = (
+    <div
+      className={`rounded-2xl px-5 py-5 ${
+        result.plafondAtteint
+          ? 'bg-gradient-to-br from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(245,158,11,0.25)]'
+          : 'bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06]'
+      }`}
+    >
+      {result.plafondAtteint ? (
+        <p className="text-xs font-semibold uppercase tracking-wide text-secondary">Max à vie</p>
+      ) : null}
+      <p
+        className={`font-heading text-3xl font-bold tracking-tight text-dark sm:text-4xl ${
+          result.plafondAtteint ? 'mt-1' : ''
+        }`}
+      >
+        {lecture.headline}
+      </p>
+      <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{lecture.detail}</p>
+      {result.cible > 0 && milestones[2].done ? (
+        <div
+          key={`gap-${result.cible}-${result.totalProjete}`}
+          className="mt-4 grid gap-3 border-t border-dark/[0.06] pt-4 sm:grid-cols-3"
+          data-testid="celiapp-gap-cible"
+        >
+          <div>
+            <p className="text-xs text-prestige-taupe">Projection</p>
+            <p className="mt-0.5 font-heading text-lg font-semibold text-dark sm:text-xl">
+              {formatCad(result.totalProjete)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-prestige-taupe">Cible</p>
+            <p className="mt-0.5 font-heading text-lg font-semibold text-dark sm:text-xl">
+              {formatCad(result.cible)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-prestige-taupe">Écart</p>
+            <p
+              className={`mt-0.5 font-heading text-lg font-semibold sm:text-xl ${
+                result.ecart > 0
+                  ? 'text-primary'
+                  : result.ecart < 0
+                    ? 'text-emerald-700'
+                    : 'text-dark'
+              }`}
+            >
+              {formatCad(Math.abs(result.ecart))}
+            </p>
+            <p className="mt-0.5 text-xs leading-relaxed text-prestige-taupe">
+              {result.ecart > 0
+                ? '~à combler'
+                : result.ecart < 0
+                  ? 'Au-dessus de ta cible (cotisations seulement)'
+                  : 'Dans la cible (cotisations)'}
+            </p>
+          </div>
+          <p className="sm:col-span-3 text-xs leading-relaxed text-prestige-taupe">
+            L’écart, c’est cotisations vs ton souhait — pas une promesse d’achat.
+          </p>
+        </div>
+      ) : null}
+      {lecture.points.length > 0 ? (
+        <ul className="mt-4 space-y-2.5 border-t border-dark/[0.06] pt-4">
+          {lecture.points.map((point) => (
+            <li
+              key={point}
+              className="flex gap-2.5 text-sm leading-relaxed text-prestige-taupe"
+            >
+              <span
+                className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
+                  result.plafondAtteint ? 'bg-amber-500' : 'bg-primary'
+                }`}
+                aria-hidden
+              />
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <div className="mt-5 grid gap-4 border-t border-dark/5 pt-4 sm:grid-cols-3">
+        <div>
+          <p className="text-xs text-prestige-taupe">Par année (retenu)</p>
+          <p className="mt-0.5 font-heading text-lg font-semibold text-dark">
+            {formatCad(result.cotisationEffective)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-prestige-taupe">Ajouté sur la période</p>
+          <p className="mt-0.5 font-heading text-lg font-semibold text-dark">
+            {formatCad(result.totalAjoute)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-prestige-taupe">
+            {result.plafondAtteint ? 'Max atteint' : 'Place restante à vie'}
+          </p>
+          <p
+            className={`mt-0.5 font-heading text-lg font-semibold ${
+              result.plafondAtteint ? 'text-amber-700' : 'text-dark'
+            }`}
+          >
+            {formatCad(result.droitsRestantsApres)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div data-testid="tool-celiapp">
       <CampagneToolShell
+        immersive={immersive}
+        titleAs={immersive ? 'h1' : 'h2'}
+        eyebrow={immersive ? 'CELIAPP' : 'Outil interactif'}
         title="Combien pour ta mise de fonds ?"
-        intro="Entre ce que tu mets par année, ce que t’as déjà dans ton CELIAPP et dans combien d’années tu vises à acheter."
+        intro={
+          immersive
+            ? 'Une question à la fois. À la fin, on clarifie ta mise de fonds en 15 minutes.'
+            : 'Entre ce que tu mets par année, ce que t’as déjà dans ton CELIAPP et dans combien d’années tu vises à acheter.'
+        }
         disclaimer="Illustration éducative seulement — pas un conseil personnalisé. Chiffres 2026 illustratifs (8 000 $ de nouveaux droits / année, 40 000 $ à vie ; les reports peuvent changer le max d’une année). Qui a le droit, les retraits et l’impôt : à revalider selon ta situation. Aucun rendement inventé."
-        footer={<p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>}
+        footer={
+          immersive ? null : showSoftCloseClassic ? (
+            softClose
+          ) : (
+            <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
+          )
+        }
       >
+        {immersive ? (
+          <>
+            <WizardProgress
+              stepIndex={stepIndex}
+              questionCount={questionCount}
+              isResult={isResult}
+              resultLabel="Ta projection"
+              progress={wizardProgress}
+            />
+            {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+
+            {currentStepId === 'cotisation' ? (
+              <WizardStep id="cotisation">
+                <WizardStepHeading
+                  title="Combien tu mets de côté par année ?"
+                  hint={`Plafond illustratif ${PLAFOND_ANNUEL.toLocaleString('fr-CA')} $ / année (2026). Tu peux viser plus — on clampera.`}
+                />
+                <Field id="celiapp-wiz-cotisation" label="Combien tu mets par année">
+                  <MoneyInput
+                    id="celiapp-wiz-cotisation"
+                    value={cotisationAnnuelle}
+                    onChange={setCotisationAnnuelle}
+                    min={0}
+                    step="100"
+                    placeholder="4000"
+                  />
+                </Field>
+                <Field
+                  id="celiapp-wiz-deja"
+                  label="Déjà dans ton CELIAPP"
+                  hint={`Max ${PLAFOND_VIE.toLocaleString('fr-CA')} $ à vie. Mets 0 si t’as pas encore ouvert le compte.`}
+                >
+                  <MoneyInput
+                    id="celiapp-wiz-deja"
+                    value={dejaCotise}
+                    onChange={setDejaCotise}
+                    min={0}
+                    max={PLAFOND_VIE}
+                    step="100"
+                    placeholder="0"
+                  />
+                </Field>
+                <WizardContinueButton
+                  disabled={toNumber(cotisationAnnuelle) <= 0}
+                  onClick={() => advanceFrom('cotisation')}
+                />
+              </WizardStep>
+            ) : null}
+
+            {currentStepId === 'horizon' ? (
+              <WizardStep id="horizon">
+                <WizardStepHeading
+                  title="Dans combien d’années tu achètes ?"
+                  hint="Ex. : 3 ans, 5 ans, 8 ans — un ordre de grandeur suffit."
+                />
+                <div className="relative">
+                  <input
+                    id="celiapp-wiz-annees"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={15}
+                    step="1"
+                    className={`${inputClass} pr-12`}
+                    value={annees}
+                    onChange={(e) => setAnnees(e.target.value)}
+                    placeholder="4"
+                  />
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-prestige-taupe">
+                    ans
+                  </span>
+                </div>
+                <WizardContinueButton
+                  disabled={toNumber(annees) <= 0}
+                  onClick={() => advanceFrom('horizon')}
+                />
+              </WizardStep>
+            ) : null}
+
+            {currentStepId === 'cible' ? (
+              <WizardStep id="cible">
+                <WizardStepHeading
+                  title="Mise de fonds que tu vises ?"
+                  hint="Optionnel — ce que toi tu as en tête. Cotisations seulement en face."
+                />
+                <MoneyInput
+                  id="celiapp-wiz-cible"
+                  value={miseCible}
+                  onChange={setMiseCible}
+                  onBlur={() => trackCibleIfSet(miseCible)}
+                  min={0}
+                  step="500"
+                  placeholder="25000"
+                />
+                <div className="flex flex-col gap-2.5 sm:flex-row">
+                  <WizardContinueButton
+                    onClick={() => {
+                      trackCibleIfSet(miseCible);
+                      advanceFrom('cible');
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMiseCible('');
+                      advanceFrom('cible');
+                    }}
+                    className="inline-flex w-full items-center justify-center rounded-full border border-prestige-beige bg-white px-6 py-3.5 text-sm font-semibold text-dark transition-colors hover:border-primary/30 hover:text-primary sm:w-auto"
+                  >
+                    Passer
+                  </button>
+                </div>
+              </WizardStep>
+            ) : null}
+
+            {isResult ? (
+              <WizardStep id="result">
+                <div className="mb-4">
+                  <div className="mb-2 flex items-end justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                        Vers le max à vie
+                      </p>
+                      <p className="font-heading mt-1 text-2xl font-bold text-dark">
+                        {formatCad(result.totalProjete)}
+                        <span className="text-base font-medium text-prestige-taupe">
+                          {' '}
+                          / {formatCad(PLAFOND_VIE)}
+                        </span>
+                      </p>
+                    </div>
+                    <p className="text-sm text-prestige-taupe">{plafondProgress} %</p>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-prestige-beige/70">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ease-out ${
+                        result.plafondAtteint
+                          ? 'bg-amber-500'
+                          : 'bg-gradient-to-r from-primary to-secondary'
+                      }`}
+                      style={{ width: `${plafondProgress}%` }}
+                    />
+                  </div>
+                </div>
+                {resultPanel}
+                <div className="mt-4 rounded-2xl bg-prestige-beige/40 px-5 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                    À retenir
+                  </p>
+                  <ul className="mt-3 space-y-2">
+                    {A_RETENIR.map((point) => (
+                      <li
+                        key={point}
+                        className="flex gap-2.5 text-sm leading-relaxed text-prestige-taupe"
+                      >
+                        <Check
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary"
+                          strokeWidth={2.5}
+                          aria-hidden
+                        />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-5" data-testid="celiapp-rdv-tool">
+                  {softClose}
+                </div>
+              </WizardStep>
+            ) : null}
+          </>
+        ) : (
+          <>
         <div className="mb-8">
           <div className="mb-2 flex items-end justify-between gap-3">
             <div>
@@ -461,128 +811,17 @@ export function CeliappTool() {
               </p>
             </div>
 
-            <div
-              className={`rounded-2xl px-5 py-5 ${
-                result.plafondAtteint
-                  ? 'bg-gradient-to-br from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(245,158,11,0.25)]'
-                  : 'bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06]'
-              }`}
-            >
-              {result.plafondAtteint ? (
-                <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-                  Max à vie
-                </p>
-              ) : null}
-              <p
-                className={`font-heading text-3xl font-bold tracking-tight text-dark sm:text-4xl ${
-                  result.plafondAtteint ? 'mt-1' : ''
-                }`}
-              >
-                {lecture.headline}
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{lecture.detail}</p>
+            {resultPanel}
 
-              {result.cible > 0 && milestones[2].done ? (
-                <div
-                  key={`gap-${result.cible}-${result.totalProjete}`}
-                  className="mt-4 grid gap-3 border-t border-dark/[0.06] pt-4 sm:grid-cols-3"
-                  data-testid="celiapp-gap-cible"
-                >
-                  <div>
-                    <p className="text-xs text-prestige-taupe">Projection</p>
-                    <p className="mt-0.5 font-heading text-lg font-semibold text-dark sm:text-xl">
-                      {formatCad(result.totalProjete)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-prestige-taupe">Cible</p>
-                    <p className="mt-0.5 font-heading text-lg font-semibold text-dark sm:text-xl">
-                      {formatCad(result.cible)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-prestige-taupe">Écart</p>
-                    <p
-                      className={`mt-0.5 font-heading text-lg font-semibold sm:text-xl ${
-                        result.ecart > 0
-                          ? 'text-primary'
-                          : result.ecart < 0
-                            ? 'text-emerald-700'
-                            : 'text-dark'
-                      }`}
-                    >
-                      {formatCad(Math.abs(result.ecart))}
-                    </p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-prestige-taupe">
-                      {result.ecart > 0
-                        ? '~à combler'
-                        : result.ecart < 0
-                          ? 'Au-dessus de ta cible (cotisations seulement)'
-                          : 'Dans la cible (cotisations)'}
-                    </p>
-                  </div>
-                  <p className="sm:col-span-3 text-xs leading-relaxed text-prestige-taupe">
-                    L’écart, c’est cotisations vs ton souhait — pas une promesse d’achat.
-                  </p>
-                </div>
-              ) : null}
-
-              {lecture.points.length > 0 ? (
-                <ul className="mt-4 space-y-2.5 border-t border-dark/[0.06] pt-4">
-                  {lecture.points.map((point) => (
-                    <li
-                      key={point}
-                      className="flex gap-2.5 text-sm leading-relaxed text-prestige-taupe"
-                    >
-                      <span
-                        className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
-                          result.plafondAtteint ? 'bg-amber-500' : 'bg-primary'
-                        }`}
-                        aria-hidden
-                      />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-
-              <div className="mt-5 grid gap-4 border-t border-dark/5 pt-4 sm:grid-cols-3">
-                <div>
-                  <p className="text-xs text-prestige-taupe">Par année (retenu)</p>
-                  <p className="mt-0.5 font-heading text-lg font-semibold text-dark">
-                    {formatCad(result.cotisationEffective)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-prestige-taupe">Ajouté sur la période</p>
-                  <p className="mt-0.5 font-heading text-lg font-semibold text-dark">
-                    {formatCad(result.totalAjoute)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-prestige-taupe">
-                    {result.plafondAtteint ? 'Max atteint' : 'Place restante à vie'}
-                  </p>
-                  <p
-                    className={`mt-0.5 font-heading text-lg font-semibold ${
-                      result.plafondAtteint ? 'text-amber-700' : 'text-dark'
-                    }`}
-                  >
-                    {formatCad(result.droitsRestantsApres)}
-                  </p>
-                </div>
+            {!showSoftCloseClassic && milestones[2].done ? (
+              <div className="mt-5">
+                <ToolDownloadPdf
+                  onClick={handleDownload}
+                  busy={busy}
+                  label="Télécharger ma projection PDF"
+                />
               </div>
-
-              {milestones[2].done ? (
-                <div className="mt-5">
-                  <ToolDownloadPdf
-                    onClick={handleDownload}
-                    busy={busy}
-                    label="Télécharger ma projection PDF"
-                  />
-                </div>
-              ) : null}
-            </div>
+            ) : null}
 
             <div className="mt-4 rounded-2xl bg-prestige-beige/40 px-5 py-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
@@ -606,6 +845,8 @@ export function CeliappTool() {
             </div>
           </div>
         </div>
+          </>
+        )}
       </CampagneToolShell>
     </div>
   );

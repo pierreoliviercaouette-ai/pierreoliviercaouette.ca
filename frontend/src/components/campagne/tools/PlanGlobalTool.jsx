@@ -2,15 +2,24 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, FileText, ListOrdered } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
-import { trackRendezVousClick } from '../../../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
 import {
   CampagneToolShell,
   ToolDownloadPdf,
   ToolSoftClose,
 } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
-/** Coche → ordre d’attaque (urgence d’abord). Labels sans jargon. */
+/** Coche ? ordre d’attaque (urgence d’abord). Labels sans jargon. */
 const ITEMS = [
   {
     id: 'fondsUrgenceFaible',
@@ -45,7 +54,7 @@ const ITEMS = [
     label: 'J’épargne sans savoir où mettre l’argent en premier',
     hint: 'REER, CELI, cash : l’ordre change le résultat net.',
     order: 'Épargner dans le bon ordre',
-    why: 'Des produits ouverts ≠ une feuille de route.',
+    why: 'Des produits ouverts ? une feuille de route.',
   },
   {
     id: 'projetCourt',
@@ -63,7 +72,7 @@ const ITEMS = [
   },
 ];
 
-/** urgence → dettes chères → salaire → vie/hypothèque → épargne → projet → succession */
+/** urgence ? dettes chères ? salaire ? vie/hypothèque ? épargne ? projet ? succession */
 const PRIORITY_IDS = [
   'fondsUrgenceFaible',
   'dettesCheres',
@@ -151,11 +160,21 @@ function SoftCheckItem({ id, checked, onChange, label, hint }) {
   );
 }
 
-export function PlanGlobalTool() {
+const PLAN_STEP_IDS = [...ITEMS.map((i) => i.id), 'result'];
+
+export function PlanGlobalTool({ immersive = false } = {}) {
   const location = useLocation();
   const [checked, setChecked] = useState(INITIAL_CHECKED);
+  const [wizardPick, setWizardPick] = useState({});
   const [notesLibres, setNotesLibres] = useState('');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_plan-global_pdf');
+  const {
+    stepIndex, currentStepId, isResult, questionCount, progress: wizardProgress,
+    selectAndAdvance, advanceFrom, goBack,
+  } = useCampagneWizard(PLAN_STEP_IDS, {
+    onReachResult: () => trackEvent('select_content', { content_type: 'tool_result', item_id: 'campagne_plan-global_result' }),
+  });
+  const currentItem = ITEMS.find((i) => i.id === currentStepId) || null;
 
   const selectedOrdered = useMemo(
     () => PRIORITY_IDS.filter((id) => checked[id]).map((id) => BY_ID[id]),
@@ -228,7 +247,7 @@ export function PlanGlobalTool() {
       notes: [
         doneCount === 0
           ? 'Coche ce qui est vrai chez toi pour voir un ordre.'
-          : `Ordre : ${selectedOrdered.map((item) => item.order).join(' → ')}.`,
+          : `Ordre : ${selectedOrdered.map((item) => item.order).join(' ? ')}.`,
         'Illustration éducative seulement — pas un conseil personnalisé. Des produits ouverts ne font pas un plan.',
       ],
     });
@@ -236,12 +255,56 @@ export function PlanGlobalTool() {
   const handleRdvOutil = () => trackRendezVousClick('campagne_plan-global_rdv_outil');
   const handleRdvFooter = () => trackRendezVousClick('campagne_plan-global_rdv_outil_footer');
 
+
+  /* immersive-wizard */
+  if (immersive) {
+    return (
+      <div data-testid="tool-plan-global">
+        <CampagneToolShell immersive titleAs="h1" eyebrow="Plan global" title="Ton ordre d’attaque" intro="Une question à la fois. À la fin, on valide en 15 minutes." disclaimer="Illustration éducative seulement." footer={null}>
+          <WizardProgress stepIndex={stepIndex} questionCount={questionCount} isResult={isResult} resultLabel="Résultat" progress={wizardProgress} />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+          {currentItem ? (
+            <WizardStep id={currentItem.id}>
+              <WizardStepHeading title={currentItem.label} hint={currentItem.hint || currentItem.next || undefined} />
+              <WizardChoiceList
+                name={currentItem.id}
+                value={wizardPick[currentItem.id] || ''}
+                options={[{ value: 'oui', label: 'Oui, c’est mon cas' }, { value: 'non', label: 'Non' }]}
+                onSelect={(v) =>
+                  selectAndAdvance(currentItem.id, () => {
+                    setWizardPick((prev) => ({ ...prev, [currentItem.id]: v }));
+                    setChecked((prev) => ({ ...prev, [currentItem.id]: v === 'oui' }));
+                  })
+                }
+              />
+            </WizardStep>
+          ) : null}
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="font-heading text-2xl font-bold text-dark">{first ? first.order : 'Coche au moins une priorité'}</p>
+              <p className="mt-2 text-sm text-prestige-taupe">{detail}</p>
+              <div className="mt-5"><ToolSoftClose
+                  headline={counterLabel}
+                  subline={detail}
+                  rdvPath={rdvPath}
+                  rdvLabel="Ancrer mon n°1 en 15 min"
+                  onRdvClick={() => trackRendezVousClick('campagne_plan-global_rdv_outil')}
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                /></div>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
+
   return (
     <div data-testid="tool-plan-global">
       <CampagneToolShell
         title="Ton ordre d’attaque"
-        intro="Coche ce qui est vrai chez toi. On range urgent → important → plus tard. Brouillon éducatif, pas un plan sur mesure."
-        disclaimer="Illustration éducative seulement — pas un conseil personnalisé. Des produits côte à côte ≠ une feuille de route."
+        intro="Coche ce qui est vrai chez toi. On range urgent ? important ? plus tard. Brouillon éducatif, pas un plan sur mesure."
+        disclaimer="Illustration éducative seulement — pas un conseil personnalisé. Des produits côte à côte ? une feuille de route."
         footer={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm leading-relaxed text-prestige-taupe">{detail}</p>

@@ -6,6 +6,15 @@ import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
 import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
 import { CampagneToolShell, ToolSoftClose } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
 /** Plafonds annuels CELI (2009–2026). Validé ARC 2026-11 — revalider à chaque nouvel indice annuel. */
 const PLAFONDS_ANNUELS = {
@@ -305,13 +314,21 @@ function softCloseCopy(result, usage) {
   };
 }
 
-export function CeliDroitsTool() {
+const CELI_DROITS_STEP_IDS = ['age', 'cotise', 'usage', 'result'];
+
+export function CeliDroitsTool({ immersive = false } = {}) {
   const location = useLocation();
   const [anneeNaissance, setAnneeNaissance] = useState('1992');
   const [dejaCotise, setDejaCotise] = useState('20000');
   const [cotisationAnnee, setCotisationAnnee] = useState('7000');
   const [usage, setUsage] = useState(null);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_celi-droits_pdf');
+  const {
+    stepIndex, currentStepId, isResult, questionCount, progress: wizardProgress,
+    selectAndAdvance, advanceFrom, goBack,
+  } = useCampagneWizard(CELI_DROITS_STEP_IDS, {
+    onReachResult: () => trackEvent('select_content', { content_type: 'tool_result', item_id: 'campagne_celi-droits_result' }),
+  });
 
   const rdvPath = buildCampagneRdvPath('celi-droits', location.search);
 
@@ -457,6 +474,65 @@ export function CeliDroitsTool() {
         'Clarifier l’usage en 15 min — soft. Pas une obligation de cotiser.',
       ],
     });
+
+
+  /* immersive-wizard */
+  if (immersive) {
+    const soft = softCloseCopy(result, usage);
+    return (
+      <div data-testid="tool-celi-droits">
+        <CampagneToolShell immersive titleAs="h1" eyebrow="CELI" title="Tes droits CELI (estimation)" intro="Une question à la fois. À la fin, on colle un usage en 15 minutes." disclaimer="Estimation seulement — Mon Dossier ARC fait foi." footer={null}>
+          <WizardProgress stepIndex={stepIndex} questionCount={questionCount} isResult={isResult} resultLabel="Tes droits" progress={wizardProgress} />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+          {currentStepId === 'age' ? (
+            <WizardStep id="age">
+              <WizardStepHeading title="Année de naissance ?" hint="Pour estimer depuis quand tu accumules des droits." />
+              <input id="celi-wiz-naissance" type="number" value={anneeNaissance} onChange={(e) => setAnneeNaissance(e.target.value)} className={inputClass} />
+              <WizardContinueButton onClick={() => advanceFrom('age')} />
+            </WizardStep>
+          ) : null}
+          {currentStepId === 'cotise' ? (
+            <WizardStep id="cotise">
+              <WizardStepHeading title="Combien déjà cotisé à vie ?" hint="Ordre de grandeur — pas besoin du dollar près." />
+              <MoneyInput id="celi-wiz-deja" value={dejaCotise} onChange={setDejaCotise} />
+              <Field id="celi-wiz-annee" label={`Cotisation prévue ${ANNEE_COURANTE}`}>
+                <MoneyInput id="celi-wiz-annee" value={cotisationAnnee} onChange={setCotisationAnnee} />
+              </Field>
+              <WizardContinueButton onClick={() => advanceFrom('cotise')} />
+            </WizardStep>
+          ) : null}
+          {currentStepId === 'usage' ? (
+            <WizardStep id="usage">
+              <WizardStepHeading title="À quoi servirait cet argent ?" hint="Urgence, projet, ou long terme." />
+              <WizardChoiceList
+                name="usage"
+                value={usage}
+                options={USAGE_OPTIONS.map((o) => ({ value: o.id, label: o.label }))}
+                onSelect={(v) => selectAndAdvance('usage', () => setUsage(v))}
+              />
+            </WizardStep>
+          ) : null}
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="font-heading text-3xl font-bold text-dark">{lecture.headline}</p>
+              <p className="mt-2 text-sm text-prestige-taupe">{lecture.detail}</p>
+              <div className="mt-5">
+                <ToolSoftClose
+                  headline={soft.headline}
+                  subline={soft.subline}
+                  rdvPath={rdvPath}
+                  rdvLabel={soft.rdvLabel}
+                  onRdvClick={() => trackRendezVousClick('campagne_celi-droits_rdv_outil')}
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                />
+              </div>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="tool-celi-droits">

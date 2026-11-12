@@ -13,17 +13,20 @@ import {
   buildCampagneRdvPath,
   getCampagneAdsLanding,
 } from '../data/campagneAdsLandings';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { useSeoMeta } from '../lib/seo';
 
 /**
  * Landing conversion Meta Ads (/campagnes/:slug).
  * Vague 0–2 : hero outil-first + atmosphere CSS + process strip + portrait uniforme.
+ * Option `mobileToolFirst` : sur mobile, wizard direct sans landing.
  */
 export function CampagneAdsLanding() {
   const { slug } = useParams();
   const location = useLocation();
   const item = getCampagneAdsLanding(slug);
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   useSeoMeta(
     item
@@ -44,8 +47,11 @@ export function CampagneAdsLanding() {
     trackEvent('view_item', {
       item_category: 'campagne_ads',
       item_id: `campagne_${item.slug}`,
+      ...(item.mobileToolFirst !== false && isMobile
+        ? { item_variant: 'mobile_tool_first' }
+        : {}),
     });
-  }, [item]);
+  }, [item, isMobile]);
 
   if (!item) {
     return <Navigate to="/" replace />;
@@ -55,6 +61,12 @@ export function CampagneAdsLanding() {
   const ToolComponent = getCampagneAdsTool(item.slug);
   const isFormCta = item.ctaType === 'form';
   const secondaryIsTool = Boolean(item.secondaryIsTool);
+  /** Mobile : outil immersif direct (sauf opt-out explicite mobileToolFirst: false). */
+  const mobileToolFirst =
+    Boolean(ToolComponent) && isMobile && item.mobileToolFirst !== false;
+  /** CTA RDV/form dans l’outil (SoftClose) — pas de doublons hero / mid. */
+  const hideHeroRdv = item.hideHeroRdv !== false && Boolean(ToolComponent);
+  const hideMidCta = item.hideMidCta !== false && Boolean(ToolComponent);
 
   const scrollToOutil = () => {
     trackEvent('select_content', {
@@ -95,6 +107,78 @@ export function CampagneAdsLanding() {
       ? ['Essayer l’outil', 'Lire ton fit', 'Demander une présentation']
       : ['Essayer l’outil', 'Lire ton chiffre', '15 min si doute'];
 
+  const legalLine =
+    item.legalNote ||
+    'Contenu éducatif et général. Titre autorisé : conseiller en sécurité financière. Ne constitue pas un conseil personnalisé. Chaque situation est unique.';
+
+  if (mobileToolFirst) {
+    return (
+      <main
+        className="min-h-screen bg-white"
+        data-testid="campagne-ads-landing"
+        data-layout="mobile-tool-first"
+      >
+        <div className="border-b border-prestige-beige/70 bg-gradient-to-r from-primary to-dark px-4 py-3 text-white">
+          <p className="text-center text-[11px] font-medium leading-snug text-white/85">
+            Conseiller en sécurité financière · Victoriaville · Gratuit, sans compte
+          </p>
+        </div>
+        <div
+          className="mx-auto max-w-lg"
+          onFocusCapture={() =>
+            trackEvent('select_content', {
+              content_type: 'tool',
+              item_id: `campagne_${item.slug}_tool`,
+              item_variant: 'mobile_tool_first',
+            })
+          }
+        >
+          <ToolComponent immersive />
+        </div>
+        {isFormCta ? (
+          <div className="mx-auto max-w-lg space-y-4 px-4 pb-4" id="demande">
+            <div className="text-center">
+              <h2 className="font-heading text-xl font-bold text-dark">{midHeadline}</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-prestige-taupe">
+                {midSubline}
+              </p>
+            </div>
+            <CampagneLeadForm
+              slug={item.slug}
+              subjectDefault={
+                item.leadSubject || `Campagne ${item.slug} — demande d’info`
+              }
+              messagePlaceholder={
+                item.leadMessagePlaceholder || 'Parle-moi un peu de ta situation…'
+              }
+              submitLabel={item.ctaLabel}
+              successTitle={item.leadSuccessTitle || 'Demande reçue'}
+              successBody={
+                item.leadSuccessBody ||
+                'Merci. Je te recontacte rapidement pour la suite.'
+              }
+              title={item.leadFormTitle}
+              subline={item.leadFormSubline}
+              requireCompany={Boolean(item.leadRequireCompany)}
+              requireMessage={
+                item.leadRequireMessage === undefined
+                  ? true
+                  : Boolean(item.leadRequireMessage)
+              }
+              companyLabel={item.leadCompanyLabel}
+              companyPlaceholder={item.leadCompanyPlaceholder}
+              phoneHint={item.leadPhoneHint}
+              trustLine={item.leadTrustLine}
+            />
+          </div>
+        ) : null}
+        <p className="mx-auto max-w-lg px-4 pb-8 text-center text-xs leading-relaxed text-prestige-taupe/80">
+          {legalLine}
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-white" data-testid="campagne-ads-landing">
       <PageHero
@@ -133,7 +217,7 @@ export function CampagneAdsLanding() {
               {item.ctaLabel}
               <ArrowRight className="h-5 w-5" />
             </button>
-          ) : item.hideHeroRdv ? null : (
+          ) : hideHeroRdv ? null : (
             <Link
               to={rdvPath}
               onClick={() => trackRendezVousClick(`campagne_${item.slug}_rdv`)}
@@ -272,7 +356,7 @@ export function CampagneAdsLanding() {
                 )}
               </div>
             </div>
-          ) : item.hideMidCta ? null : (
+          ) : hideMidCta ? null : (
             <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-dark px-6 py-8 text-center text-white shadow-lg md:px-10 md:py-10">
               <h2 className="font-heading text-2xl font-bold md:text-3xl">{midHeadline}</h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/80 md:text-base">
@@ -349,10 +433,7 @@ export function CampagneAdsLanding() {
             </div>
           ) : null}
 
-          <p className="text-center text-xs leading-relaxed text-prestige-taupe/80">
-            {item.legalNote ||
-              'Contenu éducatif et général. Titre autorisé : conseiller en sécurité financière. Ne constitue pas un conseil personnalisé. Chaque situation est unique.'}
-          </p>
+          <p className="text-center text-xs leading-relaxed text-prestige-taupe/80">{legalLine}</p>
         </div>
       </section>
     </main>

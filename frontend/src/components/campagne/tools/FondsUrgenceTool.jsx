@@ -1,24 +1,36 @@
 import { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Check, AlertTriangle, LifeBuoy } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
 import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
-import { trackRendezVousClick } from '../../../lib/analytics';
+import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
 import { CampagneToolShell, ToolDownloadPdf, ToolSoftClose } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
+
+const FONDS_STEP_IDS = ['cible', 'situation', 'result'];
 
 const MOIS_OPTIONS = [
-  { value: '3', label: '3 mois — revenu stable' },
-  { value: '6', label: '6 mois — courant' },
-  { value: '9', label: '9 mois — revenu moins stable' },
-  { value: '12', label: '12 mois — autonome / précaire' },
+  { value: '3', label: '3 mois â€” revenu stable' },
+  { value: '6', label: '6 mois â€” courant' },
+  { value: '9', label: '9 mois â€” revenu moins stable' },
+  { value: '12', label: '12 mois â€” autonome / prÃ©caire' },
 ];
 
-/** Points fixes — utiles même sans dossier. */
+/** Points fixes â€” utiles mÃªme sans dossier. */
 const A_RETENIR = [
-  'Fonds d’urgence = argent accessible si tu perds ton job ou qu’un gros imprévu arrive.',
-  'Cible typique : 3 à 6 mois de dépenses essentielles (plus si le revenu est fragile).',
-  'Garde-le liquide (épargne, CPG rachetable, CELI en liquidités) — pas dans des placements qui peuvent baisser.',
-  'Une fois le filet solide, le surplus peut aller vers dettes chères, CELI ou REER — selon ta situation.',
+  'Fonds dâ€™urgence = argent accessible si tu perds ton job ou quâ€™un gros imprÃ©vu arrive.',
+  'Cible typique : 3 Ã  6 mois de dÃ©penses essentielles (plus si le revenu est fragile).',
+  'Garde-le liquide (Ã©pargne, CPG rachetable, CELI en liquiditÃ©s) â€” pas dans des placements qui peuvent baisser.',
+  'Une fois le filet solide, le surplus peut aller vers dettes chÃ¨res, CELI ou REER â€” selon ta situation.',
 ];
 
 const inputClass =
@@ -131,7 +143,7 @@ function buildLecture({ cible, manquant, surplus, moisPourCombler, epargneParMoi
   if (cible <= 0) {
     return {
       headline: 'Il manque encore un chiffre',
-      detail: 'Indique tes dépenses essentielles et combien de mois tu vises — on calcule la cible.',
+      detail: 'Indique tes dÃ©penses essentielles et combien de mois tu vises â€” on calcule la cible.',
       points: [],
       tone: 'default',
     };
@@ -139,12 +151,12 @@ function buildLecture({ cible, manquant, surplus, moisPourCombler, epargneParMoi
 
   if (surplus > 0) {
     return {
-      headline: 'Filet déjà atteint',
-      detail: `Tu as environ ${formatCad(surplus)} de plus que la cible illustrée. Le prochain sujet, c’est souvent où oriente le surplus — pas d’ajouter encore au coussin.`,
+      headline: 'Filet dÃ©jÃ  atteint',
+      detail: `Tu as environ ${formatCad(surplus)} de plus que la cible illustrÃ©e. Le prochain sujet, câ€™est souvent oÃ¹ oriente le surplus â€” pas dâ€™ajouter encore au coussin.`,
       points: [
-        `Cible : ${formatCad(cible)} (${mois} mois de dépenses).`,
-        'Garde ce coussin accessible — ce n’est pas de l’argent « long terme ».',
-        'Surplus : dettes chères, CELI, REER… selon ta situation (à clarifier).',
+        `Cible : ${formatCad(cible)} (${mois} mois de dÃ©penses).`,
+        'Garde ce coussin accessible â€” ce nâ€™est pas de lâ€™argent Â« long terme Â».',
+        'Surplus : dettes chÃ¨res, CELI, REERâ€¦ selon ta situation (Ã  clarifier).',
       ],
       tone: 'ok',
     };
@@ -155,9 +167,9 @@ function buildLecture({ cible, manquant, surplus, moisPourCombler, epargneParMoi
   ];
 
   if (moisPourCombler == null) {
-    points.push('Avec 0 $ ajouté par mois, l’écart ne bouge pas — monte un peu pour voir un délai.');
+    points.push('Avec 0 $ ajoutÃ© par mois, lâ€™Ã©cart ne bouge pas â€” monte un peu pour voir un dÃ©lai.');
   } else if (moisPourCombler === 0) {
-    points.push('Rien à combler au rythme actuel.');
+    points.push('Rien Ã  combler au rythme actuel.');
   } else {
     points.push(
       `Au rythme de ${formatCad(epargneParMois)} / mois : environ ${formatDureeMois(moisPourCombler)}.`
@@ -165,26 +177,44 @@ function buildLecture({ cible, manquant, surplus, moisPourCombler, epargneParMoi
   }
 
   points.push(
-    'Sépare ce coussin du reste : compte accessible, pas ton REER ni un portefeuille volatil.'
+    'SÃ©pare ce coussin du reste : compte accessible, pas ton REER ni un portefeuille volatil.'
   );
 
   const long = moisPourCombler != null && moisPourCombler > 24;
   return {
-    headline: long ? 'Écart encore large — un palier d’abord' : 'Voici ton écart',
+    headline: long ? 'Ã‰cart encore large â€” un palier dâ€™abord' : 'Voici ton Ã©cart',
     detail: long
-      ? 'Pas besoin de tout remplir d’un coup. Un premier mois de dépenses de côté réduit déjà le stress ; tu montes ensuite.'
-      : 'Ajuste les montants — le délai et le rythme se mettent à jour tout de suite.',
+      ? 'Pas besoin de tout remplir dâ€™un coup. Un premier mois de dÃ©penses de cÃ´tÃ© rÃ©duit dÃ©jÃ  le stress ; tu montes ensuite.'
+      : 'Ajuste les montants â€” le dÃ©lai et le rythme se mettent Ã  jour tout de suite.',
     points,
     tone: 'warn',
   };
 }
 
-export function FondsUrgenceTool() {
+export function FondsUrgenceTool({ immersive = false } = {}) {
+  const location = useLocation();
   const [depensesMensuelles, setDepensesMensuelles] = useState('3500');
   const [moisCibles, setMoisCibles] = useState('6');
   const [dejaMisDeCote, setDejaMisDeCote] = useState('5000');
   const [epargneMensuelle, setEpargneMensuelle] = useState('300');
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_fonds-urgence_pdf');
+
+  const {
+    stepIndex,
+    currentStepId,
+    isResult,
+    questionCount,
+    progress: wizardProgress,
+    selectAndAdvance,
+    advanceFrom,
+    goBack,
+  } = useCampagneWizard(FONDS_STEP_IDS, {
+    onReachResult: () =>
+      trackEvent('select_content', {
+        content_type: 'tool_result',
+        item_id: 'campagne_fonds-urgence_result',
+      }),
+  });
 
   const depenses = parsePositive(depensesMensuelles, 0);
   const mois = parsePositive(moisCibles, 6);
@@ -235,17 +265,17 @@ export function FondsUrgenceTool() {
   const total = milestones.length;
 
   const statusDetail = !milestones[0].done
-    ? 'Indique tes dépenses essentielles et combien de mois tu vises.'
+    ? 'Indique tes dÃ©penses essentielles et combien de mois tu vises.'
     : atteint
-      ? 'Filet OK — 15 min pour trancher le surplus, ou PDF.'
+      ? 'Filet OK â€” 15 min pour trancher le surplus, ou PDF.'
       : moisPourCombler == null
-        ? 'Ajoute un montant mensuel pour estimer le délai — puis 15 min ou PDF.'
-        : 'Délai vu — 15 min pour un palier, ou PDF à garder.';
+        ? 'Ajoute un montant mensuel pour estimer le dÃ©lai â€” puis 15 min ou PDF.'
+        : 'DÃ©lai vu â€” 15 min pour un palier, ou PDF Ã  garder.';
 
   const dureeLabel = formatDureeMois(moisPourCombler);
   const moisPdfValue =
     moisPourCombler === null
-      ? 'Non estimable (épargne mensuelle = 0)'
+      ? 'Non estimable (Ã©pargne mensuelle = 0)'
       : dureeLabel || String(moisPourCombler);
 
   const showRythme12SousManquant =
@@ -256,47 +286,47 @@ export function FondsUrgenceTool() {
     if (atteint || surplus > 0) {
       return {
         tone: 'ok',
-        headline: 'Filet OK dans ce scénario.',
-        subline: `Environ ${formatCad(surplus)} de surplus vs la cible illustrée. 15 min pour trancher le prochain dollar : dettes chères, CELI ou REER — selon ta situation.`,
-        rdvLabel: 'Trancher le prochain dollar — 15 min',
+        headline: 'Filet OK dans ce scÃ©nario.',
+        subline: `Environ ${formatCad(surplus)} de surplus vs la cible illustrÃ©e. 15 min pour trancher le prochain dollar : dettes chÃ¨res, CELI ou REER â€” selon ta situation.`,
+        rdvLabel: 'Trancher le prochain dollar â€” 15 min',
       };
     }
     if (moisPourCombler != null && moisPourCombler > 24) {
       return {
         tone: 'warn',
-        headline: 'Pas besoin de tout remplir d’un coup.',
+        headline: 'Pas besoin de tout remplir dâ€™un coup.',
         subline: `Il te manque ${formatCad(manquant)}${
-          dureeLabel ? ` (~${dureeLabel} à ton rythme)` : ''
-        }. 15 min pour un premier palier — souvent un mois de dépenses — et où le garer.`,
-        rdvLabel: 'Réserver 15 minutes',
+          dureeLabel ? ` (~${dureeLabel} Ã  ton rythme)` : ''
+        }. 15 min pour un premier palier â€” souvent un mois de dÃ©penses â€” et oÃ¹ le garer.`,
+        rdvLabel: 'RÃ©server 15 minutes',
       };
     }
     return {
       tone: 'warn',
-      headline: `Ton écart : ${formatCad(manquant)}.`,
+      headline: `Ton Ã©cart : ${formatCad(manquant)}.`,
       subline: dureeLabel
-        ? `${dureeLabel} à ton rythme — 15 min pour fixer où garer le coussin et à quel rythme. Zéro pression.`
-        : '15 min pour fixer où garer le coussin et à quel rythme. Zéro pression.',
-      rdvLabel: 'Réserver 15 minutes',
+        ? `${dureeLabel} Ã  ton rythme â€” 15 min pour fixer oÃ¹ garer le coussin et Ã  quel rythme. ZÃ©ro pression.`
+        : '15 min pour fixer oÃ¹ garer le coussin et Ã  quel rythme. ZÃ©ro pression.',
+      rdvLabel: 'RÃ©server 15 minutes',
     };
   }, [cible, atteint, surplus, moisPourCombler, manquant, dureeLabel]);
 
-  const rdvPath = buildCampagneRdvPath('fonds-urgence');
+  const rdvPath = buildCampagneRdvPath('fonds-urgence', location.search);
 
   const handleDownload = () =>
     downloadPdf({
-      title: 'Résumé — fonds d’urgence',
+      title: 'RÃ©sumÃ© â€” fonds dâ€™urgence',
       filename: 'resume-fonds-urgence.pdf',
       sections: [
         {
-          heading: 'Tes entrées',
+          heading: 'Tes entrÃ©es',
           rows: [
             {
-              label: 'Dépenses essentielles / mois',
+              label: 'DÃ©penses essentielles / mois',
               value: formatCad(depenses),
             },
-            { label: 'Mois à couvrir', value: `${mois} mois` },
-            { label: 'Déjà de côté', value: formatCad(epargneActuelle) },
+            { label: 'Mois Ã  couvrir', value: `${mois} mois` },
+            { label: 'DÃ©jÃ  de cÃ´tÃ©', value: formatCad(epargneActuelle) },
             {
               label: 'Ajout possible / mois',
               value: formatCad(epargneParMois),
@@ -304,15 +334,15 @@ export function FondsUrgenceTool() {
           ],
         },
         {
-          heading: 'Résultats',
+          heading: 'RÃ©sultats',
           rows: [
-            { label: 'Montant à viser', value: formatCad(cible) },
+            { label: 'Montant Ã  viser', value: formatCad(cible) },
             {
               label: atteint ? 'Surplus' : 'Il te manque',
               value: formatCad(atteint ? surplus : manquant),
             },
             { label: 'Progression', value: `${pctVersCible} %` },
-            { label: 'Délai au rythme actuel', value: moisPdfValue },
+            { label: 'DÃ©lai au rythme actuel', value: moisPdfValue },
             ...(rythme12 > 0 && !atteint
               ? [{ label: 'Rythme pour ~12 mois', value: `${formatCad(rythme12)} / mois` }]
               : []),
@@ -326,7 +356,7 @@ export function FondsUrgenceTool() {
           })),
         },
         {
-          heading: 'À retenir',
+          heading: 'Ã€ retenir',
           rows: A_RETENIR.map((point, i) => ({
             label: `${i + 1}`,
             value: point,
@@ -334,24 +364,146 @@ export function FondsUrgenceTool() {
         },
       ],
       notes: [
-        'Fonds d’urgence = argent accessible si tu perds ton job ou un gros imprévu.',
-        'Illustration éducative seulement — pas un plan sur mesure.',
+        'Fonds dâ€™urgence = argent accessible si tu perds ton job ou un gros imprÃ©vu.',
+        'Illustration Ã©ducative seulement â€” pas un plan sur mesure.',
       ],
     });
+
+  if (immersive) {
+    return (
+      <div data-testid="tool-fonds-urgence">
+        <CampagneToolShell
+          immersive
+          titleAs="h1"
+          eyebrow="Fonds d'urgence"
+          title="Combien mettre de cÃ´tÃ© ?"
+          intro="Une question Ã  la fois. Ã€ la fin, on fixe ton coussin en 15 minutes."
+          disclaimer="Illustration Ã©ducative seulement â€” pas un plan sur mesure."
+          footer={null}
+        >
+          <WizardProgress
+            stepIndex={stepIndex}
+            questionCount={questionCount}
+            isResult={isResult}
+            resultLabel="Ton filet"
+            progress={wizardProgress}
+          />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+
+          {currentStepId === 'cible' ? (
+            <WizardStep id="cible">
+              <WizardStepHeading
+                title="Combien viser ?"
+                hint="DÃ©penses essentielles Ã— nombre de mois Ã  couvrir."
+              />
+              <Field id="fu-wiz-depenses" label="DÃ©penses essentielles / mois">
+                <MoneyInput
+                  id="fu-wiz-depenses"
+                  value={depensesMensuelles}
+                  onChange={setDepensesMensuelles}
+                  min={0}
+                  step="50"
+                  placeholder="3500"
+                />
+              </Field>
+              <WizardChoiceList
+                name="mois"
+                value={moisCibles}
+                options={MOIS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                onSelect={(v) => selectAndAdvance('cible', () => setMoisCibles(v))}
+              />
+            </WizardStep>
+          ) : null}
+
+          {currentStepId === 'situation' ? (
+            <WizardStep id="situation">
+              <WizardStepHeading
+                title="OÃ¹ tu en es ?"
+                hint="Ce que tâ€™as dÃ©jÃ , et ce que tu peux ajouter chaque mois."
+              />
+              <Field id="fu-wiz-deja" label="DÃ©jÃ  de cÃ´tÃ© (accessible)">
+                <MoneyInput
+                  id="fu-wiz-deja"
+                  value={dejaMisDeCote}
+                  onChange={setDejaMisDeCote}
+                  min={0}
+                  step="100"
+                  placeholder="5000"
+                />
+              </Field>
+              <Field id="fu-wiz-epargne" label="Ajout possible / mois">
+                <MoneyInput
+                  id="fu-wiz-epargne"
+                  value={epargneMensuelle}
+                  onChange={setEpargneMensuelle}
+                  min={0}
+                  step="25"
+                  placeholder="300"
+                />
+              </Field>
+              <WizardContinueButton onClick={() => advanceFrom('situation')} />
+            </WizardStep>
+          ) : null}
+
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                Montant Ã  viser
+              </p>
+              <p className="font-heading mt-1 text-3xl font-bold text-dark">
+                {formatCad(cible)}
+              </p>
+              <p className="mt-2 text-sm text-prestige-taupe">{lecture.headline}</p>
+              <ul className="mt-4 space-y-2">
+                {lecture.points.map((p) => (
+                  <li key={p} className="flex gap-2.5 text-sm text-prestige-taupe">
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                      aria-hidden
+                    />
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+              {softClose ? (
+                <div className="mt-5">
+                  <ToolSoftClose
+                    headline={softClose.headline}
+                    subline={softClose.subline}
+                    rdvPath={rdvPath}
+                    rdvLabel={softClose.rdvLabel}
+                    onRdvClick={() =>
+                      trackRendezVousClick('campagne_fonds-urgence_rdv_outil')
+                    }
+                    onPdf={handleDownload}
+                    pdfBusy={busy}
+                    tone={softClose.tone}
+                  />
+                </div>
+              ) : null}
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="tool-fonds-urgence">
       <CampagneToolShell
-        title="Combien mettre de côté ?"
-        intro="Un fonds d’urgence, c’est de l’argent accessible si tu perds ton job ou qu’un gros imprévu arrive. On calcule la cible, l’écart, et en combien de temps tu peux y arriver."
-        disclaimer="Illustration éducative seulement — pas un plan sur mesure. L’argent doit rester accessible : pas un conseil de placement."
+        immersive={false}
+        titleAs="h2"
+        eyebrow="Outil interactif"
+        title="Combien mettre de cÃ´tÃ© ?"
+        intro="Un fonds dâ€™urgence, câ€™est de lâ€™argent accessible si tu perds ton job ou quâ€™un gros imprÃ©vu arrive. On calcule la cible, lâ€™Ã©cart, et en combien de temps tu peux y arriver."
+        disclaimer="Illustration Ã©ducative seulement â€” pas un plan sur mesure. Lâ€™argent doit rester accessible : pas un conseil de placement."
         footer={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm leading-relaxed text-prestige-taupe">{statusDetail}</p>
             <ToolDownloadPdf
               busy={busy}
               onClick={handleDownload}
-              label="Télécharger mon résumé PDF"
+              label="TÃ©lÃ©charger mon rÃ©sumÃ© PDF"
               variant="ghost"
             />
           </div>
@@ -387,8 +539,8 @@ export function FondsUrgenceTool() {
             {doneCount}/{total} blocs remplis
             {cible > 0
               ? atteint
-                ? ' · filet atteint dans ce scénario.'
-                : ` · il manque ${formatCad(manquant)}.`
+                ? ' Â· filet atteint dans ce scÃ©nario.'
+                : ` Â· il manque ${formatCad(manquant)}.`
               : '.'}
           </p>
         </div>
@@ -397,13 +549,13 @@ export function FondsUrgenceTool() {
           <Block
             step={1}
             title="Combien viser"
-            subtitle="Dépenses essentielles × nombre de mois à couvrir."
+            subtitle="DÃ©penses essentielles Ã— nombre de mois Ã  couvrir."
             done={milestones[0].done}
           >
             <Field
               id="fu-depenses"
-              label="Dépenses essentielles / mois"
-              hint="Loyer, bouffe, transport, assurances, minimums de dettes — pas les sorties."
+              label="DÃ©penses essentielles / mois"
+              hint="Loyer, bouffe, transport, assurances, minimums de dettes â€” pas les sorties."
             >
               <MoneyInput
                 id="fu-depenses"
@@ -416,8 +568,8 @@ export function FondsUrgenceTool() {
             </Field>
             <Field
               id="fu-mois"
-              label="Mois à couvrir"
-              hint="3–6 mois si le revenu est stable ; plus si autonome, contractuel ou un seul salaire."
+              label="Mois Ã  couvrir"
+              hint="3â€“6 mois si le revenu est stable ; plus si autonome, contractuel ou un seul salaire."
             >
               <select
                 id="fu-mois"
@@ -435,13 +587,13 @@ export function FondsUrgenceTool() {
             <div className="sm:col-span-2">
               <div className="rounded-2xl bg-gradient-to-br from-primary/[0.04] to-secondary/[0.06] px-4 py-3">
                 <p className="text-xs font-medium uppercase tracking-wide text-secondary">
-                  Montant à viser
+                  Montant Ã  viser
                 </p>
                 <p className="font-heading mt-1 text-xl font-bold tabular-nums text-dark">
                   {formatCad(cible)}
                 </p>
                 <p className="mt-0.5 text-xs text-prestige-taupe">
-                  {mois} mois × {formatCad(depenses)}
+                  {mois} mois Ã— {formatCad(depenses)}
                 </p>
               </div>
             </div>
@@ -449,14 +601,14 @@ export function FondsUrgenceTool() {
 
           <Block
             step={2}
-            title="Où tu en es"
-            subtitle="Ce que t’as déjà d’accessible, et ce que tu peux ajouter chaque mois."
+            title="OÃ¹ tu en es"
+            subtitle="Ce que tâ€™as dÃ©jÃ  dâ€™accessible, et ce que tu peux ajouter chaque mois."
             done={milestones[1].done}
           >
             <Field
               id="fu-deja"
-              label="Déjà de côté (accessible)"
-              hint="Compte d’épargne, liquidités — pas ton REER ni un portefeuille long terme."
+              label="DÃ©jÃ  de cÃ´tÃ© (accessible)"
+              hint="Compte dâ€™Ã©pargne, liquiditÃ©s â€” pas ton REER ni un portefeuille long terme."
             >
               <MoneyInput
                 id="fu-deja"
@@ -501,7 +653,7 @@ export function FondsUrgenceTool() {
             <div className="mb-3">
               <h3 className="font-heading text-base font-semibold text-dark">En clair</h3>
               <p className="mt-0.5 text-sm text-prestige-taupe">
-                Écart, délai, et quoi retenir — sans jargon.
+                Ã‰cart, dÃ©lai, et quoi retenir â€” sans jargon.
               </p>
             </div>
 
@@ -521,7 +673,7 @@ export function FondsUrgenceTool() {
                 {atteint ? formatCad(surplus) : formatCad(manquant)}
               </p>
               <p className="mt-1 text-sm font-medium text-dark">
-                {atteint ? 'de surplus vs la cible' : 'à combler'}
+                {atteint ? 'de surplus vs la cible' : 'Ã  combler'}
               </p>
               {showRythme12SousManquant ? (
                 <p className="mt-1.5 text-sm font-bold text-dark">
@@ -551,26 +703,26 @@ export function FondsUrgenceTool() {
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <Metric
-                label="Délai au rythme actuel"
-                value={dureeLabel ?? '—'}
+                label="DÃ©lai au rythme actuel"
+                value={dureeLabel ?? 'â€”'}
                 detail={
                   moisPourCombler === null
-                    ? 'Monte l’ajout mensuel pour voir un délai.'
+                    ? 'Monte lâ€™ajout mensuel pour voir un dÃ©lai.'
                     : moisPourCombler === 0
-                      ? 'Rien à combler.'
-                      : `À ${formatCad(epargneParMois)} / mois.`
+                      ? 'Rien Ã  combler.'
+                      : `Ã€ ${formatCad(epargneParMois)} / mois.`
                 }
                 tone={atteint ? 'ok' : moisPourCombler == null || moisPourCombler > 24 ? 'warn' : 'default'}
               />
               <Metric
                 label={atteint ? 'Filet' : 'Pour y arriver en ~12 mois'}
-                value={atteint ? 'Atteint' : rythme12 > 0 ? formatCad(rythme12) : '—'}
+                value={atteint ? 'Atteint' : rythme12 > 0 ? formatCad(rythme12) : 'â€”'}
                 detail={
                   atteint
-                    ? 'Cible illustrée déjà couverte.'
+                    ? 'Cible illustrÃ©e dÃ©jÃ  couverte.'
                     : rythme12 > 0
                       ? 'Par mois, illustration seulement.'
-                      : 'Complète la cible pour voir un rythme.'
+                      : 'ComplÃ¨te la cible pour voir un rythme.'
                 }
                 tone={atteint ? 'ok' : 'default'}
               />
@@ -589,7 +741,7 @@ export function FondsUrgenceTool() {
                   }
                   onPdf={handleDownload}
                   pdfBusy={busy}
-                  pdfLabel="Télécharger mon résumé PDF"
+                  pdfLabel="TÃ©lÃ©charger mon rÃ©sumÃ© PDF"
                 />
               </div>
             ) : null}
@@ -597,7 +749,7 @@ export function FondsUrgenceTool() {
         </div>
 
         <div className="mt-8 rounded-2xl bg-prestige-beige/35 px-5 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-secondary">À retenir</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-secondary">Ã€ retenir</p>
           <ul className="mt-3 space-y-2">
             {A_RETENIR.map((point) => (
               <li key={point} className="flex gap-2.5 text-sm leading-relaxed text-prestige-taupe">

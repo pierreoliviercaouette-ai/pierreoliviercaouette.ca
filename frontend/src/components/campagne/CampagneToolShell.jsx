@@ -11,37 +11,78 @@ export function CampagneToolShell({
   children,
   disclaimer = 'Illustration éducative seulement — pas un conseil personnalisé.',
   footer = null,
+  /** Immersive = plein écran mobile (pas de carte landing). */
+  immersive = false,
+  eyebrow = 'Outil interactif',
+  titleAs = 'h2',
 }) {
+  const TitleTag = titleAs === 'h1' ? 'h1' : 'h2';
+
   return (
     <section
       id="outil"
-      className="scroll-mt-28 overflow-hidden rounded-3xl border border-prestige-beige/80 bg-white shadow-[0_12px_40px_rgba(1,35,63,0.06)]"
+      className={
+        immersive
+          ? 'scroll-mt-20 bg-white'
+          : 'scroll-mt-28 overflow-hidden rounded-3xl border border-prestige-beige/80 bg-white shadow-[0_12px_40px_rgba(1,35,63,0.06)]'
+      }
       data-testid="campagne-ads-tool"
+      data-layout={immersive ? 'immersive' : 'card'}
       aria-labelledby="campagne-tool-title"
     >
-      <div className="border-b border-prestige-beige/80 bg-gradient-to-br from-primary/[0.04] via-white to-secondary/[0.06] px-5 py-5 md:px-8 md:py-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-          Outil interactif
-        </p>
-        <h2
+      <div
+        className={
+          immersive
+            ? 'border-b border-prestige-beige/60 bg-gradient-to-br from-primary/[0.05] via-white to-secondary/[0.06] px-4 pb-4 pt-5'
+            : 'border-b border-prestige-beige/80 bg-gradient-to-br from-primary/[0.04] via-white to-secondary/[0.06] px-5 py-5 md:px-8 md:py-6'
+        }
+      >
+        {eyebrow ? (
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+            {eyebrow}
+          </p>
+        ) : null}
+        <TitleTag
           id="campagne-tool-title"
-          className="font-heading mt-2 text-xl font-bold text-dark md:text-2xl"
+          className={`font-heading font-bold text-dark ${
+            immersive
+              ? `${eyebrow ? 'mt-2' : ''} text-2xl leading-tight`
+              : 'mt-2 text-xl md:text-2xl'
+          }`}
         >
           {title}
-        </h2>
+        </TitleTag>
         {intro ? (
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-prestige-taupe md:text-base">
+          <p
+            className={`mt-2 max-w-2xl leading-relaxed text-prestige-taupe ${
+              immersive ? 'text-sm' : 'text-sm md:text-base'
+            }`}
+          >
             {intro}
           </p>
         ) : null}
       </div>
-      <div className="px-5 py-6 md:px-8 md:py-7">{children}</div>
+      <div className={immersive ? 'px-4 py-5' : 'px-5 py-6 md:px-8 md:py-7'}>{children}</div>
       {footer ? (
-        <div className="border-t border-prestige-beige/80 bg-gray-50/70 px-5 py-5 md:px-8">
+        <div
+          className={
+            immersive
+              ? 'border-t border-prestige-beige/60 bg-gray-50/70 px-4 py-4'
+              : 'border-t border-prestige-beige/80 bg-gray-50/70 px-5 py-5 md:px-8'
+          }
+        >
           {footer}
         </div>
       ) : null}
-      <p className="px-5 pb-5 text-xs leading-relaxed text-prestige-taupe/80 md:px-8">{disclaimer}</p>
+      <p
+        className={
+          immersive
+            ? 'px-4 pb-5 text-xs leading-relaxed text-prestige-taupe/80'
+            : 'px-5 pb-5 text-xs leading-relaxed text-prestige-taupe/80 md:px-8'
+        }
+      >
+        {disclaimer}
+      </p>
     </section>
   );
 }

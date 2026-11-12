@@ -15,6 +15,15 @@ import {
   ToolClimaxReveal,
   ToolSoftClose,
 } from '../CampagneToolShell';
+import {
+  useCampagneWizard,
+  WizardProgress,
+  WizardBackButton,
+  WizardChoiceList,
+  WizardContinueButton,
+  WizardStep,
+  WizardStepHeading,
+} from '../CampagneWizard';
 
 const PROFIL_OPTIONS = [
   { value: 'prudent', hint: 'Moins de hauts et de bas' },
@@ -149,7 +158,9 @@ function parsePctInput(raw, fallbackRate) {
   return n / 100;
 }
 
-export function ComparateurRendementsTool() {
+const COMPARATEUR_STEP_IDS = ['chiffres', 'profil', 'result'];
+
+export function ComparateurRendementsTool({ immersive = false } = {}) {
   const location = useLocation();
   const [montantInitial, setMontantInitial] = useState('10000');
   const [cotisationMensuelle, setCotisationMensuelle] = useState('200');
@@ -160,6 +171,12 @@ export function ComparateurRendementsTool() {
   );
   const [tauxBanqueManuel, setTauxBanqueManuel] = useState(false);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_comparateur-rendements_pdf');
+  const {
+    stepIndex, currentStepId, isResult, questionCount, progress: wizardProgress,
+    selectAndAdvance, advanceFrom, goBack,
+  } = useCampagneWizard(COMPARATEUR_STEP_IDS, {
+    onReachResult: () => trackEvent('select_content', { content_type: 'tool_result', item_id: 'campagne_comparateur-rendements_result' }),
+  });
   const { asOfLabel, getIaPct, ready: portfoliosReady } = useModelPortfolioReturns();
   const resultTrackedRef = useRef(false);
 
@@ -319,6 +336,61 @@ export function ComparateurRendementsTool() {
     annees === '20' &&
     profil === 'equilibre' &&
     !tauxBanqueManuel;
+
+
+  /* immersive-wizard */
+  if (immersive) {
+    return (
+      <div data-testid="tool-comparateur-rendements">
+        <CampagneToolShell immersive titleAs="h1" eyebrow="Rendements" title="Banque vs modèles — même départ" intro="Une question à la fois. À la fin, on lit l’écart en 15 minutes." disclaimer="Illustration éducative seulement." footer={null}>
+          <WizardProgress stepIndex={stepIndex} questionCount={questionCount} isResult={isResult} resultLabel="L’écart" progress={wizardProgress} />
+          {!isResult && stepIndex > 0 ? <WizardBackButton onClick={goBack} /> : null}
+          {currentStepId === 'chiffres' ? (
+            <WizardStep id="chiffres">
+              <WizardStepHeading title="Tes chiffres de départ" hint="Même départ des deux côtés." />
+              <Field id="cr-wiz-init" label="Montant initial">
+                <input id="cr-wiz-init" type="number" value={montantInitial} onChange={(e) => setMontantInitial(e.target.value)} className={inputClass} />
+              </Field>
+              <Field id="cr-wiz-mens" label="Cotisation mensuelle">
+                <input id="cr-wiz-mens" type="number" value={cotisationMensuelle} onChange={(e) => setCotisationMensuelle(e.target.value)} className={inputClass} />
+              </Field>
+              <Field id="cr-wiz-ans" label="Horizon (années)">
+                <input id="cr-wiz-ans" type="number" value={annees} onChange={(e) => setAnnees(e.target.value)} className={inputClass} />
+              </Field>
+              <WizardContinueButton onClick={() => advanceFrom('chiffres')} />
+            </WizardStep>
+          ) : null}
+          {currentStepId === 'profil' ? (
+            <WizardStep id="profil">
+              <WizardStepHeading title="Profil à risque égal" hint="Même profil des deux côtés." />
+              <WizardChoiceList
+                name="profil"
+                value={profil}
+                options={PROFIL_OPTIONS.map((o) => ({ value: o.value || o.id, label: o.label }))}
+                onSelect={(v) => selectAndAdvance('profil', () => setProfil(v))}
+              />
+            </WizardStep>
+          ) : null}
+          {isResult ? (
+            <WizardStep id="result">
+              <p className="font-heading text-3xl font-bold text-dark">Écart ~{formatCad(ecart)}</p>
+              <div className="mt-5">
+                <ToolSoftClose
+                  headline={softCloseHeadline}
+                  subline="On colle ça à ton relevé en 15 minutes — zéro pression."
+                  rdvPath={rdvPath}
+                  rdvLabel="Lire l’écart en 15 min"
+                  onRdvClick={() => trackRendezVousClick('campagne_comparateur-rendements_rdv_outil')}
+                  onPdf={handleDownload}
+                  pdfBusy={busy}
+                />
+              </div>
+            </WizardStep>
+          ) : null}
+        </CampagneToolShell>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="tool-comparateur-rendements">

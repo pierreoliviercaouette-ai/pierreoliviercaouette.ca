@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Check, AlertTriangle } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, Check, AlertTriangle } from 'lucide-react';
 import { useCampagneToolPdf } from '../../../hooks/useCampagneToolPdf';
 import { buildCampagneRdvPath } from '../../../data/campagneAdsLandings';
 import { trackEvent, trackRendezVousClick } from '../../../lib/analytics';
 import { formatCad } from '../../tools/format';
-import { CampagneToolShell, ToolSoftClose } from '../CampagneToolShell';
+import { CampagneToolShell, ToolDownloadPdf } from '../CampagneToolShell';
 
-const TRANCHE_OPTIONS = [
-  { value: 'faible', label: 'Faible', hint: '< 30 %' },
-  { value: 'moyenne', label: 'Moyenne', hint: '30–40 %' },
-  { value: 'elevee', label: 'Élevée', hint: '> 40 %' },
+/** Salaire annuel approx. → même logique interne faible / moyenne / élevée. */
+const SALAIRE_OPTIONS = [
+  { value: 'faible', label: 'Moins de 55 000 $', hint: '/ an' },
+  { value: 'moyenne', label: '55 000 $ – 100 000 $', hint: '/ an' },
+  { value: 'elevee', label: 'Plus de 100 000 $', hint: '/ an' },
 ];
 
 const HORIZON_OPTIONS = [
@@ -30,10 +31,16 @@ const MATCHING_OPTIONS = [
   { value: 'je_sais_pas', label: 'Je sais pas' },
 ];
 
-const TRANCHE_PDF = [
-  { value: 'faible', label: 'Faible (< 30 %)' },
-  { value: 'moyenne', label: 'Moyenne (30–40 %)' },
-  { value: 'elevee', label: 'Élevée (> 40 %)' },
+const MATCH_MAX_OPTIONS = [
+  { value: 'oui', label: 'Oui, je vise le match' },
+  { value: 'non', label: 'Pas encore' },
+  { value: 'je_sais_pas', label: 'Je sais pas' },
+];
+
+const SALAIRE_PDF = [
+  { value: 'faible', label: 'Moins de 55 000 $ / an' },
+  { value: 'moyenne', label: '55 000 $ – 100 000 $ / an' },
+  { value: 'elevee', label: 'Plus de 100 000 $ / an' },
 ];
 
 const HORIZON_PDF = [
@@ -47,13 +54,17 @@ const LIQUIDITE_PDF = [
   { value: 'non', label: 'Non, je peux attendre' },
 ];
 
-const inputClass =
-  'w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.08)] transition focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(6,77,217,0.45)]';
+const MATCH_MAX_PDF = [
+  { value: 'oui', label: 'Oui, je vise le match' },
+  { value: 'non', label: 'Pas encore' },
+  { value: 'je_sais_pas', label: 'Je sais pas' },
+];
 
-const labelClass = 'mb-1.5 block text-xs font-medium text-prestige-taupe';
+const inputClass =
+  'w-full rounded-2xl border-0 bg-white px-4 py-3.5 text-base text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.08)] transition focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(6,77,217,0.45)]';
 
 function optionLabel(options, value) {
-  return options.find((o) => o.value === value)?.label || value;
+  return options.find((o) => o.value === value)?.label || value || '—';
 }
 
 function parseMonthly(raw) {
@@ -62,13 +73,24 @@ function parseMonthly(raw) {
   return n;
 }
 
+function isCeliLocked(answers) {
+  return answers.horizon === 'court' || answers.liquidite === 'oui';
+}
+
+/** Étapes dynamiques selon les réponses déjà données. */
+function buildStepIds(answers) {
+  const steps = ['horizon', 'liquidite', 'matching'];
+  if (answers.matching === 'oui') steps.push('matchMax');
+  steps.push('cotisation');
+  if (!isCeliLocked(answers)) steps.push('tranche');
+  steps.push('result');
+  return steps;
+}
+
 /**
  * Règles éducatives simples — pas un conseil personnalisé.
- * Priorité : liquidité / horizon court → CELI ; tranche élevée + horizon long → REER ;
- * sinon mixte avec répartition illustrative.
- * Matching employeur : nuance éducative seulement — ne force jamais 100 % REER.
  */
-function buildSuggestion({ tranche, horizon, liquidite, monthly, matching }) {
+function buildSuggestion({ tranche, horizon, liquidite, monthly, matching, matchMax }) {
   const cotisationHint =
     monthly > 0
       ? `Avec ~${Math.round(monthly)} $ / mois, l’ordre guide où part le prochain dollar.`
@@ -79,6 +101,11 @@ function buildSuggestion({ tranche, horizon, liquidite, monthly, matching }) {
     matchingRaisons.push(
       'Ton employeur matche souvent le REER : ce match-là se regarde souvent avant le débat perso CELI vs REER — on le chiffre en 15 minutes.'
     );
+    if (matchMax === 'non') {
+      matchingRaisons.push(
+        'Tu n’es pas encore au max du match : souvent, on regarde d’abord cette portion « gratuite » avant le reste.'
+      );
+    }
     if (liquidite === 'oui') {
       matchingRaisons.push(
         'Même avec un match, ton besoin d’accès peut justifier du CELI — on démêle ça en 15 min.'
@@ -106,7 +133,9 @@ function buildSuggestion({ tranche, horizon, liquidite, monthly, matching }) {
     };
   }
 
-  if (tranche === 'elevee' && horizon === 'long') {
+  const effectiveTranche = tranche || 'moyenne';
+
+  if (effectiveTranche === 'elevee' && horizon === 'long') {
     return {
       key: 'reer',
       value: 'REER d’abord',
@@ -117,34 +146,33 @@ function buildSuggestion({ tranche, horizon, liquidite, monthly, matching }) {
       matchingNote: matching === 'oui',
       raisons: [
         ...matchingRaisons,
-        'Tranche élevée + horizon long : le report d’impôt du REER a souvent plus de sens.',
+        'Salaire plus élevé + horizon long : le report d’impôt du REER a souvent plus de sens.',
         'Tu laisses le temps au compte de travailler avant d’avoir besoin de l’argent.',
         cotisationHint,
       ],
     };
   }
 
-  // Mixte — répartition illustrative selon tranche / horizon
   let split = { celi: 50, reer: 50 };
   let leanLabel = '≈ 50 / 50';
   let leanDetail =
     'Un peu de CELI pour la flexibilité, un peu de REER pour le levier fiscal.';
 
-  if (tranche === 'faible') {
+  if (effectiveTranche === 'faible') {
     split = { celi: 70, reer: 30 };
     leanLabel = '≈ 70 % CELI / 30 % REER';
     leanDetail =
-      'Tranche plus basse : forcer le REER « parce que tout le monde le fait » n’est pas toujours le meilleur réflexe.';
-  } else if (tranche === 'elevee') {
+      'Salaire plus bas : forcer le REER « parce que tout le monde le fait » n’est pas toujours le meilleur réflexe.';
+  } else if (effectiveTranche === 'elevee') {
     split = { celi: 40, reer: 60 };
     leanLabel = '≈ 60 % REER / 40 % CELI';
     leanDetail =
-      'Tranche élevée, mais horizon pas encore très long : le REER pèse un peu plus, le CELI garde de la marge.';
+      'Salaire plus élevé, mais horizon pas encore très long : le REER pèse un peu plus, le CELI garde de la marge.';
   } else if (horizon === 'long') {
     split = { celi: 40, reer: 60 };
     leanLabel = '≈ 60 % REER / 40 % CELI';
     leanDetail =
-      'Horizon long + tranche moyenne : un peu plus de REER, sans tout y mettre.';
+      'Horizon long + salaire moyen : un peu plus de REER, sans tout y mettre.';
   }
 
   return {
@@ -157,71 +185,70 @@ function buildSuggestion({ tranche, horizon, liquidite, monthly, matching }) {
     matchingNote: matching === 'oui',
     raisons: [
       ...matchingRaisons,
-      'Pas de gagnant automatique : ça dépend de tes projets, de ton revenu demain, et de ce que t’as déjà.',
+      'Cette piste mixte change souvent avec ton matching, tes plafonds et ce que t’as déjà — d’où les 15 minutes.',
       leanDetail,
       cotisationHint,
     ],
   };
 }
 
-function softCloseCopy({ suggestion, monthly, celiAmt, reerAmt, pdfReady }) {
-  if (pdfReady) {
-    return {
-      headline: 'PDF prêt — 15 min pour le coller à ton dossier ?',
-      subline:
-        'Apporte ton résumé — matching employeur, plafonds, prochain dollar. Zéro pitch.',
-    };
+function openLoopGaps(suggestion, matching) {
+  const gaps = [
+    'Tes vrais plafonds REER / CELI (et ce que t’as déjà dedans)',
+    'Les règles exactes de ton matching employeur, s’il y en a un',
+  ];
+  if (suggestion.key === 'mixte') {
+    gaps.push('Le bon partage du prochain dollar selon tes projets réels');
+  } else if (suggestion.key === 'celi') {
+    gaps.push('Si le CELI reste #1 une fois le matching et tes comptes regardés');
+  } else {
+    gaps.push('Si le REER reste #1 avec ta vraie situation fiscale');
   }
+  if (matching === 'oui' || matching === 'je_sais_pas') {
+    gaps[1] =
+      matching === 'oui'
+        ? 'Combien ton employeur match vraiment — et jusqu’où cotiser pour le prendre'
+        : 'Si ton employeur matche (souvent ça change tout l’ordre)';
+  }
+  return gaps;
+}
 
+function conversionCopy({ suggestion, monthly, celiAmt, reerAmt }) {
   if (suggestion.key === 'mixte') {
     return {
-      headline:
-        monthly > 0
-          ? `Ton prioriseur dit Mixte — ~${formatCad(celiAmt)} CELI / ${formatCad(reerAmt)} REER`
-          : 'Ton prioriseur dit Mixte — à affiner',
+      headline: 'Attention — ce mixte n’est pas encore ton plan',
       subline:
         monthly > 0
-          ? `Pas de gagnant automatique — on colle l’ordre (~${formatCad(celiAmt)} CELI / ${formatCad(reerAmt)} REER) à tes projets et ton matching en 15 min.`
-          : 'Pas de gagnant automatique — on colle l’ordre mixte à tes projets et ton matching en 15 min.',
+          ? `Les ~${formatCad(celiAmt)} CELI / ${formatCad(reerAmt)} REER sont une piste. Sans matching ni plafonds, tu risques de mal placer le prochain dollar.`
+          : 'Cette piste mixte change souvent dès qu’on regarde matching et plafonds. Ne pars pas avec une demi-réponse.',
     };
   }
 
   if (suggestion.key === 'celi') {
     return {
-      headline: 'Piste CELI d’abord',
+      headline: 'Piste CELI — à valider avant de cotiser',
       subline:
-        'Piste CELI d’abord — en 15 min on vérifie avec tes plafonds, ton matching, et ce que t’as déjà.',
+        'L’outil ne voit pas ton matching ni tes droits. 15 minutes pour confirmer que le prochain dollar va au bon endroit.',
     };
   }
 
   return {
-    headline: 'Piste REER d’abord',
+    headline: 'Piste REER — à valider avant de cotiser',
     subline:
-      'Piste REER d’abord — en 15 min on valide le levier fiscal avec ta vraie tranche et ton dossier.',
+      'L’outil ne voit pas ton matching ni tes droits. 15 minutes pour confirmer que le prochain dollar va au bon endroit.',
   };
 }
 
-function Field({ id, label, hint, children, className = '' }) {
-  return (
-    <div className={`min-w-0 ${className}`}>
-      {id ? (
-        <label htmlFor={id} className={labelClass}>
-          {label}
-        </label>
-      ) : (
-        <p className={labelClass}>{label}</p>
-      )}
-      {children}
-      {hint ? <p className="mt-1.5 text-xs leading-relaxed text-prestige-taupe/80">{hint}</p> : null}
-    </div>
-  );
-}
-
-function ChoiceGroup({ name, options, value, onChange, columns = 3 }) {
-  const colClass = columns === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3';
+function ChoiceCards({ options, value, onChange, columns = 1 }) {
+  const colClass =
+    columns === 3
+      ? 'grid-cols-1 sm:grid-cols-3'
+      : columns === 2
+        ? 'grid-cols-1 sm:grid-cols-2'
+        : 'grid-cols-1';
 
   return (
-    <div className={`grid gap-2 ${colClass}`} role="radiogroup" aria-label={name}>
+    <div className={`grid gap-3 ${colClass}`} role="radiogroup">
       {options.map((opt) => {
         const selected = value === opt.value;
         return (
@@ -231,49 +258,25 @@ function ChoiceGroup({ name, options, value, onChange, columns = 3 }) {
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(opt.value)}
-            className={`rounded-xl px-3 py-2.5 text-left transition ${
+            className={`flex min-h-[3.25rem] w-full items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-left transition active:scale-[0.99] ${
               selected
-                ? 'bg-primary text-white shadow-sm'
-                : 'bg-white text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.08)] hover:shadow-[inset_0_0_0_1px_rgba(6,77,217,0.35)]'
+                ? 'bg-primary text-white shadow-md'
+                : 'bg-white text-dark shadow-[inset_0_0_0_1px_rgba(1,35,63,0.1)] hover:shadow-[inset_0_0_0_1px_rgba(6,77,217,0.4)]'
             }`}
           >
-            <span className="flex items-baseline justify-between gap-2">
-              <span className="text-sm font-semibold leading-tight">{opt.label}</span>
-              {opt.hint ? (
-                <span
-                  className={`shrink-0 text-[11px] leading-tight ${
-                    selected ? 'text-white/75' : 'text-prestige-taupe'
-                  }`}
-                >
-                  {opt.hint}
-                </span>
-              ) : null}
-            </span>
+            <span className="text-base font-semibold leading-snug">{opt.label}</span>
+            {opt.hint ? (
+              <span
+                className={`shrink-0 text-sm ${selected ? 'text-white/75' : 'text-prestige-taupe'}`}
+              >
+                {opt.hint}
+              </span>
+            ) : selected ? (
+              <Check className="h-5 w-5 shrink-0" strokeWidth={2.5} aria-hidden />
+            ) : null}
           </button>
         );
       })}
-    </div>
-  );
-}
-
-function Block({ step, title, subtitle, children, done }) {
-  return (
-    <div className="relative pl-11">
-      <div
-        className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
-          done
-            ? 'bg-primary text-white'
-            : 'bg-white text-prestige-taupe shadow-[inset_0_0_0_1px_rgba(1,35,63,0.12)]'
-        }`}
-        aria-hidden
-      >
-        {done ? <Check className="h-4 w-4" strokeWidth={2.5} /> : step}
-      </div>
-      <div className="mb-3">
-        <h3 className="font-heading text-base font-semibold text-dark">{title}</h3>
-        {subtitle ? <p className="mt-0.5 text-sm text-prestige-taupe">{subtitle}</p> : null}
-      </div>
-      {children}
     </div>
   );
 }
@@ -299,7 +302,9 @@ function ResultCard({ label, value, detail, tone = 'default', className = '' }) 
         {icon}
         <p className="text-xs font-medium uppercase tracking-wide text-prestige-taupe">{label}</p>
       </div>
-      <p className="font-heading mt-1.5 text-xl font-bold tabular-nums text-dark sm:text-2xl">{value}</p>
+      <p className="font-heading mt-1.5 text-xl font-bold tabular-nums text-dark sm:text-2xl">
+        {value}
+      </p>
       {detail ? <p className="mt-1.5 text-sm leading-relaxed text-prestige-taupe">{detail}</p> : null}
     </div>
   );
@@ -313,14 +318,12 @@ function SplitBar({ celiPct, reerPct }) {
           <div
             className="h-full bg-secondary transition-all duration-500 ease-out"
             style={{ width: `${celiPct}%` }}
-            title={`CELI ${celiPct} %`}
           />
         ) : null}
         {reerPct > 0 ? (
           <div
             className="h-full bg-primary transition-all duration-500 ease-out"
             style={{ width: `${reerPct}%` }}
-            title={`REER ${reerPct} %`}
           />
         ) : null}
       </div>
@@ -338,41 +341,69 @@ function SplitBar({ celiPct, reerPct }) {
   );
 }
 
-export function RetraiteReerCeliTool() {
+const STEP_COPY = {
+  horizon: {
+    title: 'Tu vas avoir besoin de cet argent…',
+    hint: 'Avant la retraite, ou pour un projet.',
+  },
+  liquidite: {
+    title: 'Tu veux pouvoir le ressortir facilement ?',
+    hint: 'Liquidité = accès sans te faire mal en impôts.',
+  },
+  matching: {
+    title: 'Ton employeur matche ou cotise déjà à un REER ?',
+    hint: 'Si oui, ça peut changer l’ordre du prochain dollar.',
+  },
+  matchMax: {
+    title: 'Tu cotises déjà assez pour prendre le match ?',
+    hint: 'Souvent, on regarde cette portion « gratuite » en premier.',
+  },
+  cotisation: {
+    title: 'Combien tu pourrais mettre de côté par mois ?',
+    hint: 'Optionnel — sert à illustrer le partage en dollars.',
+  },
+  tranche: {
+    title: 'Ton salaire annuel approx. est plutôt…',
+    hint: 'Ordre de grandeur — pas besoin du chiffre exact.',
+  },
+};
+
+export function RetraiteReerCeliTool({ immersive = false } = {}) {
   const location = useLocation();
-  const [tranche, setTranche] = useState('moyenne');
-  const [horizon, setHorizon] = useState('moyen');
-  const [liquidite, setLiquidite] = useState('non');
-  const [matching, setMatching] = useState('je_sais_pas');
-  const [cotisationMensuelle, setCotisationMensuelle] = useState('500');
+  const [answers, setAnswers] = useState({
+    horizon: null,
+    liquidite: null,
+    matching: null,
+    matchMax: null,
+    cotisation: '500',
+    tranche: null,
+  });
+  const [stepIndex, setStepIndex] = useState(0);
   const [pdfReady, setPdfReady] = useState(false);
+  const resultTrackedRef = useRef(false);
+  const advanceTimerRef = useRef(null);
   const { busy, downloadPdf } = useCampagneToolPdf('campagne_retraite-reer-celi_pdf');
 
-  const monthly = parseMonthly(cotisationMensuelle);
+  const stepIds = useMemo(() => buildStepIds(answers), [answers]);
+  const currentStepId = stepIds[Math.min(stepIndex, stepIds.length - 1)];
+  const isResult = currentStepId === 'result';
+  const questionSteps = stepIds.filter((id) => id !== 'result');
+  const progress = isResult
+    ? 100
+    : Math.round(((stepIndex + 1) / questionSteps.length) * 100);
+
+  const monthly = parseMonthly(answers.cotisation);
   const suggestion = buildSuggestion({
-    tranche,
-    horizon,
-    liquidite,
+    tranche: answers.tranche,
+    horizon: answers.horizon,
+    liquidite: answers.liquidite,
     monthly,
-    matching,
+    matching: answers.matching,
+    matchMax: answers.matchMax,
   });
 
   const celiAmt = monthly > 0 ? Math.round((monthly * suggestion.split.celi) / 100) : 0;
   const reerAmt = monthly > 0 ? Math.max(0, Math.round(monthly) - celiAmt) : 0;
-
-  const cotisationDisplay =
-    monthly >= 0 && String(cotisationMensuelle).trim() !== ''
-      ? formatCad(monthly)
-      : 'Non renseigné';
-
-  const isClear = suggestion.tone === 'ok';
-  const isNuance = suggestion.tone === 'nuance';
-  const answered = Boolean(tranche && horizon && liquidite);
-
-  const splitDetail =
-    monthly > 0
-      ? `Sur ${formatCad(monthly)} / mois → CELI ${formatCad(celiAmt)}, REER ${formatCad(reerAmt)}.`
-      : 'Indique un montant mensuel pour voir le partage en dollars.';
 
   const mixteWithDollars = suggestion.key === 'mixte' && monthly > 0;
   const snapshotDominant = mixteWithDollars
@@ -380,22 +411,95 @@ export function RetraiteReerCeliTool() {
     : suggestion.key === 'mixte'
       ? suggestion.leanLabel || suggestion.short
       : suggestion.short;
-  const snapshotSub =
-    mixteWithDollars
-      ? 'Mixte illustratif — CELI / REER'
-      : suggestion.key === 'mixte'
-        ? 'Mixte — à affiner'
-        : suggestion.value;
+  const snapshotSub = mixteWithDollars
+    ? 'Mixte illustratif — CELI / REER'
+    : suggestion.key === 'mixte'
+      ? 'Mixte — à coller à ton dossier'
+      : suggestion.value;
 
-  const { headline: softHeadline, subline: softSubline } = softCloseCopy({
+  const splitDetail =
+    monthly > 0
+      ? `Sur ${formatCad(monthly)} / mois → CELI ${formatCad(celiAmt)}, REER ${formatCad(reerAmt)}.`
+      : 'Indique un montant mensuel pour voir le partage en dollars.';
+
+  const { headline: convHeadline, subline: convSubline } = conversionCopy({
     suggestion,
     monthly,
     celiAmt,
     reerAmt,
-    pdfReady,
   });
+  const gaps = openLoopGaps(suggestion, answers.matching);
 
   const rdvPath = buildCampagneRdvPath('retraite-reer-celi', location.search);
+
+  const goToResultTracking = () => {
+    if (resultTrackedRef.current) return;
+    resultTrackedRef.current = true;
+    trackEvent('select_content', {
+      content_type: 'tool_result',
+      item_id: 'campagne_retraite-reer-celi_result',
+    });
+  };
+
+  const advanceFrom = (fromStepId, nextAnswers) => {
+    const nextSteps = buildStepIds(nextAnswers);
+    const fromIdx = nextSteps.indexOf(fromStepId);
+    const nextIdx = Math.min(fromIdx + 1, nextSteps.length - 1);
+    if (nextSteps[nextIdx] === 'result') goToResultTracking();
+    setStepIndex(nextIdx);
+  };
+
+  const selectAndAdvance = (field, value, fromStepId) => {
+    setPdfReady(false);
+    const nextAnswers = { ...answers, [field]: value };
+    if (field === 'matching' && value !== 'oui') {
+      nextAnswers.matchMax = null;
+    }
+    if (field === 'matching' && value === 'oui') {
+      trackEvent('select_content', {
+        content_type: 'tool_climax',
+        item_id: 'campagne_retraite-reer-celi_matching_oui',
+      });
+    }
+    setAnswers(nextAnswers);
+
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    advanceTimerRef.current = setTimeout(() => {
+      advanceFrom(fromStepId, nextAnswers);
+    }, 220);
+  };
+
+  const goBack = () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    setStepIndex((i) => Math.max(0, i - 1));
+  };
+
+  const skipCotisation = () => {
+    const nextAnswers = { ...answers, cotisation: '' };
+    setAnswers(nextAnswers);
+    setPdfReady(false);
+    advanceFrom('cotisation', nextAnswers);
+  };
+
+  const continueCotisation = () => {
+    setPdfReady(false);
+    advanceFrom('cotisation', answers);
+  };
+
+  const restart = () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    setAnswers({
+      horizon: null,
+      liquidite: null,
+      matching: null,
+      matchMax: null,
+      cotisation: '500',
+      tranche: null,
+    });
+    setStepIndex(0);
+    setPdfReady(false);
+    resultTrackedRef.current = false;
+  };
 
   const handleDownload = async () => {
     await downloadPdf({
@@ -405,26 +509,38 @@ export function RetraiteReerCeliTool() {
         {
           heading: 'Tes réponses',
           rows: [
-            {
-              label: "Tranche d'imposition",
-              value: optionLabel(TRANCHE_PDF, tranche),
-            },
-            {
-              label: 'Horizon',
-              value: optionLabel(HORIZON_PDF, horizon),
-            },
+            { label: 'Horizon', value: optionLabel(HORIZON_PDF, answers.horizon) },
             {
               label: 'Besoin de liquidité',
-              value: optionLabel(LIQUIDITE_PDF, liquidite),
+              value: optionLabel(LIQUIDITE_PDF, answers.liquidite),
             },
             {
               label: 'Matching employeur',
-              value: optionLabel(MATCHING_OPTIONS, matching),
+              value: optionLabel(MATCHING_OPTIONS, answers.matching),
             },
+            ...(answers.matching === 'oui'
+              ? [
+                  {
+                    label: 'Match déjà pris',
+                    value: optionLabel(MATCH_MAX_PDF, answers.matchMax),
+                  },
+                ]
+              : []),
             {
               label: 'Cotisation mensuelle possible',
-              value: cotisationDisplay,
+              value:
+                answers.cotisation.trim() === ''
+                  ? 'Non renseigné'
+                  : formatCad(monthly),
             },
+            ...(answers.tranche
+              ? [
+                  {
+                    label: 'Salaire annuel approx.',
+                    value: optionLabel(SALAIRE_PDF, answers.tranche),
+                  },
+                ]
+              : []),
           ],
         },
         {
@@ -458,59 +574,186 @@ export function RetraiteReerCeliTool() {
     setPdfReady(true);
   };
 
-  const updateField = (setter) => (value) => {
-    setPdfReady(false);
-    setter(value);
-  };
-
-  const handleMatchingChange = (value) => {
-    setPdfReady(false);
-    setMatching(value);
-    if (value === 'oui') {
-      trackEvent('select_content', {
-        content_type: 'tool_climax',
-        item_id: 'campagne_retraite-reer-celi_matching_oui',
-      });
-    }
-  };
+  const stepCopy = STEP_COPY[currentStepId];
 
   return (
     <div data-testid="tool-retraite-reer-celi">
       <CampagneToolShell
-        title="REER ou CELI en premier ?"
-        intro="Réponds. On te propose un ordre illustratif — et un partage du prochain dollar."
+        immersive={immersive}
+        titleAs={immersive ? 'h1' : 'h2'}
+        eyebrow={immersive ? 'REER · CELI' : 'Outil interactif'}
+        title={
+          immersive
+            ? 'REER ou CELI : où va le prochain dollar ?'
+            : 'Où va ton prochain dollar ?'
+        }
+        intro={
+          immersive
+            ? 'Une question à la fois. À la fin, on valide ton ordre en 15 minutes.'
+            : 'Une question à la fois — ton ordre REER / CELI se construit au fil des réponses.'
+        }
         disclaimer="Illustration éducative seulement. Pas un conseil personnalisé."
         footer={
-          <div className="space-y-3">
-            <ToolSoftClose
-              headline={softHeadline}
-              subline={softSubline}
-              rdvPath={rdvPath}
-              rdvLabel="Réserver 15 min avec mon résumé"
-              onRdvClick={() =>
-                trackRendezVousClick('campagne_retraite-reer-celi_rdv_tool')
-              }
-              onPdf={handleDownload}
-              pdfBusy={busy}
-              pdfLabel="Télécharger mon résumé PDF"
-            />
-            <p className="text-xs leading-relaxed text-prestige-taupe/80">
-              Prioriseur sans compte · PDF gratuit · 15 min soft · Illustration éducative. Pas un
-              conseil personnalisé. Titre : conseiller en sécurité financière.
+          immersive && !isResult ? null : (
+            <p className="text-sm leading-relaxed text-prestige-taupe">
+              {isResult
+                ? 'Illustration éducative — pas un conseil personnalisé. 15 min soft pour coller l’ordre à ton dossier.'
+                : 'Réponds — chaque choix adapte la suite.'}
             </p>
-          </div>
+          )
         }
       >
-        {/* Snapshot — climax $ pour mixte */}
-        <div className="mb-8">
-          <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
+        {/* Progress */}
+        <div className="mb-6">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+              {isResult
+                ? 'Ton ordre'
+                : `Question ${stepIndex + 1} / ${questionSteps.length}`}
+            </p>
+            <p className="text-xs text-prestige-taupe">{progress} %</p>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-prestige-beige/70">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-400 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {!isResult && stepIndex > 0 ? (
+          <button
+            type="button"
+            onClick={goBack}
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-prestige-taupe transition-colors hover:text-primary"
+            data-testid="retraite-wizard-back"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Retour
+          </button>
+        ) : null}
+
+        {/* Question steps */}
+        {!isResult && stepCopy ? (
+          <div
+            key={currentStepId}
+            className="campagne-climax-enter space-y-5"
+            data-testid={`retraite-step-${currentStepId}`}
+          >
+            <div>
+              <h3 className="font-heading text-xl font-bold leading-snug text-dark sm:text-2xl">
+                {stepCopy.title}
+              </h3>
+              {stepCopy.hint ? (
+                <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{stepCopy.hint}</p>
+              ) : null}
+            </div>
+
+            {currentStepId === 'horizon' ? (
+              <ChoiceCards
+                options={HORIZON_OPTIONS}
+                value={answers.horizon}
+                onChange={(v) => selectAndAdvance('horizon', v, 'horizon')}
+              />
+            ) : null}
+
+            {currentStepId === 'liquidite' ? (
+              <ChoiceCards
+                options={LIQUIDITE_OPTIONS}
+                value={answers.liquidite}
+                onChange={(v) => selectAndAdvance('liquidite', v, 'liquidite')}
+                columns={1}
+              />
+            ) : null}
+
+            {currentStepId === 'matching' ? (
+              <ChoiceCards
+                options={MATCHING_OPTIONS}
+                value={answers.matching}
+                onChange={(v) => selectAndAdvance('matching', v, 'matching')}
+                columns={1}
+              />
+            ) : null}
+
+            {currentStepId === 'matchMax' ? (
+              <ChoiceCards
+                options={MATCH_MAX_OPTIONS}
+                value={answers.matchMax}
+                onChange={(v) => selectAndAdvance('matchMax', v, 'matchMax')}
+                columns={1}
+              />
+            ) : null}
+
+            {currentStepId === 'cotisation' ? (
+              <div className="space-y-4">
+                <div className="relative">
+                  <input
+                    id="retraite-cotisation"
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step={25}
+                    className={`${inputClass} pr-10`}
+                    value={answers.cotisation}
+                    onChange={(e) => {
+                      setPdfReady(false);
+                      setAnswers((prev) => ({ ...prev, cotisation: e.target.value }));
+                    }}
+                    placeholder="500"
+                    autoFocus
+                  />
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-prestige-taupe">
+                    $
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2.5 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={continueCotisation}
+                    className="inline-flex w-full items-center justify-center rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-colors hover:bg-dark sm:w-auto"
+                    data-testid="retraite-cotisation-continue"
+                  >
+                    Continuer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={skipCotisation}
+                    className="inline-flex w-full items-center justify-center rounded-full border border-prestige-beige bg-white px-6 py-3.5 text-sm font-semibold text-dark transition-colors hover:border-primary/30 hover:text-primary sm:w-auto"
+                  >
+                    Passer
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {currentStepId === 'tranche' ? (
+              <ChoiceCards
+                options={SALAIRE_OPTIONS}
+                value={answers.tranche}
+                onChange={(v) => selectAndAdvance('tranche', v, 'tranche')}
+                columns={1}
+              />
+            ) : null}
+
+            {isCeliLocked(answers) &&
+            (currentStepId === 'matching' || currentStepId === 'matchMax') ? (
+              <p className="text-xs leading-relaxed text-prestige-taupe">
+                Avec ton horizon / besoin d’accès, on penche déjà CELI — le salaire sera sauté.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {/* Result */}
+        {isResult ? (
+          <div className="campagne-climax-enter space-y-6" data-testid="retraite-step-result">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
                 Ordre illustratif
               </p>
               <p
                 className={`font-heading mt-1 font-bold tracking-tight tabular-nums text-dark ${
-                  mixteWithDollars ? 'text-3xl sm:text-4xl' : 'text-2xl'
+                  mixteWithDollars ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'
                 }`}
               >
                 {snapshotDominant}
@@ -524,110 +767,16 @@ export function RetraiteReerCeliTool() {
                   Match employeur noté
                 </span>
               ) : null}
+              <SplitBar
+                key={`${suggestion.split.celi}-${suggestion.split.reer}`}
+                celiPct={suggestion.split.celi}
+                reerPct={suggestion.split.reer}
+              />
+              {monthly > 0 && !mixteWithDollars ? (
+                <p className="mt-2 text-xs text-prestige-taupe">{splitDetail}</p>
+              ) : null}
             </div>
-            {!mixteWithDollars && suggestion.key !== 'mixte' ? (
-              <p className="max-w-xs text-right text-sm text-prestige-taupe">{suggestion.value}</p>
-            ) : null}
-          </div>
-          <SplitBar
-            key={`${suggestion.split.celi}-${suggestion.split.reer}`}
-            celiPct={suggestion.split.celi}
-            reerPct={suggestion.split.reer}
-          />
-          {monthly > 0 && !mixteWithDollars ? (
-            <p className="mt-2 text-xs text-prestige-taupe">{splitDetail}</p>
-          ) : null}
-        </div>
 
-        <div className="relative space-y-8 before:absolute before:bottom-2 before:left-4 before:top-2 before:w-px before:bg-prestige-beige">
-          <Block
-            step={1}
-            title="Tes réponses"
-            subtitle="Tranche, horizon, liquidité, matching, et ce que tu peux mettre de côté."
-            done={answered}
-          >
-            <div className="space-y-5">
-              <Field
-                label="Ta tranche d’impôt est plutôt…"
-                hint="Ordre de grandeur — pas besoin du chiffre exact."
-              >
-                <ChoiceGroup
-                  name="Tranche d’imposition"
-                  options={TRANCHE_OPTIONS}
-                  value={tranche}
-                  onChange={updateField(setTranche)}
-                />
-              </Field>
-
-              <Field
-                label="Tu vas avoir besoin de cet argent…"
-                hint="Avant la retraite, ou pour un projet."
-              >
-                <ChoiceGroup
-                  name="Horizon"
-                  options={HORIZON_OPTIONS}
-                  value={horizon}
-                  onChange={updateField(setHorizon)}
-                />
-              </Field>
-
-              <Field label="Tu veux pouvoir le ressortir facilement ?">
-                <ChoiceGroup
-                  name="Liquidité"
-                  options={LIQUIDITE_OPTIONS}
-                  value={liquidite}
-                  onChange={updateField(setLiquidite)}
-                  columns={2}
-                />
-              </Field>
-
-              <Field
-                label="Ton employeur matche ou cotise déjà à un REER ?"
-                hint="Si oui, ça peut changer l’ordre du prochain dollar — on le quantifie en 15 min."
-              >
-                <ChoiceGroup
-                  name="Matching employeur"
-                  options={MATCHING_OPTIONS}
-                  value={matching}
-                  onChange={handleMatchingChange}
-                  columns={3}
-                />
-              </Field>
-
-              <Field
-                id="retraite-cotisation"
-                label="Combien tu pourrais mettre de côté par mois ?"
-                hint="Optionnel — sert à illustrer le partage en dollars."
-              >
-                <div className="relative max-w-xs">
-                  <input
-                    id="retraite-cotisation"
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step={25}
-                    className={`${inputClass} pr-8`}
-                    value={cotisationMensuelle}
-                    onChange={(e) => {
-                      setPdfReady(false);
-                      setCotisationMensuelle(e.target.value);
-                    }}
-                    placeholder="500"
-                  />
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-prestige-taupe">
-                    $
-                  </span>
-                </div>
-              </Field>
-            </div>
-          </Block>
-
-          <Block
-            step={2}
-            title="Ce que ça veut dire"
-            subtitle="Ordre, partage illustratif, et pourquoi."
-            done={answered}
-          >
             <div className="grid gap-3 sm:grid-cols-2">
               {suggestion.key === 'mixte' ? (
                 <>
@@ -650,7 +799,7 @@ export function RetraiteReerCeliTool() {
                     className="sm:col-span-2"
                     label="Ordre suggéré"
                     value={suggestion.value}
-                    detail="À valider avec ta vraie situation — projets, revenu, comptes déjà ouverts."
+                    detail="Piste seulement — matching et plafonds manquent encore."
                     tone="nuance"
                   />
                 </>
@@ -659,7 +808,7 @@ export function RetraiteReerCeliTool() {
                   <ResultCard
                     label="Ordre suggéré"
                     value={suggestion.value}
-                    detail="À valider avec ta vraie situation — projets, revenu, comptes déjà ouverts."
+                    detail="Piste seulement — matching et plafonds manquent encore."
                     tone={suggestion.tone}
                   />
                   <ResultCard
@@ -680,21 +829,105 @@ export function RetraiteReerCeliTool() {
               )}
             </div>
 
-            <ul className="mt-4 space-y-2.5">
+            <ul className="space-y-2.5">
               {suggestion.raisons.map((raison) => (
-                <li key={raison} className="flex gap-2.5 text-sm leading-relaxed text-prestige-taupe">
-                  <span
-                    className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
-                      isClear || isNuance ? 'bg-primary' : 'bg-prestige-taupe/50'
-                    }`}
-                    aria-hidden
-                  />
+                <li
+                  key={raison}
+                  className="flex gap-2.5 text-sm leading-relaxed text-prestige-taupe"
+                >
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
                   <span>{raison}</span>
                 </li>
               ))}
             </ul>
-          </Block>
-        </div>
+
+            <div
+              className="campagne-soft-close-enter space-y-4 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.08] via-white to-secondary/[0.08] px-4 py-5 shadow-[0_8px_28px_rgba(1,35,63,0.08)] md:px-5"
+              data-testid="retraite-rdv-tool"
+            >
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                  Prochaine étape
+                </p>
+                <p className="font-heading mt-1.5 text-lg font-bold leading-snug text-dark md:text-xl">
+                  {convHeadline}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-prestige-taupe">{convSubline}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-prestige-taupe">
+                  Ce que l’outil ne peut pas savoir
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {gaps.map((gap) => (
+                    <li
+                      key={gap}
+                      className="flex gap-2.5 text-sm leading-relaxed text-dark"
+                    >
+                      <span
+                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary"
+                        aria-hidden
+                      />
+                      <span>{gap}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-2xl bg-white/80 px-3 py-2.5 shadow-[inset_0_0_0_1px_rgba(1,35,63,0.06)]">
+                <img
+                  src="/seo/portrait.jpg"
+                  alt=""
+                  width={44}
+                  height={44}
+                  className="h-11 w-11 shrink-0 rounded-full object-cover"
+                  loading="lazy"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-dark">Pierre-Olivier Caouette</p>
+                  <p className="text-xs text-prestige-taupe">
+                    CSF · Victoriaville · 15 min, zéro pitch
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                to={rdvPath}
+                onClick={() =>
+                  trackRendezVousClick('campagne_retraite-reer-celi_rdv_tool')
+                }
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 text-base font-semibold text-white shadow-md transition-colors hover:bg-dark"
+                data-testid="campagne-tool-cta-rdv"
+              >
+                Valider mon ordre en 15 minutes
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </Link>
+              <p className="text-center text-xs leading-relaxed text-prestige-taupe">
+                Gratuit · sans pression · on colle l’ordre à ton dossier réel
+              </p>
+
+              <div className="flex flex-col items-stretch gap-2 border-t border-prestige-beige/80 pt-3 sm:flex-row sm:items-center sm:justify-between">
+                <ToolDownloadPdf
+                  onClick={handleDownload}
+                  busy={busy}
+                  label={
+                    pdfReady ? 'PDF prêt — télécharger à nouveau' : 'Garder mon résumé PDF'
+                  }
+                  variant="ghost"
+                />
+                <button
+                  type="button"
+                  onClick={restart}
+                  className="text-sm font-medium text-prestige-taupe underline-offset-2 hover:text-primary hover:underline"
+                  data-testid="retraite-wizard-restart"
+                >
+                  Recommencer
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </CampagneToolShell>
     </div>
   );
