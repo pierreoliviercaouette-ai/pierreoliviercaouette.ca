@@ -11,10 +11,17 @@ import { trackEvent } from '../lib/analytics';
 import { ToolShell } from '../components/tools/ToolShell';
 import { getToolView, hasToolView, runTool } from '../tools/registry';
 import { useModelPortfolioReturns } from '../hooks/useModelPortfolioReturns';
+import { useSeoMeta } from '../lib/seo';
 
 export const ToolDetail = () => {
   const { slug } = useParams();
   const { user, loading: authLoading } = useAuth();
+  useSeoMeta({
+    title: 'Outil financier | Espace membre',
+    description: 'Calculateur réservé à l’espace membre. Résultat indicatif, sans indexation.',
+    canonicalPath: `/outils/${slug || ''}`,
+    noindex: true,
+  });
   const navigate = useNavigate();
   const [tool, setTool] = useState(null);
   const [loading, setLoading] = useState(true);

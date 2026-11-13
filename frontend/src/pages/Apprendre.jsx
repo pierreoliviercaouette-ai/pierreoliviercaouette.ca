@@ -10,6 +10,7 @@ import {
 } from '../data/formations';
 import { useFormationProgress } from '../hooks/useFormationProgress';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
+import { getStaticSeo } from '../data/staticSeoPages';
 import { useSeoMeta } from '../lib/seo';
 
 export function Apprendre() {
@@ -21,13 +22,14 @@ export function Apprendre() {
   const doneCount = all.filter((f) => isComplete(f.id)).length;
   const progressPct = total ? Math.round((doneCount / total) * 100) : 0;
 
+  const apprendreSeo = getStaticSeo('/apprendre');
   useSeoMeta({
     title: isPrive
       ? 'Apprendre | Stratégies patrimoniales et corporatives'
-      : 'Apprendre | Épargne et protections — capsules courtes',
+      : apprendreSeo.title,
     description: isPrive
       ? 'Sujets courts pour comprendre assurances, fiscalité et stratégies d’entreprise — à votre rythme.'
-      : 'Sujets courts pour comprendre le CELI, le REER et les assurances — éducation claire, sans jargon.',
+      : apprendreSeo.description,
     canonicalPath: '/apprendre',
   });
 

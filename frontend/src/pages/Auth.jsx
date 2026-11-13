@@ -7,8 +7,15 @@ import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
+import { useSeoMeta } from '../lib/seo';
 
 export const Login = () => {
+  useSeoMeta({
+    title: 'Connexion | Espace membre',
+    description: 'Connexion à l’espace membre.',
+    canonicalPath: '/connexion',
+    noindex: true,
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -142,6 +149,12 @@ export const Login = () => {
 };
 
 export const Register = () => {
+  useSeoMeta({
+    title: 'Inscription | Espace membre',
+    description: 'Créer un espace membre.',
+    canonicalPath: '/inscription',
+    noindex: true,
+  });
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',

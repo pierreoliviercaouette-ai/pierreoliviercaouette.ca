@@ -19,6 +19,7 @@ import {
   COMPARATEUR_RENDEMENTS_META,
   COMPARATEUR_RENDEMENTS_HTML,
 } from '../data/comparateurRendementsTool';
+import { useSeoMeta } from '../lib/seo';
 
 const CONTACT_STATUS_LABELS = {
   new: 'Nouveau',
@@ -44,6 +45,12 @@ const contactStatusBadgeClass = (status) => {
 };
 
 export const Admin = () => {
+  useSeoMeta({
+    title: 'Administration',
+    description: 'Espace d’administration.',
+    canonicalPath: '/admin',
+    noindex: true,
+  });
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('tools');

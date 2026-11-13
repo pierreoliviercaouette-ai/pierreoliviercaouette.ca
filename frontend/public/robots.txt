@@ -1,4 +1,5 @@
 # https://www.pierreoliviercaouette.ca
+# Index pour les assistants : https://www.pierreoliviercaouette.ca/llms.txt
 User-agent: *
 Allow: /
 

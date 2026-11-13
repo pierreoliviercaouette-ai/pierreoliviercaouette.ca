@@ -16,6 +16,7 @@ import {
   GitBranch,
 } from 'lucide-react';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
+import { getStaticSeo } from '../data/staticSeoPages';
 import { DEFAULT_OG_IMAGE, useSeoMeta } from '../lib/seo';
 import { AMF_REGISTRE_URL } from '../lib/branding';
 import { FormationsTeaser } from '../components/formations/FormationsTeaser';
@@ -726,10 +727,10 @@ function CtaSection() {
 }
 
 export function PatrimoineHome() {
+  const patrimoineSeo = getStaticSeo('/patrimoine');
   useSeoMeta({
-    title: 'Patrimoine et stratégies avancées | En chemin ou déjà là',
-    description:
-      'Stratégies patrimoniales pour professionnels et entrepreneurs : en voie d’un haut niveau d’actifs ou déjà sur place. Exemples concrets et consultation gratuite.',
+    title: patrimoineSeo.title,
+    description: patrimoineSeo.description,
     canonicalPath: '/patrimoine',
     image: DEFAULT_OG_IMAGE,
     imageAlt:

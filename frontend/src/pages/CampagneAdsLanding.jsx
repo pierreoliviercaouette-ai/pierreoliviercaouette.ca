@@ -15,7 +15,9 @@ import {
 } from '../data/campagneAdsLandings';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
-import { useSeoMeta } from '../lib/seo';
+import { useFaqSchema, useSeoMeta } from '../lib/seo';
+
+const EMPTY_FAQ = [];
 
 /**
  * Landing conversion Meta Ads (/campagnes/:slug).
@@ -27,6 +29,7 @@ export function CampagneAdsLanding() {
   const location = useLocation();
   const item = getCampagneAdsLanding(slug);
   const isMobile = useMediaQuery('(max-width: 767px)');
+  const faqItems = item?.faq ?? EMPTY_FAQ;
 
   useSeoMeta(
     item
@@ -41,6 +44,8 @@ export function CampagneAdsLanding() {
           canonicalPath: '/campagnes',
         }
   );
+
+  useFaqSchema(faqItems);
 
   useEffect(() => {
     if (!item) return;

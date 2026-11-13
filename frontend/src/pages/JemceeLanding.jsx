@@ -6,6 +6,7 @@ import { JemceeRendementsTeaser } from '../components/jemcee/JemceeRendementsTea
 import { AppleCinematicScroll } from '../components/jemcee/AppleCinematicScroll';
 import { JEMCEE_SEQUENCE } from '../data/jemceeSequence';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
+import { getStaticSeo } from '../data/staticSeoPages';
 import { useSeoMeta } from '../lib/seo';
 
 const PHONE = '819 806-1164';
@@ -128,10 +129,10 @@ function trackCta(itemId) {
 }
 
 export const JemceeLanding = () => {
+  const jemceeSeo = getStaticSeo('/jemcee');
   useSeoMeta({
-    title: 'Pilotez votre patrimoine | Pierre-Olivier Caouette',
-    description:
-      'Performance, protection et accompagnement : une approche rallye de la sécurité financière. Rendements, optimisation fiscale, gestion du risque et planification de retraite.',
+    title: jemceeSeo.title,
+    description: jemceeSeo.description,
     canonicalPath: '/jemcee',
   });
 

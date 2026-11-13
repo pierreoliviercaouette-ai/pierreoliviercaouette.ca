@@ -26,6 +26,7 @@ export const Profile = () => {
     title: 'Mon profil | Espace membre',
     description: 'Historique de vos outils, notifications, et raccourci vers le programme de recommandations.',
     canonicalPath: '/profil',
+    noindex: true,
   });
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');

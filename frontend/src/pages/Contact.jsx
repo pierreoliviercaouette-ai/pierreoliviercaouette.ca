@@ -11,6 +11,7 @@ import { trackEvent, trackRendezVousClick } from '../lib/analytics';
 import { getMetaClickCookies } from '../lib/metaCookies';
 import { OUTLOOK_BOOKING_URL } from '../lib/booking';
 import { BookingScheduleConfirm } from '../components/booking/BookingScheduleConfirm';
+import { getStaticSeo } from '../data/staticSeoPages';
 import { useSeoMeta } from '../lib/seo';
 import { PageHero } from '../components/layout/PageHero';
 
@@ -24,10 +25,10 @@ const CONTACT_INFO = {
 };
 
 export const Contact = () => {
+  const contactSeo = getStaticSeo('/contact');
   useSeoMeta({
-    title: 'Contact conseiller en sécurité financière | Victoriaville et Québec',
-    description:
-      'Contactez un conseiller en sécurité financière pour vos besoins en assurance, épargne, retraite et planification.',
+    title: contactSeo.title,
+    description: contactSeo.description,
     canonicalPath: '/contact',
   });
 
@@ -286,10 +287,10 @@ export const Contact = () => {
 };
 
 export const Appointment = () => {
+  const rdvSeo = getStaticSeo('/rendez-vous');
   useSeoMeta({
-    title: 'Prendre rendez-vous | Conseiller en sécurité financière',
-    description:
-      'Prenez rendez-vous pour une consultation en assurance vie, retraite, REER, CELI et planification financière.',
+    title: rdvSeo.title,
+    description: rdvSeo.description,
     canonicalPath: '/rendez-vous',
   });
 

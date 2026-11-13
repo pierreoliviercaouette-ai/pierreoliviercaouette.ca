@@ -11,6 +11,9 @@
 # production
 /build
 
+# Bundle temporaire du générateur SEO
+/scripts/.seo-bundle.cjs
+
 # misc
 .DS_Store
 .env.local

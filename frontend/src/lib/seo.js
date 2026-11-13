@@ -1,6 +1,20 @@
 import { useEffect } from 'react';
+import {
+  HOME_DESCRIPTION,
+  HOME_TITLE,
+  SITE_ORIGIN as COPY_ORIGIN,
+} from '../data/seoCopy';
 
-export const SITE_ORIGIN = 'https://www.pierreoliviercaouette.ca';
+export { HOME_DESCRIPTION, HOME_TITLE };
+export const SITE_ORIGIN = COPY_ORIGIN;
+
+/** Aperçu Vercel et autres hôtes : pas d’indexation. Localhost reste consultable. */
+export function shouldNoindexHost(hostname) {
+  if (!hostname) return false;
+  if (hostname === 'www.pierreoliviercaouette.ca') return false;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') return false;
+  return true;
+}
 
 /** Image sociale / Google (1200×630), hébergée sur le domaine. */
 export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/seo/og-default.jpg`;
@@ -15,11 +29,7 @@ export const PERSON_IMAGE = `${SITE_ORIGIN}/seo/portrait.jpg`;
 function absoluteUrl(pathOrUrl) {
   if (!pathOrUrl) return DEFAULT_OG_IMAGE;
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
-  const origin =
-    typeof window !== 'undefined' && window.location?.origin
-      ? window.location.origin
-      : SITE_ORIGIN;
-  return `${origin}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
+  return `${SITE_ORIGIN}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
 }
 
 function upsertMeta(selector, attributes) {
@@ -61,11 +71,13 @@ export function useSeoMeta({
   type = 'website',
 }) {
   useEffect(() => {
-    const origin =
-      typeof window !== 'undefined' && window.location?.origin
-        ? window.location.origin
-        : SITE_ORIGIN;
-    const canonicalHref = canonicalPath ? `${origin}${canonicalPath}` : null;
+    const previewNoindex = shouldNoindexHost(
+      typeof window !== 'undefined' ? window.location.hostname : ''
+    );
+    const blockIndex = noindex || previewNoindex;
+    const canonicalHref = canonicalPath
+      ? `${SITE_ORIGIN}${canonicalPath === '/' ? '/' : canonicalPath}`
+      : null;
     const ogImage = absoluteUrl(image || DEFAULT_OG_IMAGE);
     const ogAlt = imageAlt || DEFAULT_OG_IMAGE_ALT;
 
@@ -105,8 +117,10 @@ export function useSeoMeta({
       setPropertyMeta('og:url', canonicalHref);
     }
 
+    const indexRobots =
+      'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
     let robots = document.querySelector('meta[name="robots"]');
-    if (noindex) {
+    if (blockIndex) {
       if (!robots) {
         robots = document.createElement('meta');
         robots.setAttribute('name', 'robots');
@@ -114,24 +128,37 @@ export function useSeoMeta({
       }
       robots.setAttribute('content', 'noindex, nofollow');
     } else if (robots && robots.getAttribute('content') === 'noindex, nofollow') {
-      robots.setAttribute(
-        'content',
-        'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
-      );
+      robots.setAttribute('content', indexRobots);
     }
 
     return () => {
-      if (noindex) {
+      if (noindex && !previewNoindex) {
         const currentRobots = document.querySelector('meta[name="robots"]');
         if (currentRobots && currentRobots.getAttribute('content') === 'noindex, nofollow') {
-          currentRobots.setAttribute(
-            'content',
-            'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
-          );
+          currentRobots.setAttribute('content', indexRobots);
         }
       }
     };
   }, [title, description, canonicalPath, noindex, image, imageAlt, type]);
+}
+
+export function useJsonLd(id, data) {
+  const serialized = data ? JSON.stringify(data) : '';
+  useEffect(() => {
+    const existing = document.getElementById(id);
+    if (existing) existing.remove();
+    if (!serialized) return undefined;
+
+    const script = document.createElement('script');
+    script.id = id;
+    script.type = 'application/ld+json';
+    script.text = serialized;
+    document.head.appendChild(script);
+    return () => {
+      const current = document.getElementById(id);
+      if (current) current.remove();
+    };
+  }, [id, serialized]);
 }
 
 export function useFaqSchema(faqItems = []) {

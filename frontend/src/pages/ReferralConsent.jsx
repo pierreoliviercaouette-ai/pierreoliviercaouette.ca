@@ -8,6 +8,8 @@ import { Checkbox } from '../components/ui/checkbox';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
+import { getStaticSeo } from '../data/staticSeoPages';
+import { useSeoMeta } from '../lib/seo';
 
 const CONSENT_TEXT =
   "J'accepte que Pierre-Olivier Caouette, conseiller en sécurité financière, communique avec moi par téléphone ou par courriel au sujet de ses services de conseil, en se basant sur les renseignements que je fournis ci-dessous. Je comprends que je peux retirer ce consentement en tout temps en le lui signalant directement.";
@@ -22,6 +24,12 @@ const errorMessages = {
 export const ReferralConsent = () => {
   const [searchParams] = useSearchParams();
   const refCode = (searchParams.get('ref') || '').trim();
+  const consentSeo = getStaticSeo('/recommandations/consentement');
+  useSeoMeta({
+    title: consentSeo.title,
+    description: consentSeo.description,
+    canonicalPath: '/recommandations/consentement',
+  });
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');

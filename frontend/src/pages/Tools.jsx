@@ -5,12 +5,20 @@ import { supabase } from '../lib/supabaseClient';
 import { Wrench, Clock, ChevronRight } from 'lucide-react';
 import { PageHero } from '../components/layout/PageHero';
 import { hasToolView } from '../tools/registry';
+import { getStaticSeo } from '../data/staticSeoPages';
+import { useSeoMeta } from '../lib/seo';
 
 export const Tools = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [tools, setTools] = useState([]);
   const [loading, setLoading] = useState(true);
+  const toolsSeo = getStaticSeo('/outils');
+  useSeoMeta({
+    title: toolsSeo.title,
+    description: toolsSeo.description,
+    canonicalPath: '/outils',
+  });
 
   useEffect(() => {
     const fetchTools = async () => {

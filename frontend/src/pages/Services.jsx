@@ -4,6 +4,7 @@ import { PageHero } from '../components/layout/PageHero';
 import { getServicesForAudience } from '../data/services';
 import { useAudienceMode } from '../context/AudienceModeContext';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
+import { getStaticSeo } from '../data/staticSeoPages';
 import { useSeoMeta } from '../lib/seo';
 
 const ServiceCard = ({ service }) => {
@@ -61,13 +62,14 @@ export const Services = () => {
   const { audience, isPrive } = useAudienceMode();
   const services = getServicesForAudience(audience);
 
+  const servicesSeo = getStaticSeo('/services');
   useSeoMeta({
     title: isPrive
       ? 'Services patrimoniaux | Fiscalité, entreprise, employés'
-      : 'Services financiers | Assurance vie, retraite, invalidité',
+      : servicesSeo.title,
     description: isPrive
       ? 'Maximisation du patrimoine, optimisation fiscale, stratégie corporative et assurances employés avec Pierre-Olivier Caouette.'
-      : 'Découvrez les services : assurance vie, épargne retraite, planification financière, invalidité et stratégies de protection au Québec.',
+      : servicesSeo.description,
     canonicalPath: '/services',
   });
 

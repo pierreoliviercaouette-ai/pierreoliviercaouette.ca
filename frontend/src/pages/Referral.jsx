@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { trackEvent } from '../lib/analytics';
+import { getStaticSeo } from '../data/staticSeoPages';
 import { useSeoMeta } from '../lib/seo';
 import { useReferralProgramData } from '../hooks/useReferralProgramData';
 import { PageHero } from '../components/layout/PageHero';
@@ -31,7 +32,7 @@ const HOW_IT_WORKS_STEPS = [
   },
   {
     title: 'Accumulez des chances',
-    body: 'À partir de 5 points vérifiés, chaque point donne 1 chance au tirage trimestriel (valeur d’environ 750 $).',
+    body: 'À partir de 5 points vérifiés, chaque point donne 1 chance au tirage trimestriel (valeur d’environ 300 $).',
     icon: Trophy,
   },
 ];
@@ -109,7 +110,7 @@ function HeroBlock({ user }) {
       <PageHero
         badge="Recommandations"
         title="Recommandez en toute simplicité et multipliez vos chances"
-        description="Accumulez vos points vérifiés, devenez admissible dès 5 points et participez au tirage trimestriel d’une valeur d’environ 750 $."
+        description="Accumulez vos points vérifiés, devenez admissible dès 5 points et participez au tirage trimestriel d’une valeur d’environ 300 $."
         minHeightClass="min-h-[36vh] md:min-h-[40vh]"
       >
         <Link
@@ -332,7 +333,7 @@ function JourneyMilestonesSection({ totalPoints, loading, isMember }) {
             />
           </div>
           <p className="mt-3 text-xs leading-relaxed text-slate-600">
-            Les montants affichés sur le tirage (environ 750 $) sont décrits au règlement du concours. Aucun montant
+            Les montants affichés sur le tirage (environ 300 $) sont décrits au règlement du concours. Aucun montant
             additionnel n’est lié à ces paliers décoratifs.
           </p>
         </div>
@@ -345,7 +346,7 @@ function DrawSection({ user, referralStats, loading }) {
   const isMember = Boolean(user);
   const total = isMember && !loading && referralStats != null ? referralStats.total_points : null;
   const minimum = referralStats?.quarterly_draw?.minimum_points ?? 5;
-  const drawValue = referralStats?.quarterly_draw?.value ?? 750;
+  const drawValue = referralStats?.quarterly_draw?.value ?? 300;
   const chances = referralStats?.quarterly_draw?.chances ?? 0;
   const toEligibility = referralStats?.quarterly_draw?.points_to_eligibility ?? Math.max(0, minimum - (total ?? 0));
   const eligible = referralStats?.quarterly_draw?.is_eligible ?? (total != null && total >= minimum);
@@ -355,11 +356,11 @@ function DrawSection({ user, referralStats, loading }) {
       <div className="container-max">
         <SectionHeading
           kicker="Concours trimestriel"
-          title="Un tirage d’une valeur d’environ 750 $ à chaque trimestre"
+          title="Un tirage d’une valeur d’environ 300 $ à chaque trimestre"
           subtitle={
             isMember
               ? 'Admissible dès 5 points. Ensuite, chaque point accumulé vous donne une chance de participation.'
-              : 'Accumulez des points vérifiés : dès 5 points, vous participez au tirage d’une valeur d’environ 750 $.'
+              : 'Accumulez des points vérifiés : dès 5 points, vous participez au tirage d’une valeur d’environ 300 $.'
           }
         />
 
@@ -547,7 +548,7 @@ function LegalLine() {
       <div className="container-max px-4 text-center text-xs leading-relaxed text-slate-600 md:px-8">
         <p>
           Programme de reconnaissance, sans obligation d’achat. Vous ne présentez pas de produits : vous partagez un contact. Soumis à
-          conditions — les points sont vérifiés. Admissible au tirage trimestriel d’une valeur d’environ 750 $ dès 5 points, avec 1 point = 1 chance.
+          conditions — les points sont vérifiés. Admissible au tirage trimestriel d’une valeur d’environ 300 $ dès 5 points, avec 1 point = 1 chance.
         </p>
         <p className="mt-2">
           Exclusions et règles d’admissibilité applicables : résidence au Québec, majorité légale, pas d’auto-référence, pas de doublons, et toute
@@ -567,10 +568,10 @@ export const Referral = () => {
   const program = useReferralProgramData(user);
   const { loading, referralStats } = program;
 
+  const referralSeo = getStaticSeo('/recommandations');
   useSeoMeta({
-    title: 'Programme de recommandations | Victoriaville',
-    description:
-      'Un programme de recommandations attractif et moderne : lien de consentement, points cumulatifs et tirage trimestriel d’une valeur d’environ 750 $.',
+    title: referralSeo.title,
+    description: referralSeo.description,
     canonicalPath: '/recommandations',
   });
 

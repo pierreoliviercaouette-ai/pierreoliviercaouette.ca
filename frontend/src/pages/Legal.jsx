@@ -1,7 +1,15 @@
 import { Link } from 'react-router-dom';
 import { clearConsent } from '../lib/consent';
+import { getStaticSeo } from '../data/staticSeoPages';
+import { useSeoMeta } from '../lib/seo';
 
 export const Privacy = () => {
+  const privacySeo = getStaticSeo('/confidentialite');
+  useSeoMeta({
+    title: privacySeo.title,
+    description: privacySeo.description,
+    canonicalPath: '/confidentialite',
+  });
   const resetCookieChoice = () => {
     clearConsent();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -208,6 +216,12 @@ export const Privacy = () => {
 };
 
 export const Terms = () => {
+  const termsSeo = getStaticSeo('/conditions');
+  useSeoMeta({
+    title: termsSeo.title,
+    description: termsSeo.description,
+    canonicalPath: '/conditions',
+  });
   return (
     <main className="min-h-screen bg-white" data-testid="terms-page">
       <section className="section-padding">

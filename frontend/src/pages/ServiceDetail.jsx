@@ -4,7 +4,8 @@ import { PageHero } from '../components/layout/PageHero';
 import { getOtherServices, getServiceById } from '../data/services';
 import { useAudienceMode } from '../context/AudienceModeContext';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
-import { useSeoMeta } from '../lib/seo';
+import { useJsonLd, useSeoMeta } from '../lib/seo';
+import { breadcrumbSchema, serviceSchema } from '../lib/seoArtifacts';
 
 export const ServiceDetail = () => {
   const { slug } = useParams();
@@ -18,6 +19,26 @@ export const ServiceDetail = () => {
     description: service?.seoDescription ?? 'Decouvrez les services de Pierre-Olivier Caouette.',
     canonicalPath: service ? `/services/${service.id}` : '/services',
   });
+  useJsonLd(
+    'service-schema-jsonld',
+    service
+      ? serviceSchema({
+          name: service.subtitle || service.title,
+          description: service.seoDescription,
+          path: `/services/${service.id}`,
+        })
+      : null
+  );
+  useJsonLd(
+    'breadcrumb-schema-jsonld',
+    service
+      ? breadcrumbSchema([
+          { name: 'Accueil', path: '/' },
+          { name: 'Services', path: '/services' },
+          { name: service.title, path: `/services/${service.id}` },
+        ])
+      : null
+  );
 
   if (!service) {
     return <Navigate to="/services" replace />;

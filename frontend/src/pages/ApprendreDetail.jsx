@@ -19,7 +19,8 @@ import { FormationTimelineChart } from '../components/formations/FormationTimeli
 import { FormationQuiz } from '../components/formations/FormationQuiz';
 import { useFormationProgress } from '../hooks/useFormationProgress';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
-import { useSeoMeta } from '../lib/seo';
+import { useSeoMeta, useJsonLd } from '../lib/seo';
+import { articleSchema, breadcrumbSchema, joinArticleBody, apprendreDocumentTitle } from '../lib/seoArtifacts';
 
 /** La page affiche déjà 01, 02… — retirer un préfixe « 1. » éventuel dans les données. */
 function sectionTitle(heading) {
@@ -35,11 +36,33 @@ export function ApprendreDetail() {
 
   useSeoMeta({
     title: item
-      ? `${item.seoTitle} | Apprendre`
+      ? apprendreDocumentTitle(item.seoTitle)
       : 'Apprendre | Pierre-Olivier Caouette',
     description: item?.seoDescription ?? 'Capsules éducatives courtes.',
     canonicalPath: item ? getApprendrePath(item.id) : '/apprendre',
+    type: item ? 'article' : 'website',
   });
+  useJsonLd(
+    'article-schema-jsonld',
+    item
+      ? articleSchema({
+          headline: item.title,
+          description: item.seoDescription,
+          path: getApprendrePath(item.id),
+          articleBody: joinArticleBody(item.sections, item.subtitle),
+        })
+      : null
+  );
+  useJsonLd(
+    'breadcrumb-schema-jsonld',
+    item
+      ? breadcrumbSchema([
+          { name: 'Accueil', path: '/' },
+          { name: 'Apprendre', path: '/apprendre' },
+          { name: item.title, path: getApprendrePath(item.id) },
+        ])
+      : null
+  );
 
   const sectionIds = useMemo(
     () => (item?.sections || []).map((_, i) => `apprendre-s-${i}`),

@@ -4,6 +4,7 @@ import { Shield, TrendingUp, Heart, Umbrella, PiggyBank, ArrowRight, CheckCircle
 import { supabase } from '../lib/supabaseClient';
 import { getPublicSiteOrigin } from '../lib/referralLink';
 import { trackEvent, trackRendezVousClick } from '../lib/analytics';
+import { getStaticSeo } from '../data/staticSeoPages';
 import { DEFAULT_OG_IMAGE, useSeoMeta } from '../lib/seo';
 import {
   AMF_REGISTRE_URL,
@@ -774,10 +775,10 @@ export const Home = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const refFromQuery = searchParams.get('ref');
+  const homeSeo = getStaticSeo('/');
   useSeoMeta({
-    title: 'Conseiller en sécurité financière | Familles, épargne et retraite',
-    description:
-      'Protection des familles, épargne pour un projet et retraite à Victoriaville : assurance vie, invalidité, REER et CELI avec Pierre-Olivier Caouette.',
+    title: homeSeo.title,
+    description: homeSeo.description,
     canonicalPath: '/',
     image: DEFAULT_OG_IMAGE,
     imageAlt:
